@@ -1,0 +1,44 @@
+!!!
+html(lang='en')
+  head
+    include includes/head
+
+  body
+    .navbar.navbar-fixed-top
+        .navbar-inner
+            .container
+                a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+                    span.icon-bar
+                    span.icon-bar
+                    span.icon-bar
+                a.brand {%= name %}
+                .nav-collapse
+                if (!user)
+                    ul.nav
+                        li
+                            a(href="/") Home
+                        li
+                            a(href="/login") Login
+                else
+                    ul.nav
+                        li.active
+                            a(href="/") Home
+                        li
+                            a(href="/admin") Admin
+                        li
+                            a(href="/account") Account
+                        li
+                            a(href="/logout") Logout
+    .container
+
+        block content
+
+        block footer
+            footer.page-footer
+                p &copy; Company 2013
+
+
+    | !{cachify_js('/components/jquery/jquery.min.js')}
+    | !{cachify_js('/components/bootstrap/docs/assets/js/bootstrap.min.js')}
+    | !{cachify_js('/js/site.js')}
+    block scripts

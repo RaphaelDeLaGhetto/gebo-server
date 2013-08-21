@@ -1,6 +1,15 @@
-lib-cov
-*.seed
+/public/components/
+*.swp
+*.swo
+.DS_Store
+/node_modules/
+/.idea/
+*.iml
 *.log
+*~
+/root/package.json
+
+*.seed
 *.csv
 *.dat
 *.out
@@ -12,3 +21,4 @@ logs
 results
 
 npm-debug.log
+

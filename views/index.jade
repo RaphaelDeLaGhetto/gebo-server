@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    .header.jumbotron.subhead
+        .row
+            .span6
+                h1 Welcome
+                if (!user)
+                    p.lead Don't forget to seed the database:
+                    code $ grunt dbseed
+                else
+                    p.lead Hello, #{user.username}
+

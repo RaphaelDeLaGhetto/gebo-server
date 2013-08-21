@@ -1,0 +1,26 @@
+{
+    "name": "gebo-server",
+    "domain":"http://localhost",
+    "port":3000,
+    "cachify":false,
+    "assets":{
+        "/components/bootstrap/docs/assets/css/bootstrap.css":[
+            "/components/bootstrap/docs/assets/css/bootstrap.css"
+        ],
+        "/css/style.min.css":[
+            "/css/style.css"
+        ],
+        "/js/site.min.js":[
+            "/js/site.js"
+        ],
+        "/components/jquery/jquery.min.js":[
+            "/components/jquery/jquery.js"
+        ],
+        "/components/bootstrap/docs/assets/js/bootstrap.min.js":[
+            "/components/bootstrap/docs/assets/js/bootstrap.js"
+        ]
+    },
+    "apps":{
+        "demoApp":"http://localhost:4000"
+    }
+}

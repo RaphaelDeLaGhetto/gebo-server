@@ -1,0 +1,58 @@
+{
+  "name": "test",
+  "description": "The best project ever.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/dan/test",
+  "author": {
+    "name": "Daniel Bidulock",
+    "email": "dan.bidulock@hiregroundsoftware.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dan/test.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dan/test/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/dan/test/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/test",
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "scripts": {
+    "test": "grunt nodeunit"
+  },
+  "dependencies": {
+    "connect-cachify": "*",
+    "winston": "*",
+    "winston-request-logger": "*",
+    "jade": "*",
+    "nconf": "*",
+    "express": "*",
+    "uglify-js": "*",
+    "uglifycss": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "mongoose": "*",
+    "bcrypt": "*",
+    "oauth2orize": "*",
+    "passport-http": "*",
+    "passport-http-bearer": "*",
+    "passport-oauth2-client-password": "*",
+    "connect-ensure-login": "*"
+  },
+  "devDependencies": {
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-jshint": "~0.6.2",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt": "~0.4.1"
+  },
+  "keywords": []
+}
