@@ -2,7 +2,7 @@
 
 exports.index = function (req, res) {
     res.render('index', {
-        title: '{%= name %}',
+        title: 'gebo-server',
         user: req.user
       });
   };

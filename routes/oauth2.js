@@ -82,23 +82,20 @@ server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, d
  */
 server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 
-    console.log("---------------------------");
-    console.log(done.toString());
-
     var tokenStr = utils.uid(256);
 
     var token = new db.tokenModel({
         userId: user._id,
         clientId: client._id,
         token: tokenStr,
-    });
+      });
 
     token.save(function (err, token) {
         if (err) {
           return done(err);
         }
         return done(null, token.token);
-    });
+      });
   }));
 
 // Exchange authorization codes for access tokens.  The callback accepts the
@@ -163,16 +160,11 @@ exports.authorization = [
             //          redirectURI provided by the client matches one registered with
             //          the server.  For simplicity, this example does not.  You have
             //          been warned.
-            console.log('exports.authorization');
-            console.log(redirectUri);
             return done(null, client, redirectUri);
           });
       }),
 
     function (req, res) {
-
-        console.log('exports.authorization render dialog');
-        console.log(req.oauth2);
         res.render('dialog', {
             transactionID: req.oauth2.transactionID,
             user: req.user,

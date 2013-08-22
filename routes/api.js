@@ -11,9 +11,6 @@ exports.userinfo = [
         // and used in access control checks.  For illustrative purposes, this
         // example simply returns the scope in the response.
         db.userModel.findById(req.user.id, function (err, user) {
-
-            // Pretty sure this is going to have to change
-            res.header('Access-Control-Allow-Origin', '*');
             res.json({ username: user.username, email: user.email, scope: req.authInfo.scope });
           });
       }

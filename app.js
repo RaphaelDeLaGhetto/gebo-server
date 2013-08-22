@@ -24,6 +24,24 @@ require('./settings')(app, express, passport, logger);
 // Merge nconf overrides with the configuration file.
 nconf.argv().env().file({ file: 'local.json' });
 
+// Enable CORS
+//app.all('/', function(req, res, next) {
+//    res.header('Access-Control-Allow-Origin', '*');
+//    res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+//    next();
+//});
+
+// Alright, what the heck is going on here? What are the security
+// implications?
+app.all('*', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+    next();
+});
+
+
 // Basic routes
 app.get('/', basic_routes.index);
 
