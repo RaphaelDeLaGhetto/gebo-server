@@ -1,4 +1,5 @@
-# gebo-server 
+gebo-server 
+===========
 
 This is an OAuth2 server built with Express
 
@@ -18,7 +19,14 @@ sudo service mongodb start
 
 ### your server
 
-First, install your npm modules:
+First, clone the repository:
+
+```
+git clone https://github.com/RaphaelDeLaGhetto/gebo-client.git
+cd gebo-client
+```
+
+Next, install your npm modules:
 
 ```
 npm install
