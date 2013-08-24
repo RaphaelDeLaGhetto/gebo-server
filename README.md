@@ -22,7 +22,7 @@ sudo service mongodb start
 First, clone the repository:
 
 ```
-git clone https://github.com/RaphaelDeLaGhetto/gebo-client.git
+git clone https://github.com/RaphaelDeLaGhetto/gebo-server.git
 cd gebo-client
 ```
 
@@ -61,5 +61,4 @@ node server.js
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](https://github.com/gruntjs/grunt).
 
 ## License
-Copyright (c) 2013 Capitol Hill Productions Inc. 
-MIT License
+MIT
