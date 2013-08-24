@@ -54,7 +54,7 @@ grunt dbdrop
 # Run your server
 
 ```
-node server.js
+node app.js
 ```
 
 ## Contributing
