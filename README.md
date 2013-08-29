@@ -23,13 +23,19 @@ First, clone the repository:
 
 ```
 git clone https://github.com/RaphaelDeLaGhetto/gebo-server.git
-cd gebo-client
+cd gebo-server
 ```
 
 Next, install your npm modules:
 
 ```
 npm install
+```
+
+If you get an error suggesting as much, install with `sudo` instead:
+
+```
+sudo npm install
 ```
 
 Then, install your UI dependencies:
