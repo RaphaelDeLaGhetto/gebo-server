@@ -16,3 +16,11 @@ exports.userinfo = [
       }
   ];
 
+
+exports.save = [
+    passport.authenticate('bearer', { session: false }),
+    function(req, res) {
+        logger.info('-------------------------------');
+        console.log(req);
+    }
+  ];

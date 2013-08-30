@@ -36,6 +36,8 @@ nconf.argv().env().file({ file: 'local.json' });
 app.all('*', function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Accept');
+    res.header('Access-Control-Allow-Headers', 'Origin');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With');
     next();
@@ -59,6 +61,7 @@ app.post('/oauth/token', oauth2_routes.token);
 
 // API routes
 app.get('/api/userinfo', api_routes.userinfo);
+app.post('/api/save', api_routes.save);
 
 logger.info('listening on', nconf.get('port'));
 app.listen(process.env.PORT || nconf.get('port'));
