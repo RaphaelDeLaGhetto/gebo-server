@@ -33,15 +33,12 @@ nconf.argv().env().file({ file: 'local.json' });
 
 // Alright, what the heck is going on here? What are the security
 // implications?
-app.all('*', function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Accept');
-    res.header('Access-Control-Allow-Headers', 'Origin');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With');
-    next();
-});
+//app.all('*', function(req, res, next) {
+//    res.header('Access-Control-Allow-Origin', '*');
+//    res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+//    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+//    next();
+//});
 
 
 // Basic routes
@@ -61,7 +58,7 @@ app.post('/oauth/token', oauth2_routes.token);
 
 // API routes
 app.get('/api/userinfo', api_routes.userinfo);
-app.post('/api/save', api_routes.save);
+app.put('/api/save', api_routes.save);
 
 logger.info('listening on', nconf.get('port'));
 app.listen(process.env.PORT || nconf.get('port'));

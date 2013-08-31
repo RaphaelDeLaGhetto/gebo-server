@@ -24,6 +24,22 @@ module.exports = function (app, express, passport, logger) {
         app.use(express.errorHandler())
     });
 
+    /**
+     * allowCrossDomain
+     */
+    var allowCrossDomain = function(req, res, next) {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+
+        if ('OPTIONS' === req.method) {
+          res.send(200);
+        }
+        else {
+          next();
+        }
+    };
+
     // Cachify Asset Configuration
     app.use(cachify.setup(assets, {
         root: __dirname + '/public',
@@ -33,6 +49,7 @@ module.exports = function (app, express, passport, logger) {
     // Global Configuration
     app.configure(function(){
 
+        app.use(allowCrossDomain);
         app.set('views', __dirname + '/views');
         app.set('view engine', 'jade');
         app.set('view options', { layout: false });

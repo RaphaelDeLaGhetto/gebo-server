@@ -20,7 +20,8 @@ exports.userinfo = [
 exports.save = [
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
-        logger.info('-------------------------------');
-        console.log(req);
+        console.log('-------------------------------');
+        console.log(req.body);
+        res.send(200);
     }
   ];
