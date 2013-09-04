@@ -5,7 +5,7 @@ var config = {
         db: "exampleDb",
         collections : ["tweets"],
         serverOptions : {},
-        clientOptions : { w: 0 }
+        clientOptions : { w: 1 }
     }
 }
 module.exports = config;

@@ -1,6 +1,6 @@
 var config = require('./config'),
     mongo = require('mongodb'),
-    utils = require('../lib/utils');
+    utils = require('../lib/utils'),
     q = require('q');
 
 module.exports =  {
@@ -18,14 +18,15 @@ module.exports =  {
             this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
-    		      deferred.reject(err);
+    		  deferred.reject(err);
                 }
                 else {
-    		      deferred.resolve(client);
+                  deferred.resolve(client);
                 }
              });
     	} catch(e) {
-    		deferred.reject(e);
+            console.log(e);
+    	    deferred.reject(e);
     	}
 
         return deferred.promise;
@@ -57,6 +58,9 @@ module.exports =  {
 
                 if (names.length === 0) {
                   deferred.reject(new Error('Database: ' + dbName + ' does not exist'));
+                  db.dropDatabase(function(err, done) {
+                    console.log(dbName + ' dropped');
+                  });
                 }
                 else {
                   deferred.resolve();
@@ -78,36 +82,57 @@ module.exports =  {
      *
      * @return promise
      */
-    save: function(user, collection, data) {
+    save: function(user, cname, data) {
         var deferred = q.defer();
         var dbName = utils.getMongoDbName(user.email);
-        this.dbExists(dbName).then(function() {
 
-            console.log('db must exist');
-            this.openDb(dbName).then(function(client) {
-                    console.log('openDb');
-                    var collectionName = utils.getMongoCollectionname(collection);
-        	        var collection = new mongo.Collection(client, collectionName);
-                    collection.insert(data, function(err, data) {
-                                if (err) {
-                                  deferred.reject(err);
-                                }
-                                else {
-                                  deferred.resolve(data);
-                                }
-                            });
-                },
-                function(err) {
-                    deferred.reject(err);
-                });
-        },
-        function(err) {
-            console.log('dbExists failed');
-            deferred.reject(err);
-        });
-
-        console.log('return deferred.promise');
+        this.dbExists(dbName).then(
+            this.openDb(dbName).
+                then(
+                    function(client) {
+                        var collectionName = utils.getMongoCollectionName(cname);
+                        var collection = new mongo.Collection(client, collectionName);
+                        collection.save(data, { upsert: true, safe: true },
+                                function(err, ack) {
+                                    deferred.resolve(ack);
+                                });
+                    })).
+                 catch(
+                    function(err) {
+                        deferred.reject(err);
+                    }).
+                 done();
         return deferred.promise;
     },
         
+    /**
+     * Retrieve JSON from a user's profile
+     *
+     * @param Object - user profile object
+     * @param string - collection name
+     * @param string - mongoId
+     */
+    retrieve: function(user, cname, mongoId) {
+        var deferred = q.defer();
+        var dbName = utils.getMongoDbName(user.email);
+
+        this.dbExists(dbName).then(
+            this.openDb(dbName).
+                then(
+                    function(client) {
+                        var collectionName = utils.getMongoCollectionName(cname);
+                        var collection = new mongo.Collection(client, collectionName);
+                        collection.find({'_id': new mongo.ObjectID(mongoId) }).toArray(
+                                function(err, docs) {
+                                    deferred.resolve(docs);
+                                });
+                    })).
+                 catch(
+                    function(err) {
+                        deferred.reject(err);
+                    }).
+                 done();
+ 
+        return deferred.promise;
+    },
 };
