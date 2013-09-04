@@ -19,7 +19,7 @@ module.testConnection = {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
+        	    this.collection = new mongo.Collection(client, cname);
     	    	this.collection.remove({}, function(err) {
     		    	callback();
     		    });
@@ -60,7 +60,7 @@ module.testConnection = {
 
 
 /**
- * Open the given database
+ * Open the given databse
  */
 
 exports.openDb = {
@@ -76,7 +76,6 @@ exports.openDb = {
                 }
         	this.collection = new mongo.Collection(client, cname);
                 this.collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
-//                    this.db.close();
                     callback();
                 });
             });
@@ -90,24 +89,19 @@ exports.openDb = {
         this.db.dropDatabase(function(err) { 
             callback();
         });
-
-//        databaseCleaner.clean(this.db, function() {
-//    	    callback();
-//        });
     },
  
     'Open non-existent database': function (test) {
         test.expect(4);
-        var deferred = q.defer();
+//        var deferred = q.defer();
 
         // Get a promise
-        documentProvider.openDb('non_existent_db', deferred);
+        documentProvider.openDb('non_existent_db').then(function(client) {
 
         // Execute the promise
-        deferred.promise.then(function(db) {
+//        deferred.promise.then(function(db) {
 
-            // db is the database resolved in the promise
-            db.collectionNames(function(err, names) {
+            client.collectionNames(function(err, names) {
                     
                 test.ifError(err);
                 
@@ -115,10 +109,10 @@ exports.openDb = {
                 test.deepEqual(names, []);
 
                 // Create a new collection and make sure it takes data
-                db.createCollection('new_collection', function(err, collection) {
+                client.createCollection('new_collection', function(err, collection) {
                     collection.insert({ foo: 'bar' }, function(data) {
 
-                        db.collectionNames(function(err2, names2) {
+                        client.collectionNames(function(err2, names2) {
                             
                             test.ifError(err2);
 
@@ -130,7 +124,7 @@ exports.openDb = {
                                       { name: 'non_existent_db.system.indexes' } ]);
 
                             // Lose the database for next time
-                            db.dropDatabase(function(err) { 
+                            client.dropDatabase(function(err) { 
                                 test.done();
                             });
                        });
@@ -146,11 +140,11 @@ exports.openDb = {
         var deferred = q.defer();
 
         // Get a promise
-        documentProvider.openDb('existing_database', deferred);
+        documentProvider.openDb('existing_database').then(function(client) {
 
         // Execute the promise
-        deferred.promise.then(function(db) {
-            db.collectionNames(function(err, names) {
+//        deferred.promise.then(function(db) {
+            client.collectionNames(function(err, names) {
                     
                 test.ifError(err);
                 
@@ -161,7 +155,7 @@ exports.openDb = {
                           { name: 'existing_database.system.indexes' } ]
                         );
 
-                var collection = db.collection('unitTest');
+                var collection = client.collection('unitTest');
                 var cursor = collection.find({ name: 'dan'});
                 cursor.toArray(function(err, docs) {
 
@@ -188,12 +182,12 @@ exports.save = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+            this.db = new mongo.Db('dan_at_email_dot_com', server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
+        	    this.collection = new mongo.Collection(client, cname);
                 this.collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
                     callback();
                 });
@@ -213,19 +207,33 @@ exports.save = {
    'Do not save to a non-existent database': function (test) {
         test.expect(1);
         
-        documentProvider.save({name: 'dan', email: 'dan@email.com'},
-                        'non_existent_database', { data: 'junk' }).then();
-
-        test.done();
+        documentProvider.save({name: 'yanfen', email: 'yanfen@email.com'},
+                        'some_collection', { data: 'junk' }).then(function(data) {
+                                    // Shouldn't get here
+                                    test.isError(data); 
+                                    test.done();
+                                },
+                                function(err) {
+                                    test.ok(err);
+                                    test.done(); 
+                                });
    }, 
 
    'Save to existing database': function (test) {
         test.expect(1);
 
-        documentProvider.save({name: 'dan', email: 'dan@email.com'},
-                        'existing_database', { data: 'junk' }).then();
-
-        test.done();
+        console.log('saving');
+        documentProvider.save({ name: 'dan', email: 'dan@email.com' },
+                        'some_collection', { data: 'junk' }).then(function(data) {
+                                    console.log(data);
+                                    test.ok(data);
+                                    test.done();
+                                },
+                                function(err) {
+                                    console.log(err);
+                                    test.isError(err);
+                                    test.done(); 
+                                });
    }, 
 
 
@@ -266,32 +274,24 @@ exports.dbExists = {
    'Return a rejected promise if the database does not exist': function (test) {
         test.expect(1);
 
-        var deferred = q.defer();
-        documentProvider.dbExists('non_existent_database', deferred);
-
-        deferred.promise.then(function(exists) {
-            // Shouldn't get here
-            test.isError(err);
-            test.equal(exists, 'this must fail');
-            test.done();
-        },
-        function(err) {
-            test.ok(err);
-            test.done();
-        });
+        documentProvider.dbExists('non_existent_database').then(function() {
+                            // Shouldn't get here
+                            test.isError(err);
+                            test.done();
+                        },
+                        function(err) {
+                            test.ok(err, 'An error should be thrown');
+                            test.done();
+                        });
    }, 
 
    'Return a resolved promise if the database does exist': function (test) {
-        test.expect(2);
+        test.expect(1);
 
-        var deferred = q.defer();
-        documentProvider.dbExists('existing_database', deferred);
-
-        deferred.promise.then(function(exists) {
-            test.ok(exists);
-            test.equal(exists, true);
-            test.done();
-        });
+        documentProvider.dbExists('existing_database').then(function() {
+                            test.ok(true, 'Verified the database exists');
+                            test.done();
+                        });
    }, 
 };
 

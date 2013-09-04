@@ -4,7 +4,13 @@ var config = require('./config'),
     q = require('q');
 
 module.exports =  {
-    openDb: function (dbName, deferred) {
+
+    /**
+     * Open the database and return a promise resolved
+     * with a client
+     */
+    openDb: function (dbName) {
+        var deferred = q.defer();
     	try{
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
@@ -12,13 +18,17 @@ module.exports =  {
             this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
-    		  deferred.reject(err);
+    		      deferred.reject(err);
                 }
-    		deferred.resolve(client);
+                else {
+    		      deferred.resolve(client);
+                }
              });
     	} catch(e) {
-            console.dir(e);
+    		deferred.reject(e);
     	}
+
+        return deferred.promise;
     },
  
     /**
@@ -32,7 +42,8 @@ module.exports =  {
      *
      * @return bool
      */
-    dbExists: function(dbName, deferred) {
+    dbExists: function(dbName) {
+        var deferred = q.defer();
         var server = new mongo.Server(config.mongo.host,
                                       config.mongo.port,
                                       config.mongo.serverOptions);
@@ -48,24 +59,55 @@ module.exports =  {
                   deferred.reject(new Error('Database: ' + dbName + ' does not exist'));
                 }
                 else {
-                  deferred.resolve(true);
+                  deferred.resolve();
                 }
 
                 db.close();
             });
         });
- 
+
+        return deferred.promise; 
     },
 
     /**
      * Save JSON to user's profile
      *
      * @param Object { name: string, email: string,
+     * @param string
+     * @param Object - arbitrary
      *
+     * @return promise
      */
     save: function(user, collection, data) {
         var deferred = q.defer();
-        this.openDb(utils.getMongoDbName(user.email), deferred);
+        var dbName = utils.getMongoDbName(user.email);
+        this.dbExists(dbName).then(function() {
+
+            console.log('db must exist');
+            this.openDb(dbName).then(function(client) {
+                    console.log('openDb');
+                    var collectionName = utils.getMongoCollectionname(collection);
+        	        var collection = new mongo.Collection(client, collectionName);
+                    collection.insert(data, function(err, data) {
+                                if (err) {
+                                  deferred.reject(err);
+                                }
+                                else {
+                                  deferred.resolve(data);
+                                }
+                            });
+                },
+                function(err) {
+                    deferred.reject(err);
+                });
+        },
+        function(err) {
+            console.log('dbExists failed');
+            deferred.reject(err);
+        });
+
+        console.log('return deferred.promise');
         return deferred.promise;
     },
+        
 };
