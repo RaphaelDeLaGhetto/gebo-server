@@ -200,7 +200,7 @@ exports.save = {
                 then(
                     function(docs) {
                         console.log(docs);       
-                        test.ok(false, 'Can\'t insert into non-existent database');
+                        test.ok(false, 'This database should\'nt exist. Delete manually');
                         test.equal(docs[0].data, 'junk');
                         test.done();
                     }).
@@ -266,22 +266,6 @@ exports.save = {
                     test.ifError(err);        
                     test.done();
                 });
-
-//        documentProvider.save(user, 'some_collection', {
-//                _id: new mongo.ObjectID('0123456789AB'), data: 'junk'
-//            }).
-//            then(
-//                function(docs) {
-//                    test.ok(docs);
-//                    test.equal(docs[0].data, 'junk');
-//                    test.done();
-//                }).
-//            catch(
-//                function(err) {
-//                    console.log('Error???? ' + err);       
-//                    test.ifError(err);
-//                    test.done();
-//            });
     }
 };
 
@@ -449,31 +433,139 @@ exports.retrieve = {
 //   }, 
 //
 //};
-//
-///**
-// * Delete a document from the profile 
-// */
-//exports.destroy = {
-//
-//   'Do not delete from a non-existent database': function (test) {
-//        test.expect(1);
-//
-//        test.done();
-//   }, 
-//
-//   'Do not delete non-existent document': function (test) {
-//        test.expect(1);
-//
-//        test.done();
-//   }, 
-//
-//
-//   'Delete from an existing database': function (test) {
-//        test.expect(1);
-//
-//        test.done();
-//   }, 
-//
-//};
-//
-//
+
+/**
+ * Delete a document from the profile 
+ */
+exports.destroy = {
+
+    setUp: function (callback) {
+    	try{
+            var server = new mongo.Server(config.mongo.host,
+                                          config.mongo.port,
+                                          config.mongo.serverOptions);
+            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+            this.db.open(function (err, client) {
+                if (err) {
+                  throw err;
+                }
+        	this.collection = new mongo.Collection(client, cname);
+                this.collection.insert([
+                        {
+                            _id: new mongo.ObjectID('0123456789AB'),
+                            name: 'dan',
+                            occupation: 'Batman'
+                        },
+                        {
+                            _id: new mongo.ObjectID('123456789ABC'),
+                            name: 'yanfen',
+                            occupation: 'Being cool'
+                        }
+                    ],
+                    function() {
+                        callback();
+                    });
+            });
+    	} catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        // Lose the database for next time
+        this.db.dropDatabase(function(err) { 
+            callback();
+        });
+    },
+
+   'Do not delete from a non-existent database': function (test) {
+        test.expect(1);
+
+        var user = { name: 'dan', email: 'does_not_exist' };
+
+        // Retrieve the existing document
+        documentProvider.destroy(user, cname, '0123456789AB').
+            then(
+                function() {
+                    // Shouldn't get here
+                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                }).
+            catch(
+                function(err) {
+                    test.ok(err, 'This should throw an error');        
+                    test.done();
+                });
+   }, 
+
+   'Do not delete from a non-existent collection': function (test) {
+        test.expect(1);
+
+        var user = { name: 'dan', email: 'existing_database' };
+
+        // Retrieve the existing document
+        documentProvider.destroy(user, 'NoSuchCollection', '0123456789AB').
+            then(
+                function() {
+                    // Shouldn't get here
+                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                }).
+            catch(
+                function(err) {
+                    test.ok(err, 'This should throw an error');        
+                    test.done();
+                });
+   }, 
+
+
+   'Do not delete non-existent document': function (test) {
+        test.expect(1);
+
+        var user = { name: 'dan', email: 'existing_database' };
+
+        documentProvider.destroy(user, cname, 'NoSuchDocABC').
+            then(
+                function() {
+                    // Shouldn't get here
+                    test.ifError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                }).
+            catch(
+                function(err) {
+                    test.ok(err, 'This should throw an error');        
+                    test.done();
+                });
+   }, 
+
+
+   'Delete from an existing database': function (test) {
+        test.expect(3);
+
+        collection.count(function(err, count) {
+            test.equal(count, 2);
+        });
+
+        var user = { name: 'dan', email: 'existing_database' };
+
+        documentProvider.destroy(user, cname, '123456789ABC').
+            then(
+                function() {
+                    test.ok(true, 'The doc has been deleted, I think');
+                    collection.count(function(err, count) {
+                        test.equal(count, 1);
+                        test.done();
+                    });
+                }).
+            catch(
+                function(err) {
+                    // Shouldn't get here
+                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+ 
+   }, 
+
+};
+
+
