@@ -568,4 +568,115 @@ exports.destroy = {
 
 };
 
+/**
+ * Delete a collection from the profile 
+ */
+exports.destroyCollection = {
+     setUp: function (callback) {
+    	try{
+            var server = new mongo.Server(config.mongo.host,
+                                          config.mongo.port,
+                                          config.mongo.serverOptions);
+            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+            this.db.open(function (err, client) {
+                if (err) {
+                  throw err;
+                }
+        	this.collection = new mongo.Collection(client, cname);
+                this.collection.insert([
+                        {
+                            _id: new mongo.ObjectID('0123456789AB'),
+                            name: 'dan',
+                            occupation: 'Batman'
+                        },
+                        {
+                            _id: new mongo.ObjectID('123456789ABC'),
+                            name: 'yanfen',
+                            occupation: 'Being cool'
+                        }
+                    ],
+                    function() {
+                        callback();
+                    });
+            });
+    	} catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        // Lose the database for next time
+        this.db.dropDatabase(function(err) { 
+            callback();
+        });
+    },
+
+   'Do not delete from a non-existent database': function (test) {
+        test.expect(1);
+
+        var user = { name: 'dan', email: 'does_not_exist' };
+
+        // Retrieve the existing document
+        documentProvider.destroyCollection(user, cname).
+            then(
+                function() {
+                    // Shouldn't get here
+                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                }).
+            catch(
+                function(err) {
+                    test.ok(err, 'This should throw an error');        
+                    test.done();
+                });
+   }, 
+
+   'Do not delete a non-existent collection': function (test) {
+        test.expect(1);
+
+        var user = { name: 'dan', email: 'existing_database' };
+
+        // Retrieve the existing document
+        documentProvider.destroyCollection(user, 'NoSuchCollection').
+            then(
+                function() {
+                    // Shouldn't get here
+                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                }).
+            catch(
+                function(err) {
+                    test.ok(err, 'This should throw an error');        
+                    test.done();
+                });
+   }, 
+
+   'Delete collection from an existing database': function (test) {
+        test.expect(3);
+
+        collection.count(function(err, count) {
+            test.equal(count, 2);
+        });
+
+        var user = { name: 'dan', email: 'existing_database' };
+
+        documentProvider.destroyCollection(user, cname, '123456789ABC').
+            then(
+                function() {
+                    test.ok(true, 'The doc has been deleted, I think');
+                    collection.count(function(err, count) {
+                        test.equal(count, 1);
+                        test.done();
+                    });
+                }).
+            catch(
+                function(err) {
+                    // Shouldn't get here
+                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+ 
+   }, 
+   
+};
 
