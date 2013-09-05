@@ -200,7 +200,7 @@ exports.save = {
                 then(
                     function(docs) {
                         console.log(docs);       
-                        test.ok(false, 'This database should\'nt exist. Delete manually');
+                        test.ok(false, 'This database shouldn\'t exist. Delete manually');
                         test.equal(docs[0].data, 'junk');
                         test.done();
                     }).
@@ -263,6 +263,7 @@ exports.save = {
                 }).
             catch(
                 function(err) {
+                    console.log(err);
                     test.ifError(err);        
                     test.done();
                 });
@@ -309,7 +310,7 @@ exports.dbExists = {
                             function() {
                                 // Shouldn't get here
                                 console.log('Shouldn\'t get here!!!');
-                                test.isError(true, 'Shouldn\'t get here!!!');
+                                test.ok(false, 'Shouldn\'t get here!!!');
                                 test.done();
                             }).
                         catch(
@@ -331,7 +332,7 @@ exports.dbExists = {
                 catch(
                     function(err) {
                         // Shouldn't get here
-                        test.isError(true, 'Shouldn\'t get here!!!');
+                        test.ok(false, 'Shouldn\'t get here!!!');
                         test.done();
                      });
    }, 
@@ -381,7 +382,7 @@ exports.retrieve = {
             then(
                 function() {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 }).
             catch(
@@ -406,7 +407,7 @@ exports.retrieve = {
                 function(err) {
                    // Shouldn't get here
                     console.log('Shouldn\'t get here!!!');
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
  
@@ -488,7 +489,7 @@ exports.destroy = {
             then(
                 function() {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 }).
             catch(
@@ -508,7 +509,7 @@ exports.destroy = {
             then(
                 function() {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 }).
             catch(
@@ -528,7 +529,7 @@ exports.destroy = {
             then(
                 function() {
                     // Shouldn't get here
-                    test.ifError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 }).
             catch(
@@ -560,7 +561,7 @@ exports.destroy = {
             catch(
                 function(err) {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
  
@@ -621,7 +622,7 @@ exports.destroyCollection = {
             then(
                 function() {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 }).
             catch(
@@ -641,7 +642,7 @@ exports.destroyCollection = {
             then(
                 function() {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 }).
             catch(
@@ -660,19 +661,19 @@ exports.destroyCollection = {
 
         var user = { name: 'dan', email: 'existing_database' };
 
-        documentProvider.destroyCollection(user, cname, '123456789ABC').
+        documentProvider.destroyCollection(user, cname).
             then(
                 function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {
-                        test.equal(count, 1);
+                        test.equal(count, 0);
                         test.done();
                     });
                 }).
             catch(
                 function(err) {
                     // Shouldn't get here
-                    test.isError(true, 'Shouldn\'t get here!!!');
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
  

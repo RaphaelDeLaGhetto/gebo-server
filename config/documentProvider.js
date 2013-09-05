@@ -179,14 +179,6 @@ module.exports =  {
                                       });
                             }
                           });
-
-
-//                    console.log(collection.find()); 
-//                    deferred.resolve();
-////                  collection.find({'_id': new mongo.ObjectID(mongoId) }).toArray(
-////                       function(err, docs) {
-////                       deferred.resolve(docs);
-////                  });
                       })).
             catch(
                 function(err) {
@@ -197,4 +189,49 @@ module.exports =  {
         return deferred.promise;
       },
 
+    /**
+     * Delete a collection from a user's profile
+     *
+     * @param Object - user profile object
+     * @param string - collection name
+     */
+    destroyCollection: function(user, cname) {
+        var deferred = q.defer();
+        var dbName = utils.getMongoDbName(user.email);
+
+        this.dbExists(dbName).
+            then(this.openDb(dbName).
+                then(
+                    function(client) {
+                        var collectionName = utils.getMongoCollectionName(cname);
+                        var collection = new mongo.Collection(client, collectionName);
+
+                        // Does this collection exist?
+                        collection.count(function(err, count) {
+                            if (count === 0) {
+                              deferred.reject(
+                                new Error('Collection: ' +
+                                        collectionName + ' does not exist'));
+                            }
+                            else {
+                              collection.drop(
+                                    function(err, ack) {
+                                        if (err || ack === 0) {
+                                          deferred.reject(new Error('Could not delete document: ' + mongoId));
+                                        }
+                                        else {
+                                          deferred.resolve();
+                                        }
+                                      });
+                            }
+                          });
+                      })).
+            catch(
+                function(err) {
+                    deferred.reject(err);
+                  }).
+            done();
+        return deferred.promise;
+      },
+ 
   };
