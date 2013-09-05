@@ -3,7 +3,8 @@
 var passport = require('passport'),
     db = require('../config/dbschema'),
     utils = require('../lib/utils'),
-    documentProvider = require('../config/documentProvider');
+    documentProvider = require('../config/documentProvider'),
+    q = require('q');
 
 exports.userinfo = [
     passport.authenticate('bearer', { session: false }),
@@ -33,14 +34,37 @@ exports.userinfo = [
 exports.save = [
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
-        console.log('-------------------------------');
-        console.log(req.body);
-        documentProvider.save(
-                        req.body.data,
-                        req.body.collection,
-                        utils.getMongoDbname(req.body.owner.email)).
-                then();
-        res.send(200);
+        var _token, _user, _client;
+
+        // Retrieve the token
+        var tokenQuery = db.tokenModel.findOne({ token: req.body.access_token });
+        tokenQuery.exec().
+        then(function(token) {
+                _token = token;
+                var userQuery = db.userModel.findOne({ _id: _token.userId });
+                return userQuery.exec();
+              }).
+        // User
+        then(function(user) {
+                _user = user;       
+                var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
+                return clientQuery.exec();
+              }).
+        // Client and save
+        then(function(client) {
+                _client = client;
+                return documentProvider.save(_user, _client.clientId, req.body.data);
+              }).
+        // Results of save
+        then(function() {
+            res.send(200);
+          });
+        // Something blew up
+        // What goes here?
+//        catch(function(err) {
+//            console.log('This is an error, uh uh');
+//            res.send(400, err)
+//          });
       }
   ];
 

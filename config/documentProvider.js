@@ -100,7 +100,12 @@ module.exports =  {
                         var collection = new mongo.Collection(client, collectionName);
                         collection.save(data, { upsert: true, safe: true },
                                 function(err, ack) {
-                                    deferred.resolve(ack);
+                                    if (err) {
+                                      deferred.reject(err)
+                                    }
+                                    else {
+                                      deferred.resolve(ack);
+                                    }
                                   });
                       })).
                  catch(
