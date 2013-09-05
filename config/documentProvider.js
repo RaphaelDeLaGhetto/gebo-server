@@ -1,3 +1,5 @@
+'use strict';
+
 var config = require('./config'),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
@@ -11,26 +13,27 @@ module.exports =  {
      */
     openDb: function (dbName) {
         var deferred = q.defer();
-    	try{
+        try{
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
             this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
-    		  deferred.reject(err);
+                  deferred.reject(err);
                 }
                 else {
                   deferred.resolve(client);
                 }
-             });
-    	} catch(e) {
+              });
+          }
+        catch(e) {
             console.log(e);
-    	    deferred.reject(e);
-    	}
+            deferred.reject(e);
+          }
 
         return deferred.promise;
-    },
+      },
  
     /**
      * Determine if the database exists. To do this,
@@ -58,7 +61,10 @@ module.exports =  {
 
                 if (names.length === 0) {
                   deferred.reject(new Error('Database: ' + dbName + ' does not exist'));
-                  db.dropDatabase(function(err, done) {
+                  db.dropDatabase(function(err) {
+                    if (err) {
+                      deferred.reject(new Error('Database: ' + dbName + ' was not dropped'));
+                    }
                     console.log(dbName + ' dropped');
                   });
                 }
@@ -67,11 +73,11 @@ module.exports =  {
                 }
 
                 db.close();
-            });
-        });
+              });
+          });
 
-        return deferred.promise; 
-    },
+        return deferred.promise;
+      },
 
     /**
      * Save JSON to user's profile
@@ -95,15 +101,15 @@ module.exports =  {
                         collection.save(data, { upsert: true, safe: true },
                                 function(err, ack) {
                                     deferred.resolve(ack);
-                                });
-                    })).
+                                  });
+                      })).
                  catch(
                     function(err) {
                         deferred.reject(err);
-                    }).
+                      }).
                  done();
         return deferred.promise;
-    },
+      },
         
     /**
      * Retrieve JSON from a user's profile
@@ -125,16 +131,16 @@ module.exports =  {
                         collection.find({'_id': new mongo.ObjectID(mongoId) }).toArray(
                                 function(err, docs) {
                                     deferred.resolve(docs);
-                                });
-                    })).
+                                  });
+                      })).
                  catch(
                     function(err) {
                         deferred.reject(err);
-                    }).
+                      }).
                  done();
  
         return deferred.promise;
-    },
+      },
 
     /**
      * Delete a doc from a user's profile
@@ -158,22 +164,21 @@ module.exports =  {
                         collection.count(function(err, count) {
                             if (count === 0) {
                               deferred.reject(
-                                new Error('Collection: ' + 
+                                new Error('Collection: ' +
                                         collectionName + ' does not exist'));
                             }
                             else {
                               collection.remove({ _id: new mongo.ObjectID(mongoId) },
                                     function(err, ack) {
                                         if (err || ack === 0) {
-                                            deferred.reject(                                                                                new Error('Could not delete document: ' +
-                                                            mongoId));
+                                          deferred.reject(new Error('Could not delete document: ' + mongoId));
                                         }
                                         else {
                                           deferred.resolve();
                                         }
-                                    });
+                                      });
                             }
-                        });
+                          });
 
 
 //                    console.log(collection.find()); 
@@ -182,14 +187,14 @@ module.exports =  {
 ////                       function(err, docs) {
 ////                       deferred.resolve(docs);
 ////                  });
-                })).
+                      })).
             catch(
                 function(err) {
                     deferred.reject(err);
-                }).
-             done();
+                  }).
+            done();
  
         return deferred.promise;
-    },
+      },
 
-};
+  };

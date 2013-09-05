@@ -1,3 +1,5 @@
+'use strict';
+
 /** 
  * Thank you to jaredhanson/passport-local
  * https://github.com/jaredhanson/passport-local
@@ -15,23 +17,24 @@ exports.mongoose = mongoose;
 /**
  *  Database connect
  */
-var uristring = 
-  process.env.MONGOLAB_URI || 
-  process.env.MONGOHQ_URL || 
-  'mongodb://localhost/test';
+var uristring =
+    process.env.MONGOLAB_URI ||
+    process.env.MONGOHQ_URL ||
+    'mongodb://localhost/test';
 
 var mongoOptions = { db: { safe: true }};
 
-mongoose.connect(uristring, mongoOptions, function (err, res) {
-  if (err) { 
-    console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-  } else {
-    console.log ('Successfully connected to: ' + uristring);
-  }
-});
+mongoose.connect(uristring, mongoOptions, function (err) {//, res) {
+    if (err) {
+      console.log ('ERROR connecting to: ' + uristring + '. ' + err);
+    }
+    else {
+      console.log ('Successfully connected to: ' + uristring);
+    }
+  });
 
 //******* Database schema TODO add more validation
-var Schema = mongoose.Schema, 
+var Schema = mongoose.Schema,
     ObjectId = Schema.Types.ObjectId;
 
 /**
@@ -42,33 +45,41 @@ var userSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true},
     admin: { type: Boolean, required: true },
-});
+  });
 
 
 // Bcrypt middleware
 userSchema.pre('save', function(next) {
-    var user = this
+    var user = this;
 
-    if(!user.isModified('password')) return next();
+    if (!user.isModified('password')) {
+      return next();
+    }
 
     bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-	    if(err) return next(err);
+        if (err) {
+          return next(err);
+        }
 
-    	bcrypt.hash(user.password, salt, function(err, hash) {
-    	    if(err) return next(err);
-	        user.password = hash;
-	        next();
-	    });
-    });
-});
+        bcrypt.hash(user.password, salt, function(err, hash) {
+            if (err) {
+              return next(err);
+            }
+            user.password = hash;
+            next();
+          });
+      });
+  });
 
 // Password verification
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-        if(err) return cb(err);
-	cb(null, isMatch);
-    });
-};
+        if (err) {
+          return cb(err);
+        }
+        cb(null, isMatch);
+      });
+  };
 
 // Export user model
 var userModel = mongoose.model('User', userSchema);
@@ -81,7 +92,7 @@ var clientSchema = new Schema({
     name: { type: String, required: true, unique: false },
     clientId: { type: String, required: true, unique: true },
     secret: { type: String, required: true, unique: false },
-});
+  });
 
 // Export client model
 var clientModel = mongoose.model('Client', clientSchema);
@@ -94,7 +105,7 @@ var tokenSchema = new Schema({
     userId: { type: ObjectId, required: true, unique: false },
     clientId: { type: ObjectId, required: true, unique: false },
     token: { type: String, required: true, unique: true },
-});
+  });
 
 // Export token model
 var tokenModel = mongoose.model('Token', tokenSchema);
@@ -108,7 +119,7 @@ var authorizationSchema = new Schema({
     clientId: { type: ObjectId, required: true, unique: false },
     redirectUri: { type: String, required: true, unique: false },
     code: { type: String, required: true, unique: true },
-});
+  });
 
 // Export token model
 var authorizationModel = mongoose.model('Authorization', authorizationSchema);

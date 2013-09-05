@@ -1,11 +1,11 @@
 var config = {
     mongo : {
-        host: "localhost",
+        host: 'localhost',
         port: 27017,
-        db: "exampleDb",
-        collections : ["tweets"],
+        db: 'exampleDb',
+        collections : ['tweets'],
         serverOptions : {},
         clientOptions : { w: 1 }
-    }
-}
+      }
+    };
 module.exports = config;

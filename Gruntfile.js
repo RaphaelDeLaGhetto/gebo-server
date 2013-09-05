@@ -48,6 +48,9 @@ module.exports = function (grunt) {
                       apps: {
                         src: ['app/**/*.js']
                       },
+                      config: {
+                        src: ['config/**/*.js']
+                      },
                       lib: {
                         src: ['lib/**/*.js']
                       },
