@@ -217,7 +217,8 @@ module.exports =  {
                               collection.drop(
                                     function(err, ack) {
                                         if (err || ack === 0) {
-                                          deferred.reject(new Error('Could not delete document: ' + mongoId));
+                                          deferred.reject(new Error('Could not delete collection: ' +
+                                                          collectionName));
                                         }
                                         else {
                                           deferred.resolve();

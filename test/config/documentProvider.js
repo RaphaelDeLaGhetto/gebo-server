@@ -583,7 +583,7 @@ exports.destroyCollection = {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
+        	    this.collection = new mongo.Collection(client, cname);
                 this.collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
