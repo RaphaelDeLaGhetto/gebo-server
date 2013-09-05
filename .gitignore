@@ -8,6 +8,7 @@
 *.log
 *~
 /root/package.json
+/dist
 
 *.seed
 *.csv
