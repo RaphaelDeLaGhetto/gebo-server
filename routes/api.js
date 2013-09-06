@@ -2,9 +2,9 @@
 
 var passport = require('passport'),
     db = require('../config/dbschema'),
-    utils = require('../lib/utils'),
-    documentProvider = require('../config/documentProvider'),
-    q = require('q');
+//    utils = require('../lib/utils'),
+    documentProvider = require('../config/documentProvider');
+//    q = require('q');
 
 exports.userinfo = [
     passport.authenticate('bearer', { session: false }),
@@ -46,7 +46,7 @@ exports.save = [
               }).
         // User
         then(function(user) {
-                _user = user;       
+                _user = user;
                 var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
                 return clientQuery.exec();
               }).

@@ -101,7 +101,7 @@ module.exports =  {
                         collection.save(data, { upsert: true, safe: true },
                                 function(err, ack) {
                                     if (err) {
-                                      deferred.reject(err)
+                                      deferred.reject(err);
                                     }
                                     else {
                                       deferred.resolve(ack);
