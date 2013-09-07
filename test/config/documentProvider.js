@@ -681,3 +681,50 @@ exports.destroyCollection = {
    
 };
 
+/**
+ * ls
+ */
+exports.ls = {
+
+     setUp: function (callback) {
+    	try{
+            var server = new mongo.Server(config.mongo.host,
+                                          config.mongo.port,
+                                          config.mongo.serverOptions);
+            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+            this.db.open(function (err, client) {
+                if (err) {
+                  throw err;
+                }
+        	    this.collection = new mongo.Collection(client, cname);
+                this.collection.insert([
+                        {
+                            _id: new mongo.ObjectID('0123456789AB'),
+                            name: 'dan',
+                            occupation: 'Batman'
+                        },
+                        {
+                            _id: new mongo.ObjectID('123456789ABC'),
+                            name: 'yanfen',
+                            occupation: 'Being cool'
+                        }
+                    ],
+                    function() {
+                        callback();
+                    });
+            });
+    	} catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        // Lose the database for next time
+        this.db.dropDatabase(function(err) { 
+            callback();
+        });
+    },
+
+
+};
+

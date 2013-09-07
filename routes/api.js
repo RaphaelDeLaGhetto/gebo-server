@@ -68,5 +68,14 @@ exports.save = [
       }
   ];
 
+ /**
+  * Get a list of documents in the app's colleciton
+  */
+exports.ls = [
+    passport.authenticate('bearer', { session: false }),
+    function(req, res) {
+        res.json([{a:1},{b:2}]);
+      } 
+  ];
 
 
