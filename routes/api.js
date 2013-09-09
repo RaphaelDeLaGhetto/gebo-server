@@ -68,10 +68,6 @@ exports.ls = [
     function(req, res) {
         _verify(req.query.access_token).
             then(function(verified) {
-                // Don't save the access token to the DB. All
-                // data to be saved is stored in the request body
-                delete req.body.access_token;
-
                 return documentProvider.ls(
                         verified.dbName,
                         verified.collectionName);
