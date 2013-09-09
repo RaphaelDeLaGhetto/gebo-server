@@ -35,6 +35,7 @@ exports.save = [
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
 
+        console.log(req.body.access_token);
         _verify(req.body.access_token).
             then(function(verified) {
                 // Don't save the access token to the DB. All
@@ -65,10 +66,49 @@ exports.save = [
 exports.ls = [
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
-        console.log('Getting list');
-        console.log(req.query);
-        res.json([{a:1},{b:2}]);
-      } 
+        _verify(req.query.access_token).
+            then(function(verified) {
+                // Don't save the access token to the DB. All
+                // data to be saved is stored in the request body
+                delete req.body.access_token;
+
+                return documentProvider.ls(
+                        verified.dbName,
+                        verified.collectionName);
+              }).
+            // Results of listing
+            then(function(data) {
+                res.json(data);
+              }).
+            // Something blew up
+            catch(function(err) {
+                res.send(404, err);
+              });
+       } 
+  ];
+
+ /**
+  * Remove a document from the app's colleciton
+  */
+exports.rm = [
+    passport.authenticate('bearer', { session: false }),
+    function(req, res) {
+        _verify(req.query.access_token).
+            then(function(verified) {
+                return documentProvider.rm(
+                        verified.dbName,
+                        verified.collectionName,
+                        req.query._id);
+              }).
+            // Results of listing
+            then(function(data) {
+                res.send(200, 'Deleted');
+              }).
+            // Something blew up
+            catch(function(err) {
+                res.send(404, err);
+              });
+       } 
   ];
 
 
@@ -81,35 +121,40 @@ exports.ls = [
  * @return promise
  */
 var _verify = function(token) {
-        var deferred = q.defer();
+    var deferred = q.defer();
 
-        var _token, _user, _client;
+    var _token, _user, _client;
 
-        // Retrieve the token
-        var tokenQuery = db.tokenModel.findOne({ token: token});
+    // Retrieve the token
+    var tokenQuery = db.tokenModel.findOne({ token: token});
 
-        tokenQuery.exec().
+    tokenQuery.exec().
         then(function(token) {
-                _token = token;
-                var userQuery = db.userModel.findOne({ _id: _token.userId });
-                return userQuery.exec();
-              }).
+            _token = token;
+            var userQuery = db.userModel.findOne({ _id: _token.userId });
+            return userQuery.exec();
+          }).
         // User
         then(function(user) {
-                _user = user;
-                var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
-                return clientQuery.exec();
-              }).
+            _user = user;
+            var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
+            return clientQuery.exec();
+          }).
         // Client
         then(function(client) {
-                _client = client;
-                var verified = {
-                    dbName: utils.getMongoDbName(_user.email),
-                    collectionName: utils.getMongoCollectionName(_client.name)
-                };
-                deferred.resolve(verified);
-              });
-  
-        return deferred.promise;
+            _client = client;
+            var verified = {
+                dbName: utils.getMongoDbName(_user.email),
+                collectionName: utils.getMongoCollectionName(_client.name)
+            };
+            deferred.resolve(verified);
+          });
+        // Why doesn't the catch function work here?
+//        catch(function(err) {
+//            console.log(err);
+//            deferred.reject(err)
+//          });
+
+    return deferred.promise;
   };
 

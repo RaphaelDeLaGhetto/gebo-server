@@ -60,6 +60,7 @@ app.post('/oauth/token', oauth2_routes.token);
 app.get('/api/userinfo', api_routes.userinfo);
 app.post('/api/save', api_routes.save);
 app.get('/api/ls', api_routes.ls);
+app.del('/api/rm', /*function(req,res) { console.log(req); res.send(200);});//*/api_routes.rm);
 
 logger.info('listening on', nconf.get('port'));
 app.listen(process.env.PORT || nconf.get('port'));
