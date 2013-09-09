@@ -51,25 +51,30 @@ exports.testConnection = {
     },
 };
 
-
 /**
- * Open the given databse
+ * Get the app's collection
  */
-exports.openDb = {
-    setUp: function (callback) {
+exports.getCollection = {
+
+   setUp: function (callback) {
     	try{
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+            this.db = new mongo.Db('dan_at_email_dot_com',
+                            server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
         	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
-                    callback();
-                });
+                this.collection.insert({
+                        _id: new mongo.ObjectID('0123456789AB'), 
+                        name: 'dan',
+                        occupation: 'Batman'
+                    }, function() {
+                        callback();
+                    });
             });
     	} catch(e) {
             console.dir(e);
@@ -82,77 +87,31 @@ exports.openDb = {
             callback();
         });
     },
- 
-    'Open non-existent database': function (test) {
-        test.expect(4);
 
-        documentProvider.openDb('non_existent_db').
-                then(
-                    function(client) {
-                        client.collectionNames(function(err, names) {
-
-                            test.ifError(err);
-                
-                            // It's a new DB, there are no collections yet
-                            test.deepEqual(names, []);
-
-                            // Create a new collection and make sure it takes data
-                            client.createCollection('new_collection',
-                                function(err, collection) {
-                                    collection.insert({ foo: 'bar' }, function(data) {
-
-                                        client.collectionNames(function(err2, names2) {
-
-                                        test.ifError(err2);
-
-                                        // The new collection exists
-                                        test.deepEqual(names2,
-                                            [ 
-                                              { name: 'non_existent_db.new_collection',
-                                                options: { create: 'new_collection' } },
-                                              { name: 'non_existent_db.system.indexes' } ]);
-
-                                        // Lose the database for next time
-                                        client.dropDatabase(function(err) { 
-                                            test.done();
-                                        });
-                                   });
-                                });
+    'Return a mongo collection object': function (test) {
+        test.expect(2);
+        documentProvider.getCollection(
+                        utils.getMongoDbName('dan@email.com'),
+                        utils.getMongoCollectionName(cname)).
+                then(function(collection) {
+                    test.ok(true);    
+                    collection.save({ greeting: 'Hello' },
+                            { upsert: true, safe: true },
+                            function(err, ack) {
+                                if (err) {
+                                  test.ok(false, err);
+                                  test.done();
+                                }
+                                test.ok(true, ack);
+                                test.done();
                             });
-                        });
-       });
-    },
-
-    'Open existing database': function (test) {
-        test.expect(5);
-
-        documentProvider.openDb('existing_database').then(function(client) {
-
-            client.collectionNames(function(err, names) {
-                    
-                test.ifError(err);
-                
-                // It's a new DB, there are no collections yet
-                test.deepEqual(names, 
-                        [ 
-                          { name: 'existing_database.unitTest' },
-                          { name: 'existing_database.system.indexes' } ]
-                        );
-
-                var collection = client.collection('unitTest');
-                var cursor = collection.find({ name: 'dan'});
-                cursor.toArray(function(err, docs) {
-
-                    test.ifError(err);
-    
-                    test.equal(docs[0].name, 'dan');
-                    test.equal(docs[0].occupation, 'Batman');
-    
+                }).
+                catch(function(err) {
+                    test.ok(false, err);
                     test.done();
                 });
-            });
-        });
-    },
+    }, 
+
 };
 
 /**
@@ -195,13 +154,14 @@ exports.save = {
    'Do not save to a non-existent database': function (test) {
         test.expect(1);
         
-        var user = { name: 'yanfen', email: 'yanfen@email.com' };
-        documentProvider.save(user, 'some_collection', { data: 'junk' }).
+        documentProvider.save(
+                        utils.getMongoDbName('yanfen@email.com'),
+                        'some_collection',
+                        { data: 'junk' }).
                 then(
                     function(docs) {
                         console.log(docs);       
                         test.ok(false, 'This database shouldn\'t exist. Delete manually');
-                        test.equal(docs[0].data, 'junk');
                         test.done();
                     }).
                 catch(
@@ -214,8 +174,10 @@ exports.save = {
    'Save to existing database': function (test) {
         test.expect(2);
 
-        var user = { name: 'dan', email: 'dan@email.com' };
-        documentProvider.save(user, 'some_collection', { data: 'junk' }).
+        documentProvider.save(
+                        utils.getMongoDbName('dan@email.com'),
+                        'some_collection',
+                        { data: 'junk' }).
                 then(
                     function(docs) {
                         test.ok(docs);
@@ -233,25 +195,29 @@ exports.save = {
    'Update existing document': function(test) {
         test.expect(9);
 
-        var user = { name: 'dan', email: 'dan@email.com' };
-
         // Retrieve the existing document
-        documentProvider.retrieve(user, cname, '0123456789AB').
+        documentProvider.cp(
+                        utils.getMongoDbName('dan@email.com'),
+                        cname, '0123456789AB').
             then(
                 function(docs) {
-                    test.ok(docs, 'Docs successfully retrieved');
+                    test.ok(docs, 'Docs successfully copied');
                     test.equal(docs.length, 1);
                     test.equal(docs[0].name, 'dan');
                     test.equal(docs[0].occupation, 'Batman');
                     docs[0].occupation = 'AI Practitioner';
 
-                    return documentProvider.save(user, cname, docs[0]);
+                    return documentProvider.save(
+                        utils.getMongoDbName('dan@email.com'),
+                        cname, docs[0]);
                 }).
             then(
                 function(ack) {
                     test.ok(ack, 'Doc successfully saved');
                   // test.done();
-                    return documentProvider.retrieve(user, cname, '0123456789AB');
+                    return documentProvider.cp(
+                            utils.getMongoDbName('dan@email.com'),
+                            cname, '0123456789AB');
                 }).
             then(
                 function(docs) {
@@ -339,9 +305,9 @@ exports.dbExists = {
 };
 
 /**
- * Retrieve document from the database
+ * Copy document from the database
  */
-exports.retrieve = {
+exports.cp = {
 
     setUp: function (callback) {
     	try{
@@ -375,10 +341,11 @@ exports.retrieve = {
         });
     },
  
-   'Do not retrieve from non-existent database': function (test) {
+   'Do not copy from non-existent database': function (test) {
         test.expect(1);
-        var user = { name: 'no_one', email: 'no_one@not-here.com' };
-        documentProvider.retrieve(user, cname, '0123456789AB').
+        documentProvider.cp(
+                        utils.getMongoDbName('no_one@not-here.com'),
+                        cname, '0123456789AB').
             then(
                 function() {
                     // Shouldn't get here
@@ -392,13 +359,14 @@ exports.retrieve = {
                 });
    }, 
 
-   'Retrieve from existing database': function (test) {
+   'Copy from existing database': function (test) {
         test.expect(3);
-        var user = { name: '4real', email: 'existing_database' };
-        documentProvider.retrieve(user, cname, '0123456789AB').
+        documentProvider.cp(
+                        utils.getMongoDbName('existing_database'),
+                        cname, '0123456789AB').
              then(
                 function(docs) {
-                    test.ok(docs, 'Document retrieved');
+                    test.ok(docs, 'Document copied');
                     test.equal(docs[0].name, 'dan');
                     test.equal(docs[0].occupation, 'Batman');
                     test.done();
@@ -438,7 +406,7 @@ exports.retrieve = {
 /**
  * Delete a document from the profile 
  */
-exports.destroy = {
+exports.rm = {
 
     setUp: function (callback) {
     	try{
@@ -482,10 +450,10 @@ exports.destroy = {
    'Do not delete from a non-existent database': function (test) {
         test.expect(1);
 
-        var user = { name: 'dan', email: 'does_not_exist' };
-
         // Retrieve the existing document
-        documentProvider.destroy(user, cname, '0123456789AB').
+        documentProvider.rm(
+                        utils.getMongoDbName('does_not_exist'),
+                        cname, '0123456789AB').
             then(
                 function() {
                     // Shouldn't get here
@@ -502,10 +470,10 @@ exports.destroy = {
    'Do not delete from a non-existent collection': function (test) {
         test.expect(1);
 
-        var user = { name: 'dan', email: 'existing_database' };
-
         // Retrieve the existing document
-        documentProvider.destroy(user, 'NoSuchCollection', '0123456789AB').
+        documentProvider.rm(
+                        utils.getMongoDbName('existing_database'),
+                        'NoSuchCollection', '0123456789AB').
             then(
                 function() {
                     // Shouldn't get here
@@ -523,9 +491,9 @@ exports.destroy = {
    'Do not delete non-existent document': function (test) {
         test.expect(1);
 
-        var user = { name: 'dan', email: 'existing_database' };
-
-        documentProvider.destroy(user, cname, 'NoSuchDocABC').
+        documentProvider.rm(
+                        utils.getMongoDbName('existing_database'),
+                        cname, 'NoSuchDocABC').
             then(
                 function() {
                     // Shouldn't get here
@@ -547,9 +515,9 @@ exports.destroy = {
             test.equal(count, 2);
         });
 
-        var user = { name: 'dan', email: 'existing_database' };
-
-        documentProvider.destroy(user, cname, '123456789ABC').
+        documentProvider.rm(
+                        utils.getMongoDbName('existing_database'),
+                        cname, '123456789ABC').
             then(
                 function() {
                     test.ok(true, 'The doc has been deleted, I think');
@@ -572,7 +540,7 @@ exports.destroy = {
 /**
  * Delete a collection from the profile 
  */
-exports.destroyCollection = {
+exports.rmdir = {
      setUp: function (callback) {
     	try{
             var server = new mongo.Server(config.mongo.host,
@@ -615,10 +583,10 @@ exports.destroyCollection = {
    'Do not delete from a non-existent database': function (test) {
         test.expect(1);
 
-        var user = { name: 'dan', email: 'does_not_exist' };
-
         // Retrieve the existing document
-        documentProvider.destroyCollection(user, cname).
+        documentProvider.rmdir(
+                        utils.getMongoDbName('does_not_exist'), 
+                        cname).
             then(
                 function() {
                     // Shouldn't get here
@@ -635,10 +603,10 @@ exports.destroyCollection = {
    'Do not delete a non-existent collection': function (test) {
         test.expect(1);
 
-        var user = { name: 'dan', email: 'existing_database' };
-
         // Retrieve the existing document
-        documentProvider.destroyCollection(user, 'NoSuchCollection').
+        documentProvider.rmdir(
+                        utils.getMongoDbName('existing_database'), 
+                        'NoSuchCollection').
             then(
                 function() {
                     // Shouldn't get here
@@ -659,9 +627,9 @@ exports.destroyCollection = {
             test.equal(count, 2);
         });
 
-        var user = { name: 'dan', email: 'existing_database' };
-
-        documentProvider.destroyCollection(user, cname).
+        documentProvider.rmdir(
+                        utils.getMongoDbName('existing_database'), 
+                        cname).
             then(
                 function() {
                     test.ok(true, 'The doc has been deleted, I think');
@@ -696,7 +664,7 @@ exports.ls = {
                 if (err) {
                   throw err;
                 }
-        	    this.collection = new mongo.Collection(client, cname);
+                this.collection = new mongo.Collection(client, cname);
                 this.collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
@@ -725,6 +693,36 @@ exports.ls = {
         });
     },
 
+    'Return a list of documents contained in the collection': function(test) {
+        test.expect(3);
+        documentProvider.ls('existing_database', cname).
+            then(function(list) {
+                test.equal(list.length, 2);
+                test.equal(list[0].name, 'dan');
+                test.equal(list[1].name, 'yanfen');
+                test.done();
+            }).
+            catch(
+                function(err) {
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+    },
 
+    'Return an empty list from an empty collection': function(test) {
+        test.expect(1);
+        documentProvider.ls('existing_database', 'no_such_collection').
+            then(function(list) {
+                test.equal(list.length, 0);
+                test.done();
+            }).
+            catch(
+                function(err) {
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+    },
 };
 

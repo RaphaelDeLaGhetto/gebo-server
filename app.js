@@ -58,8 +58,8 @@ app.post('/oauth/token', oauth2_routes.token);
 
 // API routes
 app.get('/api/userinfo', api_routes.userinfo);
-app.put('/api/save', api_routes.save);
-app.put('/api/ls', api_routes.ls);
+app.post('/api/save', api_routes.save);
+app.get('/api/ls', api_routes.ls);
 
 logger.info('listening on', nconf.get('port'));
 app.listen(process.env.PORT || nconf.get('port'));
