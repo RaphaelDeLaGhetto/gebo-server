@@ -242,4 +242,61 @@ module.exports =  {
         return deferred.promise;
       },  
     
+    /**
+     * Create a new database
+     *
+     * @param string
+     * @param Object - The user's public profile
+     *
+     * @return promise
+     */
+    createDatabase: function(dbName, profile) {
+        var deferred = q.defer();
+
+        this.dbExists(dbName).
+                then(function() {
+                    deferred.reject();
+                  }).
+                catch(function(err) {
+                        var server = new mongo.Server(config.mongo.host,
+                                         config.mongo.port,
+                                         config.mongo.serverOptions);
+                        var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+
+                        db.open(function (err, client) {
+                            if (err) {
+                              deferred.reject(err);
+                            }
+                            else { 
+                              var collection = new mongo.Collection(client, 'profile');
+                              collection.save(profile.toObject(), { safe: true },
+                                      function(err, ack) {
+                                          if (err) {
+                                            deferred.reject(err);
+                                          }
+                                          else {
+                                            deferred.resolve(ack);
+                                          }
+                                          db.close();  
+                                        });
+                            }
+                        });
+                  });
+
+        return deferred.promise;
+      },
+
+    /**
+     * Drop a database
+     * 
+     * @param string
+     *
+     * @return promise
+     */
+    dropDatabase: function(dbName) {
+        var deferred = q.defer();
+        deferred.resolve();
+        return deferred.promise;
+      },
+
   };
