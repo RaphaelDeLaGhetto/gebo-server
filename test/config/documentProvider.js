@@ -848,7 +848,7 @@ exports.createDatabase = {
                     test.done();
                   });
 
-   },
+    },
 
     'Should not overwrite an existing database': function(test) {
         test.expect(8);
@@ -900,84 +900,105 @@ exports.createDatabase = {
 /**
  * dropDatabase
  */
-//exports.dropDatabase = {
-//
-//    setUp: function(callback) {
-//    	try{
-//            var server = new mongo.Server(config.mongo.host,
-//                                          config.mongo.port,
-//                                          config.mongo.serverOptions);
-//            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
-//            this.db.open(function (err, client) {
-//                if (err) {
-//                  throw err;
-//                }
-//                this.collection = new mongo.Collection(client, cname);
-//                this.collection.insert([
-//                        {
-//                            _id: new mongo.ObjectID('0123456789AB'),
-//                            name: 'dan',
-//                            occupation: 'Batman'
-//                        },
-//                        {
-//                            _id: new mongo.ObjectID('123456789ABC'),
-//                            name: 'yanfen',
-//                            occupation: 'Being cool'
-//                        }
-//                    ],
-//                    function() {
-//                        callback();
-//                    });
-//            });
-//    	} catch(e) {
-//            console.dir(e);
-//    	}
-//    },
-//
-//    tearDown: function (callback) {
-//        // Lose the database for next time
-//        this.db.dropDatabase(function(err) {
-//            callback();
-//        });
-//    },
-//
-//
-//    'Should delete the database specified': function(test) {
-//        test.expect(3);
-//
-//        // Make sure the DB exists
-//        var dbName = utils.getMongoDbName('existing_database');
-//        documentProvider.dbExists(dbName).
-//                then(function(client) {
-//                    test.ok(true);
-//                  }).
-//                catch(function(err) {
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//
-//        documentProvider.dropDatabase(dbName).
-//                then(function() {
-//                    test.ok(true);
-//                  }).
-//                catch(function(err) {
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//
-//        documentProvider.dbExists(dbName).
-//                then(function(client) {
-//                    test.ok(false, dbName + ' should not exist');
-//                    test.done();
-//                  }).
-//                catch(function(err) {
-//                    test.ok(true, err);
-//                    test.done();
-//                  });
-//    },
-//
-//    'Should not barf if the database does not exist': function(test) {
-//        test.expect(1);
-//        test.done();
-//    },
-//};
+exports.dropDatabase = {
+
+    setUp: function(callback) {
+    	try {
+            var server = new mongo.Server(config.mongo.host,
+                                          config.mongo.port,
+                                          config.mongo.serverOptions);
+            this.db = new mongo.Db('existing_db', server, config.mongo.clientOptions);
+            this.db.open(function (err, client) {
+                if (err) {
+                  throw err;
+                }
+                this.collection = new mongo.Collection(client, cname);
+                this.collection.insert([
+                        {
+                            _id: new mongo.ObjectID('0123456789AB'),
+                            name: 'dan',
+                            occupation: 'Batman'
+                        },
+                        {
+                            _id: new mongo.ObjectID('123456789ABC'),
+                            name: 'yanfen',
+                            occupation: 'Being cool'
+                        }
+                    ],
+                    function() {
+                        callback();
+                    });
+            });
+    	} catch(e) {
+            console.dir(e);
+    	}
+    },
+
+    tearDown: function (callback) {
+        // Lose the database for next time
+        this.db.dropDatabase(function(err) {
+            callback();
+        });
+    },
+
+
+    'Should delete the database specified': function(test) {
+        test.expect(3);
+
+        // Make sure the DB exists
+        var dbName = utils.getMongoDbName('existing_db');
+        documentProvider.dbExists(dbName).
+                then(function(client) {
+                    test.ok(true);
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+
+        documentProvider.dropDatabase(dbName).
+                then(function() {
+                    test.ok(true);
+
+                    documentProvider.dbExists(dbName).
+                        then(function(client) {
+                            test.ok(false, dbName + ' should not exist');
+                            test.done();
+                          }).
+                        catch(function(err) {
+                            test.ok(true, err);
+                            test.done();
+                          });
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+
+    },
+
+    'Should not barf if the database does not exist': function(test) {
+        test.expect(2);
+
+        // Make sure the database doesn't exist
+        var dbName = utils.getMongoDbName('no_such_database');
+        documentProvider.dbExists(dbName).
+                then(function(client) {
+                    test.ok(false, dbName + ' should not exist. Why is it in the db?');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.ok(true);
+                 });
+
+        documentProvider.dropDatabase(dbName).
+                then(function() {
+                    test.ok(false, dbname + ' should not exist');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.ok(true);
+                    test.done();
+                 });
+    },
+};
