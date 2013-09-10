@@ -1,6 +1,8 @@
 'use strict';
 
-var db = require('./config/dbschema');
+var db = require('./config/dbschema'),
+    utils = require('./lib/utils'),
+    documentProvider = require('./config/documentProvider');
 
 module.exports = function (grunt) {
 
@@ -119,7 +121,19 @@ module.exports = function (grunt) {
                 }
                 else {
                   console.log('saved user: ' + user.username);
-                  done();
+                  documentProvider.createDatabase(
+                          utils.getMongoDbName(emailaddress),
+                          user).
+                    then(function() {
+                        done();
+                      }).
+                    catch(function(err) {
+                        done();
+                        // I think a db drop on a non existent database
+                        // should not return an error...? What to do?
+//                        console.log('Error: ' + err);
+//                        done(false);
+                      });
                 }
               });
           });
