@@ -295,7 +295,33 @@ module.exports =  {
      */
     dropDatabase: function(dbName) {
         var deferred = q.defer();
-        deferred.resolve();
+        this.dbExists(dbName).
+                then(function() {
+                    var server = new mongo.Server(config.mongo.host,
+                                     config.mongo.port,
+                                     config.mongo.serverOptions);
+                    var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+
+                    db.open(function (err, client) {
+                        if (err) {
+                          deferred.reject(err);
+                        }
+                        else { 
+                          db.dropDatabase(function(err) {
+                              if (err) {
+                                deferred.reject(new Error('Database: ' +
+                                                dbName + ' was not dropped'));
+                              }
+                              else {
+                                deferred.resolve();
+                              }
+                            });
+                        }
+                      });
+                  }).
+                catch(function(err) {
+                   deferred.reject(err);
+                });
         return deferred.promise;
       },
 
