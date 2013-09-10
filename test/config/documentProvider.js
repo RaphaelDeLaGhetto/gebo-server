@@ -993,7 +993,7 @@ exports.dropDatabase = {
 
         documentProvider.dropDatabase(dbName).
                 then(function() {
-                    test.ok(false, dbname + ' should not exist');
+                    test.ok(false, dbName + ' should not exist');
                     test.done();
                   }).
                 catch(function(err) {
@@ -1001,4 +1001,5 @@ exports.dropDatabase = {
                     test.done();
                  });
     },
+
 };
