@@ -47,7 +47,6 @@ exports.save = [
               }).
             // Results of save
             then(function(data) {
-                console.log('done');
                 res.send(200);
               }).
             // Something blew up

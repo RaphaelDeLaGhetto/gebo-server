@@ -83,6 +83,13 @@ module.exports =  {
         var deferred = q.defer();
         this.getCollection(dbName, colName).
             then(function(collection) {
+
+                    // Make data._id a string (because it might
+                    // otherwise be interpreted as an int or hex)
+                    if (data._id) {
+                      data._id = new mongo.ObjectID(data._id+'');
+                    }
+
                     collection.save(data, { upsert: true, safe: true },
                     function(err, ack) {
                         if (err) {

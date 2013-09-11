@@ -133,6 +133,7 @@ exports.save = {
                 }
         	this.collection = new mongo.Collection(client, cname);
                 this.collection.insert({
+                        //_id: new mongo.ObjectID('0123456789AB'), 
                         _id: new mongo.ObjectID('0123456789AB'), 
                         name: 'dan',
                         occupation: 'Batman'
