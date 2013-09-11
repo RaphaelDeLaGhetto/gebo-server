@@ -45,6 +45,12 @@ bower install
 ```
 
 # Seed the database
+You may need to install [grunt-cli](https://github.com/gruntjs/grunt-cli) first:
+
+```
+sudo npm install -g grunt-cli
+```
+
 This inserts a couple of test users into your database to confirm that authentication is working.
 
 ```
