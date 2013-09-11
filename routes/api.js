@@ -35,7 +35,6 @@ exports.save = [
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
 
-        console.log(req.body.access_token);
         _verify(req.body.access_token).
             then(function(verified) {
                 // Don't save the access token to the DB. All
@@ -60,9 +59,9 @@ exports.save = [
       }
   ];
 
- /**
-  * Get a list of documents in the app's colleciton
-  */
+/**
+ * Get a list of documents in the app's colleciton
+ */
 exports.ls = [
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
@@ -82,6 +81,31 @@ exports.ls = [
               });
        } 
   ];
+
+/**
+ * Get a document from the app's colleciton
+ */
+exports.cp = [
+    passport.authenticate('bearer', { session: false }),
+    function(req, res) {
+        _verify(req.query.access_token).
+            then(function(verified) {
+                return documentProvider.cp(
+                        verified.dbName,
+                        verified.collectionName,
+                        req.query.id);
+              }).
+            // Results of listing
+            then(function(data) {
+                res.json(data[0]);
+              }).
+            // Something blew up
+            catch(function(err) {
+                res.send(404, err);
+              });
+       } 
+  ];
+
 
  /**
   * Remove a document from the app's colleciton
