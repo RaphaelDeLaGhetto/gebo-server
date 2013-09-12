@@ -1,5 +1,6 @@
 'use strict';
 var passport = require('passport'),
+    pass = require('../config/pass'),
     login = require('connect-ensure-login');
 
 exports.account = [
@@ -13,9 +14,13 @@ exports.getLogin = function (req, res) {
     res.render('login');
   };
 
-exports.admin = function (req, res) {
-    res.send('Admin access granted');
-  };
+exports.admin = [
+    pass.ensureAuthenticated,
+    pass.ensureAdmin,
+    function (req, res) {
+        res.render('admin');
+    }
+  ];
 
 // POST /login
 exports.postLogin = passport.authenticate('local', {

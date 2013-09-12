@@ -11,7 +11,7 @@ html(lang='en')
                     span.icon-bar
                     span.icon-bar
                     span.icon-bar
-                a.brand gebo-server
+                a.brand(href="/") gebo-server 
                 .nav-collapse
                 if (!user)
                     ul.nav
@@ -21,10 +21,9 @@ html(lang='en')
                             a(href="/login") Login
                 else
                     ul.nav
-                        li
-                            a(href="/") Home
-                        li
-                            a(href="/admin") Admin
+                        if (user.admin)
+                             li
+                                a(href="/admin") Admin
                         li
                             a(href="/account") Account
                         li
@@ -35,7 +34,7 @@ html(lang='en')
 
         block footer
             footer.page-footer
-                p &copy; Company 2013
+                p &copy; Hire Ground 2013
 
 
     | !{cachify_js('/components/jquery/jquery.min.js')}
