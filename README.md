@@ -17,9 +17,41 @@ Start MongoDB by executing this at the command line:
 sudo service mongodb start
 ```
 
+### node
+
+If you don't have node, you won't get very far:
+
+```
+sudo apt-get install nodejs
+```
+
+### g++
+
+The bcrypt package is compiled with g++:
+
+```
+sudo apt-get install g++
+```
+
+### npm
+
+Node Package Manager is needed to install all of gebo-server's dependencies. It should be installed along with nodejs (see above). If not:
+
+```
+sudo apt-get install npm
+```
+
+### bower
+
+Install the bower package manager globally with the `-g` option:
+
+```
+sudo npm install -g bower
+```
+
 ### your server
 
-First, clone the repository:
+Now, clone the repository:
 
 ```
 git clone https://github.com/RaphaelDeLaGhetto/gebo-server.git
