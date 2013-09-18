@@ -26,6 +26,9 @@ module.exports =  {
         var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
 
         db.open(function (err, client) {
+            if (err) {
+              throw(err);
+            }
             client.collectionNames(function(err, names) {
                 if (err) {
                   throw(err);
