@@ -47,7 +47,7 @@ exports.save = [
               }).
             // Results of save
             then(function(data) {
-                res.send(200);
+                res.send(200, data._id);
               }).
             // Something blew up
             catch(function(err) {
