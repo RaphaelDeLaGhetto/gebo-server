@@ -868,6 +868,7 @@ exports.createDatabase = {
         documentProvider.createDatabase(dbName).
                 then(function() {
                     test.ok(false, dbName + ' should not have been created');
+                    test.done();
                   }).
                 catch(function(err) {
                     test.ok(true);
@@ -1002,5 +1003,79 @@ exports.dropDatabase = {
                     test.done();
                  });
     },
+};
 
+/**
+ * getUserDocuments 
+ */
+exports.getUserDocuments = {
+
+    setUp: function(callback) {
+        user = new dbSchema.userModel({
+            username: 'Joey Joe Joe Jr. Shabadoo',
+            email: 'jjjj@shabadoo.com',
+            password: 'abc123',
+            admin: 'true'
+        });
+
+        var dbName = utils.getMongoDbName(user.email);
+        try {
+            var server = new mongo.Server(config.mongo.host,
+                            config.mongo.port,
+                            config.mongo.serverOptions);
+            
+            this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+            this.db.open(function (err, client) {
+                            if (err) {
+                              throw err;
+                            }
+                            
+                            this.collection = new mongo.Collection(client, cname);
+                            this.collection.insert([
+                                    { _id: new mongo.ObjectID('0123456789AB'), name: 'doc 1', },
+                                    { _id: new mongo.ObjectID('123456789ABC'), name: 'doc 2', }],
+                                    function() {
+                                        callback();
+                                      });
+                            });
+        }
+        catch(e) {
+            console.dir(e);
+        }
+    },
+
+    tearDown: function (callback) {
+        // Lose the database for next time
+        this.db.dropDatabase(function(err) {
+            callback();
+        });
+    },
+
+    'Should return a list of a user\'s documents': function(test) {
+        test.expect(1);
+        action.getUserDocuments(
+                        { dbName: 'don\'t matter', collectionName: cname, admin: true },
+                        { email: user.email }).
+            then(function(data) {
+                test.ok(data);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Should throw an error when accessed by non-admin': function(test) {
+        test.expect(1);
+        action.getUserDocuments({ email: user.email, admin: false }).
+            then(function(data) {
+                test.ok(false, 'This should not be accessible');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(err);
+                test.done();
+              });
+    },
 };
