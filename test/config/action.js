@@ -1,4 +1,4 @@
-var documentProvider = require('../../config/documentProvider'),
+var action = require('../../config/action'),
     config = require('../../config/config'),
     utils = require('../../lib/utils'),
     DatabaseCleaner = require('database-cleaner'),
@@ -91,7 +91,7 @@ exports.getCollection = {
 
     'Return a mongo collection object': function (test) {
         test.expect(2);
-        documentProvider.getCollection(
+        action.getCollection(
                         utils.getMongoDbName('dan@email.com'),
                         utils.getMongoCollectionName(cname)).
                 then(function(collection) {
@@ -156,7 +156,7 @@ exports.save = {
    'Do not save to a non-existent database': function (test) {
         test.expect(1);
         
-        documentProvider.save(
+        action.save(
                         utils.getMongoDbName('yanfen@email.com'),
                         'some_collection',
                         { data: 'junk' }).
@@ -176,7 +176,7 @@ exports.save = {
    'Save to existing database': function (test) {
         test.expect(2);
 
-        documentProvider.save(
+        action.save(
                         utils.getMongoDbName('dan@email.com'),
                         'some_collection',
                         { data: 'junk' }).
@@ -198,7 +198,7 @@ exports.save = {
         test.expect(9);
 
         // Retrieve the existing document
-        documentProvider.cp(
+        action.cp(
                         utils.getMongoDbName('dan@email.com'),
                         cname, '0123456789AB').
             then(
@@ -209,7 +209,7 @@ exports.save = {
                     test.equal(docs[0].occupation, 'Batman');
                     docs[0].occupation = 'AI Practitioner';
 
-                    return documentProvider.save(
+                    return action.save(
                         utils.getMongoDbName('dan@email.com'),
                         cname, docs[0]);
                 }).
@@ -217,7 +217,7 @@ exports.save = {
                 function(ack) {
                     test.ok(ack, 'Doc successfully saved');
                   // test.done();
-                    return documentProvider.cp(
+                    return action.cp(
                             utils.getMongoDbName('dan@email.com'),
                             cname, '0123456789AB');
                 }).
@@ -273,7 +273,7 @@ exports.dbExists = {
    'Return an error if the database does not exist': function (test) {
         test.expect(1);
 
-        documentProvider.dbExists('non_existent_database').
+        action.dbExists('non_existent_database').
                         then(
                             function() {
                                 // Shouldn't get here
@@ -291,7 +291,7 @@ exports.dbExists = {
    'Return a promise if the database does exist': function (test) {
         test.expect(1);
 
-        documentProvider.dbExists('existing_database').
+        action.dbExists('existing_database').
                 then(
                     function() {
                         test.ok(true, 'Verified the database exists');
@@ -345,7 +345,7 @@ exports.cp = {
  
    'Do not copy from non-existent database': function (test) {
         test.expect(1);
-        documentProvider.cp(
+        action.cp(
                         utils.getMongoDbName('no_one@not-here.com'),
                         cname, '0123456789AB').
             then(
@@ -363,7 +363,7 @@ exports.cp = {
 
    'Copy from existing database': function (test) {
         test.expect(3);
-        documentProvider.cp(
+        action.cp(
                         utils.getMongoDbName('existing_database'),
                         cname, '0123456789AB').
              then(
@@ -453,7 +453,7 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-        documentProvider.rm(
+        action.rm(
                         utils.getMongoDbName('does_not_exist'),
                         cname, '0123456789AB').
             then(
@@ -473,7 +473,7 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-        documentProvider.rm(
+        action.rm(
                         utils.getMongoDbName('existing_database'),
                         'NoSuchCollection', '0123456789AB').
             then(
@@ -493,7 +493,7 @@ exports.rm = {
    'Do not delete non-existent document': function (test) {
         test.expect(1);
 
-        documentProvider.rm(
+        action.rm(
                         utils.getMongoDbName('existing_database'),
                         cname, 'NoSuchDocABC').
             then(
@@ -517,7 +517,7 @@ exports.rm = {
             test.equal(count, 2);
         });
 
-        documentProvider.rm(
+        action.rm(
                         utils.getMongoDbName('existing_database'),
                         cname, '123456789ABC').
             then(
@@ -586,7 +586,7 @@ exports.rmdir = {
         test.expect(1);
 
         // Retrieve the existing document
-        documentProvider.rmdir(
+        action.rmdir(
                         utils.getMongoDbName('does_not_exist'), 
                         cname).
             then(
@@ -606,7 +606,7 @@ exports.rmdir = {
         test.expect(1);
 
         // Retrieve the existing document
-        documentProvider.rmdir(
+        action.rmdir(
                         utils.getMongoDbName('existing_database'), 
                         'NoSuchCollection').
             then(
@@ -629,7 +629,7 @@ exports.rmdir = {
             test.equal(count, 2);
         });
 
-        documentProvider.rmdir(
+        action.rmdir(
                         utils.getMongoDbName('existing_database'), 
                         cname).
             then(
@@ -697,7 +697,7 @@ exports.ls = {
 
     'Return a list of documents contained in the collection': function(test) {
         test.expect(3);
-        documentProvider.ls('existing_database', cname).
+        action.ls('existing_database', cname).
             then(function(list) {
                 test.equal(list.length, 2);
                 test.equal(list[0].name, 'dan');
@@ -714,7 +714,7 @@ exports.ls = {
 
     'Return an empty list from an empty collection': function(test) {
         test.expect(1);
-        documentProvider.ls('existing_database', 'no_such_collection').
+        action.ls('existing_database', 'no_such_collection').
             then(function(list) {
                 test.equal(list.length, 0);
                 test.done();
@@ -806,7 +806,7 @@ exports.createDatabase = {
 
         // Make sure the DB doesn't exists already
         var dbName = utils.getMongoDbName(user.email);
-        documentProvider.dbExists(dbName).
+        action.dbExists(dbName).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
                     test.done();
@@ -815,11 +815,11 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        documentProvider.createDatabase(dbName, user).
+        action.createDatabase(dbName, user).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created');
 
-                    documentProvider.getCollection(dbName, 'profile').
+                    action.getCollection(dbName, 'profile').
                             then(function(collection) {
                                 collection.findOne({ email: 'jjjj@shabadoo.com' },
                                         function(err, doc) {
@@ -856,7 +856,7 @@ exports.createDatabase = {
 
         // Make sure the DB exists
         var dbName = utils.getMongoDbName('existing_database');
-        documentProvider.dbExists(dbName).
+        action.dbExists(dbName).
                 then(function(client) {
                     test.ok(true);
                   }).
@@ -865,14 +865,14 @@ exports.createDatabase = {
                     test.done();
                   });
 
-        documentProvider.createDatabase(dbName).
+        action.createDatabase(dbName).
                 then(function() {
                     test.ok(false, dbName + ' should not have been created');
                     test.done();
                   }).
                 catch(function(err) {
                     test.ok(true);
-                    documentProvider.getCollection(dbName, cname).
+                    action.getCollection(dbName, cname).
                         then(function(collection) {
                             test.ok(true, 'Collection retrieved');
                             collection.find().toArray(function(err, docs) {
@@ -949,7 +949,7 @@ exports.dropDatabase = {
 
         // Make sure the DB exists
         var dbName = utils.getMongoDbName('existing_db');
-        documentProvider.dbExists(dbName).
+        action.dbExists(dbName).
                 then(function(client) {
                     test.ok(true);
                   }).
@@ -958,11 +958,11 @@ exports.dropDatabase = {
                     test.done();
                   });
 
-        documentProvider.dropDatabase(dbName).
+        action.dropDatabase(dbName).
                 then(function() {
                     test.ok(true);
 
-                    documentProvider.dbExists(dbName).
+                    action.dbExists(dbName).
                         then(function(client) {
                             test.ok(false, dbName + ' should not exist');
                             test.done();
@@ -984,7 +984,7 @@ exports.dropDatabase = {
 
         // Make sure the database doesn't exist
         var dbName = utils.getMongoDbName('no_such_database');
-        documentProvider.dbExists(dbName).
+        action.dbExists(dbName).
                 then(function(client) {
                     test.ok(false, dbName + ' should not exist. Why is it in the db?');
                     test.done();
@@ -993,7 +993,7 @@ exports.dropDatabase = {
                     test.ok(true);
                  });
 
-        documentProvider.dropDatabase(dbName).
+        action.dropDatabase(dbName).
                 then(function() {
                     test.ok(false, dbName + ' should not exist');
                     test.done();

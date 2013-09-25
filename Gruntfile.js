@@ -2,7 +2,7 @@
 
 var db = require('./config/dbschema'),
     utils = require('./lib/utils'),
-    documentProvider = require('./config/documentProvider');
+    action = require('./config/action');
 
 module.exports = function (grunt) {
 
@@ -121,7 +121,7 @@ module.exports = function (grunt) {
                 }
                 else {
                   console.log('saved user: ' + user.username);
-                  documentProvider.createDatabase(
+                  action.createDatabase(
                           utils.getMongoDbName(emailaddress),
                           user).
                     then(function() {

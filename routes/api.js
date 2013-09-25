@@ -3,7 +3,7 @@
 var passport = require('passport'),
     db = require('../config/dbschema'),
     utils = require('../lib/utils'),
-    documentProvider = require('../config/documentProvider'),
+    action = require('../config/action'),
     q = require('q');
 
 exports.userinfo = [
@@ -41,7 +41,7 @@ exports.save = [
                 // data to be saved is stored in the request body
                 delete req.body.access_token;
 
-                return documentProvider.save(
+                return action.save(
                         verified.dbName,
                         verified.collectionName, req.body);
               }).
@@ -66,7 +66,7 @@ exports.ls = [
     function(req, res) {
         _verify(req.query.access_token).
             then(function(verified) {
-                return documentProvider.ls(
+                return action.ls(
                         verified.dbName,
                         verified.collectionName);
               }).
@@ -89,7 +89,7 @@ exports.cp = [
     function(req, res) {
         _verify(req.query.access_token).
             then(function(verified) {
-                return documentProvider.cp(
+                return action.cp(
                         verified.dbName,
                         verified.collectionName,
                         req.query.id);
@@ -114,7 +114,7 @@ exports.rm = [
     function(req, res) {
         _verify(req.query.access_token).
             then(function(verified) {
-                return documentProvider.rm(
+                return action.rm(
                         verified.dbName,
                         verified.collectionName,
                         req.query._id);
