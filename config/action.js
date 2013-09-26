@@ -79,15 +79,16 @@ module.exports =  {
     /**
      * Save JSON to user's profile
      *
-     * @param string
-     * @param string
-     * @param Object - arbitrary
+     * @param Object
+     * @param Object - arbitrary. Whatever's there is getting saved
      *
      * @return promise
      */
-    save: function(dbName, colName, data) {
+    //save: function(dbName, colName, data) {
+    save: function(verified, data) {
         var deferred = q.defer();
-        this.getCollection(dbName, colName).
+        //this.getCollection(dbName, colName).
+        this.getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
 
                     // Make data._id a string (because it might
