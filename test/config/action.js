@@ -344,7 +344,7 @@ exports.cp = {
    'Do not copy from non-existent database': function (test) {
         test.expect(1);
         action.cp({ dbName: 'no_one_at_not_here_dot_com',
-		    collectioName: cname,
+		    collectionName: cname,
 		    admin: true },
 		  { id: '0123456789AB' }).
              then(function() {
@@ -388,7 +388,7 @@ exports.rm = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_database',
+            this.db = new mongo.Db('yanfen_at_hg_dot_com',
 			    server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -427,9 +427,13 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-        action.rm(utils.getMongoDbName('does_not_exist'),
-			cname, '0123456789AB').
-            then(function() {
+//        action.rm(utils.getMongoDbName('does_not_exist'),
+//			cname, '0123456789AB').
+        action.rm({ dbName: 'no_one_at_not_here_dot_com',
+		    collectionName: cname,
+		    admin: true },
+                  { id: '0123456789AB' }).
+             then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
@@ -445,8 +449,12 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-        action.rm(utils.getMongoDbName('existing_database'),
-			'NoSuchCollection', '0123456789AB').
+//        action.rm(utils.getMongoDbName('existing_database'),
+//			'NoSuchCollection', '0123456789AB').
+        action.rm({ dbName: 'existing_database',
+		    collectionName: 'NoSuchCollection',
+		    admin: true },
+                  { id: '0123456789AB' }).
             then(
                 function() {
                     // Shouldn't get here
@@ -464,8 +472,12 @@ exports.rm = {
    'Do not delete non-existent document': function (test) {
         test.expect(1);
 
-        action.rm(utils.getMongoDbName('existing_database'),
-			cname, 'NoSuchDocABC').
+//        action.rm(utils.getMongoDbName('existing_database'),
+//			cname, 'NoSuchDocABC').
+        action.rm({ dbName: 'existing_database',
+		    collectionName: cname,
+		    admin: true },
+                  { id: 'NoSuchDocABC' }).
             then(
                 function() {
                     // Shouldn't get here
@@ -486,8 +498,7 @@ exports.rm = {
             test.equal(count, 2);
         });
 
-        action.rm(utils.getMongoDbName('existing_database'),
-                        cname, '123456789ABC').
+        action.rm(verifiedUser, { id: '123456789ABC' }).
             then(function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {

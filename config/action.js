@@ -150,10 +150,11 @@ module.exports =  {
      * @param string - collection name
      * @param string - mongoId
      */
-    rm: function(dbName, colName, mongoId) {
+    rm: function(verified, params) {
+    //rm: function(dbName, colName, mongoId) {
         var deferred = q.defer();
 
-        this.getCollection(dbName, colName).
+        this.getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
                     // Does this collection exist?
                     collection.count(function(err, count) {
@@ -163,7 +164,7 @@ module.exports =  {
                                           colName + ' does not exist'));
                         }
                         else {
-                          collection.remove({ _id: new mongo.ObjectID(mongoId) },
+                          collection.remove({ _id: new mongo.ObjectID(params.id) },
                           function(err, ack) {
                               if (err || ack === 0) {
                                 deferred.reject(
