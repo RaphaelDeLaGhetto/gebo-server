@@ -16,8 +16,6 @@ html(lang='en')
                 if (!user)
                     ul.nav
                         li
-                            a(href="/") Home
-                        li
                             a(href="/login") Login
                 else
                     ul.nav
@@ -34,7 +32,7 @@ html(lang='en')
 
         block footer
             footer.page-footer
-                p &copy; Hire Ground 2013
+                p &copy; Company 2013
 
 
     | !{cachify_js('/components/jquery/jquery.min.js')}

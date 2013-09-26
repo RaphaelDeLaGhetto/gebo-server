@@ -1,6 +1,7 @@
 'use strict';
 
 var config = require('./config'),
+    db = require('./dbschema'),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q');
@@ -13,7 +14,6 @@ module.exports =  {
      * collections is counted. If the number is zero,
      * this is a new database that did not previously
      * exist.
-     *
      * @param string
      *
      * @return bool
@@ -27,6 +27,8 @@ module.exports =  {
 
         db.open(function (err, client) {
             if (err) {
+	      console.log('ERROR! What is happening here?');
+	      console.log(err);
               throw(err);
             }
             client.collectionNames(function(err, names) {
@@ -91,18 +93,18 @@ module.exports =  {
                     // Make data._id a string (because it might
                     // otherwise be interpreted as an int or hex)
                     if (data._id) {
-                      data._id = new mongo.ObjectID(data._id+'');
+                      data._id = new mongo.ObjectID(data._id + '');
                     }
 
-                    collection.save(data, { upsert: true, safe: true },
-                    function(err, ack) {
-                        if (err) {
-                          deferred.reject(err);
-                        }
-                        else {
-                          deferred.resolve(ack);
-                        }
-                      });
+                    collection.save(data, { safe: true },
+			function(err, ack) {
+			    if (err) {
+	                      deferred.reject(err);
+	                    }
+	                    else {
+			      deferred.resolve(ack);
+	                    }
+			  });
               }).
             catch(function(err) {
                     deferred.reject(err);
@@ -114,22 +116,22 @@ module.exports =  {
     /**
      * Copy JSON from a user's profile
      *
-     * @param Object - user profile object
-     * @param string - collection name
-     * @param string - mongoId
+     * @param Object
+     * @param Object
      */
-    cp: function(dbName, colName, mongoId) {
+    cp: function(verified, params) {
         var deferred = q.defer();
 
-        this.getCollection(dbName, colName).
+        this.getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
-                    collection.find({'_id': new mongo.ObjectID(mongoId) }).toArray(
+		collection.find({'_id': new mongo.ObjectID(params.id) }).toArray(
                     function(err, docs) {
                         if (err) {
                           deferred.reject(err);
                         }
                         else {
-                          deferred.resolve(docs);
+			  // Should I check for multiple matches?
+                          deferred.resolve(docs[0]);
                         }
                       });
                    }).
@@ -227,14 +229,13 @@ module.exports =  {
     /**
      * Return a list of documents contained in the app's collection
      *
-     * @param string
-     * @param string
+     * @param Object
      *
      * @return promise
      */
-    ls: function(dbName, colName) {
+    ls: function(params) {
         var deferred = q.defer();
-        this.getCollection(dbName, colName).
+        this.getCollection(params.dbName, params.collectionName).
             then(function(collection) {
                     collection.find({}, ['_id', 'name']).
                         sort('name').
@@ -251,8 +252,59 @@ module.exports =  {
                     deferred.reject(err);
               });
         return deferred.promise;
-      },  
+      },
     
+    /**
+     * Return a list of registered users 
+     *
+     * @param Object
+     *
+     * @return promise
+     */
+    getUsers: function(params) {
+        var deferred = q.defer();
+	if (params.admin) {
+	  var query = db.userModel.find({}, { password: false });
+	  query.exec().
+	    then(function(users) {
+		deferred.resolve(users);		  
+	      });
+	}
+	else {
+	  deferred.reject('You don\'t have permission to view registered users');
+	}
+
+        return deferred.promise;
+      },
+
+    /**
+     * Return a list of a registered user's 
+     * documents
+     *
+     * @param Object
+     * @param Object
+     *
+     * @return promise
+     */
+    getUserDocuments: function(verified, params) {
+        var deferred = q.defer();
+	if (verified.admin) {
+	    var dbName = utils.getMongoDbName(params.email);
+	    this.ls({ dbName: dbName, collectionName: verified.collectionName }).
+		then(function(data) {
+		    deferred.resolve(data);
+		  }).
+		catch(function(err) {
+		    deferred.reject(err);
+		  });
+	}
+	else {
+	  deferred.reject('You don\'t have permission to view user documents');
+	}
+
+        return deferred.promise;
+      },
+
     /**
      * Create a new database
      *
@@ -272,7 +324,8 @@ module.exports =  {
                         var server = new mongo.Server(config.mongo.host,
                                          config.mongo.port,
                                          config.mongo.serverOptions);
-                        var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+                        var db = new mongo.Db(
+				dbName, server, config.mongo.clientOptions);
 
                         db.open(function (err, client) {
                             if (err) {
