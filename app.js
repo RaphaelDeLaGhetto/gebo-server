@@ -9,6 +9,7 @@ var express = require('express')
     , basic_routes = require('./routes/basic')
     , user_routes = require('./routes/user')
     , oauth2_routes = require('./routes/oauth2')
+    , performative_routes = require('./routes/performative')
     , util = require('util');
     
 // Expose the Express app so that it may be run
@@ -48,13 +49,16 @@ app.get('/', basic_routes.index);
 app.get('/account', user_routes.account);
 app.get('/login', user_routes.getLogin);
 app.post('/login', user_routes.postLogin);
-app.get('/admin', /*pass.ensureAuthenticated, pass.ensureAdmin(),*/ user_routes.admin);
+app.get('/admin', user_routes.admin);
 app.get('/logout', user_routes.logout);
 
 // OAuth2 routes
 app.get('/dialog/authorize', oauth2_routes.authorization); 
 app.post('/dialog/authorize/decision', oauth2_routes.decision); 
 app.post('/oauth/token', oauth2_routes.token);
+
+// Performative route
+app.post('/request', performative_routes.request);
 
 // API routes
 app.get('/api/userinfo', api_routes.userinfo);
