@@ -80,24 +80,23 @@ module.exports =  {
      * Save JSON to user's profile
      *
      * @param Object
-     * @param Object - arbitrary. Whatever's there is getting saved
+     * @param Object
      *
      * @return promise
      */
-    //save: function(dbName, colName, data) {
-    save: function(verified, data) {
+    save: function(verified, params) {
         var deferred = q.defer();
-        //this.getCollection(dbName, colName).
+
         this.getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
 
                     // Make data._id a string (because it might
                     // otherwise be interpreted as an int or hex)
-                    if (data._id) {
-                      data._id = new mongo.ObjectID(data._id + '');
+                    if (params.data._id) {
+                      params.data._id = new mongo.ObjectID(params.data._id + '');
                     }
 
-                    collection.save(data, { safe: true },
+                    collection.save(params.data, { safe: true },
 			function(err, ack) {
 			    if (err) {
 	                      deferred.reject(err);
@@ -125,7 +124,7 @@ module.exports =  {
 
         this.getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
-		collection.find({'_id': new mongo.ObjectID(params.id) }).toArray(
+		collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
                     function(err, docs) {
                         if (err) {
                           deferred.reject(err);

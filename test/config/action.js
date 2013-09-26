@@ -169,9 +169,6 @@ exports.save = {
    'Do not save to a non-existent database': function (test) {
         test.expect(1);
         
-//        action.save(utils.getMongoDbName('nosuch@email.com'),
-//			'some_collection',
-//                        { data: 'junk' }).
         action.save({ dbName: 'no_one_at_not_here_dot_com',
   		      collectionName: cname,
 		      admin: true },
@@ -190,15 +187,12 @@ exports.save = {
    'Save to existing database': function (test) {
         test.expect(3);
 
-//        action.save(utils.getMongoDbName('yanfen@hg.com'),
-//                        'some_collection',
-//                        { data: 'junk' }).
-        action.save(verifiedUser, { data: 'junk' }).
+        action.save(verifiedUser, { data: { junk: 'I like to move it move it' } }).
                 then(function(docs) {
                         test.ok(docs);
 			// If it's already saved, it doesn't return
 			// the mongo ID
-                        test.equal(docs.data, 'junk');
+                        test.equal(docs.junk, 'I like to move it move it');
                         test.ok(docs._id);
                         test.done();
                     }).
@@ -220,9 +214,7 @@ exports.save = {
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
 
-                    return action.save(verifiedUser, docs);
-//                        utils.getMongoDbName('yanfen@hg.com'),
-//                        cname, docs);
+                    return action.save(verifiedUser, { data: docs });
                 }).
             then(function(ack) {
                     test.ok(ack, 'Doc successfully saved');
