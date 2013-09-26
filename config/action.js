@@ -146,12 +146,10 @@ module.exports =  {
     /**
      * Remove a doc from a user's profile
      *
-     * @param string - user profile object
-     * @param string - collection name
-     * @param string - mongoId
+     * @param Object
+     * @param Object
      */
     rm: function(verified, params) {
-    //rm: function(dbName, colName, mongoId) {
         var deferred = q.defer();
 
         this.getCollection(verified.dbName, verified.collectionName).
@@ -188,22 +186,22 @@ module.exports =  {
     /**
      * Remove a collection from the user's profile
      *
-     * @param string
-     * @param string
+     * @param Object
+     * @param Object
      *
      * @return promise
      */
-    rmdir: function(dbName, colName) {
+    rmdir: function(verified) {
         var deferred = q.defer();
 
-        this.getCollection(dbName, colName).
+        this.getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
                     // Does this collection exist?
                     collection.count(function(err, count) {
                         if (count === 0) {
                           deferred.reject(
                             new Error('Collection: ' +
-                                    colName + ' does not exist'));
+                                    verified.collectionName + ' does not exist'));
                         }
                         else {
                           collection.drop(
@@ -211,7 +209,7 @@ module.exports =  {
                                   if (err || ack === 0) {
                                     deferred.reject(
                                             new Error('Could not delete collection: ' +
-                                                    colName));
+                                                    verified.collectionName));
                                   }
                                   else {
                                     deferred.resolve();

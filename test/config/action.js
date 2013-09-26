@@ -427,8 +427,6 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-//        action.rm(utils.getMongoDbName('does_not_exist'),
-//			cname, '0123456789AB').
         action.rm({ dbName: 'no_one_at_not_here_dot_com',
 		    collectionName: cname,
 		    admin: true },
@@ -449,8 +447,6 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-//        action.rm(utils.getMongoDbName('existing_database'),
-//			'NoSuchCollection', '0123456789AB').
         action.rm({ dbName: 'existing_database',
 		    collectionName: 'NoSuchCollection',
 		    admin: true },
@@ -472,8 +468,6 @@ exports.rm = {
    'Do not delete non-existent document': function (test) {
         test.expect(1);
 
-//        action.rm(utils.getMongoDbName('existing_database'),
-//			cname, 'NoSuchDocABC').
         action.rm({ dbName: 'existing_database',
 		    collectionName: cname,
 		    admin: true },
@@ -525,7 +519,7 @@ exports.rmdir = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_database',
+            this.db = new mongo.Db('yanfen_at_hg_dot_com',
 			    server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -563,9 +557,9 @@ exports.rmdir = {
    'Do not delete from a non-existent database': function (test) {
         test.expect(1);
 
-        // Retrieve the existing document
-        action.rmdir(utils.getMongoDbName('does_not_exist'), 
-                        cname).
+        action.rmdir({ dbName: 'no_one_at_not_here_dot_com',
+  		       collectionName: cname,
+		       admin: true }).
             then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
@@ -580,10 +574,9 @@ exports.rmdir = {
    'Do not delete a non-existent collection': function (test) {
         test.expect(1);
 
-        // Retrieve the existing document
-        action.rmdir(
-                        utils.getMongoDbName('existing_database'), 
-                        'NoSuchCollection').
+        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+  		       collectionName: 'NoSuchCollection',
+		       admin: true }).
             then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
@@ -602,8 +595,7 @@ exports.rmdir = {
             test.equal(count, 2);
         });
 
-        action.rmdir(utils.getMongoDbName('existing_database'), 
-                        cname).
+        action.rmdir(verifiedUser).
             then(function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {
