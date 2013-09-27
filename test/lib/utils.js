@@ -1,6 +1,10 @@
 
-var utils = require('../../lib/utils');
+var utils = require('../../lib/utils'),
+    config = require('../../config/config');
 
+/**
+ * getMongoDbName
+ */
 exports.getMongoDbName = {
 
     'Remove periods and @s': function(test) {
@@ -23,6 +27,9 @@ exports.getMongoDbName = {
     },
 };
 
+/**
+ * getMongoCollectionName
+ */
 exports.getMongoCollectionName = {
 
     'Remove $s': function(test) {
@@ -71,8 +78,12 @@ exports.getMongoCollectionName = {
         var collectionName = utils.getMongoCollectionName(str);
         test.equal(collectionName, '_? hello');
         test.done();
-    },};
+    },
+};
 
+/**
+ * getMongoFieldName
+ */
 exports.getMongoFieldName = {
 
     'Remove $s': function(test) {
@@ -98,6 +109,5 @@ exports.getMongoFieldName = {
         test.equal(fieldName, 'will_dot_i_dot_am');
         test.done();
     },
-
-
 };
+

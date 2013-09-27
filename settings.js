@@ -1,9 +1,9 @@
 module.exports = function (app, express, passport, logger) {
 
-    var nconf = require('nconf')
-        , cachify = require('connect-cachify')
-        , winston = require('winston')
-        , requestLogger = require('winston-request-logger');
+    var nconf = require('nconf'),
+        cachify = require('connect-cachify'),
+        winston = require('winston'),
+        requestLogger = require('winston-request-logger');
 
     nconf.argv().env().file({ file: 'local.json' });
 

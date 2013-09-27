@@ -1,7 +1,8 @@
 'use strict';
 
 var config = require('./config'),
-    db = require('./dbschema'),
+    nconf = require('nconf'),
+    db = require('./dbschema'),//(nconf.get('name')),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q');

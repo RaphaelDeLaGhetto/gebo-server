@@ -1,7 +1,8 @@
 'use strict';
 
 var passport = require('passport'),
-    db = require('../config/dbschema'),
+    nconf = require('nconf'),
+    db = require('../config/dbschema'),//('gebo-performative-test'),//(nconf.get('name')),
     utils = require('../lib/utils'),
     action = require('../config/action'),
     q = require('q');
@@ -15,13 +16,9 @@ exports.request = [
 
         _verify(req.body.access_token, req.body.email).
             then(function(verified) {
-                // Remove the access token for when saving to the DB. All
-                // data to be saved is stored in the request body
-                delete req.body.access_token;
-
 		return action[req.body.action](verified, req.body);	    
               }).
-            // Results of save
+            // Results of action
             then(function(data) {
 		res.send(data);
               }).
@@ -54,6 +51,7 @@ var _verify = function(token, email) {
     tokenQuery.exec().
         then(function(token) {
             _token = token;
+            console.log(_token);
             var userQuery = db.userModel.findOne({ _id: _token.userId });
             return userQuery.exec();
           }).
@@ -93,3 +91,4 @@ var _verify = function(token, email) {
     return deferred.promise;
   };
 
+exports.verify = _verify;

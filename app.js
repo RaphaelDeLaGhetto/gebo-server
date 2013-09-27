@@ -1,16 +1,16 @@
-var express = require('express')
-    , app = express()
-    , nconf = require('nconf')
-    , winston = require('winston')
-    , db = require('./config/dbschema')
-    , pass = require('./config/pass')
-    , passport = require('passport')
-    , api_routes = require('./routes/api')
-    , basic_routes = require('./routes/basic')
-    , user_routes = require('./routes/user')
-    , oauth2_routes = require('./routes/oauth2')
-    , performative_routes = require('./routes/performative')
-    , util = require('util');
+var express = require('express'),
+    app = express(),
+    nconf = require('nconf'),
+    winston = require('winston'),
+    db = require('./config/dbschema'),
+    pass = require('./config/pass'),
+    passport = require('passport'),
+    api_routes = require('./routes/api'),
+    basic_routes = require('./routes/basic'),
+    user_routes = require('./routes/user'),
+    oauth2_routes = require('./routes/oauth2'),
+    performative_routes = require('./routes/performative'),
+    util = require('util');
     
 // Expose the Express app so that it may be run
 // as a virtual host
@@ -24,23 +24,6 @@ require('./settings')(app, express, passport, logger);
 
 // Merge nconf overrides with the configuration file.
 nconf.argv().env().file({ file: 'local.json' });
-
-// Enable CORS
-//app.all('/', function(req, res, next) {
-//    res.header('Access-Control-Allow-Origin', '*');
-//    res.header('Access-Control-Allow-Headers', 'X-Requested-With');
-//    next();
-//});
-
-// Alright, what the heck is going on here? What are the security
-// implications?
-//app.all('*', function(req, res, next) {
-//    res.header('Access-Control-Allow-Origin', '*');
-//    res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-//    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-//    next();
-//});
-
 
 // Basic routes
 app.get('/', basic_routes.index);
@@ -62,10 +45,6 @@ app.post('/request', performative_routes.request);
 
 // API routes
 app.get('/api/userinfo', api_routes.userinfo);
-app.post('/api/save', api_routes.save);
-app.get('/api/ls', api_routes.ls);
-app.get('/api/cp', api_routes.cp);
-app.del('/api/rm', api_routes.rm);
 
 logger.info('listening on', nconf.get('port'));
 app.listen(process.env.PORT || nconf.get('port'));
