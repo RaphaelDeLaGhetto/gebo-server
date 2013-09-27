@@ -695,6 +695,7 @@ var user;
 exports.createDatabase = {
 
     setUp: function(callback) {
+        console.log('setUp called');
         this.dbSchema = require('../../config/dbschema')('gebo-action-test');
         user = new this.dbSchema.userModel({
                 username: 'Joey Joe Joe Jr. Shabadoo',
@@ -732,44 +733,44 @@ exports.createDatabase = {
             });
     	} catch(e) {
             console.log(e);
+            callback();
     	}
     },
 
     tearDown: function (callback) {
         console.log('createDatabase: closing in tearDown');
+        // Drop the existing database defined in setup
+        this.db.dropDatabase(function(err) {
+
+            // Lose the database for next time
+            var server = new mongo.Server(config.mongo.host,
+                                          config.mongo.port,
+                                          config.mongo.serverOptions);
+            var testDb = new mongo.Db(utils.getMongoDbName(user.email),
+                            server, config.mongo.clientOptions);
+
+            testDb.open(function(err, client) {
+                    if (err) {
+                      console.log('Could not open database: ' + err);
+                    } 
+
+                    testDb.dropDatabase(function(err) { 
+                        if (err) {
+                          console.log('Could not drop database: ' + err);
+                        }
+                    });
+               });
+          });
+
         this.dbSchema.close(function(err) {
             console.log('createDatabase: closed');
-
-        // Drop the existing database defined in setup
-//        this.db.dropDatabase(function(err) {
-//
-//            // Lose the database for next time
-//            var server = new mongo.Server(config.mongo.host,
-//                                          config.mongo.port,
-//                                          config.mongo.serverOptions);
-//            var testDb = new mongo.Db(utils.getMongoDbName(user.email),
-//                            server, config.mongo.clientOptions);
-//
-//            testDb.open(function(err, client) {
-//                    if (err) {
-//                      console.log('Could not open database: ' + err);
-//                    } 
-//
-//                    testDb.dropDatabase(function(err) { 
-//                        if (err) {
-//                          console.log('Could not drop database: ' + err);
-                          callback();
-//                        }
-//                    });
-//               });
-//          });
-
+            callback();
         });
         
 
     },
 
-//    'Should add a new database with a profile collection': function(test) {
+    'Should add a new database with a profile collection': function(test) {
 //        test.expect(5);
 //
 //        // Make sure the DB doesn't exists already
@@ -807,7 +808,7 @@ exports.createDatabase = {
 //                              }).
 //                            catch(function(err) {
 //                                test.ok(false, err);
-//                                test.done();
+                                test.done();
 //                              });
 // 
 //
@@ -818,7 +819,7 @@ exports.createDatabase = {
 //                    test.done();
 //                  });
 //
-//    },
+    },
 
     'Should not overwrite an existing database': function(test) {
 //        test.expect(8);
@@ -868,116 +869,10 @@ exports.createDatabase = {
 };
 
 
-/**
- * dropDatabase
- */
-exports.dropDatabase = {
-
-    setUp: function(callback) {
-    	try {
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_db', server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
-                if (err) {
-                  throw err;
-                }
-                this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
-                        {
-                            _id: new mongo.ObjectID('0123456789AB'),
-                            name: 'dan',
-                            occupation: 'Batman'
-                        },
-                        {
-                            _id: new mongo.ObjectID('123456789ABC'),
-                            name: 'yanfen',
-                            occupation: 'Being cool'
-                        }
-                    ],
-                    function() {
-                        callback();
-                    });
-            });
-    	} catch(e) {
-            console.dir(e);
-    	}
-    },
-
-    tearDown: function (callback) {
-        // Lose the database for next time
-        this.db.dropDatabase(function(err) {
-            callback();
-        });
-    },
-
-
-    'Should delete the database specified': function(test) {
-        test.expect(3);
-
-        // Make sure the DB exists
-        var dbName = utils.getMongoDbName('existing_db');
-        action.dbExists(dbName).
-                then(function(client) {
-                    test.ok(true);
-                  }).
-                catch(function(err) {
-                    test.ok(false, err);
-                    test.done();
-                  });
-
-        action.dropDatabase(dbName).
-                then(function() {
-                    test.ok(true);
-
-                    action.dbExists(dbName).
-                        then(function(client) {
-                            test.ok(false, dbName + ' should not exist');
-                            test.done();
-                          }).
-                        catch(function(err) {
-                            test.ok(true, err);
-                            test.done();
-                          });
-                  }).
-                catch(function(err) {
-                    test.ok(false, err);
-                    test.done();
-                  });
-
-    },
-
-    'Should not barf if the database does not exist': function(test) {
-        test.expect(2);
-
-        // Make sure the database doesn't exist
-        var dbName = utils.getMongoDbName('no_such_database');
-        action.dbExists(dbName).
-                then(function(client) {
-                    test.ok(false, dbName + ' should not exist. Why is it in the db?');
-                    test.done();
-                  }).
-                catch(function(err) {
-                    test.ok(true);
-                 });
-
-        action.dropDatabase(dbName).
-                then(function() {
-                    test.ok(false, dbName + ' should not exist');
-                    test.done();
-                  }).
-                catch(function(err) {
-                    test.ok(true);
-                    test.done();
-                 });
-    },
-};
-
-/**
- * getUsers 
- */
-//exports.getUsers = {
+///**
+// * dropDatabase
+// */
+//exports.dropDatabase = {
 //
 //    setUp: function(callback) {
 //    	try {
@@ -1018,104 +913,210 @@ exports.dropDatabase = {
 //        });
 //    },
 //
-//    'Should return a list of registered users': function(test) {
-//        test.expect(1);
-//	test.done();
+//
+//    'Should delete the database specified': function(test) {
+//        test.expect(3);
+//
+//        // Make sure the DB exists
+//        var dbName = utils.getMongoDbName('existing_db');
+//        action.dbExists(dbName).
+//                then(function(client) {
+//                    test.ok(true);
+//                  }).
+//                catch(function(err) {
+//                    test.ok(false, err);
+//                    test.done();
+//                  });
+//
+//        action.dropDatabase(dbName).
+//                then(function() {
+//                    test.ok(true);
+//
+//                    action.dbExists(dbName).
+//                        then(function(client) {
+//                            test.ok(false, dbName + ' should not exist');
+//                            test.done();
+//                          }).
+//                        catch(function(err) {
+//                            test.ok(true, err);
+//                            test.done();
+//                          });
+//                  }).
+//                catch(function(err) {
+//                    test.ok(false, err);
+//                    test.done();
+//                  });
+//
 //    },
 //
+//    'Should not barf if the database does not exist': function(test) {
+//        test.expect(2);
+//
+//        // Make sure the database doesn't exist
+//        var dbName = utils.getMongoDbName('no_such_database');
+//        action.dbExists(dbName).
+//                then(function(client) {
+//                    test.ok(false, dbName + ' should not exist. Why is it in the db?');
+//                    test.done();
+//                  }).
+//                catch(function(err) {
+//                    test.ok(true);
+//                 });
+//
+//        action.dropDatabase(dbName).
+//                then(function() {
+//                    test.ok(false, dbName + ' should not exist');
+//                    test.done();
+//                  }).
+//                catch(function(err) {
+//                    test.ok(true);
+//                    test.done();
+//                 });
+//    },
 //};
-
-/**
- * getUserDocuments 
- */
-exports.getUserDocuments = {
-
-    setUp: function(callback) {
-        console.log('here');
-        this.dbSchema = require('../../config/dbschema')('gebo-action-test');
-        user = new this.dbSchema.userModel({
-                username: 'Joey Joe Joe Jr. Shabadoo',
-                email: 'jjjj@shabadoo.com',
-                password: 'abc123',
-                admin: 'true'
-              });
-
-        var dbName = utils.getMongoDbName(user.email);
-
-    	try {
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
-                if (err) {
-                  throw err;
-                }
-                this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
-                        {
-                            _id: new mongo.ObjectID('0123456789AB'),
-                            name: 'doc 1',
-                        },
-                        {
-                            _id: new mongo.ObjectID('123456789ABC'),
-                            name: 'doc 2',
-                        }
-                    ],
-                    function() {
-                        callback();
-                    });
-            });
-    	} catch(e) {
-            console.dir(e);
-    	}
-    },
-
-    tearDown: function (callback) {
-        console.log('getUserDocuments: tearDown');
-        // Lose the database for next time
-        this.db.dropDatabase(function(err) {
-            if(err) {
-              console.log('ERRRRRRRRRRRRRRRROR');
-              console.log(err);
-            }
-            console.log('good');
+//
+///**
+// * getUsers 
+// */
+////exports.getUsers = {
+////
+////    setUp: function(callback) {
+////    	try {
+////            var server = new mongo.Server(config.mongo.host,
+////                                          config.mongo.port,
+////                                          config.mongo.serverOptions);
+////            this.db = new mongo.Db('existing_db', server, config.mongo.clientOptions);
+////            this.db.open(function (err, client) {
+////                if (err) {
+////                  throw err;
+////                }
+////                this.collection = new mongo.Collection(client, cname);
+////                this.collection.insert([
+////                        {
+////                            _id: new mongo.ObjectID('0123456789AB'),
+////                            name: 'dan',
+////                            occupation: 'Batman'
+////                        },
+////                        {
+////                            _id: new mongo.ObjectID('123456789ABC'),
+////                            name: 'yanfen',
+////                            occupation: 'Being cool'
+////                        }
+////                    ],
+////                    function() {
+////                        callback();
+////                    });
+////            });
+////    	} catch(e) {
+////            console.dir(e);
+////    	}
+////    },
+////
+////    tearDown: function (callback) {
+////        // Lose the database for next time
+////        this.db.dropDatabase(function(err) {
+////            callback();
+////        });
+////    },
+////
+////    'Should return a list of registered users': function(test) {
+////        test.expect(1);
+////	test.done();
+////    },
+////
+////};
+//
+///**
+// * getUserDocuments 
+// */
+//exports.getUserDocuments = {
+//
+//    setUp: function(callback) {
+//        console.log('here');
+//        this.dbSchema = require('../../config/dbschema')('gebo-action-test');
+//        user = new this.dbSchema.userModel({
+//                username: 'Joey Joe Joe Jr. Shabadoo',
+//                email: 'jjjj@shabadoo.com',
+//                password: 'abc123',
+//                admin: 'true'
+//              });
+//
+//        var dbName = utils.getMongoDbName(user.email);
+//
+//    	try {
+//            var server = new mongo.Server(config.mongo.host,
+//                                          config.mongo.port,
+//                                          config.mongo.serverOptions);
+//            this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+//            this.db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//                this.collection = new mongo.Collection(client, cname);
+//                this.collection.insert([
+//                        {
+//                            _id: new mongo.ObjectID('0123456789AB'),
+//                            name: 'doc 1',
+//                        },
+//                        {
+//                            _id: new mongo.ObjectID('123456789ABC'),
+//                            name: 'doc 2',
+//                        }
+//                    ],
+//                    function() {
+//                        callback();
+//                    });
+//            });
+//    	} catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//
+//    tearDown: function (callback) {
+//        console.log('getUserDocuments: tearDown');
+//        // Lose the database for next time
+//        this.db.dropDatabase(function(err) {
+//            if(err) {
+//              console.log('ERRRRRRRRRRRRRRRROR');
+//              console.log(err);
+//            }
+//            console.log('good');
+////            callback();
+//        });
+//
+//        console.log('getUserDocuments: closing in tearDown');
+//        this.dbSchema.close(function(err) {
+//            console.log('getUserDocuments: closed');
 //            callback();
-        });
-
-        console.log('getUserDocuments: closing in tearDown');
-        this.dbSchema.close(function(err) {
-            console.log('getUserDocuments: closed');
-            callback();
-        });
- 
-    },
-
-    'Should return a list of a user\'s documents': function(test) {
-        test.expect(1);
-	action.getUserDocuments(
-			{ dbName: 'don\'t matter', collectionName: cname, admin: true },
-			{ email: user.email }).
-		then(function(data) {
-		    test.ok(data);
-		    test.done();
-		  }).
-		catch(function(err) {
-		    test.ok(false, err);
-		    test.done();
-		  });
-    },
-
-    'Should throw an error when accessed by non-admin': function(test) {
-	test.expect(1);
-	action.getUserDocuments({ email: user.email, admin: false }).
-		then(function(data) {
-		    test.ok(false, 'This should not be accessible');
-		    test.done();
-		  }).
-		catch(function(err) {
-		    test.ok(err);
-		    test.done();
-		  });
-    },
-};
+//        });
+// 
+//    },
+//
+//    'Should return a list of a user\'s documents': function(test) {
+//        test.expect(1);
+//	action.getUserDocuments(
+//			{ dbName: 'don\'t matter', collectionName: cname, admin: true },
+//			{ email: user.email }).
+//		then(function(data) {
+//		    test.ok(data);
+//		    test.done();
+//		  }).
+//		catch(function(err) {
+//		    test.ok(false, err);
+//		    test.done();
+//		  });
+//    },
+//
+//    'Should throw an error when accessed by non-admin': function(test) {
+//	test.expect(1);
+//	action.getUserDocuments({ email: user.email, admin: false }).
+//		then(function(data) {
+//		    test.ok(false, 'This should not be accessible');
+//		    test.done();
+//		  }).
+//		catch(function(err) {
+//		    test.ok(err);
+//		    test.done();
+//		  });
+//    },
+//};
