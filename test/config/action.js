@@ -1,5 +1,4 @@
-var action = require('../../config/action'),
-    config = require('../../config/config'),
+var config = require('../../config/config'),
     utils = require('../../lib/utils'),
     DatabaseCleaner = require('database-cleaner'),
     databaseCleaner = new DatabaseCleaner('mongodb'),
@@ -23,7 +22,8 @@ var verifiedUser = {
 
 // Start up the test database
 nconf.argv().env().file({ file: 'local.json' });
-var dbSchema = require('../../config/dbschema')(nconf.get('testDb'));
+var dbSchema = require('../../config/dbschema')(nconf.get('testDb')),
+    action = require('../../config/action')(nconf.get('testDb'));
 
 /**
  * testConnection
@@ -701,7 +701,6 @@ exports.createDatabase = {
 
     setUp: function(callback) {
     	try{
-            dbSchema.open();
             user = new dbSchema.userModel({
                     username: 'Joey Joe Joe Jr. Shabadoo',
                     email: 'jjjj@shabadoo.com',
@@ -762,7 +761,7 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
-                        dbSchema.close();
+//                        dbSchema.close();
                         callback();
                     });
                });
@@ -1028,7 +1027,6 @@ exports.dropDatabase = {
 exports.getUserDocuments = {
 
     setUp: function(callback) {
-        dbSchema.open();
         user = new dbSchema.userModel({
                 username: 'Joey Joe Joe Jr. Shabadoo',
                 email: 'jjjj@shabadoo.com',
@@ -1073,7 +1071,6 @@ exports.getUserDocuments = {
             if(err) {
               console.log(err);
             }
-            dbSchema.close();
             callback();
         });
     },

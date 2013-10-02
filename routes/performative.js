@@ -1,15 +1,20 @@
 'use strict';
 
+var passport = require('passport'),
+    nconf = require('nconf'),
+    utils = require('../lib/utils'),
+    q = require('q');
+
 module.exports = function(dbName) {
 
-    var passport = require('passport'),
-        nconf = require('nconf'),
-        db = require('../config/dbschema')(dbName),
-        utils = require('../lib/utils'),
-        action = require('../config/action'),
-        q = require('q');
-    
-    nconf.argv().env().file({ file: 'local.json' });
+        console.log(dbName);
+    if (!dbName) {
+      nconf.argv().env().file({ file: 'local.json' });
+      dbName = nconf.get('name');
+    }
+
+    var db = require('../config/dbschema')(dbName),
+        action = require('../config/action')(dbName);
 
     /**
      * Receive a request for consideration
@@ -50,7 +55,6 @@ module.exports = function(dbName) {
         var _token, _user, _client;
     
         // Retrieve the token
-        db.open();
         var tokenQuery = db.tokenModel.findOne({ token: token });
     
         tokenQuery.exec().
@@ -68,7 +72,7 @@ module.exports = function(dbName) {
             // Client
             then(function(client) {
                 _client = client;
-
+    
                 var verified = {
                     dbName: utils.getMongoDbName(_user.email),
                     collectionName: utils.getMongoCollectionName(_client.name),
@@ -86,8 +90,6 @@ module.exports = function(dbName) {
            	else {
                   deferred.resolve(verified);
            	}
-
-                db.close();
           });
             // Why doesn't the catch function work here?
     //        catch(function(err) {

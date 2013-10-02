@@ -2,12 +2,19 @@
 
 var config = require('./config'),
     nconf = require('nconf'),
-    db = require('./dbschema'),//(nconf.get('name')),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q');
 
-module.exports = {
+module.exports = function(dbName) {
+
+    if (!dbName) {
+      console.log('No dbName???');
+      nconf.argv().env().file({ file: 'local.json' });
+      dbName = nconf.get('name');
+    }
+
+    var db = require('./dbschema')(dbName);
 
     /**
      * Determine if the database exists. To do this,
@@ -19,7 +26,7 @@ module.exports = {
      *
      * @return bool
      */
-    dbExists: function(dbName) {
+    var _dbExists = function(dbName) {
         var deferred = q.defer();
         var server = new mongo.Server(config.mongo.host,
                                       config.mongo.port,
@@ -54,7 +61,8 @@ module.exports = {
           });
 
         return deferred.promise;
-      },
+      };
+    exports.dbExists = _dbExists;
 
     /**
      * Get the app's collection
@@ -63,9 +71,9 @@ module.exports = {
      *
      * @return promise
      */
-    getCollection: function(dbName, colName) {
+    var _getCollection = function(dbName, colName) {
         var deferred = q.defer();
-        this.dbExists(dbName).
+        _dbExists(dbName).
             then(function(client) {
                 var collectionName = utils.getMongoCollectionName(colName);
                 var collection = new mongo.Collection(client, collectionName);
@@ -75,7 +83,8 @@ module.exports = {
                 deferred.reject(err);       
               });
         return deferred.promise;
-      },
+      };
+    exports.getCollection = _getCollection;
     
     /**
      * Save JSON to user's profile
@@ -85,10 +94,10 @@ module.exports = {
      *
      * @return promise
      */
-    save: function(verified, params) {
+    var _save = function(verified, params) {
         var deferred = q.defer();
 
-        this.getCollection(verified.dbName, verified.collectionName).
+        _getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
 
                     // Make data._id a string (because it might
@@ -112,7 +121,8 @@ module.exports = {
               }).
             done();
         return deferred.promise;
-      },
+      };
+    exports.save = _save;
         
     /**
      * Copy JSON from a user's profile
@@ -120,10 +130,10 @@ module.exports = {
      * @param Object
      * @param Object
      */
-    cp: function(verified, params) {
+    var _cp = function(verified, params) {
         var deferred = q.defer();
 
-        this.getCollection(verified.dbName, verified.collectionName).
+        _getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
 		collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
                     function(err, docs) {
@@ -142,7 +152,8 @@ module.exports = {
 //                 done();
 // 
         return deferred.promise;
-      },
+      };
+    exports.cp = _cp;
 
     /**
      * Remove a doc from a user's profile
@@ -150,10 +161,10 @@ module.exports = {
      * @param Object
      * @param Object
      */
-    rm: function(verified, params) {
+    var _rm = function(verified, params) {
         var deferred = q.defer();
 
-        this.getCollection(verified.dbName, verified.collectionName).
+        _getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
                     // Does this collection exist?
                     collection.count(function(err, count) {
@@ -182,7 +193,8 @@ module.exports = {
             done();
  
         return deferred.promise;
-      },
+      };
+    exports.rm = _rm;
 
     /**
      * Remove a collection from the user's profile
@@ -192,10 +204,10 @@ module.exports = {
      *
      * @return promise
      */
-    rmdir: function(verified) {
+    var _rmdir = function(verified) {
         var deferred = q.defer();
 
-        this.getCollection(verified.dbName, verified.collectionName).
+        _getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
                     // Does this collection exist?
                     collection.count(function(err, count) {
@@ -224,8 +236,9 @@ module.exports = {
               }).
             done();
         return deferred.promise;
-      },
- 
+      };
+    exports.rmdir = _rmdir;
+
     /**
      * Return a list of documents contained in the app's collection
      *
@@ -233,9 +246,9 @@ module.exports = {
      *
      * @return promise
      */
-    ls: function(params) {
+    var _ls = function(params) {
         var deferred = q.defer();
-        this.getCollection(params.dbName, params.collectionName).
+        _getCollection(params.dbName, params.collectionName).
             then(function(collection) {
                     collection.find({}, ['_id', 'name']).
                         sort('name').
@@ -252,7 +265,8 @@ module.exports = {
                     deferred.reject(err);
               });
         return deferred.promise;
-      },
+      };
+    exports.ls = _ls;
     
     /**
      * Return a list of registered users 
@@ -261,7 +275,7 @@ module.exports = {
      *
      * @return promise
      */
-    getUsers: function(params) {
+    var _getUsers = function(params) {
         var deferred = q.defer();
 	if (params.admin) {
 	  var query = db.userModel.find({}, { password: false });
@@ -275,7 +289,8 @@ module.exports = {
 	}
 
         return deferred.promise;
-      },
+      };
+    exports.getUsers = _getUsers;
 
     /**
      * Return a list of a registered user's 
@@ -286,11 +301,11 @@ module.exports = {
      *
      * @return promise
      */
-    getUserDocuments: function(verified, params) {
+    var _getUserDocuments = function(verified, params) {
         var deferred = q.defer();
 	if (verified.admin) {
 	    var dbName = utils.getMongoDbName(params.email);
-	    this.ls({ dbName: dbName, collectionName: verified.collectionName }).
+	    _ls({ dbName: dbName, collectionName: verified.collectionName }).
 		then(function(data) {
 		    deferred.resolve(data);
 		  }).
@@ -303,7 +318,8 @@ module.exports = {
 	}
 
         return deferred.promise;
-      },
+      };
+    exports.getUserDocuments = _getUserDocuments;
 
     /**
      * Create a new database
@@ -313,10 +329,10 @@ module.exports = {
      *
      * @return promise
      */
-    createDatabase: function(dbName, profile) {
+    var _createDatabase = function(dbName, profile) {
         var deferred = q.defer();
 
-        this.dbExists(dbName).
+        _dbExists(dbName).
                 then(function() {
                     deferred.reject();
                   }).
@@ -348,7 +364,8 @@ module.exports = {
                   });
 
         return deferred.promise;
-      },
+      };
+    exports.createDatabase = _createDatabase;
 
     /**
      * Drop a database
@@ -357,9 +374,9 @@ module.exports = {
      *
      * @return promise
      */
-    dropDatabase: function(dbName) {
+    var _dropDatabase = function(dbName) {
         var deferred = q.defer();
-        this.dbExists(dbName).
+        _dbExists(dbName).
                 then(function() {
                     var server = new mongo.Server(config.mongo.host,
                                      config.mongo.port,
@@ -387,6 +404,9 @@ module.exports = {
                    deferred.reject(err);
                 });
         return deferred.promise;
-      },
+      };
+    exports.dropDatabase = _dropDatabase;
+
+    return exports;
 
   };

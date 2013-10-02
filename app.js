@@ -9,7 +9,7 @@ var express = require('express'),
     basic_routes = require('./routes/basic'),
     user_routes = require('./routes/user'),
     oauth2_routes = require('./routes/oauth2'),
-    performative_routes = require('./routes/performative'),
+//    performative_routes = require('./routes/performative'),
     util = require('util');
     
 // Expose the Express app so that it may be run
@@ -41,6 +41,7 @@ app.post('/dialog/authorize/decision', oauth2_routes.decision);
 app.post('/oauth/token', oauth2_routes.token);
 
 // Performative route
+performative_routes = require('./routes/performative')(nconf.get('name')),
 app.post('/request', performative_routes.request);
 
 // API routes

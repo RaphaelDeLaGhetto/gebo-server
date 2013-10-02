@@ -4,6 +4,7 @@ module.exports = function (dbName) {
 
     if (!dbName) {
       var nconf = require('nconf');
+      nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('name');
     }
 
@@ -33,22 +34,21 @@ module.exports = function (dbName) {
 
     var mongoOptions = { db: { safe: true }};
 
+    console.log('dbschema: ' + uristring);
+
     /**
      * Open a connection to mongo
      */
-    exports.open = function() {
-//    var _open = function() {
+    if (!mongoose.connection.readyState) {
         mongoose.connect(uristring, mongoOptions, function (err) {//, res) {
             if (err) {
               console.log ('ERROR connecting to: ' + uristring + '. ' + err);
             }
-//            else {
-//              console.log ('Successfully connected to: ' + uristring);
-//            }
+            else {
+              console.log ('Successfully connected to: ' + uristring);
+            }
           });
       };
-    // Call on load
-    //exports.open();
 
     //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,
@@ -157,19 +157,10 @@ module.exports = function (dbName) {
     /**
      * Close the connection
      */
-    exports.close = function(next) {
-//    var _close = function(next) {
-        mongoose.connection.close(next);
-      };
+//    exports.close = function(next) {
+////    var _close = function(next) {
+//        mongoose.connection.close(next);
+//      };
 
     return exports;
-    /**
-     * API
-     */
-//    return {
-//        close: _close,
-//        open: _open,
-//        tokenModel: function() { return 'hello, world'; },
-//        userModel: _userModel,
-//      };
 };
