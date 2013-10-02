@@ -22,5 +22,6 @@
     },
     "apps":{
         "demoApp":"http://localhost:4000"
-    }
+    },
+    "testDb": "gebo-server-test" 
 }

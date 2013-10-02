@@ -1,94 +1,103 @@
 'use strict';
 
-var passport = require('passport'),
-    nconf = require('nconf'),
-    db = require('../config/dbschema'),//('gebo-performative-test'),//(nconf.get('name')),
-    utils = require('../lib/utils'),
-    action = require('../config/action'),
-    q = require('q');
+module.exports = function(dbName) {
 
-/**
- * Receive a request for consideration
- */
-exports.request = [
-    passport.authenticate('bearer', { session: false }),
-    function(req, res) {
+    var passport = require('passport'),
+        nconf = require('nconf'),
+        db = require('../config/dbschema')(dbName),
+        utils = require('../lib/utils'),
+        action = require('../config/action'),
+        q = require('q');
+    
+    nconf.argv().env().file({ file: 'local.json' });
 
-        _verify(req.body.access_token, req.body.email).
-            then(function(verified) {
-		return action[req.body.action](verified, req.body);	    
+    /**
+     * Receive a request for consideration
+     */
+    exports.request = [
+        passport.authenticate('bearer', { session: false }),
+        function(req, res) {
+    
+            _verify(req.body.access_token, req.body.email).
+                then(function(verified) {
+    		return action[req.body.action](verified, req.body);	    
+                  }).
+                // Results of action
+                then(function(data) {
+    		res.send(data);
+                  }).
+                // Something blew up
+                catch(function(err) {
+                    console.log('err');
+                    console.log(err);
+                    res.send(404, err);
+                  });
+          }
+      ];
+    
+    /**
+     * Match the token against the user and the registered 
+     * client. If they exist, return a promise
+     *
+     * @param string
+     * @param string
+     *
+     * @return promise
+     */
+    var _verify = function(token, email) {
+        var deferred = q.defer();
+    
+        var _token, _user, _client;
+    
+        // Retrieve the token
+        db.open();
+        var tokenQuery = db.tokenModel.findOne({ token: token });
+    
+        tokenQuery.exec().
+            then(function(token) {
+                _token = token;
+                var userQuery = db.userModel.findOne({ _id: _token.userId });
+                return userQuery.exec();
               }).
-            // Results of action
-            then(function(data) {
-		res.send(data);
+            // User
+            then(function(user) {
+                _user = user;
+                var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
+                return clientQuery.exec();
               }).
-            // Something blew up
-            catch(function(err) {
-                console.log('err');
-                console.log(err);
-                res.send(404, err);
-              });
-      }
-  ];
+            // Client
+            then(function(client) {
+                _client = client;
 
-/**
- * Match the token against the user and the registered 
- * client. If they exist, return a promise
- *
- * @param string
- * @param string
- *
- * @return promise
- */
-var _verify = function(token, email) {
-    var deferred = q.defer();
+                var verified = {
+                    dbName: utils.getMongoDbName(_user.email),
+                    collectionName: utils.getMongoCollectionName(_client.name),
+    	            admin: _user.admin,
+                };
+    
+       	        // Admins may operate on DBs not their own
+           	if (email && verified.admin) {
+           	  verified.dbName = utils.getMongoDbName(email); 
+                  deferred.resolve(verified);
+           	}
+           	else if (email && email !== _user.email && !verified.admin) {
+           	  deferred.reject('You are not permitted to access that resource');
+           	}
+           	else {
+                  deferred.resolve(verified);
+           	}
 
-    var _token, _user, _client;
-
-    // Retrieve the token
-    var tokenQuery = db.tokenModel.findOne({ token: token});
-
-    tokenQuery.exec().
-        then(function(token) {
-            _token = token;
-            console.log(_token);
-            var userQuery = db.userModel.findOne({ _id: _token.userId });
-            return userQuery.exec();
-          }).
-        // User
-        then(function(user) {
-            _user = user;
-            var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
-            return clientQuery.exec();
-          }).
-        // Client
-        then(function(client) {
-            _client = client;
-            var verified = {
-                dbName: utils.getMongoDbName(_user.email),
-                collectionName: utils.getMongoCollectionName(_client.name),
-		admin: _user.admin,
-            };
-
-	    // Admins may operate on DBs not their own
-	    if (email && verified.admin) {
-	      verified.dbName = utils.getMongoDbName(email); 
-              deferred.resolve(verified);
-	    }
-	    else if (email && !verified.admin) {
-	      deferred.reject('You are not permitted to access that resource');
-	    }
-	    else {
-              deferred.resolve(verified);
-	    }
+                db.close();
           });
-        // Why doesn't the catch function work here?
-//        catch(function(err) {
-//            console.log(err);
-//            deferred.reject(err)
-//          });
+            // Why doesn't the catch function work here?
+    //        catch(function(err) {
+    //            console.log(err);
+    //            deferred.reject(err)
+    //          });
+    
+        return deferred.promise;
+      };
+    exports.verify = _verify;
 
-    return deferred.promise;
+    return exports;
   };
-
-exports.verify = _verify;

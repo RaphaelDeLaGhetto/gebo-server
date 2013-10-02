@@ -7,7 +7,7 @@ var config = require('./config'),
     utils = require('../lib/utils'),
     q = require('q');
 
-module.exports =  {
+module.exports = {
 
     /**
      * Determine if the database exists. To do this,
@@ -138,9 +138,9 @@ module.exports =  {
                    }).
                  catch(function(err) {
                         deferred.reject(err);
-                   }).
-                 done();
- 
+                  });
+//                 done();
+// 
         return deferred.promise;
       },
 

@@ -3,7 +3,8 @@
 module.exports = function (dbName) {
 
     if (!dbName) {
-      dbName = 'test';
+      var nconf = require('nconf');
+      dbName = nconf.get('name');
     }
 
     /** 
@@ -18,8 +19,9 @@ module.exports = function (dbName) {
         bcrypt = require('bcrypt'),
         SALT_WORK_FACTOR = 10;
 
-   // exports.mongoose = mongoose;
-
+    // This is handy for when I need to drop a database
+    // during testing
+    exports.mongoose = mongoose;
 
     /**
      *  Database connect
@@ -31,14 +33,22 @@ module.exports = function (dbName) {
 
     var mongoOptions = { db: { safe: true }};
 
-    mongoose.connect(uristring, mongoOptions, function (err) {//, res) {
-        if (err) {
-          console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-        }
-        else {
-          console.log ('Successfully connected to: ' + uristring);
-        }
-      });
+    /**
+     * Open a connection to mongo
+     */
+    exports.open = function() {
+//    var _open = function() {
+        mongoose.connect(uristring, mongoOptions, function (err) {//, res) {
+            if (err) {
+              console.log ('ERROR connecting to: ' + uristring + '. ' + err);
+            }
+//            else {
+//              console.log ('Successfully connected to: ' + uristring);
+//            }
+          });
+      };
+    // Call on load
+    //exports.open();
 
     //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,
@@ -89,8 +99,11 @@ module.exports = function (dbName) {
       };
 
     // Export user model
-    var userModel = mongoose.model('User', userSchema);
-    exports.userModel = userModel;
+    try {
+        var userModel = mongoose.model('User', userSchema);
+        exports.userModel = userModel;
+    }
+    catch (error) {}
 
     /**
      * Client schema
@@ -102,8 +115,11 @@ module.exports = function (dbName) {
       });
     
     // Export client model
-    var clientModel = mongoose.model('Client', clientSchema);
-    exports.clientModel = clientModel;
+    try {
+        var clientModel = mongoose.model('Client', clientSchema);
+        exports.clientModel = clientModel;
+    }
+    catch(err) {}
 
     /**
      * Token schema
@@ -115,9 +131,12 @@ module.exports = function (dbName) {
       });
     
     // Export token model
-    var tokenModel = mongoose.model('Token', tokenSchema);
-    exports.tokenModel = tokenModel;
-    
+    try {
+        var tokenModel = mongoose.model('Token', tokenSchema);
+        exports.tokenModel = tokenModel;
+    }
+    catch(err) {}
+
     /**
      * Authorization schema
      */
@@ -129,16 +148,28 @@ module.exports = function (dbName) {
       });
     
     // Export token model
-    var authorizationModel = mongoose.model('Authorization', authorizationSchema);
-    exports.authorizationModel = authorizationModel;
+    try {
+        var authorizationModel = mongoose.model('Authorization', authorizationSchema);
+        exports.authorizationModel = authorizationModel;
+    }
+    catch (error) {}
 
     /**
      * Close the connection
      */
     exports.close = function(next) {
-        console.log('closing');
+//    var _close = function(next) {
         mongoose.connection.close(next);
       };
 
     return exports;
+    /**
+     * API
+     */
+//    return {
+//        close: _close,
+//        open: _open,
+//        tokenModel: function() { return 'hello, world'; },
+//        userModel: _userModel,
+//      };
 };

@@ -4,6 +4,7 @@ var action = require('../../config/action'),
     DatabaseCleaner = require('database-cleaner'),
     databaseCleaner = new DatabaseCleaner('mongodb'),
     mongo = require('mongodb'),
+    nconf = require('nconf'),
     q = require('q');
 
 var cname = 'unitTest';
@@ -20,7 +21,9 @@ var verifiedUser = {
 	admin: false,
     };
 
-var dbSchema = require('../../config/dbschema')('gebo-action-test');
+// Start up the test database
+nconf.argv().env().file({ file: 'local.json' });
+var dbSchema = require('../../config/dbschema')(nconf.get('testDb'));
 
 /**
  * testConnection
@@ -698,6 +701,7 @@ exports.createDatabase = {
 
     setUp: function(callback) {
     	try{
+            dbSchema.open();
             user = new dbSchema.userModel({
                     username: 'Joey Joe Joe Jr. Shabadoo',
                     email: 'jjjj@shabadoo.com',
@@ -708,7 +712,7 @@ exports.createDatabase = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('gebo-action-test',
+            this.db = new mongo.Db(nconf.get('testDb'),
 			    server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -758,6 +762,7 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
+                        dbSchema.close();
                         callback();
                     });
                });
@@ -817,7 +822,7 @@ exports.createDatabase = {
         test.expect(8);
 
         // Make sure the DB exists
-        var dbName = utils.getMongoDbName('gebo-action-test');
+        var dbName = utils.getMongoDbName(nconf.get('testDb'));
         action.dbExists(dbName).
                 then(function(client) {
                     test.ok(true);
@@ -938,7 +943,6 @@ exports.dropDatabase = {
                     test.ok(false, err);
                     test.done();
                   });
-
     },
 
     'Should not barf if the database does not exist': function(test) {
@@ -1024,6 +1028,7 @@ exports.dropDatabase = {
 exports.getUserDocuments = {
 
     setUp: function(callback) {
+        dbSchema.open();
         user = new dbSchema.userModel({
                 username: 'Joey Joe Joe Jr. Shabadoo',
                 email: 'jjjj@shabadoo.com',
@@ -1068,6 +1073,7 @@ exports.getUserDocuments = {
             if(err) {
               console.log(err);
             }
+            dbSchema.close();
             callback();
         });
     },
