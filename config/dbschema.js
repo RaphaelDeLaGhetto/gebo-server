@@ -25,7 +25,7 @@ module.exports = function (dbName) {
     exports.mongoose = mongoose;
 
     /**
-     *  Database connect
+     *  Database config
      */
     var uristring =
         process.env.MONGOLAB_URI ||
@@ -34,13 +34,11 @@ module.exports = function (dbName) {
 
     var mongoOptions = { db: { safe: true }};
 
-    console.log('dbschema: ' + uristring);
-
     /**
-     * Open a connection to mongo
+     * Connect to mongo
      */
-    if (!mongoose.connection.readyState) {
-        mongoose.connect(uristring, mongoOptions, function (err) {//, res) {
+    var _connect = function() { 
+        mongoose.connect(uristring, mongoOptions, function (err) {
             if (err) {
               console.log ('ERROR connecting to: ' + uristring + '. ' + err);
             }
@@ -49,6 +47,20 @@ module.exports = function (dbName) {
             }
           });
       };
+
+    /**
+     * Open a connection to mongo
+     */
+    if (!mongoose.connection.readyState) {
+      _connect();
+    }
+    else {
+      if (mongoose.connection.db.name !== dbName) {
+        mongoose.connection.close(function() {
+            _connect();
+          });
+      }
+    }
 
     //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,

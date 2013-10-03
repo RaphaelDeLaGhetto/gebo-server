@@ -104,7 +104,6 @@ exports.verify = {
         });
 
         dbSchema.mongoose.connection.db.dropDatabase(function(err) {
-            console.log('dropped');
             if (err) {
               console.log(err)
             }
