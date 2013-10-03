@@ -39,9 +39,7 @@ server.serializeClient(function (client, done) {
   });
 
 server.deserializeClient(function (id, done) {
-    db.open();
     db.clientModel.findOne({ '_id': mongoose.Types.ObjectId(id) }, function (err, client) {
-        db.close();
         if (err) {
           return done(err);
         }
@@ -66,7 +64,6 @@ server.deserializeClient(function (id, done) {
 server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, done) {
     var code = utils.uid(16);
   
-    db.open();
     var authorization = new db.authorizationModel({
         userId: user.id,
         clientId: client.id,
@@ -75,7 +72,6 @@ server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, d
       });
 
     authorization.save(function (err, code) {
-        db.close();
         if (err) {
           return done(err);
         }
@@ -91,7 +87,6 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 
     var tokenStr = utils.uid(256);
 
-    db.open();
     var token = new db.tokenModel({
         userId: user._id,
         clientId: client._id,
@@ -99,7 +94,6 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
       });
 
     token.save(function (err, token) {
-        db.close();
         if (err) {
           return done(err);
         }
@@ -114,9 +108,7 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 // code.
 
 server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
-    db.open();
     db.authorizationModel.findOne({ code: code }, function (err, authCode) {
-        db.close();
         if (err) {
           return done(err);
         }
@@ -129,7 +121,6 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
     
         var tokenStr = utils.uid(256);
 
-        db.open();
         var token = new db.tokenModel({
             userId: authCode.userId,
             clientId: client.id,
@@ -137,7 +128,6 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
           });
 
         token.save(function (err, token) {
-            db.close();
             if (err) {
               return done(err);
             }
@@ -165,9 +155,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
 exports.authorization = [
     login.ensureLoggedIn(),
     server.authorization(function (clientId, redirectUri, done) {
-        db.open();
         db.clientModel.findOne({ clientId: clientId }, function (err, client) {
-            db.close();
             if (err) {
               return done(err);
             }

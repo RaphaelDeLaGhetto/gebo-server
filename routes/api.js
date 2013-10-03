@@ -16,9 +16,7 @@ exports.userinfo = [
         // `BearerStrategy`.  It is typically used to indicate scope of the token,
         // and used in access control checks.  For illustrative purposes, this
         // example simply returns the scope in the response.
-        db.open();
         db.userModel.findById(req.user.id, function (err, user) {
-            db.close();
             res.json({ name: user.username, email: user.email, scope: req.authInfo.scope });
           });
       }

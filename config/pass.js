@@ -29,11 +29,9 @@ var db = require('./dbschema')(nconf.get('name'));
  */
 passport.use(new LocalStrategy(
     function(username, password, done) {
-        db.open();
         console.log(username);
         db.userModel.findOne({ username: username }, function(err, user) {
             console.log(user);
-            db.close();
             if (err) {
               return done(err);
             }
@@ -59,9 +57,7 @@ passport.serializeUser(function(user, done) {
   });
 
 passport.deserializeUser(function(id, done) {
-    db.open();
     db.userModel.findById(id, function (err, user) {
-        db.close();
         done(err, user);
       });
   });
@@ -100,9 +96,7 @@ exports.ensureAdmin = function(req, res, next) {
  */
 passport.use(new BasicStrategy(
     function(clientName, password, done) {
-        db.open();
         db.clientModel.findOne({ name: clientName }, function(err, client) {
-            db.close();
             if (err) {
               return done(err);
             }
@@ -120,9 +114,7 @@ passport.use(new BasicStrategy(
 
 passport.use(new ClientPasswordStrategy(
     function(clientId, secret, done) {
-        db.open();
         db.clientModel.findOne({ clientId: clientId, secret: secret }, function(err, client) {
-            db.close();
             if (err) {
               return done(err);
             }
@@ -147,9 +139,7 @@ passport.use(new ClientPasswordStrategy(
  */
 passport.use(new BearerStrategy(
     function(accessToken, done) {
-        db.open();
         db.tokenModel.findOne({ token: accessToken }, function(err, token) {
-            db.close();
             if (err) {
               return done(err);
             }
@@ -157,9 +147,7 @@ passport.use(new BearerStrategy(
               return done(null, false);
             }
             
-            db.open();
             db.userModel.findOne({ _id: token.userId }, function(err, user) {
-                db.close();
                 if (err) {
                   return done(err);
                 }
