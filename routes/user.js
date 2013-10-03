@@ -19,7 +19,7 @@ exports.admin = [
     pass.ensureAdmin,
     function (req, res) {
         res.render('admin');
-    }
+      }
   ];
 
 // POST /login

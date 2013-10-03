@@ -9,7 +9,6 @@ var config = require('./config'),
 module.exports = function(dbName) {
 
     if (!dbName) {
-      console.log('No dbName???');
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('name');
     }
@@ -27,41 +26,43 @@ module.exports = function(dbName) {
      * @return bool
      */
     var _dbExists = function(dbName) {
-        var deferred = q.defer();
-        var server = new mongo.Server(config.mongo.host,
-                                      config.mongo.port,
-                                      config.mongo.serverOptions);
-        var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+            var deferred = q.defer();
+            var server = new mongo.Server(
+                            config.mongo.host,
+                            config.mongo.port,
+                            config.mongo.serverOptions);
+            var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
 
-        db.open(function (err, client) {
-            if (err) {
-	      console.log('ERROR! What is happening here?');
-	      console.log(err);
-              throw(err);
-            }
-            client.collectionNames(function(err, names) {
-                if (err) {
-                  console.log(err);
-                  throw(err);
-                }
-
-                if (names.length === 0) {
-                  deferred.reject(new Error('Database: ' + dbName + ' does not exist'));
-                  db.dropDatabase(function(err) {
+            db.open(function (err, client) {
                     if (err) {
-                      deferred.reject(new Error('Database: ' +
-                                      dbName + ' was not dropped'));
+                      console.log('ERROR! What is happening here?');
+                      console.log(err);
+                      throw(err);
                     }
+                    client.collectionNames(function(err, names) {
+                        if (err) {
+                          console.log(err);
+                          throw(err);
+                        }
+    
+                        if (names.length === 0) {
+                          deferred.reject(
+                                  new Error('Database: ' + dbName + ' does not exist'));
+                          db.dropDatabase(function(err) {
+                            if (err) {
+                              deferred.reject(new Error('Database: ' +
+                                              dbName + ' was not dropped'));
+                            }
+                          });
+                        }
+                        else {
+                          deferred.resolve(client);
+                        }
+                      });
                   });
-                }
-                else {
-                  deferred.resolve(client);
-                }
-              });
-          });
 
-        return deferred.promise;
-      };
+            return deferred.promise;
+          };
     exports.dbExists = _dbExists;
 
     /**
@@ -80,7 +81,7 @@ module.exports = function(dbName) {
                 deferred.resolve(collection);
               }).
             catch(function(err) {
-                deferred.reject(err);       
+                deferred.reject(err);
               });
         return deferred.promise;
       };
@@ -107,19 +108,19 @@ module.exports = function(dbName) {
                     }
 
                     collection.save(params.data, { safe: true },
-			function(err, ack) {
-			    if (err) {
-	                      deferred.reject(err);
-	                    }
-	                    else {
-			      deferred.resolve(ack);
-	                    }
-			  });
-              }).
-            catch(function(err) {
+                            function(err, ack) {
+                                    if (err) {
+                                      deferred.reject(err);
+                                    }
+                                    else {
+                                      deferred.resolve(ack);
+                                    }
+                                  });
+                  }).
+                catch(function(err) {
                     deferred.reject(err);
-              }).
-            done();
+                  }).
+                done();
         return deferred.promise;
       };
     exports.save = _save;
@@ -135,22 +136,20 @@ module.exports = function(dbName) {
 
         _getCollection(verified.dbName, verified.collectionName).
             then(function(collection) {
-		collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
-                    function(err, docs) {
-                        if (err) {
-                          deferred.reject(err);
-                        }
-                        else {
-			  // Should I check for multiple matches?
-                          deferred.resolve(docs[0]);
-                        }
-                      });
-                   }).
-                 catch(function(err) {
+                    collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
+                            function(err, docs) {
+                                    if (err) {
+                                      deferred.reject(err);
+                                    }
+                                    else {
+                                      // Should I check for multiple matches?
+                                      deferred.resolve(docs[0]);
+                                    }
+                                  });
+                  }).
+                catch(function(err) {
                         deferred.reject(err);
-                  });
-//                 done();
-// 
+                      });
         return deferred.promise;
       };
     exports.cp = _cp;
@@ -171,14 +170,15 @@ module.exports = function(dbName) {
                         if (count === 0) {
                           deferred.reject(
                                   new Error('Collection: ' +
-                                          colName + ' does not exist'));
+                                          verified.collectionName + ' does not exist'));
                         }
                         else {
                           collection.remove({ _id: new mongo.ObjectID(params.id) },
                           function(err, ack) {
                               if (err || ack === 0) {
                                 deferred.reject(
-                                        new Error('Could not delete document: ' + mongoId));
+                                        new Error('Could not delete document: ' +
+                                                params.id));
                               }
                               else {
                                 deferred.resolve();
@@ -186,11 +186,11 @@ module.exports = function(dbName) {
                             });
                         }
                       });
-              }).
-            catch(function(err) {
-                    deferred.reject(err);
-              }).
-            done();
+                  }).
+                catch(function(err) {
+                        deferred.reject(err);
+                      }).
+                done();
  
         return deferred.promise;
       };
@@ -230,10 +230,10 @@ module.exports = function(dbName) {
                                 });
                         }
                       });
-              }).
+                  }).
             catch(function(err) {
                     deferred.reject(err);
-              }).
+                  }).
             done();
         return deferred.promise;
       };
@@ -258,12 +258,12 @@ module.exports = function(dbName) {
                             }
                             else {
                               deferred.resolve(docs);
-                            }      
+                            }
                           });
-              }).
+                  }).
             catch(function(err) {
                     deferred.reject(err);
-              });
+                  });
         return deferred.promise;
       };
     exports.ls = _ls;
@@ -277,16 +277,16 @@ module.exports = function(dbName) {
      */
     var _getUsers = function(params) {
         var deferred = q.defer();
-	if (params.admin) {
-	  var query = db.userModel.find({}, { password: false });
-	  query.exec().
-	    then(function(users) {
-		deferred.resolve(users);		  
-	      });
-	}
-	else {
-	  deferred.reject('You don\'t have permission to view registered users');
-	}
+        if (params.admin) {
+          var query = db.userModel.find({}, { password: false });
+          query.exec().
+            then(function(users) {
+                    deferred.resolve(users);
+                  });
+        }
+        else {
+          deferred.reject('You don\'t have permission to view registered users');
+        }
 
         return deferred.promise;
       };
@@ -303,19 +303,19 @@ module.exports = function(dbName) {
      */
     var _getUserDocuments = function(verified, params) {
         var deferred = q.defer();
-	if (verified.admin) {
-	    var dbName = utils.getMongoDbName(params.email);
-	    _ls({ dbName: dbName, collectionName: verified.collectionName }).
+        if (verified.admin) {
+          var dbName = utils.getMongoDbName(params.email);
+          _ls({ dbName: dbName, collectionName: verified.collectionName }).
 		then(function(data) {
-		    deferred.resolve(data);
-		  }).
-		catch(function(err) {
-		    deferred.reject(err);
-		  });
-	}
-	else {
-	  deferred.reject('You don\'t have permission to view user documents');
-	}
+                        deferred.resolve(data);
+                      }).
+                catch(function(err) {
+                        deferred.reject(err);
+                      });
+        }
+        else {
+          deferred.reject('You don\'t have permission to view user documents');
+        }
 
         return deferred.promise;
       };
@@ -336,7 +336,7 @@ module.exports = function(dbName) {
                 then(function() {
                     deferred.reject();
                   }).
-                catch(function(err) {
+                catch(function() {
                         var server = new mongo.Server(config.mongo.host,
                                          config.mongo.port,
                                          config.mongo.serverOptions);
@@ -347,7 +347,7 @@ module.exports = function(dbName) {
                             if (err) {
                               deferred.reject(err);
                             }
-                            else { 
+                            else {
                               var collection = new mongo.Collection(client, 'profile');
                               collection.save(profile.toObject(), { safe: true },
                                       function(err, ack) {
@@ -357,11 +357,11 @@ module.exports = function(dbName) {
                                           else {
                                             deferred.resolve(ack);
                                           }
-                                          db.close();  
+                                          db.close();
                                         });
                             }
-                        });
-                  });
+                          });
+                      });
 
         return deferred.promise;
       };
@@ -383,11 +383,11 @@ module.exports = function(dbName) {
                                      config.mongo.serverOptions);
                     var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
 
-                    db.open(function (err, client) {
+                    db.open(function (err) {
                         if (err) {
                           deferred.reject(err);
                         }
-                        else { 
+                        else {
                           db.dropDatabase(function(err) {
                               if (err) {
                                 deferred.reject(new Error('Database: ' +
@@ -401,12 +401,11 @@ module.exports = function(dbName) {
                       });
                   }).
                 catch(function(err) {
-                   deferred.reject(err);
-                });
+                    deferred.reject(err);
+                  });
         return deferred.promise;
       };
     exports.dropDatabase = _dropDatabase;
 
     return exports;
-
   };

@@ -9,7 +9,6 @@ var express = require('express'),
     basic_routes = require('./routes/basic'),
     user_routes = require('./routes/user'),
     oauth2_routes = require('./routes/oauth2'),
-//    performative_routes = require('./routes/performative'),
     util = require('util');
     
 // Expose the Express app so that it may be run

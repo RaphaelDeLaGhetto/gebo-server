@@ -7,7 +7,6 @@ var passport = require('passport'),
 
 module.exports = function(dbName) {
 
-        console.log(dbName);
     if (!dbName) {
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('name');
@@ -25,11 +24,11 @@ module.exports = function(dbName) {
     
             _verify(req.body.access_token, req.body.email).
                 then(function(verified) {
-    		return action[req.body.action](verified, req.body);	    
+                    return action[req.body.action](verified, req.body);
                   }).
                 // Results of action
                 then(function(data) {
-    		res.send(data);
+                    res.send(data);
                   }).
                 // Something blew up
                 catch(function(err) {
@@ -76,27 +75,22 @@ module.exports = function(dbName) {
                 var verified = {
                     dbName: utils.getMongoDbName(_user.email),
                     collectionName: utils.getMongoCollectionName(_client.name),
-    	            admin: _user.admin,
-                };
+                    admin: _user.admin,
+                  };
     
-       	        // Admins may operate on DBs not their own
-           	if (email && verified.admin) {
-           	  verified.dbName = utils.getMongoDbName(email); 
+                // Admins may operate on DBs not their own
+                if (email && verified.admin) {
+                  verified.dbName = utils.getMongoDbName(email);
                   deferred.resolve(verified);
-           	}
-           	else if (email && email !== _user.email && !verified.admin) {
-           	  deferred.reject('You are not permitted to access that resource');
-           	}
-           	else {
+                }
+                else if (email && email !== _user.email && !verified.admin) {
+                  deferred.reject('You are not permitted to access that resource');
+                }
+                else {
                   deferred.resolve(verified);
-           	}
-          });
-            // Why doesn't the catch function work here?
-    //        catch(function(err) {
-    //            console.log(err);
-    //            deferred.reject(err)
-    //          });
-    
+                }
+              });
+   
         return deferred.promise;
       };
     exports.verify = _verify;

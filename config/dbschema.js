@@ -37,7 +37,7 @@ module.exports = function (dbName) {
     /**
      * Connect to mongo
      */
-    var _connect = function() { 
+    var _connect = function() {
         mongoose.connect(uristring, mongoOptions, function (err) {
             if (err) {
               console.log ('ERROR connecting to: ' + uristring + '. ' + err);
@@ -114,7 +114,7 @@ module.exports = function (dbName) {
     try {
         var userModel = mongoose.model('User', userSchema);
         exports.userModel = userModel;
-    }
+      }
     catch (error) {}
 
     /**
@@ -130,7 +130,7 @@ module.exports = function (dbName) {
     try {
         var clientModel = mongoose.model('Client', clientSchema);
         exports.clientModel = clientModel;
-    }
+      }
     catch(err) {}
 
     /**
@@ -146,7 +146,7 @@ module.exports = function (dbName) {
     try {
         var tokenModel = mongoose.model('Token', tokenSchema);
         exports.tokenModel = tokenModel;
-    }
+      }
     catch(err) {}
 
     /**
@@ -163,7 +163,7 @@ module.exports = function (dbName) {
     try {
         var authorizationModel = mongoose.model('Authorization', authorizationSchema);
         exports.authorizationModel = authorizationModel;
-    }
+      }
     catch (error) {}
 
     /**
@@ -175,4 +175,4 @@ module.exports = function (dbName) {
 //      };
 
     return exports;
-};
+  };

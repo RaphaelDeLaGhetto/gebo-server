@@ -1,10 +1,7 @@
 'use strict';
 
 var passport = require('passport'),
-    nconf = require('nconf'),
-    utils = require('../lib/utils'),
-    action = require('../config/action'),
-    q = require('q');
+    nconf = require('nconf');
 
 nconf.argv().env().file({ file: 'local.json' });
 var db = require('../config/dbschema')(nconf.get('name'));

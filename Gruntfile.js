@@ -131,11 +131,11 @@ module.exports = function (grunt) {
                         done();
                       }).
                     catch(function(err) {
+                        if (err) {
+                          console.log(err);
+                          done(false);
+                        }
                         done();
-                        // I think a db drop on a non existent database
-                        // should not return an error...? What to do?
-//                        console.log('Error: ' + err);
-//                        done(false);
                       });
                 }
               });

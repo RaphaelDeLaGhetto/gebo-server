@@ -131,7 +131,6 @@ exports.getCollection = {
                     test.done();
                 });
     }, 
-
 };
 
 /**
