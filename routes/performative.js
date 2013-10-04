@@ -3,6 +3,7 @@
 var passport = require('passport'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),
+    dbSchema = require('../config/dbschema'),
     q = require('q');
 
 module.exports = function(dbName) {
@@ -12,8 +13,6 @@ module.exports = function(dbName) {
       dbName = nconf.get('name');
     }
 
-    var db = require('../config/dbschema')(dbName),
-        action = require('../config/action')(dbName);
 
     /**
      * Receive a request for consideration
@@ -21,7 +20,8 @@ module.exports = function(dbName) {
     exports.request = [
         passport.authenticate('bearer', { session: false }),
         function(req, res) {
-    
+            var action = require('../config/action')(dbName);
+
             _verify(req.body.access_token, req.body.email).
                 then(function(verified) {
                     return action[req.body.action](verified, req.body);
@@ -49,6 +49,8 @@ module.exports = function(dbName) {
      * @return promise
      */
     var _verify = function(token, email) {
+        var db = new dbSchema(dbName);
+
         var deferred = q.defer();
     
         var _token, _user, _client;

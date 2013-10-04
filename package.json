@@ -55,7 +55,8 @@
     "grunt-contrib-nodeunit": "~0.2.0",
     "grunt-contrib-watch": "~0.4.0",
     "grunt": "~0.4.1",
-    "database-cleaner": "~0.7.0"
+    "database-cleaner": "~0.7.0",
+    "nock": "~0.22.1"
   },
   "keywords": []
 }

@@ -13,8 +13,6 @@ module.exports = function(dbName) {
       dbName = nconf.get('name');
     }
 
-    var db = require('./dbschema')(dbName);
-
     /**
      * Determine if the database exists. To do this,
      * a database is opened and the number of 
@@ -278,6 +276,7 @@ module.exports = function(dbName) {
     var _getUsers = function(params) {
         var deferred = q.defer();
         if (params.admin) {
+          var db = require('./dbschema')(dbName);
           var query = db.userModel.find({}, { password: false });
           query.exec().
             then(function(users) {

@@ -159,7 +159,7 @@ module.exports = function (dbName) {
         code: { type: String, required: true, unique: true },
       });
     
-    // Export token model
+    // Export authorization model
     try {
         var authorizationModel = mongoose.model('Authorization', authorizationSchema);
         exports.authorizationModel = authorizationModel;
@@ -167,12 +167,25 @@ module.exports = function (dbName) {
     catch (error) {}
 
     /**
-     * Close the connection
+     * Agent schema
      */
-//    exports.close = function(next) {
-////    var _close = function(next) {
-//        mongoose.connection.close(next);
-//      };
+    var agentSchema = new Schema({
+        clientId: { type: String, required: true, unique: false },
+        authorizationEndpoint: { type: String, required: true, unique: false },
+        requestEndpoint: { type: String, required: true, unique: false },
+        verificationEndpoint: { type: String, required: true, unique: false },
+        token: { type: String, required: false, unique: false },
+      });
 
+    // Export agent model
+    try {
+        var agentModel = mongoose.model('Agent', agentSchema);
+        exports.agentModel = agentModel;
+      }
+    catch (error) {}
+
+    /**
+     * API
+     */
     return exports;
   };
