@@ -119,12 +119,12 @@ exports.verify = {
                 test.equal(verified.collectionName, 'todoApp');
                 test.equal(verified.admin, false);
                 test.done();
-            }).
+              }).
             catch(function(err) {
                 console.log('ERRORRRRRRRRRRRR: ' + err);
                 test.ok(false, err);
                 test.done();
-            });
+              });
    }, 
 
    'Do not allow user access to another user\'s database': function(test) {
@@ -133,11 +133,11 @@ exports.verify = {
            then(function(verified) {
                 test.ok(false, 'Should not get here');
                 test.done();
-           }).
+             }).
            catch(function(err) {
                 test.equal(err, 'You are not permitted to access that resource');
                 test.done();
-           });
+             });
    },
 
    'Allow admin access to his database': function(test) {
@@ -148,11 +148,11 @@ exports.verify = {
                 test.equal(verified.collectionName, 'todoApp');
                 test.equal(verified.admin, true);
                 test.done();
-            }).
+              }).
             catch(function(err) {
                 test.ok(false, err);
                 test.done();
-            });
+              });
    },
 
    'Allow admin access to another user\'s database': function(test) {
@@ -163,11 +163,11 @@ exports.verify = {
                 test.equal(verified.collectionName, 'todoApp');
                 test.equal(verified.admin, true);
                 test.done();
-            }).
+              }).
             catch(function(err) {
                 test.ok(false, err);
                 test.done();
-            });
+              });
    },
 
 };

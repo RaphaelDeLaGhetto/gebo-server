@@ -106,9 +106,33 @@ module.exports = function(dbName) {
                 agent.token = accessToken;
                 agent.save(function(err) {
                     if (err) {
-                      console.log(err);
+                      deferred.reject(err);
                     }
-                    deferred.resolve();
+                    else {
+                      deferred.resolve();
+                    }
+                  });
+              });
+        return deferred.promise;
+      };
+
+    /**
+     * Remove token from local storage and clear
+     * authentication data
+     */
+    exports.clear = function() {
+        var deferred = q.defer();
+
+        _get().
+            then(function(agent) {
+                agent.token = null;
+                agent.save(function(err) {
+                    if (err) {
+                      deferred.reject(err);
+                    }
+                    else {
+                      deferred.resolve();
+                    }
                   });
               });
         return deferred.promise;
