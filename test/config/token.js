@@ -2,15 +2,28 @@ var nock = require('nock'),
     config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
+    http = require('http'),
     dbSchema = require('../../config/dbschema');
 
 var CLIENT_ID = 'abc123',
     REDIRECT_URI = 'http://myhost.com',
-    AUTHORIZATION_ENDPOINT = 'http://theirhost.com/authorize',
-    VERIFICATION_ENDPOINT = 'http://theirhost.com/userinfo',
-    REQUEST_ENDPOINT = 'http://theirhost.com/request',
+    //BASE_ADDRESS = 'http://theirhost.com',
+    BASE_ADDRESS = 'theirhost.com',
+    //AUTHORIZATION_ENDPOINT = 'http://theirhost.com/authorize',
+    AUTHORIZATION_ENDPOINT = '/authorize',
+    //VERIFICATION_ENDPOINT = 'http://theirhost.com/userinfo',
+    VERIFICATION_ENDPOINT = '/userinfo',
+    //REQUEST_ENDPOINT = 'http://theirhost.com/request',
+    REQUEST_ENDPOINT = '/request',
     SCOPES = ['*'],
     ACCESS_TOKEN = '1234';
+
+var VERIFICATION_DATA = {
+        id: '1',
+        name: 'agent',
+        email: 'agent@hg.com',
+        scope: ['*'],
+    };
 
 // Start up the test database
 nconf.argv().env().file({ file: 'local.json' });
@@ -40,6 +53,7 @@ exports.getParams = {
 
         token.setParams({
                 clientId: CLIENT_ID,
+                agentUri: BASE_ADDRESS,
                 redirectUri: REDIRECT_URI,
                 authorizationEndpoint: AUTHORIZATION_ENDPOINT,
                 verificationEndpoint: VERIFICATION_ENDPOINT,
@@ -65,6 +79,7 @@ exports.get = {
     setUp: function (callback) {
 
         token.setParams({
+                agentUri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
                 authorizationEndpoint: AUTHORIZATION_ENDPOINT,
@@ -129,6 +144,7 @@ exports.set = {
 
     setUp: function (callback) {
         token.setParams({
+                agentUri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
                 authorizationEndpoint: AUTHORIZATION_ENDPOINT,
@@ -195,6 +211,7 @@ exports.set = {
 exports.clear = {
     setUp: function (callback) {
         token.setParams({
+                agentUri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
                 authorizationEndpoint: AUTHORIZATION_ENDPOINT,
@@ -281,4 +298,72 @@ exports.clear = {
               });
     },
 };
+
+/**
+ * verify
+ */
+exports.verify = {
+    setUp: function (callback) {
+        token.setParams({
+                agentUri: BASE_ADDRESS,
+                clientId: CLIENT_ID,
+                redirectUri: REDIRECT_URI,
+                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
+                requestEndpoint: REQUEST_ENDPOINT,
+                verificationEndpoint: VERIFICATION_ENDPOINT,
+                scopes: SCOPES
+            });
+
+        /**
+         * Setup an external agent
+         */
+        this.db = new dbSchema(nconf.get('testDb'));
+        var agent = new this.db.agentModel({
+                clientId: CLIENT_ID,
+                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
+                requestEndpoint: REQUEST_ENDPOINT,
+                verificationEndpoint: VERIFICATION_ENDPOINT,
+                token: ACCESS_TOKEN,
+                _id: new mongo.ObjectID('0123456789AB')
+            });
+
+        agent.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    tearDown: function(callback) {
+        this.db.mongoose.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    },
+
+    'Store verification data': function(test) {
+        test.expect(6);
+
+        var scope = nock('http://' + BASE_ADDRESS).
+                get(VERIFICATION_ENDPOINT + '?access_token=' + ACCESS_TOKEN).
+                reply(201, VERIFICATION_DATA);  
+
+        token.verify(ACCESS_TOKEN).
+            then(function(data) {
+                test.equal(token.data().id, VERIFICATION_DATA.id);
+                test.equal(data.id, VERIFICATION_DATA.id);
+                test.equal(token.data().name, VERIFICATION_DATA.name);
+                test.equal(data.name, VERIFICATION_DATA.name);
+                test.equal(token.data().email, VERIFICATION_DATA.email);
+                test.equal(data.email, VERIFICATION_DATA.email);
+
+                scope.done();
+                test.done();
+            }); 
+    },
+};
+
 

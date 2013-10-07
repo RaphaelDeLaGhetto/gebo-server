@@ -1,9 +1,16 @@
 'use strict';
 
 var q = require('q'),
+    http = require('http'),
     dbSchema = require('./dbschema');
 
 module.exports = function(dbName) {
+
+    /**
+     * Data returned upon token verification
+     */
+    var _data = {};
+    exports.data = function() { return _data; };
 
     /**
      * Start up the database connection
@@ -25,6 +32,7 @@ module.exports = function(dbName) {
      * Default config fields
      */
     var _config = {
+            agentUri: null,
             clientId: null,
             redirectUri: null,
             authorizationEndpoint: null,
@@ -135,6 +143,36 @@ module.exports = function(dbName) {
                     }
                   });
               });
+        return deferred.promise;
+      };
+
+    /**
+     * Verify that the token stored by this agent
+     * is still valid
+     *
+     * @param string
+     *
+     * @return promise
+     */
+    exports.verify = function(token) {
+        var deferred = q.defer();
+
+        var options = {
+                host: _config.agentUri,
+                path: _config.verificationEndpoint + '?access_token=' + token,
+                method: 'GET'
+              };
+        var req = http.get(options, function(res) {
+                        res.setEncoding('utf8');
+                        res.on('data', function(data) {
+                            _data = JSON.parse(data);
+                            deferred.resolve(_data);
+                          });
+                      })
+                    .on('error', function(err){
+                        deferred.reject(err);
+                      });
+
         return deferred.promise;
       };
 
