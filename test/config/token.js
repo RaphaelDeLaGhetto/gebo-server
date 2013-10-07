@@ -366,4 +366,63 @@ exports.verify = {
     },
 };
 
+/**
+ * getToken
+ */
+exports.getToken = {
+    setUp: function (callback) {
+        token.setParams({
+                agentUri: BASE_ADDRESS,
+                clientId: CLIENT_ID,
+                redirectUri: REDIRECT_URI,
+                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
+                requestEndpoint: REQUEST_ENDPOINT,
+                verificationEndpoint: VERIFICATION_ENDPOINT,
+                scopes: SCOPES
+            });
 
+        /**
+         * Setup an external agent
+         */
+        this.db = new dbSchema(nconf.get('testDb'));
+        var agent = new this.db.agentModel({
+                clientId: CLIENT_ID,
+                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
+                requestEndpoint: REQUEST_ENDPOINT,
+                verificationEndpoint: VERIFICATION_ENDPOINT,
+                token: ACCESS_TOKEN,
+                _id: new mongo.ObjectID('0123456789AB')
+            });
+
+        agent.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    tearDown: function(callback) {
+        this.db.mongoose.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    },
+
+    'Get a token from the server agent': function(test) {
+//        var scope = nock('http://' + BASE_ADDRESS).
+//                get(VERIFICATION_ENDPOINT + '?access_token=' + ACCESS_TOKEN).
+//                reply(201, VERIFICATION_DATA);  
+
+        token.getToken().
+                then(function(token) {
+                    test.done();
+                  });
+    },
+
+    'Store the token': function(test) {
+        test.done();
+    },
+};

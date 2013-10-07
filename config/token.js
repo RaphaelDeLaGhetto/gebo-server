@@ -177,6 +177,17 @@ module.exports = function(dbName) {
       };
 
     /**
+     * Request a token
+     *
+     * @return promise
+     */
+    exports.getToken = function() {
+        var deferred = q.defer();
+        deferred.resolve();
+        return deferred.promise;
+      };
+
+    /**
      * API
      */
     return exports;
