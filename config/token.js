@@ -81,10 +81,8 @@ module.exports = function(dbName) {
         var query = db.agentModel.findOne({
                 clientId: _config.clientId,
                 verificationEndpoint: _config.verificationEndpoint });
-        console.log('get has been called');
         query.exec().
                 then(function(agent) {
-                      console.log(agent);
                       deferred.resolve(agent);
                   });
   
@@ -101,7 +99,6 @@ module.exports = function(dbName) {
      * @return promise
      */
     exports.set = function(accessToken) {
-//        var db = new dbSchema(dbName);
         var deferred = q.defer();
 
         console.log('set has been called');
@@ -114,9 +111,6 @@ module.exports = function(dbName) {
                     deferred.resolve(ack);
                   });
               });
- //       var query = db.agentModel.findOne({ name: agentName });
-
-        deferred.resolve(1);
         return deferred.promise;
       };
 

@@ -1,4 +1,5 @@
 var nock = require('nock'),
+    config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     dbSchema = require('../../config/dbschema');
@@ -54,7 +55,6 @@ exports.getParams = {
 
         test.done();
     },
-
 }
 
 /**
@@ -163,31 +163,26 @@ exports.set = {
     },
 
     tearDown: function (callback) {
-        console.log('tearDown');
         this.db.mongoose.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            console.log('done');
             callback();
           });
     }, 
 
     'Overwrite the access token value of a previously stored agent': function(test) {
-        test.expect(1);
+        test.expect(2);
         token.get().
             then(function(agent) {
                 test.equal(agent.token, ACCESS_TOKEN);
-                console.log('HERE');
                 return token.set(ACCESS_TOKEN + '5678');
               }).
             then(function(ack) {
-                console.log(ack);
                 return token.get();
               }).
             then(function(agent) {
-                console.log('HERE?????????????');
-                console.log(agent);
+                test.equal(agent.token, ACCESS_TOKEN + '5678');
                 test.done(); 
               });
     },
