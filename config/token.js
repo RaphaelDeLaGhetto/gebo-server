@@ -101,14 +101,14 @@ module.exports = function(dbName) {
     exports.set = function(accessToken) {
         var deferred = q.defer();
 
-        console.log('set has been called');
         _get().
             then(function(agent) {
-                console.log('get has resolved a promise');
                 agent.token = accessToken;
-                agent.save(function(ack) {
-                    console.log('should have saved');
-                    deferred.resolve(ack);
+                agent.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    deferred.resolve();
                   });
               });
         return deferred.promise;
@@ -120,3 +120,4 @@ module.exports = function(dbName) {
     return exports;
 
   };
+
