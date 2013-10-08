@@ -121,13 +121,13 @@ exports.objectToQueryString = {
         var obj = {
                 response_type: 'token',
                 client_id: 'abc123',
-                redirect_uri: 'http://theirhost.com',
+                redirect_uri: 'http://myhost.com',
                 scope: ['*'],
             };
         test.equal(utils.objectToQueryString(obj),
                 'response_type=token&client_id=abc123' +
                 '&redirect_uri=' +
-                encodeURIComponent('http://theirhost.com') + '&scope=' + ['*']);
+                encodeURIComponent('http://myhost.com') + '&scope=' + ['*']);
         test.done();
     }, 
 };

@@ -3,17 +3,14 @@ var nock = require('nock'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     http = require('http'),
+    utils = require('../../lib/utils'),
     dbSchema = require('../../config/dbschema');
 
 var CLIENT_ID = 'abc123',
     REDIRECT_URI = 'http://myhost.com',
-    //BASE_ADDRESS = 'http://theirhost.com',
     BASE_ADDRESS = 'theirhost.com',
-    //AUTHORIZATION_ENDPOINT = 'http://theirhost.com/authorize',
     AUTHORIZATION_ENDPOINT = '/authorize',
-    //VERIFICATION_ENDPOINT = 'http://theirhost.com/userinfo',
     VERIFICATION_ENDPOINT = '/userinfo',
-    //REQUEST_ENDPOINT = 'http://theirhost.com/request',
     REQUEST_ENDPOINT = '/request',
     SCOPES = ['*'],
     ACCESS_TOKEN = '1234';
@@ -119,6 +116,7 @@ exports.get = {
     }, 
 
     'Return the external agent collection if it exists': function(test) {
+        console.log('Why stall here?');
         test.expect(5);
         token.get().
             then(function(agent) {
@@ -380,49 +378,23 @@ exports.getToken = {
                 verificationEndpoint: VERIFICATION_ENDPOINT,
                 scopes: SCOPES
             });
-
-        /**
-         * Setup an external agent
-         */
-        this.db = new dbSchema(nconf.get('testDb'));
-        var agent = new this.db.agentModel({
-                clientId: CLIENT_ID,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
-                token: ACCESS_TOKEN,
-                _id: new mongo.ObjectID('0123456789AB')
-            });
-
-        agent.save(function(err) {
-            if (err) {
-              console.log(err);
-            }
-            callback();
-          });
+        callback();
     },
 
     tearDown: function(callback) {
-        this.db.mongoose.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
-          });
+        callback();
     },
 
     'Get a token from the server agent': function(test) {
+        var params = token.getParams();
+
         var scope = nock('http://' + BASE_ADDRESS).
-                get(AUTHORIZATION_ENDPOINT + '?access_token=' + ACCESS_TOKEN).
-                reply(201, VERIFICATION_DATA);  
+                get(AUTHORIZATION_ENDPOINT + '?' + utils.objectToQueryString(params)).
+                reply(200, VERIFICATION_DATA);  
 
         token.getToken().
                 then(function(token) {
                     test.done();
                   });
-    },
-
-    'Store the token': function(test) {
-        test.done();
     },
 };
