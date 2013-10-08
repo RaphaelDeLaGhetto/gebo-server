@@ -111,3 +111,24 @@ exports.getMongoFieldName = {
     },
 };
 
+
+/**
+ * objectToQueryString
+ */
+exports.objectToQueryString = {
+    'Take an object and spit out a query string': function(test) {
+        test.expect(1);
+        var obj = {
+                response_type: 'token',
+                client_id: 'abc123',
+                redirect_uri: 'http://theirhost.com',
+                scope: ['*'],
+            };
+        test.equal(utils.objectToQueryString(obj),
+                'response_type=token&client_id=abc123' +
+                '&redirect_uri=' +
+                encodeURIComponent('http://theirhost.com') + '&scope=' + ['*']);
+        test.done();
+    }, 
+};
+

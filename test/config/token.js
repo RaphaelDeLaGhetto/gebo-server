@@ -412,9 +412,9 @@ exports.getToken = {
     },
 
     'Get a token from the server agent': function(test) {
-//        var scope = nock('http://' + BASE_ADDRESS).
-//                get(VERIFICATION_ENDPOINT + '?access_token=' + ACCESS_TOKEN).
-//                reply(201, VERIFICATION_DATA);  
+        var scope = nock('http://' + BASE_ADDRESS).
+                get(AUTHORIZATION_ENDPOINT + '?access_token=' + ACCESS_TOKEN).
+                reply(201, VERIFICATION_DATA);  
 
         token.getToken().
                 then(function(token) {
