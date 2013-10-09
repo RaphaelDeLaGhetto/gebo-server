@@ -205,7 +205,6 @@ module.exports = function(dbName) {
             };
         jwt += base64url(JSON.stringify(claim));
 
-
         // Sign the request
         var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
         var key = pem.toString('ascii');

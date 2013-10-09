@@ -18,7 +18,7 @@ exports.admin = [
     pass.ensureAuthenticated,
     pass.ensureAdmin,
     function (req, res) {
-        res.render('admin');
+        res.render('admin', { user: req.user });
       }
   ];
 
