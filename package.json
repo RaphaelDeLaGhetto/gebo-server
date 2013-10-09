@@ -56,7 +56,9 @@
     "grunt-contrib-watch": "~0.4.0",
     "grunt": "~0.4.1",
     "database-cleaner": "~0.7.0",
-    "nock": "~0.22.1"
+    "nock": "~0.22.1",
+    "oauth2orize-jwt-bearer": "~0.1.0",
+    "base64url": "0.0.4"
   },
   "keywords": []
 }

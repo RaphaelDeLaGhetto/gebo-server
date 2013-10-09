@@ -13,6 +13,7 @@ var oauth2orize = require('oauth2orize'),
     login = require('connect-ensure-login'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),
+    jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
     mongoose = require('mongoose');
 
 nconf.argv().env().file({ file: 'local.json' });
@@ -84,7 +85,7 @@ server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, d
  * Here's my attempt at an implicit grant
  */
 server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
-
+    console.log('------ implicit grant');
     var tokenStr = utils.uid(256);
 
     var token = new db.tokenModel({
@@ -108,6 +109,7 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 // code.
 
 server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
+    console.log('------ regular exchange, no no');
     db.authorizationModel.findOne({ code: code }, function (err, authCode) {
         if (err) {
           return done(err);
@@ -134,6 +136,36 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
             return done(null, token.token);
           });
       });
+  }));
+
+/**
+ * For server login
+ */
+server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(function(client, data, signature, done) {
+    console.log('------ JWT, yeah yeah');
+    var crypto = require('crypto'),
+        pub = 'somePublicKey',
+        verifier = crypto.createVerify('RSA-SHA256');
+
+    verifier.update(JSON.stringify(data));
+
+    if (verifier.verify(pub, signature, 'base64')) {
+
+      var tokenStr = utils.uid(256);
+
+      var token = new db.tokenModel({
+          userId: client.id,
+          clientId: client.id,
+          token: tokenStr,
+        });
+
+      token.save(function (err, token) {
+          if (err) {
+            return done(err);
+          }
+          return done(null, token.token);
+        });
+    }
   }));
 
 // user authorization endpoint
@@ -196,9 +228,8 @@ exports.decision = [
 // authenticate when making requests to this endpoint.
 
 exports.token = [
-    passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
+    passport.authenticate(['basic', 'oauth2-client-password', 'oauth2-jwt-bearer'], { session: false }),
     server.token(),
     server.errorHandler()
   ];
-
 

@@ -2,6 +2,9 @@
 
 var q = require('q'),
     http = require('http'),
+    base64url = require('base64url'),
+    crypto = require('crypto'),
+    fs = require('fs'),
     dbSchema = require('./dbschema');
 
 module.exports = function(dbName) {
@@ -181,9 +184,62 @@ module.exports = function(dbName) {
      *
      * @return promise
      */
-    exports.getToken = function() {
+    exports.getTokenWithJwt = function() {
         var deferred = q.defer();
-        deferred.resolve();
+        var jwt = '';
+
+        // Make the header
+        var header = {
+                alg: 'RS256',
+                typ: 'JWT',
+            };
+        jwt += base64url(JSON.stringify(header)) + '.';
+
+        // Make the claim 
+        var claim = {
+                iss: 'some@email.com',
+                scope: _config.requestEndpoint,
+                aud: _config.authorizationEndpoint,
+                exp: new Date()/1000 + 3600*1000,
+                iat: new Date()/1000, 
+            };
+        jwt += base64url(JSON.stringify(claim));
+
+
+        // Sign the request
+        var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
+        var key = pem.toString('ascii');
+
+        var sign = crypto.createSign('sha256WithRSAEncryption');
+        sign.update(new Buffer(jwt, 'base64'));
+        var signature = sign.sign(key);
+
+        jwt += '.' + base64url(signature);
+
+        var params = {
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                assertion: jwt,
+            };
+
+        // Make the request
+        var options = {
+                host: _config.agentUri,
+                path: _config.authorizationEndpoint,
+                method: 'POST'
+              };
+        var req = http.request(options, function(res) {
+                        res.setEncoding('utf8');
+                        res.on('data', function(token) {
+                            deferred.resolve(token);
+                          });
+                      }).
+                    on('error', function(err){
+                        deferred.reject(err);
+                      });
+
+        req.write(params);
+        req.end();
+
         return deferred.promise;
       };
 

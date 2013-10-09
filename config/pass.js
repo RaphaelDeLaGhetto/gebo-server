@@ -14,7 +14,8 @@ var passport = require('passport'),
     // jaredhanson/oauth2orize
     BasicStrategy = require('passport-http').BasicStrategy,
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
-    BearerStrategy = require('passport-http-bearer').Strategy;
+    BearerStrategy = require('passport-http-bearer').Strategy,
+    ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy;
 
 nconf.argv().env().file({ file: 'local.json' });
 var db = require('./dbschema')(nconf.get('name'));
@@ -163,3 +164,24 @@ passport.use(new BearerStrategy(
       }
   ));
 
+  /**
+   * Client JWT Bearer Strategy
+   *
+   * This should let this server authenticate against
+   * other servers, but time will tell.
+   */
+passport.use(new ClientJwtBearerStrategy(
+    function(claimSetIss, done) {
+        console.log('ClientJwtBearerStrategy');
+
+        db.clientModel.findOne({ clientId: claimSetIss }, function(err, client) {
+            if (err) {
+              return done(err);
+            }
+            if (!client) {
+              return done(null, false);
+            }
+            return done(null, client);
+          });
+      }
+  ));

@@ -38,6 +38,7 @@ app.get('/logout', user_routes.logout);
 app.get('/dialog/authorize', oauth2_routes.authorization); 
 app.post('/dialog/authorize/decision', oauth2_routes.decision); 
 app.post('/oauth/token', oauth2_routes.token);
+//app.get('/oauth/agent', oauth2_routes.agentLogin);
 
 // Performative route
 performative_routes = require('./routes/performative')(nconf.get('name')),

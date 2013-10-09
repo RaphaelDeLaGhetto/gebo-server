@@ -22,6 +22,12 @@ var VERIFICATION_DATA = {
         scope: ['*'],
     };
 
+var JWT_RESPONSE = {
+        access_token: ACCESS_TOKEN, 
+        token_type: 'Bearer',
+        expires_in: 3600
+    };
+
 // Start up the test database
 nconf.argv().env().file({ file: 'local.json' });
 var token = require('../../config/token')(nconf.get('testDb'));
@@ -46,6 +52,7 @@ exports.getParams = {
     },
 
     'Return an object if initialized': function(test) {
+        console.log('Why stall here?');
         test.expect(4);
 
         token.setParams({
@@ -57,7 +64,15 @@ exports.getParams = {
                 scopes: SCOPES
             });
 
-        var params = token.getParams();
+        var params;
+        try {
+            params = token.getParams();
+        }
+        catch(err) {
+            console.log(err);
+            test.ok(false);
+            test.done();
+        }
 
         test.equal(params.client_id, CLIENT_ID);
         test.equal(params.response_type, 'token');
@@ -116,7 +131,6 @@ exports.get = {
     }, 
 
     'Return the external agent collection if it exists': function(test) {
-        console.log('Why stall here?');
         test.expect(5);
         token.get().
             then(function(agent) {
@@ -365,9 +379,9 @@ exports.verify = {
 };
 
 /**
- * getToken
+ * getTokenWithJwt
  */
-exports.getToken = {
+exports.getTokenWithJwt = {
     setUp: function (callback) {
         token.setParams({
                 agentUri: BASE_ADDRESS,
@@ -386,14 +400,18 @@ exports.getToken = {
     },
 
     'Get a token from the server agent': function(test) {
-        var params = token.getParams();
-
+        test.expect(3);
         var scope = nock('http://' + BASE_ADDRESS).
-                get(AUTHORIZATION_ENDPOINT + '?' + utils.objectToQueryString(params)).
-                reply(200, VERIFICATION_DATA);  
+                post(AUTHORIZATION_ENDPOINT).
+                reply(200, JWT_RESPONSE);  
 
-        token.getToken().
+        token.getTokenWithJwt().
                 then(function(token) {
+                    token = JSON.parse(token);
+                    scope.done();
+                    test.equal(token.access_token, JWT_RESPONSE.access_token);
+                    test.equal(token.token_type, JWT_RESPONSE.token_type);
+                    test.equal(token.expires_in, JWT_RESPONSE.expires_in);
                     test.done();
                   });
     },
