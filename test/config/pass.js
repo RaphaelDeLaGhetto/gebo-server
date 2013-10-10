@@ -30,7 +30,7 @@ exports.localStrategy = {
               });
     	}
         catch(e) {
-            console.dir(e);
+            console.log(e);
             callback();
     	}
     },
@@ -45,15 +45,46 @@ exports.localStrategy = {
     },
 
     'Return a user object when provided correct email and password': function(test) {
-        test.done();
+        test.expect(3);
+        pass.localStrategy('dan@hg.com', 'password123', function(err, user) {
+            if (err) {
+              test.ok(false, err);
+            } 
+            else {
+              test.equal(user.username, 'dan');
+              test.equal(user.email, 'dan@hg.com');
+              test.equal(user.admin, true);
+            }
+            test.done();
+          });
     },
 
-    'Return an error if an invalid email is provided': function(test) {
-        test.done();
+    'Return false user if an invalid email is provided': function(test) {
+        test.expect(2);
+        pass.localStrategy('wrongemail@hg.com', 'password123', function(err, user, message) {
+            if (err) {
+              test.ok(false, err);
+            } 
+            else {
+              test.equal(user, false);
+              test.equal(message.message, 'Invalid email or password');
+            }
+            test.done();
+          });
     },
 
-    'Return an error if a valid email and invalid password are provided': function(test) {
-        test.done();
+    'Return false user if a valid email and invalid password are provided': function(test) {
+        test.expect(2);
+        pass.localStrategy('dan@hg.com', 'wrongpassword123', function(err, user, message) {
+            if (err) {
+              test.ok(false, err);
+            } 
+            else {
+              test.equal(user, false);
+              test.equal(message.message, 'Invalid email or password');
+            }
+            test.done();
+          });
     },
 
 };

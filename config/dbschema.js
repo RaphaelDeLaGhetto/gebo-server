@@ -46,33 +46,6 @@ module.exports = function (dbName) {
     // during testing
     exports.mongoose = connection;
 
-
-
-//    var _connect = function() {
-//        mongoose.connect(uristring, mongoOptions, function (err) {
-//            if (err) {
-//              console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-//            }
-//            else {
-//              console.log ('Successfully connected to: ' + uristring);
-//            }
-//          });
-//      };
-//
-//    /**
-//     * Open a connection to mongo
-//     */
-//    if (!mongoose.connection.readyState) {
-//      _connect();
-//    }
-//    else {
-//      if (mongoose.connection.db.name !== dbName) {
-//        mongoose.connection.close(function() {
-//            _connect();
-//          });
-//      }
-//    }
-
     //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,
         ObjectId = Schema.Types.ObjectId;
@@ -88,7 +61,11 @@ module.exports = function (dbName) {
       });
 
 
-    // Bcrypt middleware
+    /**
+     * Encrypt the agent's password before saving
+     * 
+     * @param function
+     */
     userSchema.pre('save', function(next) {
         var user = this;
     
@@ -111,7 +88,13 @@ module.exports = function (dbName) {
           });
       });
 
-    // Password verification
+    /**
+     * Compare the given password to the 
+     * one stored in the database
+     *
+     * @param string
+     * @param function
+     */
     userSchema.methods.comparePassword = function(candidatePassword, cb) {
         bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
             if (err) {
