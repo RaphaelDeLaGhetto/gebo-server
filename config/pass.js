@@ -55,7 +55,7 @@ module.exports = function(dbName) {
                   return done(null, user);
                 }
                 else {
-                  return done(null, false, { message: 'Invalid username or password' });
+                  return done(null, false, { message: 'Invalid email or password' });
                 }
               });
           });
