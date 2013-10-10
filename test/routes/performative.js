@@ -103,7 +103,7 @@ exports.verify = {
             }
         });
 
-        dbSchema.mongoose.connection.db.dropDatabase(function(err) {
+        dbSchema.mongoose.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }

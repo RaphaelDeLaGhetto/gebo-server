@@ -4,8 +4,8 @@ var q = require('q'),
     http = require('http'),
     base64url = require('base64url'),
     crypto = require('crypto'),
-    fs = require('fs'),
-    dbSchema = require('./dbschema');
+    fs = require('fs');
+//    dbSchema = require('./dbschema');
 
 module.exports = function(dbName) {
 
@@ -23,6 +23,7 @@ module.exports = function(dbName) {
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('name');
     }
+//    var db = require('./dbschema')(dbName);
 
     /**
      *  This response type must be passed to the authorization endpoint using
@@ -86,7 +87,8 @@ module.exports = function(dbName) {
      * @return Promise
      */
     var _get = function() {
-        var db = new dbSchema(dbName);
+        var db = require('./dbschema')(dbName);
+
         var deferred = q.defer();
 
         var query = db.agentModel.findOne({

@@ -52,7 +52,6 @@ exports.getParams = {
     },
 
     'Return an object if initialized': function(test) {
-        console.log('Why stall here?');
         test.expect(4);
 
         token.setParams({
@@ -90,39 +89,44 @@ exports.get = {
 
     setUp: function (callback) {
 
-        token.setParams({
-                agentUri: BASE_ADDRESS,
-                clientId: CLIENT_ID,
-                redirectUri: REDIRECT_URI,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
-                scopes: SCOPES
-            });
-
-        /**
-         * Setup an external agent
-         */
-        this.db = new dbSchema(nconf.get('testDb'));
-        var agent = new this.db.agentModel({
-                clientId: CLIENT_ID,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
-                token: ACCESS_TOKEN,
-                _id: new mongo.ObjectID('0123456789AB')
-            });
-
-        agent.save(function(err) {
-            if (err) {
-              console.log(err);
-            }
+    	try{
+            token.setParams({
+                    agentUri: BASE_ADDRESS,
+                    clientId: CLIENT_ID,
+                    redirectUri: REDIRECT_URI,
+                    authorizationEndpoint: AUTHORIZATION_ENDPOINT,
+                    requestEndpoint: REQUEST_ENDPOINT,
+                    verificationEndpoint: VERIFICATION_ENDPOINT,
+                    scopes: SCOPES
+                });
+    
+            /**
+             * Setup an external agent
+             */
+            this.db = new dbSchema(nconf.get('testDb'));
+            var agent = new this.db.agentModel({
+                    clientId: CLIENT_ID,
+                    authorizationEndpoint: AUTHORIZATION_ENDPOINT,
+                    requestEndpoint: REQUEST_ENDPOINT,
+                    verificationEndpoint: VERIFICATION_ENDPOINT,
+                    token: ACCESS_TOKEN,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+            agent.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
+        }
+        catch(err) {
+            console.log(err);
             callback();
-          });
+        }
     },
 
     tearDown: function (callback) {
-        this.db.mongoose.connection.db.dropDatabase(function(err) {
+        this.db.mongoose.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -187,7 +191,7 @@ exports.set = {
     },
 
     tearDown: function (callback) {
-        this.db.mongoose.connection.db.dropDatabase(function(err) {
+        this.db.mongoose.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -254,7 +258,7 @@ exports.clear = {
     },
 
     tearDown: function(callback) {
-        this.db.mongoose.connection.db.dropDatabase(function(err) {
+        this.db.mongoose.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -348,7 +352,7 @@ exports.verify = {
     },
 
     tearDown: function(callback) {
-        this.db.mongoose.connection.db.dropDatabase(function(err) {
+        this.db.mongoose.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -406,12 +410,12 @@ exports.getTokenWithJwt = {
                 reply(200, JWT_RESPONSE);  
 
         token.getTokenWithJwt().
-                then(function(token) {
-                    token = JSON.parse(token);
+                then(function(t) {
+                    t= JSON.parse(t);
                     scope.done();
-                    test.equal(token.access_token, JWT_RESPONSE.access_token);
-                    test.equal(token.token_type, JWT_RESPONSE.token_type);
-                    test.equal(token.expires_in, JWT_RESPONSE.expires_in);
+                    test.equal(t.access_token, JWT_RESPONSE.access_token);
+                    test.equal(t.token_type, JWT_RESPONSE.token_type);
+                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
                     test.done();
                   });
     },

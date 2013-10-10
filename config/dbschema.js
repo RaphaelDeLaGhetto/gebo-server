@@ -20,10 +20,6 @@ module.exports = function (dbName) {
         bcrypt = require('bcrypt'),
         SALT_WORK_FACTOR = 10;
 
-    // This is handy for when I need to drop a database
-    // during testing
-    exports.mongoose = mongoose;
-
     /**
      *  Database config
      */
@@ -37,30 +33,45 @@ module.exports = function (dbName) {
     /**
      * Connect to mongo
      */
-    var _connect = function() {
-        mongoose.connect(uristring, mongoOptions, function (err) {
-            if (err) {
-              console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-            }
-            else {
-              console.log ('Successfully connected to: ' + uristring);
-            }
-          });
-      };
+    var connection = mongoose.createConnection(uristring, mongoOptions);
+    connection.on('open', function() {
+        console.log ('Successfully connected to: ' + uristring);
+      });
 
-    /**
-     * Open a connection to mongo
-     */
-    if (!mongoose.connection.readyState) {
-      _connect();
-    }
-    else {
-      if (mongoose.connection.db.name !== dbName) {
-        mongoose.connection.close(function() {
-            _connect();
-          });
-      }
-    }
+    connection.on('error', function(err) {
+        console.log ('ERROR connecting to: ' + uristring + '. ' + err);
+      });
+
+    // This is handy for when I need to drop a database
+    // during testing
+    exports.mongoose = connection;
+
+
+
+//    var _connect = function() {
+//        mongoose.connect(uristring, mongoOptions, function (err) {
+//            if (err) {
+//              console.log ('ERROR connecting to: ' + uristring + '. ' + err);
+//            }
+//            else {
+//              console.log ('Successfully connected to: ' + uristring);
+//            }
+//          });
+//      };
+//
+//    /**
+//     * Open a connection to mongo
+//     */
+//    if (!mongoose.connection.readyState) {
+//      _connect();
+//    }
+//    else {
+//      if (mongoose.connection.db.name !== dbName) {
+//        mongoose.connection.close(function() {
+//            _connect();
+//          });
+//      }
+//    }
 
     //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,
@@ -112,7 +123,8 @@ module.exports = function (dbName) {
 
     // Export user model
     try {
-        var userModel = mongoose.model('User', userSchema);
+        //var userModel = mongoose.model('User', userSchema);
+        var userModel = connection.model('User', userSchema);
         exports.userModel = userModel;
       }
     catch (error) {}
@@ -128,7 +140,8 @@ module.exports = function (dbName) {
     
     // Export client model
     try {
-        var clientModel = mongoose.model('Client', clientSchema);
+        //var clientModel = mongoose.model('Client', clientSchema);
+        var clientModel = connection.model('Client', clientSchema);
         exports.clientModel = clientModel;
       }
     catch(err) {}
@@ -144,7 +157,8 @@ module.exports = function (dbName) {
     
     // Export token model
     try {
-        var tokenModel = mongoose.model('Token', tokenSchema);
+        //var tokenModel = mongoose.model('Token', tokenSchema);
+        var tokenModel = connection.model('Token', tokenSchema);
         exports.tokenModel = tokenModel;
       }
     catch(err) {}
@@ -161,7 +175,8 @@ module.exports = function (dbName) {
     
     // Export authorization model
     try {
-        var authorizationModel = mongoose.model('Authorization', authorizationSchema);
+        //var authorizationModel = mongoose.model('Authorization', authorizationSchema);
+        var authorizationModel = connection.model('Authorization', authorizationSchema);
         exports.authorizationModel = authorizationModel;
       }
     catch (error) {}
@@ -179,7 +194,8 @@ module.exports = function (dbName) {
 
     // Export agent model
     try {
-        var agentModel = mongoose.model('Agent', agentSchema);
+        //var agentModel = mongoose.model('Agent', agentSchema);
+        var agentModel = connection.model('Agent', agentSchema);
         exports.agentModel = agentModel;
       }
     catch (error) {}
