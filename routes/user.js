@@ -1,7 +1,11 @@
 'use strict';
 var passport = require('passport'),
-    pass = require('../config/pass'),
-    login = require('connect-ensure-login');
+    nconf = require('nconf'),
+    login = require('connect-ensure-login')
+
+nconf.argv().env().file({ file: 'local.json' });
+var pass = require('../config/pass')(nconf.get('name'));
+
 
 exports.account = [
     login.ensureLoggedIn(),

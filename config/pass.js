@@ -175,12 +175,12 @@ module.exports = function(dbName) {
           }
       ));
     
-      /**
-       * Client JWT Bearer Strategy
-       *
-       * This should let this server authenticate against
-       * other servers, but time will tell.
-       */
+    /**
+     * Client JWT Bearer Strategy
+     *
+     * This should let this server authenticate against
+     * other servers, but time will tell.
+     */
     passport.use(new ClientJwtBearerStrategy(
         function(claimSetIss, done) {
             console.log('ClientJwtBearerStrategy');
