@@ -10,7 +10,7 @@ var CLIENT_ID = 'abc123',
     REDIRECT_URI = 'http://myhost.com',
     BASE_ADDRESS = 'theirhost.com',
     AUTHORIZATION_ENDPOINT = '/authorize',
-    VERIFICATION_ENDPOINT = '/userinfo',
+    VERIFICATION_ENDPOINT = '/verify',
     REQUEST_ENDPOINT = '/request',
     SCOPES = ['*'],
     ACCESS_TOKEN = '1234';
@@ -105,6 +105,10 @@ exports.get = {
              */
             this.db = new dbSchema(nconf.get('testDb'));
             var agent = new this.db.agentModel({
+                    name: 'dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: true,
                     clientId: CLIENT_ID,
                     authorization: AUTHORIZATION_ENDPOINT,
                     request: REQUEST_ENDPOINT,
@@ -174,6 +178,10 @@ exports.set = {
          */
         this.db = new dbSchema(nconf.get('testDb'));
         var agent = new this.db.agentModel({
+                name: 'dan',
+                email: 'dan@hg.com',
+                password: 'password123',
+                admin: true,
                 clientId: CLIENT_ID,
                 authorization: AUTHORIZATION_ENDPOINT,
                 request: REQUEST_ENDPOINT,
@@ -241,6 +249,10 @@ exports.clear = {
          */
         this.db = new dbSchema(nconf.get('testDb'));
         var agent = new this.db.agentModel({
+                name: 'dan',
+                email: 'dan@hg.com',
+                password: 'password123',
+                admin: true,
                 clientId: CLIENT_ID,
                 authorization: AUTHORIZATION_ENDPOINT,
                 request: REQUEST_ENDPOINT,
@@ -335,6 +347,10 @@ exports.verify = {
          */
         this.db = new dbSchema(nconf.get('testDb'));
         var agent = new this.db.agentModel({
+                name: 'dan',
+                email: 'dan@hg.com',
+                password: 'password123',
+                admin: true,
                 clientId: CLIENT_ID,
                 authorization: AUTHORIZATION_ENDPOINT,
                 request: REQUEST_ENDPOINT,

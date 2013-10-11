@@ -103,7 +103,7 @@ module.exports = function(dbName) {
             
     /**
      * Store the access token associated with the
-     * endpoint configured abov
+     * endpoint configured above
      *
      * @param string
      *

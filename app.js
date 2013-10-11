@@ -7,7 +7,6 @@ var express = require('express'),
     passport = require('passport'),
     api_routes = require('./routes/api'),
     basic_routes = require('./routes/basic'),
-    user_routes = require('./routes/user'),
     oauth2_routes = require('./routes/oauth2'),
     util = require('util');
     
@@ -23,6 +22,10 @@ require('./settings')(app, express, passport, logger);
 
 // Merge nconf overrides with the configuration file.
 nconf.argv().env().file({ file: 'local.json' });
+
+// Requirements
+var performative_routes = require('./routes/performative')(nconf.get('email')),
+    user_routes = require('./routes/user')(nconf.get('email'));
 
 // Basic routes
 app.get('/', basic_routes.index);
@@ -40,7 +43,6 @@ app.post('/dialog/authorize/decision', oauth2_routes.decision);
 app.post('/oauth/token', oauth2_routes.token);
 
 // Performative route
-performative_routes = require('./routes/performative')(nconf.get('email')),
 app.post('/request', performative_routes.request);
 
 // API routes

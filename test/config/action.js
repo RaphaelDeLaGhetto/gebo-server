@@ -21,9 +21,9 @@ var verifiedUser = {
     };
 
 // Start up the test database
+nconf.argv().env().file({ file: 'local.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
-nconf.argv().env().file({ file: 'local.json' });
 var dbSchema = require('../../config/dbschema')(TEST_DB),
     action = require('../../config/action')(TEST_DB);
 
@@ -219,13 +219,11 @@ exports.save = {
                     test.equal(docs.name, 'dan');
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
-
                     return action.save(verifiedUser, { data: docs });
                 }).
             then(function(ack) {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
-                  // test.done();
                     return action.cp(verifiedUser, { id: '0123456789AB' });
                 }).
             then(function(docs) {
@@ -762,7 +760,6 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
-//                        dbSchema.close();
                         callback();
                     });
                });

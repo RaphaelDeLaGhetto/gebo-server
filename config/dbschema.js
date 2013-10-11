@@ -19,7 +19,6 @@ module.exports = function (dbName) {
      * and jaredhanson/oauth2orize
      * https://github.com/jaredhanson/oauth2orize
      */
-    
     var mongoose = require('mongoose'),
         bcrypt = require('bcrypt'),
         SALT_WORK_FACTOR = 10;
@@ -63,7 +62,6 @@ module.exports = function (dbName) {
         password: { type: String, required: true},
         admin: { type: Boolean, required: true },
       });
-
 
     /**
      * Encrypt the agent's password before saving
@@ -170,10 +168,17 @@ module.exports = function (dbName) {
      * Agent schema
      */
     var agentSchema = new Schema({
-        clientId: { type: String, required: true, unique: false },
-        authorization: { type: String, required: true, unique: false },
-        request: { type: String, required: true, unique: false },
-        verification: { type: String, required: true, unique: false },
+        // From the old userSchema
+        name: { type: String, required: true, unique: false },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true},
+        admin: { type: Boolean, required: true },
+
+        // Experimental
+        clientId: { type: String, required: false, unique: false },
+        authorization: { type: String, required: false, unique: false },
+        request: { type: String, required: false, unique: false },
+        verification: { type: String, required: false, unique: false },
         token: { type: String, required: false, unique: false },
       });
 

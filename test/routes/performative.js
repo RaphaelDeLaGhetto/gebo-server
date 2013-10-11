@@ -1,14 +1,15 @@
 var config = require('../../config/config'),
     nconf = require('nconf'),
-    mongo = require('mongodb');
+    mongo = require('mongodb'),
+    dbSchema = require('../../config/dbschema');
 
 var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '1234',
     USER_TOKEN = '5678';
 
-nconf.argv().env().file({ file: 'local.json' });
-var dbSchema = require('../../config/dbschema')(nconf.get('testDb'));
-var performative = require('../../routes/performative')(nconf.get('testDb'));
+var TEST_DB = nconf.argv().env().file({ file: 'local.json' }).get('testDb');
+//var dbSchema = require('../../config/dbschema')(nconf.get('testDb'));
+var performative = require('../../routes/performative')(TEST_DB);
 
 /**
  * verify
@@ -17,23 +18,24 @@ exports.verify = {
 
     setUp: function(callback) {
     	try{
+            this.db = new dbSchema(TEST_DB);
             /**
              * Setup the app database
              */
             // Registered users
-            var user = new dbSchema.userModel(
+            var user = new this.db.userModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
             user.save();
-            user = new dbSchema.userModel(
+            user = new this.db.userModel(
                             { name: 'yanfen', email: 'yanfen@hg.com',
                               password: 'password123', admin: false,  
                               _id: new mongo.ObjectID('123456789ABC') });
             user.save();
             
             // Registered client app
-            var client = new dbSchema.clientModel(
+            var client = new this.db.clientModel(
                             { name: 'todoApp',
                               clientId: 'todoApp123', 
                               secret: 'todo-secret',
@@ -41,13 +43,13 @@ exports.verify = {
             client.save();
 
             // Authorization tokens
-            var token = new dbSchema.tokenModel(
+            var token = new this.db.tokenModel(
                         { userId: new mongo.ObjectID('0123456789AB'),
                           clientId: new mongo.ObjectID('23456789ABCD'),  
                           token: ADMIN_TOKEN });
             token.save();
             
-            token = new dbSchema.tokenModel(
+            token = new this.db.tokenModel(
                         { userId: new mongo.ObjectID('123456789ABC'),
                           clientId: new mongo.ObjectID('23456789ABCD'),  
                           token: USER_TOKEN });
@@ -103,7 +105,7 @@ exports.verify = {
             }
         });
 
-        dbSchema.mongoose.db.dropDatabase(function(err) {
+        this.db.mongoose.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
