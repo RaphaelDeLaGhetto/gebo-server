@@ -140,7 +140,6 @@ module.exports = function (dbName) {
     
     // Export token model
     try {
-        //var tokenModel = mongoose.model('Token', tokenSchema);
         var tokenModel = connection.model('Token', tokenSchema);
         exports.tokenModel = tokenModel;
       }
@@ -158,7 +157,6 @@ module.exports = function (dbName) {
     
     // Export authorization model
     try {
-        //var authorizationModel = mongoose.model('Authorization', authorizationSchema);
         var authorizationModel = connection.model('Authorization', authorizationSchema);
         exports.authorizationModel = authorizationModel;
       }
@@ -169,15 +167,14 @@ module.exports = function (dbName) {
      */
     var agentSchema = new Schema({
         clientId: { type: String, required: true, unique: false },
-        authorizationEndpoint: { type: String, required: true, unique: false },
-        requestEndpoint: { type: String, required: true, unique: false },
-        verificationEndpoint: { type: String, required: true, unique: false },
+        authorization: { type: String, required: true, unique: false },
+        request: { type: String, required: true, unique: false },
+        verification: { type: String, required: true, unique: false },
         token: { type: String, required: false, unique: false },
       });
 
     // Export agent model
     try {
-        //var agentModel = mongoose.model('Agent', agentSchema);
         var agentModel = connection.model('Agent', agentSchema);
         exports.agentModel = agentModel;
       }

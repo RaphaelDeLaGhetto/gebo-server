@@ -5,7 +5,6 @@ var q = require('q'),
     base64url = require('base64url'),
     crypto = require('crypto'),
     fs = require('fs');
-//    dbSchema = require('./dbschema');
 
 module.exports = function(dbName) {
 
@@ -16,14 +15,13 @@ module.exports = function(dbName) {
     exports.data = function() { return _data; };
 
     /**
-     * Start up the database connection
+     * Set the database name, if not set already 
      */
     if (!dbName) {
       var nconf = require('nconf');
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('name');
     }
-//    var db = require('./dbschema')(dbName);
 
     /**
      *  This response type must be passed to the authorization endpoint using
@@ -31,17 +29,17 @@ module.exports = function(dbName) {
      */
     var RESPONSE_TYPE = 'token';
     
-     
     /**
-     * Default config fields
+     * Communication endpoints for the agent who
+     * grants the token 
      */
-    var _config = {
-            agentUri: null,
+    var _agent = {
+            uri: null,
             clientId: null,
             redirectUri: null,
-            authorizationEndpoint: null,
-            requestEndpoint: null,
-            verificationEndpoint: null,
+            authorization: null,
+            request: null,
+            verification: null,
             scopes: []
         };
     
@@ -49,7 +47,7 @@ module.exports = function(dbName) {
      * set the configuration options
      */
     exports.setParams = function(config) {
-        _config = config;
+        _agent = config;
       };
     
     /**
@@ -60,8 +58,8 @@ module.exports = function(dbName) {
     exports.getParams = function() {
         var requiredAndMissing = [];
     
-        Object.keys(_config).forEach(function(key) {
-                if (!_config[key]) {
+        Object.keys(_agent).forEach(function(key) {
+                if (!_agent[key]) {
                   requiredAndMissing.push(key);
                 }
               });
@@ -74,9 +72,9 @@ module.exports = function(dbName) {
     
         return {
             response_type: RESPONSE_TYPE,
-            client_id: _config.clientId,
-            redirect_uri: _config.redirectUri,
-            scope: _config.scopes.join(' '),
+            client_id: _agent.clientId,
+            redirect_uri: _agent.redirectUri,
+            scope: _agent.scopes.join(' '),
         };
       };
     
@@ -92,8 +90,8 @@ module.exports = function(dbName) {
         var deferred = q.defer();
 
         var query = db.agentModel.findOne({
-                clientId: _config.clientId,
-                verificationEndpoint: _config.verificationEndpoint });
+                clientId: _agent.clientId,
+                verification: _agent.verification });
         query.exec().
                 then(function(agent) {
                       deferred.resolve(agent);
@@ -163,8 +161,8 @@ module.exports = function(dbName) {
         var deferred = q.defer();
 
         var options = {
-                host: _config.agentUri,
-                path: _config.verificationEndpoint + '?access_token=' + token,
+                host: _agent.uri,
+                path: _agent.verification + '?access_token=' + token,
                 method: 'GET'
               };
         var req = http.get(options, function(res) {
@@ -200,8 +198,8 @@ module.exports = function(dbName) {
         // Make the claim 
         var claim = {
                 iss: 'some@email.com',
-                scope: _config.requestEndpoint,
-                aud: _config.authorizationEndpoint,
+                scope: _agent.request,
+                aud: _agent.authorization,
                 exp: new Date()/1000 + 3600*1000,
                 iat: new Date()/1000, 
             };
@@ -224,8 +222,8 @@ module.exports = function(dbName) {
 
         // Make the request
         var options = {
-                host: _config.agentUri,
-                path: _config.authorizationEndpoint,
+                host: _agent.uri,
+                path: _agent.authorization,
                 method: 'POST'
               };
         var req = http.request(options, function(res) {

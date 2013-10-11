@@ -6,7 +6,7 @@ var passport = require('passport'),
 nconf.argv().env().file({ file: 'local.json' });
 var db = require('../config/dbschema')(nconf.get('name'));
 
-exports.userinfo = [
+exports.verify = [
     passport.authenticate('bearer', { session: false }),
     function (req, res) {
         // req.authInfo is set using the `info` argument supplied by

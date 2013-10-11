@@ -44,7 +44,7 @@ performative_routes = require('./routes/performative')(nconf.get('name')),
 app.post('/request', performative_routes.request);
 
 // API routes
-app.get('/api/userinfo', api_routes.userinfo);
+app.get('/verify', api_routes.verify);
 
 logger.info('listening on', nconf.get('port'));
 app.listen(process.env.PORT || nconf.get('port'));

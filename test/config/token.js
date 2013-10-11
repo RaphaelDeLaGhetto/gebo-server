@@ -56,10 +56,10 @@ exports.getParams = {
 
         token.setParams({
                 clientId: CLIENT_ID,
-                agentUri: BASE_ADDRESS,
+                uri: BASE_ADDRESS,
                 redirectUri: REDIRECT_URI,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 scopes: SCOPES
             });
 
@@ -91,12 +91,12 @@ exports.get = {
 
     	try{
             token.setParams({
-                    agentUri: BASE_ADDRESS,
+                    uri: BASE_ADDRESS,
                     clientId: CLIENT_ID,
                     redirectUri: REDIRECT_URI,
-                    authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                    requestEndpoint: REQUEST_ENDPOINT,
-                    verificationEndpoint: VERIFICATION_ENDPOINT,
+                    authorization: AUTHORIZATION_ENDPOINT,
+                    request: REQUEST_ENDPOINT,
+                    verification: VERIFICATION_ENDPOINT,
                     scopes: SCOPES
                 });
     
@@ -106,9 +106,9 @@ exports.get = {
             this.db = new dbSchema(nconf.get('testDb'));
             var agent = new this.db.agentModel({
                     clientId: CLIENT_ID,
-                    authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                    requestEndpoint: REQUEST_ENDPOINT,
-                    verificationEndpoint: VERIFICATION_ENDPOINT,
+                    authorization: AUTHORIZATION_ENDPOINT,
+                    request: REQUEST_ENDPOINT,
+                    verification: VERIFICATION_ENDPOINT,
                     token: ACCESS_TOKEN,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
@@ -140,9 +140,9 @@ exports.get = {
             then(function(agent) {
                 test.equal(agent.clientId, CLIENT_ID);
                 test.equal(agent.token, ACCESS_TOKEN);
-                test.equal(agent.authorizationEndpoint, AUTHORIZATION_ENDPOINT);
-                test.equal(agent.requestEndpoint, REQUEST_ENDPOINT);
-                test.equal(agent.verificationEndpoint, VERIFICATION_ENDPOINT);
+                test.equal(agent.authorization, AUTHORIZATION_ENDPOINT);
+                test.equal(agent.request, REQUEST_ENDPOINT);
+                test.equal(agent.verification, VERIFICATION_ENDPOINT);
                 test.done();
               }).
             catch(function(err) {
@@ -160,12 +160,12 @@ exports.set = {
 
     setUp: function (callback) {
         token.setParams({
-                agentUri: BASE_ADDRESS,
+                uri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 scopes: SCOPES
             });
 
@@ -175,9 +175,9 @@ exports.set = {
         this.db = new dbSchema(nconf.get('testDb'));
         var agent = new this.db.agentModel({
                 clientId: CLIENT_ID,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 token: ACCESS_TOKEN,
                 _id: new mongo.ObjectID('0123456789AB')
             });
@@ -227,12 +227,12 @@ exports.set = {
 exports.clear = {
     setUp: function (callback) {
         token.setParams({
-                agentUri: BASE_ADDRESS,
+                uri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 scopes: SCOPES
             });
 
@@ -242,9 +242,9 @@ exports.clear = {
         this.db = new dbSchema(nconf.get('testDb'));
         var agent = new this.db.agentModel({
                 clientId: CLIENT_ID,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 token: ACCESS_TOKEN,
                 _id: new mongo.ObjectID('0123456789AB')
             });
@@ -302,9 +302,9 @@ exports.clear = {
             then(function(agent) {
                 test.equal(agent.token, null);
                 test.equal(agent.clientId, CLIENT_ID);
-                test.equal(agent.authorizationEndpoint, AUTHORIZATION_ENDPOINT);
-                test.equal(agent.requestEndpoint, REQUEST_ENDPOINT);
-                test.equal(agent.verificationEndpoint, VERIFICATION_ENDPOINT);
+                test.equal(agent.authorization, AUTHORIZATION_ENDPOINT);
+                test.equal(agent.request, REQUEST_ENDPOINT);
+                test.equal(agent.verification, VERIFICATION_ENDPOINT);
                 test.done();
               }).
             catch(function(err) {
@@ -321,12 +321,12 @@ exports.clear = {
 exports.verify = {
     setUp: function (callback) {
         token.setParams({
-                agentUri: BASE_ADDRESS,
+                uri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 scopes: SCOPES
             });
 
@@ -336,9 +336,9 @@ exports.verify = {
         this.db = new dbSchema(nconf.get('testDb'));
         var agent = new this.db.agentModel({
                 clientId: CLIENT_ID,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 token: ACCESS_TOKEN,
                 _id: new mongo.ObjectID('0123456789AB')
             });
@@ -388,12 +388,12 @@ exports.verify = {
 exports.getTokenWithJwt = {
     setUp: function (callback) {
         token.setParams({
-                agentUri: BASE_ADDRESS,
+                uri: BASE_ADDRESS,
                 clientId: CLIENT_ID,
                 redirectUri: REDIRECT_URI,
-                authorizationEndpoint: AUTHORIZATION_ENDPOINT,
-                requestEndpoint: REQUEST_ENDPOINT,
-                verificationEndpoint: VERIFICATION_ENDPOINT,
+                authorization: AUTHORIZATION_ENDPOINT,
+                request: REQUEST_ENDPOINT,
+                verification: VERIFICATION_ENDPOINT,
                 scopes: SCOPES
             });
         callback();
