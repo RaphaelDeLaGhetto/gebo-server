@@ -25,7 +25,7 @@ module.exports = function(dbName) {
     if (!dbName) {
       var nconf = require('nconf');
       nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('name');
+      dbName = nconf.get('email');
     }
 
     var db = require('./dbschema')(dbName);

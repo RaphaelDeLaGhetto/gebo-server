@@ -40,7 +40,7 @@ app.post('/dialog/authorize/decision', oauth2_routes.decision);
 app.post('/oauth/token', oauth2_routes.token);
 
 // Performative route
-performative_routes = require('./routes/performative')(nconf.get('name')),
+performative_routes = require('./routes/performative')(nconf.get('email')),
 app.post('/request', performative_routes.request);
 
 // API routes

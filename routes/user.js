@@ -4,7 +4,7 @@ var passport = require('passport'),
     login = require('connect-ensure-login')
 
 nconf.argv().env().file({ file: 'local.json' });
-var pass = require('../config/pass')(nconf.get('name'));
+var pass = require('../config/pass')(nconf.get('email'));
 
 
 exports.account = [

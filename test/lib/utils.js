@@ -25,6 +25,26 @@ exports.getMongoDbName = {
                            'The forbidden string was properly sanitized')
         test.done();
     },
+
+    'Don\'t alter names that have been cleaned already': function(test) {
+        test.expect(2);
+        var str = '/\\. "*<>:|?';  
+
+        // Clean the data
+        var dbName = utils.getMongoDbName(str);
+        test.equal(dbName, '_slash__backslash__dot_' +
+                           '_space__doublequotes__star__lessthan_' +
+                           '_greaterthan__colon__pipe__questionmark_',
+                           'The forbidden string was properly sanitized')
+ 
+        // Clean it again
+        var dbName = utils.getMongoDbName(dbName);
+        test.equal(dbName, '_slash__backslash__dot_' +
+                           '_space__doublequotes__star__lessthan_' +
+                           '_greaterthan__colon__pipe__questionmark_',
+                           'The forbidden string was properly sanitized')
+        test.done();
+    },
 };
 
 /**

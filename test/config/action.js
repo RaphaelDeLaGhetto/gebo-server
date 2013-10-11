@@ -21,9 +21,11 @@ var verifiedUser = {
     };
 
 // Start up the test database
+var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
+
 nconf.argv().env().file({ file: 'local.json' });
-var dbSchema = require('../../config/dbschema')(nconf.get('testDb')),
-    action = require('../../config/action')(nconf.get('testDb'));
+var dbSchema = require('../../config/dbschema')(TEST_DB),
+    action = require('../../config/action')(TEST_DB);
 
 /**
  * testConnection
@@ -710,7 +712,7 @@ exports.createDatabase = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db(nconf.get('testDb'),
+            this.db = new mongo.Db(TEST_DB,
 			    server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -820,7 +822,7 @@ exports.createDatabase = {
         test.expect(8);
 
         // Make sure the DB exists
-        var dbName = utils.getMongoDbName(nconf.get('testDb'));
+        var dbName = utils.getMongoDbName(TEST_DB);
         action.dbExists(dbName).
                 then(function(client) {
                     test.ok(true);

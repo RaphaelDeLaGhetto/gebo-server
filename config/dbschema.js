@@ -1,12 +1,16 @@
 'use strict';
 
+var utils = require('../lib/utils');
+
 module.exports = function (dbName) {
 
     if (!dbName) {
       var nconf = require('nconf');
       nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('name');
+      dbName = nconf.get('email');
     }
+
+    dbName = utils.getMongoDbName(dbName);
 
     /** 
      * Thank you to jaredhanson/passport-local

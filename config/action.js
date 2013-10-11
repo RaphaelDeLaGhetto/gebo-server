@@ -12,6 +12,7 @@ module.exports = function(dbName) {
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('name');
     }
+    dbName = utils.getMongoDbName(dbName);
 
     /**
      * Determine if the database exists. To do this,
