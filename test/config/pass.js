@@ -18,7 +18,7 @@ exports.localStrategy = {
     setUp: function(callback) {
     	try{
             var user = new dbSchema.userModel(
-                            { username: 'dan', email: 'dan@hg.com',
+                            { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
 
@@ -51,7 +51,7 @@ exports.localStrategy = {
               test.ok(false, err);
             } 
             else {
-              test.equal(user.username, 'dan');
+              test.equal(user.name, 'dan');
               test.equal(user.email, 'dan@hg.com');
               test.equal(user.admin, true);
             }

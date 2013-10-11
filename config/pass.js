@@ -36,6 +36,10 @@ module.exports = function(dbName) {
      * This strategy is used to authenticate an agent's email and password.
      * Anytime a request is made to authorize an application, we must ensure that
      * a user is logged in before asking them to approve the request.
+     *
+     * @param string
+     * @param string
+     * @param function
      */
     var _localStrategy = function(email, password, done) {
         console.log(email);

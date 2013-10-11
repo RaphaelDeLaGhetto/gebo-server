@@ -108,7 +108,7 @@ module.exports = function (grunt) {
             adm = (adm === 'true');
 
             var user = new db.userModel({
-                username: usr,
+                name: usr,
                 email: emailaddress,
                 password: pass,
                 admin: adm
@@ -123,7 +123,7 @@ module.exports = function (grunt) {
                   done(false);
                 }
                 else {
-                  console.log('saved user: ' + user.username);
+                  console.log('saved user: ' + user.name);
                   action.createDatabase(
                           utils.getMongoDbName(emailaddress),
                           user).
@@ -146,8 +146,8 @@ module.exports = function (grunt) {
             // async mode
             var done = this.async();
 
-            db.mongoose.connection.on('open', function () {
-                db.mongoose.connection.db.dropDatabase(function (err) {
+            db.mongoose.db.on('open', function () {
+                db.mongoose.db.dropDatabase(function (err) {
                     if (err) {
                       console.log('Error: ' + err);
                       done(false);

@@ -701,7 +701,7 @@ exports.createDatabase = {
     setUp: function(callback) {
     	try{
             user = new dbSchema.userModel({
-                    username: 'Joey Joe Joe Jr. Shabadoo',
+                    name: 'Joey Joe Joe Jr. Shabadoo',
                     email: 'jjjj@shabadoo.com',
                     password: 'abc123',
                     admin: 'true'
@@ -793,7 +793,7 @@ exports.createDatabase = {
                                               test.done();
                                             }
                                             else {
-                                              test.equal(doc.username,
+                                              test.equal(doc.name,
                                                       'Joey Joe Joe Jr. Shabadoo');
                                               test.equal(doc.email, 'jjjj@shabadoo.com');
                                               test.ok(doc.admin);
@@ -1027,7 +1027,7 @@ exports.getUserDocuments = {
 
     setUp: function(callback) {
         user = new dbSchema.userModel({
-                username: 'Joey Joe Joe Jr. Shabadoo',
+                name: 'Joey Joe Joe Jr. Shabadoo',
                 email: 'jjjj@shabadoo.com',
                 password: 'abc123',
                 admin: 'true'

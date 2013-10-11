@@ -31,14 +31,13 @@ app.get('/', basic_routes.index);
 app.get('/account', user_routes.account);
 app.get('/login', user_routes.getLogin);
 app.post('/login', user_routes.postLogin);
-app.get('/admin', user_routes.account);//admin);
+app.get('/admin', user_routes.admin);
 app.get('/logout', user_routes.logout);
 
 // OAuth2 routes
 app.get('/dialog/authorize', oauth2_routes.authorization); 
 app.post('/dialog/authorize/decision', oauth2_routes.decision); 
 app.post('/oauth/token', oauth2_routes.token);
-//app.get('/oauth/agent', oauth2_routes.agentLogin);
 
 // Performative route
 performative_routes = require('./routes/performative')(nconf.get('name')),

@@ -22,12 +22,12 @@ exports.verify = {
              */
             // Registered users
             var user = new dbSchema.userModel(
-                            { username: 'dan', email: 'dan@hg.com',
+                            { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
             user.save();
             user = new dbSchema.userModel(
-                            { username: 'yanfen', email: 'yanfen@hg.com',
+                            { name: 'yanfen', email: 'yanfen@hg.com',
                               password: 'password123', admin: false,  
                               _id: new mongo.ObjectID('123456789ABC') });
             user.save();
