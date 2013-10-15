@@ -17,12 +17,12 @@ exports.localStrategy = {
 
     setUp: function(callback) {
     	try{
-            var user = new dbSchema.userModel(
+            var agent = new dbSchema.agentModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
 
-            user.save(function(err){
+            agent.save(function(err){
                 if (err) {
                   console.log(err);
                 }
@@ -44,43 +44,43 @@ exports.localStrategy = {
           });
     },
 
-    'Return a user object when provided correct email and password': function(test) {
+    'Return an agent object when provided correct email and password': function(test) {
         test.expect(3);
-        pass.localStrategy('dan@hg.com', 'password123', function(err, user) {
+        pass.localStrategy('dan@hg.com', 'password123', function(err, agent) {
             if (err) {
               test.ok(false, err);
             } 
             else {
-              test.equal(user.name, 'dan');
-              test.equal(user.email, 'dan@hg.com');
-              test.equal(user.admin, true);
+              test.equal(agent.name, 'dan');
+              test.equal(agent.email, 'dan@hg.com');
+              test.equal(agent.admin, true);
             }
             test.done();
           });
     },
 
-    'Return false user if an invalid email is provided': function(test) {
+    'Return false agent if an invalid email is provided': function(test) {
         test.expect(2);
-        pass.localStrategy('wrongemail@hg.com', 'password123', function(err, user, message) {
+        pass.localStrategy('wrongemail@hg.com', 'password123', function(err, agent, message) {
             if (err) {
               test.ok(false, err);
             } 
             else {
-              test.equal(user, false);
+              test.equal(agent, false);
               test.equal(message.message, 'Invalid email or password');
             }
             test.done();
           });
     },
 
-    'Return false user if a valid email and invalid password are provided': function(test) {
+    'Return false agent if a valid email and invalid password are provided': function(test) {
         test.expect(2);
-        pass.localStrategy('dan@hg.com', 'wrongpassword123', function(err, user, message) {
+        pass.localStrategy('dan@hg.com', 'wrongpassword123', function(err, agent, message) {
             if (err) {
               test.ok(false, err);
             } 
             else {
-              test.equal(user, false);
+              test.equal(agent, false);
               test.equal(message.message, 'Invalid email or password');
             }
             test.done();

@@ -695,12 +695,12 @@ exports.ls = {
 /**
  * createDatabase
  */
-var user;
+var agent;
 exports.createDatabase = {
 
     setUp: function(callback) {
     	try{
-            user = new dbSchema.userModel({
+            agent = new dbSchema.agentModel({
                     name: 'Joey Joe Joe Jr. Shabadoo',
                     email: 'jjjj@shabadoo.com',
                     password: 'abc123',
@@ -716,7 +716,7 @@ exports.createDatabase = {
                 if (err) {
                   throw err;
                 }
-                user.save();
+                agent.save();
                 this.collection = new mongo.Collection(client, cname);
                 this.collection.insert([
                         {
@@ -748,7 +748,7 @@ exports.createDatabase = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            var testDb = new mongo.Db(utils.getMongoDbName(user.email),
+            var testDb = new mongo.Db(utils.getMongoDbName(agent.email),
                             server, config.mongo.clientOptions);
 
             testDb.open(function(err, client) {
@@ -760,7 +760,12 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
-                        callback();
+                        dbSchema.mongoose.db.dropDatabase(function(err) {
+                            if (err) {
+                              console.log(err)
+                            }
+                            callback();
+                          });
                     });
                });
           });
@@ -769,8 +774,8 @@ exports.createDatabase = {
     'Should add a new database with a profile collection': function(test) {
         test.expect(5);
 
-        // Make sure the DB doesn't exists already
-        var dbName = utils.getMongoDbName(user.email);
+        // Make sure the DB doesn't exist already
+        var dbName = utils.getMongoDbName(agent.email);
         action.dbExists(dbName).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
@@ -780,7 +785,7 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase(dbName, user).
+        action.createDatabase(dbName, agent).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created'); //
                     action.getCollection(dbName, 'profile').
@@ -1012,7 +1017,7 @@ exports.dropDatabase = {
 //        });
 //    },
 //
-//    'Should return a list of registered users': function(test) {
+//    'Should return a list of registered agents': function(test) {
 //        test.expect(1);
 //	test.done();
 //    },
@@ -1025,14 +1030,14 @@ exports.dropDatabase = {
 exports.getUserDocuments = {
 
     setUp: function(callback) {
-        user = new dbSchema.userModel({
+        agent = new dbSchema.agentModel({
                 name: 'Joey Joe Joe Jr. Shabadoo',
                 email: 'jjjj@shabadoo.com',
                 password: 'abc123',
                 admin: 'true'
               });
 
-        var dbName = utils.getMongoDbName(user.email);
+        var dbName = utils.getMongoDbName(agent.email);
 
     	try {
             var server = new mongo.Server(config.mongo.host,
@@ -1073,11 +1078,11 @@ exports.getUserDocuments = {
         });
     },
 
-    'Should return a list of a user\'s documents': function(test) {
+    'Should return a list of a agent\'s documents': function(test) {
         test.expect(1);
 	action.getUserDocuments(
 			{ dbName: 'don\'t matter', collectionName: cname, admin: true },
-			{ email: user.email }).
+			{ email: agent.email }).
 		then(function(data) {
 		    test.ok(data);
 		    test.done();
@@ -1090,7 +1095,7 @@ exports.getUserDocuments = {
 
     'Should throw an error when accessed by non-admin': function(test) {
 	test.expect(1);
-	action.getUserDocuments({ email: user.email, admin: false }).
+	action.getUserDocuments({ email: agent.email, admin: false }).
 		then(function(data) {
 		    test.ok(false, 'This should not be accessible');
 		    test.done();

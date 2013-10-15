@@ -40,7 +40,7 @@ module.exports = function(dbName) {
       ];
     
     /**
-     * Match the token against the user and the registered 
+     * Match the token against the agent and the registered 
      * client. If they exist, return a promise
      *
      * @param string
@@ -53,7 +53,7 @@ module.exports = function(dbName) {
 
         var deferred = q.defer();
     
-        var _token, _user, _client;
+        var _token, _agent, _client;
     
         // Retrieve the token
         var tokenQuery = db.tokenModel.findOne({ token: token });
@@ -61,12 +61,12 @@ module.exports = function(dbName) {
         tokenQuery.exec().
             then(function(token) {
                 _token = token;
-                var userQuery = db.userModel.findOne({ _id: _token.userId });
-                return userQuery.exec();
+                var agentQuery = db.agentModel.findOne({ _id: _token.agentId });
+                return agentQuery.exec();
               }).
             // User
-            then(function(user) {
-                _user = user;
+            then(function(agent) {
+                _agent = agent;
                 var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
                 return clientQuery.exec();
               }).
@@ -75,9 +75,9 @@ module.exports = function(dbName) {
                 _client = client;
     
                 var verified = {
-                    dbName: utils.getMongoDbName(_user.email),
+                    dbName: utils.getMongoDbName(_agent.email),
                     collectionName: utils.getMongoCollectionName(_client.name),
-                    admin: _user.admin,
+                    admin: _agent.admin,
                   };
     
                 // Admins may operate on DBs not their own
@@ -85,7 +85,7 @@ module.exports = function(dbName) {
                   verified.dbName = utils.getMongoDbName(email);
                   deferred.resolve(verified);
                 }
-                else if (email && email !== _user.email && !verified.admin) {
+                else if (email && email !== _agent.email && !verified.admin) {
                   deferred.reject('You are not permitted to access that resource');
                 }
                 else {

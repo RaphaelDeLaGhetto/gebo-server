@@ -54,67 +54,6 @@ module.exports = function (dbName) {
         ObjectId = Schema.Types.ObjectId;
 
     /**
-     * User schema
-     */
-    var userSchema = new Schema({
-        name: { type: String, required: true, unique: true },
-        email: { type: String, required: true, unique: true },
-        password: { type: String, required: true},
-        admin: { type: Boolean, required: true },
-      });
-
-    /**
-     * Encrypt the agent's password before saving
-     * 
-     * @param function
-     */
-    userSchema.pre('save', function(next) {
-        var user = this;
-    
-        if (!user.isModified('password')) {
-          return next();
-        }
-    
-        bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-            if (err) {
-              return next(err);
-            }
-    
-            bcrypt.hash(user.password, salt, function(err, hash) {
-                if (err) {
-                  return next(err);
-                }
-                user.password = hash;
-                next();
-              });
-          });
-      });
-
-    /**
-     * Compare the given password to the 
-     * one stored in the database
-     *
-     * @param string
-     * @param function
-     */
-    userSchema.methods.comparePassword = function(candidatePassword, cb) {
-        bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-            if (err) {
-              return cb(err);
-            }
-            cb(null, isMatch);
-          });
-      };
-
-    // Export user model
-    try {
-        //var userModel = mongoose.model('User', userSchema);
-        var userModel = connection.model('User', userSchema);
-        exports.userModel = userModel;
-      }
-    catch (error) {}
-
-    /**
      * Client schema
      */
     var clientSchema = new Schema({
@@ -135,7 +74,7 @@ module.exports = function (dbName) {
      * Token schema
      */
     var tokenSchema = new Schema({
-        userId: { type: ObjectId, required: true, unique: false },
+        agentId: { type: ObjectId, required: true, unique: false },
         clientId: { type: ObjectId, required: true, unique: false },
         token: { type: String, required: true, unique: true },
       });
@@ -151,7 +90,7 @@ module.exports = function (dbName) {
      * Authorization schema
      */
     var authorizationSchema = new Schema({
-        userId: { type: ObjectId, required: true, unique: false },
+        agentId: { type: ObjectId, required: true, unique: false },
         clientId: { type: ObjectId, required: true, unique: false },
         redirectUri: { type: String, required: true, unique: false },
         code: { type: String, required: true, unique: true },

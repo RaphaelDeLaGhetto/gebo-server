@@ -22,17 +22,17 @@ exports.verify = {
             /**
              * Setup the app database
              */
-            // Registered users
-            var user = new this.db.userModel(
+            // Registered agents
+            var agent = new this.db.agentModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
-            user.save();
-            user = new this.db.userModel(
+            agent.save();
+            agent = new this.db.agentModel(
                             { name: 'yanfen', email: 'yanfen@hg.com',
                               password: 'password123', admin: false,  
                               _id: new mongo.ObjectID('123456789ABC') });
-            user.save();
+            agent.save();
             
             // Registered client app
             var client = new this.db.clientModel(
@@ -44,13 +44,13 @@ exports.verify = {
 
             // Authorization tokens
             var token = new this.db.tokenModel(
-                        { userId: new mongo.ObjectID('0123456789AB'),
+                        { agentId: new mongo.ObjectID('0123456789AB'),
                           clientId: new mongo.ObjectID('23456789ABCD'),  
                           token: ADMIN_TOKEN });
             token.save();
             
             token = new this.db.tokenModel(
-                        { userId: new mongo.ObjectID('123456789ABC'),
+                        { agentId: new mongo.ObjectID('123456789ABC'),
                           clientId: new mongo.ObjectID('23456789ABCD'),  
                           token: USER_TOKEN });
             token.save();
@@ -68,18 +68,18 @@ exports.verify = {
                 if (err) {
                   throw err;
                 }
-                // Insert an admin and regular user
+                // Insert an admin and regular agent
                 collection = new mongo.Collection(client, COL_NAME);
                 collection.insert({ data: 'Important to the app' });
             });
 
             // Create a database for the admin
-            this.userDb = this.adminDb.db('userDb');
-            this.userDb.open(function (err, client) {
+            this.agentDb = this.adminDb.db('agentDb');
+            this.agentDb.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-                // Insert an admin and regular user
+                // Insert an admin and regular agent
                 collection = new mongo.Collection(client, COL_NAME);
                 collection.insert({ data: 'Also important to the app' }, function() {
                         callback();
@@ -99,7 +99,7 @@ exports.verify = {
             }
         });
 
-        this.userDb.dropDatabase(function(err) { 
+        this.agentDb.dropDatabase(function(err) { 
             if (err) {
               console.log(err);
             }
@@ -113,7 +113,7 @@ exports.verify = {
         });
     },
 
-   'Allow user access to his database': function(test) {
+   'Allow agent access to his database': function(test) {
         test.expect(3);
         performative.verify(USER_TOKEN, 'yanfen@hg.com').
             then(function(verified) {
@@ -129,7 +129,7 @@ exports.verify = {
               });
    }, 
 
-   'Do not allow user access to another user\'s database': function(test) {
+   'Do not allow agent access to another agent\'s database': function(test) {
         test.expect(1);
         performative.verify(USER_TOKEN, 'dan@hg.com').
            then(function(verified) {
@@ -157,7 +157,7 @@ exports.verify = {
               });
    },
 
-   'Allow admin access to another user\'s database': function(test) {
+   'Allow admin access to another agent\'s database': function(test) {
         test.expect(3);
         performative.verify(ADMIN_TOKEN, 'yanfen@hg.com').
             then(function(verified) {
