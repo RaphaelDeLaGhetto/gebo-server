@@ -1,6 +1,7 @@
 'use strict';
 var passport = require('passport'),
     nconf = require('nconf'),
+    q = require('q'),
     login = require('connect-ensure-login');
 
 module.exports = function(dbName) {
@@ -45,7 +46,6 @@ module.exports = function(dbName) {
         req.logout();
         res.redirect('/');
       };
-
 
     /**
      * API

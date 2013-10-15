@@ -407,5 +407,49 @@ module.exports = function(dbName) {
       };
     exports.dropDatabase = _dropDatabase;
 
+    /**
+     * This adds a new agent for this agent to represent
+     * (c.f., addFriend)
+     *
+     * @param Object
+     */
+    var _registerAgent = function(newAgent) {
+        var deferred = q.defer();
+
+        var db = require('./dbschema')(dbName);
+        var agent = new db.agentModel(newAgent);
+        agent.save(function(err, agent) {
+            if (err) {
+              deferred.reject(err);
+            }
+            else {
+              deferred.resolve(agent);
+            }
+          });
+        return deferred.promise; 
+      };
+    exports.registerAgent = _registerAgent;
+
+    /**
+     * Remove an agent from this agent's database
+     *
+     * @param string
+     */
+    var _deregisterAgent = function(email) {
+        var deferred = q.defer();
+
+        var db = require('./dbschema')(dbName);
+        db.agentModel.remove({ email: email}, function(err) {
+                if (err) {
+                  deferred.reject(err);
+                }
+                else {
+                  deferred.resolve();
+                }
+              });
+        return deferred.promise; 
+      };
+    exports.deregisterAgent = _deregisterAgent;
+
     return exports;
   };

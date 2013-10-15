@@ -1101,3 +1101,128 @@ exports.getUserDocuments = {
 		  });
     },
 };
+
+/**
+ * registerAgent
+ */
+exports.registerAgent = {
+
+    setUp: function(callback) {
+    	try{
+            var agent = new dbSchema.agentModel(
+                            { name: 'dan', email: 'dan@hg.com',
+                              password: 'password123', admin: true,  
+                              _id: new mongo.ObjectID('0123456789AB') });
+            agent.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+        dbSchema.mongoose.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    }, 
+
+    'Add a new agent to the database': function(test) {
+        test.expect(4);
+        dbSchema.agentModel.find({}, function(err, agents) {
+                if (err) {
+                  test.ok(false, err);
+                  test.done();
+                }
+                test.equal(agents.length, 1); 
+
+                var newAgent = {
+                        name: 'yanfen',
+                        email: 'yanfen@hg.com',
+                        password: 'password456',
+                        admin: false,
+                        _id: new mongo.ObjectID('123456789ABC')
+                    };
+                action.registerAgent(newAgent).
+                    then(function(agent) {  
+                        test.equal(agent.name, 'yanfen');
+                        test.equal(agent.email, 'yanfen@hg.com');
+                        test.equal(agent.admin, false);
+                        test.done();
+                      });
+          });
+    },
+};
+
+/**
+ * deregisterAgent
+ */
+exports.deregisterAgent = {
+
+    setUp: function(callback) {
+    	try{
+            var agent = new dbSchema.agentModel(
+                            { name: 'dan', email: 'dan@hg.com',
+                              password: 'password123', admin: true,  
+                              _id: new mongo.ObjectID('0123456789AB') });
+            agent.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+        dbSchema.mongoose.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    }, 
+
+    'Remove an agent from the database': function(test) {
+        test.expect(1);
+
+        action.deregisterAgent('dan@hg.com').
+            then(function(err, ack) {
+                    dbSchema.agentModel.find({}, function(err, agents) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(agents.length, 0); 
+                        test.done();
+                      });
+                  });
+    },
+
+    'Should not barf if agent does not exist': function(test) {
+        test.expect(1);
+        action.deregisterAgent('nosuchagent@hg.com').
+            then(function(err, ack) {
+                    dbSchema.agentModel.find({}, function(err, agents) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(agents.length, 1); 
+                        test.done();
+                      });
+                  });
+    },
+};
