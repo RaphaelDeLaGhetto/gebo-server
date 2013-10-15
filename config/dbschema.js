@@ -180,7 +180,52 @@ module.exports = function (dbName) {
         request: { type: String, required: false, unique: false },
         verification: { type: String, required: false, unique: false },
         token: { type: String, required: false, unique: false },
+//        gebo: { type: String, require: true, unique: false },
       });
+
+    /**
+     * Encrypt the agent's password before saving
+     * 
+     * @param function
+     */
+    agentSchema.pre('save', function(next) {
+        var agent = this;
+    
+        if (!agent.isModified('password')) {
+          return next();
+        }
+    
+        bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+            if (err) {
+              return next(err);
+            }
+    
+            bcrypt.hash(agent.password, salt, function(err, hash) {
+                if (err) {
+                  return next(err);
+                }
+                agent.password = hash;
+                next();
+              });
+          });
+      });
+
+    /**
+     * Compare the given password to the 
+     * one stored in the database
+     *
+     * @param string
+     * @param function
+     */
+    agentSchema.methods.comparePassword = function(candidatePassword, cb) {
+        bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+            if (err) {
+              return cb(err);
+            }
+            cb(null, isMatch);
+          });
+      };
+
 
     // Export agent model
     try {

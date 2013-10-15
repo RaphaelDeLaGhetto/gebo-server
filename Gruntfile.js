@@ -97,17 +97,17 @@ module.exports = function (grunt) {
      * https://github.com/jaredhanson/passport-local
      */
     grunt.registerTask('dbseed', 'seed the database', function () {
-        grunt.task.run('adduser:admin:admin@example.com:secret:true');
-        grunt.task.run('adduser:bob:bob@example.com:secret:false');
+        grunt.task.run('addagent:admin:admin@example.com:secret:true');
+        grunt.task.run('addagent:bob:bob@example.com:secret:false');
         grunt.task.run('addclient:Samplr:abc123:ssh-secret');
       });
 
-    grunt.registerTask('adduser', 'add a user to the database',
+    grunt.registerTask('addagent', 'add a agent to the database',
         function (usr, emailaddress, pass, adm) {
             // convert adm string to bool
             adm = (adm === 'true');
 
-            var user = new db.userModel({
+            var agent = new db.agentModel({
                 name: usr,
                 email: emailaddress,
                 password: pass,
@@ -117,16 +117,16 @@ module.exports = function (grunt) {
             // save call is async, put grunt into async mode to work
             var done = this.async();
 
-            user.save(function (err) {
+            agent.save(function (err) {
                 if (err) {
                   console.log('Error: ' + err);
                   done(false);
                 }
                 else {
-                  console.log('saved user: ' + user.name);
+                  console.log('saved agent: ' + agent.name);
                   action.createDatabase(
                           utils.getMongoDbName(emailaddress),
-                          user).
+                          agent).
                     then(function() {
                         done();
                       }).

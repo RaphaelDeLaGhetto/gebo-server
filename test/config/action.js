@@ -1160,6 +1160,25 @@ exports.registerAgent = {
                       });
           });
     },
+
+    'Do not overwrite an existing agent': function(test) {
+        test.expect(1);
+        var existingAgent = {
+                name: 'dan',
+                email: 'dan@hg.com',
+                password: 'password123',
+                admin: true
+            };
+        action.registerAgent(existingAgent).
+           then(function(agent) {
+               test.ok(false, 'Must not overwrite an existing agent');
+               test.done();
+             }).
+           catch(function(err) {
+               test.ok(true, err);
+               test.done();
+             });
+    },
 };
 
 /**

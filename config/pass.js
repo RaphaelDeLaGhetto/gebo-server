@@ -43,20 +43,20 @@ module.exports = function(dbName) {
      */
     var _localStrategy = function(email, password, done) {
         console.log(email);
-        db.userModel.findOne({ email: email }, function(err, user) {
-            console.log(user);
+        db.agentModel.findOne({ email: email }, function(err, agent) {
+            console.log(agent);
             if (err) {
               return done(err);
             }
-            if (!user) {
+            if (!agent) {
               return done(null, false, { message: 'Invalid email or password' });
             }
-            user.comparePassword(password, function(err, isMatch) {
+            agent.comparePassword(password, function(err, isMatch) {
                 if (err) {
                   return done(err);
                 }
                 if(isMatch) {
-                  return done(null, user);
+                  return done(null, agent);
                 }
                 else {
                   return done(null, false, { message: 'Invalid email or password' });
@@ -67,13 +67,13 @@ module.exports = function(dbName) {
     exports.localStrategy = _localStrategy;
     passport.use(new LocalStrategy(_localStrategy));
     
-    passport.serializeUser(function(user, done) {
-        done(null, user.id);
+    passport.serializeUser(function(agent, done) {
+        done(null, agent.id);
       });
     
     passport.deserializeUser(function(id, done) {
-        db.userModel.findById(id, function (err, user) {
-            done(err, user);
+        db.agentModel.findById(id, function (err, agent) {
+            done(err, agent);
           });
       });
     

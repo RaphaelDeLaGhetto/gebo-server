@@ -36,6 +36,7 @@ app.get('/login', user_routes.getLogin);
 app.post('/login', user_routes.postLogin);
 app.get('/admin', user_routes.admin);
 app.get('/logout', user_routes.logout);
+app.post('/signup', user_routes.signUp);
 
 // OAuth2 routes
 app.get('/dialog/authorize', oauth2_routes.authorization); 

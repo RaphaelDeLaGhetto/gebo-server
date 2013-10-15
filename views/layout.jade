@@ -13,13 +13,13 @@ html(lang='en')
                     span.icon-bar
                 a.brand(href="/") gebo-server 
                 .nav-collapse
-                if (!user)
+                if (!agent)
                     ul.nav
                         li
                             a(href="/login") Login
                 else
                     ul.nav
-                        if (user.admin)
+                        if (agent.admin)
                              li
                                 a(href="/admin") Admin
                         li

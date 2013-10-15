@@ -409,7 +409,6 @@ module.exports = function(dbName) {
 
     /**
      * This adds a new agent for this agent to represent
-     * (c.f., addFriend)
      *
      * @param Object
      */

@@ -20,7 +20,7 @@ module.exports = function(dbName) {
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
-            res.render('account', { user: req.user });
+            res.render('account', { agent: req.user });
           }
       ];
     
@@ -32,7 +32,7 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
-            res.render('admin', { user: req.user });
+            res.render('admin', { agent: req.user });
           }
       ];
     
@@ -42,9 +42,29 @@ module.exports = function(dbName) {
         failureRedirect: '/login'
       });
     
-    exports.logout = function (req, res) {
+    exports.logout = function(req, res) {
         req.logout();
         res.redirect('/');
+      };
+
+    /**
+     * POST /signup
+     */
+    exports.signUp = function(req, res) {
+        var db = require('../config/dbschema')(dbName);
+
+        // Add the admin param
+        req.body.admin = false;
+        var newAgent = new db.agentModel(req.body);
+
+        newAgent.save(function(err, agent) {
+            if (err) {
+              res.redirect('/');
+            }
+            else {
+              res.render('login', { agent: agent });
+            }
+          });
       };
 
     /**

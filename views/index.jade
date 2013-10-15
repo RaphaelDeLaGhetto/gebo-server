@@ -4,23 +4,23 @@ block content
     .header.jumbotron.subhead
         .row
             .span6
-                if (!user)
+                if (!agent)
                     h1 Welcome
                     p.lead Don't forget to seed the database:
                     code $ grunt dbseed
                 else
-                    p.lead Hello, #{user.name}
-            if (!user)
+                    p.lead Hello, #{agent.name}
+            if (!agent)
                 .span6
                     div.pull-right
                         h2 Sign up
                         form(action="/signup", method="post", autocomplete="off")
                             div
-                                input(type="text", name="newName", placeholder="Name")
+                                input(type="text", name="name", placeholder="Name")
                             div
-                                input(type="text", name="newEmail", placeholder="Email")
+                                input(type="text", name="email", placeholder="Email")
                             div
-                                input(type="password", name="newPassword", placeholder="Password")
+                                input(type="password", name="password", placeholder="Password")
                             div
                                 input(type="submit", value="Sign up")
 
