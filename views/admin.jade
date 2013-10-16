@@ -1,4 +1,8 @@
 extends layout
 
 block content
-    p You are an administrator. This is the admin page.
+    p.lead Registered agents
+    ul
+        - for (var i = 0; i < agents.length; i++)
+            li #{agents[i].name} - #{agents[i].email}
+

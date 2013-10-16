@@ -173,6 +173,50 @@ module.exports = function (dbName) {
       }
     catch (error) {}
 
+
+    /**
+     * Friend schema
+     */
+    var friendSchema = new Schema({
+        name: { type: String, required: true, unique: false },
+        email: { type: String, required: true, unique: true },
+        token: { type: String, required: false, unique: false },
+        groupIds: [{ type: ObjectId, required: true, unique: true }],
+      });
+
+
+    /**
+     * Permission schema
+     */
+    var permissionSchema = new Schema({
+        email: { type: String, required: true, unique: false },
+        read: { type: Boolean, required: true },
+        write: { type: Boolean, required: true },
+        execute: { type: Boolean, required: true },
+      });
+
+    /**
+     * Group schema
+     */
+    var groupSchema = new Schema({
+        name: { type: String, required: true, unique: true },
+//        agentIds: [{ type: ObjectId, required: true, unique: true }]
+//        emails: [{ type: String, required: false, unique: true }],
+//        name: { type: String, required: true, unique: false },
+//        token: { type: String, required: false, unique: false },
+//        admin: { type: Boolean, required: true },
+      });
+
+    /**
+     * inode
+     */
+    var inodeSchema = new Schema({
+        owner: { type: ObjectId, required: true, unique: false },
+        group: { type: ObjectId, required: true, unique: false },
+        created: { type: Date, default: Date.now },
+        changed: { type: Date, default: Date.now },
+      });
+
     /**
      * API
      */

@@ -32,7 +32,10 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
-            res.render('admin', { agent: req.user });
+            var db = require('../config/dbschema')(dbName);
+            db.agentModel.find({}, function(err, agents) {
+                res.render('admin', { agent: req.user, agents: agents, error: err });
+              });
           }
       ];
     
