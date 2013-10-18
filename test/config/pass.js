@@ -36,7 +36,7 @@ exports.localStrategy = {
     },
 
     tearDown: function(callback) {
-        dbSchema.mongoose.db.dropDatabase(function(err) {
+        dbSchema.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }

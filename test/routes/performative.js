@@ -105,7 +105,7 @@ exports.verify = {
             }
         });
 
-        this.db.mongoose.db.dropDatabase(function(err) {
+        this.db.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }

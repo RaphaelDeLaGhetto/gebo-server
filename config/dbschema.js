@@ -47,7 +47,7 @@ module.exports = function (dbName) {
 
     // This is handy for when I need to drop a database
     // during testing
-    exports.mongoose = connection;
+    exports.connection = connection;
 
     //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,
@@ -107,19 +107,18 @@ module.exports = function (dbName) {
      * Agent schema
      */
     var agentSchema = new Schema({
-        // From the old userSchema
         name: { type: String, required: true, unique: false },
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true},
-        admin: { type: Boolean, required: true },
+        admin: { type: Boolean, required: true, default: true },
 
+//        friends: [friendSchema],
         // Experimental
-        clientId: { type: String, required: false, unique: false },
-        authorization: { type: String, required: false, unique: false },
-        request: { type: String, required: false, unique: false },
-        verification: { type: String, required: false, unique: false },
-        token: { type: String, required: false, unique: false },
-//        gebo: { type: String, require: true, unique: false },
+//        clientId: { type: String, required: false, unique: false },
+//        authorization: { type: String, required: false, unique: false },
+//        request: { type: String, required: false, unique: false },
+//        verification: { type: String, required: false, unique: false },
+//        token: { type: String, required: false, unique: false },
       });
 
     /**
@@ -173,6 +172,23 @@ module.exports = function (dbName) {
       }
     catch (error) {}
 
+    /**
+     * Permission schema
+     */
+    var permissionSchema = new Schema({
+        email: { type: String, required: true, unique: false },
+        read: { type: Boolean, required: true, default: true },
+        write: { type: Boolean, required: true, default: false },
+        execute: { type: Boolean, required: true, default: false },
+      });
+
+    // Export permission model
+    try {
+        var permissionModel = connection.model('Permission', permissionSchema);
+        exports.permissionModel = permissionModel;
+      }
+    catch (error) {}
+
 
     /**
      * Friend schema
@@ -181,19 +197,23 @@ module.exports = function (dbName) {
         name: { type: String, required: true, unique: false },
         email: { type: String, required: true, unique: true },
         token: { type: String, required: false, unique: false },
-        groupIds: [{ type: ObjectId, required: true, unique: true }],
+
+        myStuff: [permissionSchema],
+        hisStuff: [permissionSchema],
+
+        uri: { type: String, required: false, unique: false },
+        request: { type: String, required: false, unique: false },
+        propose: { type: String, required: false, unique: false },
+        inform: { type: String, required: false, unique: false },
       });
 
+    // Export friend model
+    try {
+        var friendModel = connection.model('Friend', friendSchema);
+        exports.friendModel = friendModel;
+      }
+    catch (error) {}
 
-    /**
-     * Permission schema
-     */
-    var permissionSchema = new Schema({
-        email: { type: String, required: true, unique: false },
-        read: { type: Boolean, required: true },
-        write: { type: Boolean, required: true },
-        execute: { type: Boolean, required: true },
-      });
 
     /**
      * Group schema

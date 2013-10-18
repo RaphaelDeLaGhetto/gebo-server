@@ -40,42 +40,58 @@ module.exports = function(dbName) {
             authorization: null,
             request: null,
             verification: null,
-            scopes: []
+//            scopes: []
         };
     
     /**
      * set the configuration options
      */
-    exports.setParams = function(config) {
-        _agent = config;
-      };
+//    exports.setParams = function(config) {
+//        _agent = config;
+//      };
     
     /**
-     * Return select parameters for this token
+     * Load a friend's token verification parameters
+     * from the database
+     *
+     * @param string
      *
      * @return Object
      */
-    exports.getParams = function() {
-        var requiredAndMissing = [];
-    
-        Object.keys(_agent).forEach(function(key) {
-                if (!_agent[key]) {
-                  requiredAndMissing.push(key);
-                }
-              });
-    
-        if (requiredAndMissing.length) {
-          throw new Error('Token is insufficiently configured. Please ' +
-                          'configure the following options: ' +
-                          requiredAndMissing.join(', '));
-        }
-    
-        return {
-            response_type: RESPONSE_TYPE,
-            client_id: _agent.clientId,
-            redirect_uri: _agent.redirectUri,
-            scope: _agent.scopes.join(' '),
-        };
+    exports.getParams = function(email) {
+        var db = require('./dbschema')(dbName);
+        var deferred = q.defer();
+
+        db.friendModel.findOne({ email: email }, function(err, friend) {
+            if (err) {
+              deferred.reject(err);
+            }
+            else {
+              deferred.resolve(friend);
+            }
+          });
+
+        return deferred.promise;
+//        var requiredAndMissing = [];
+//    
+//        Object.keys(_agent).forEach(function(key) {
+//                if (!_agent[key]) {
+//                  requiredAndMissing.push(key);
+//                }
+//              });
+//    
+//        if (requiredAndMissing.length) {
+//          throw new Error('Token is insufficiently configured. Please ' +
+//                          'configure the following options: ' +
+//                          requiredAndMissing.join(', '));
+//        }
+//    
+//        return {
+//            response_type: RESPONSE_TYPE,
+//            client_id: _agent.clientId,
+//            redirect_uri: _agent.redirectUri,
+////            scope: _agent.scopes.join(' '),
+//        };
       };
     
     /**
@@ -84,7 +100,7 @@ module.exports = function(dbName) {
      *
      * @return Promise
      */
-    var _get = function() {
+    var _get = function(email) {
         var db = require('./dbschema')(dbName);
 
         var deferred = q.defer();
@@ -128,7 +144,7 @@ module.exports = function(dbName) {
       };
 
     /**
-     * Remove token from local storage and clear
+     * Remove token from database collection and clear
      * authentication data
      */
     exports.clear = function() {

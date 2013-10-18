@@ -2,6 +2,7 @@
 var passport = require('passport'),
     nconf = require('nconf'),
     q = require('q'),
+    utils = require('../lib/utils'),
     login = require('connect-ensure-login');
 
 module.exports = function(dbName) {
@@ -20,6 +21,7 @@ module.exports = function(dbName) {
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
+            //var db = require('../config/dbschema')(utils.getMongoDbName(req.user.email));
             res.render('account', { agent: req.user });
           }
       ];
@@ -57,7 +59,7 @@ module.exports = function(dbName) {
         var db = require('../config/dbschema')(dbName);
 
         // Add the admin param
-        req.body.admin = false;
+//        req.body.admin = false;
         var newAgent = new db.agentModel(req.body);
 
         newAgent.save(function(err, agent) {

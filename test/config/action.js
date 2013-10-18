@@ -760,7 +760,7 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
-                        dbSchema.mongoose.db.dropDatabase(function(err) {
+                        dbSchema.connection.db.dropDatabase(function(err) {
                             if (err) {
                               console.log(err)
                             }
@@ -1132,7 +1132,7 @@ exports.registerAgent = {
     }, 
 
     tearDown: function(callback) {
-        dbSchema.mongoose.db.dropDatabase(function(err) {
+        dbSchema.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -1176,8 +1176,8 @@ exports.registerAgent = {
             };
         action.registerAgent(existingAgent).
            then(function(agent) {
-               test.ok(false, 'Must not overwrite an existing agent');
-               test.done();
+                test.ok(false, 'Must not overwrite an existing agent');
+                test.done();
              }).
            catch(function(err) {
                test.ok(true, err);
@@ -1211,7 +1211,7 @@ exports.deregisterAgent = {
     }, 
 
     tearDown: function(callback) {
-        dbSchema.mongoose.db.dropDatabase(function(err) {
+        dbSchema.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
