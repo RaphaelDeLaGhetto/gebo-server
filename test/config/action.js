@@ -24,7 +24,7 @@ var verifiedUser = {
 nconf.argv().env().file({ file: 'local.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
-var dbSchema = require('../../config/dbschema')(TEST_DB),
+var gebo = require('../../schemata/gebo')(TEST_DB),
     action = require('../../config/action')(TEST_DB);
 
 /**
@@ -700,7 +700,7 @@ exports.createDatabase = {
 
     setUp: function(callback) {
     	try{
-            agent = new dbSchema.agentModel({
+            agent = new gebo.registrantModel({
                     name: 'Joey Joe Joe Jr. Shabadoo',
                     email: 'jjjj@shabadoo.com',
                     password: 'abc123',
@@ -760,7 +760,7 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
-                        dbSchema.connection.db.dropDatabase(function(err) {
+                        gebo.connection.db.dropDatabase(function(err) {
                             if (err) {
                               console.log(err)
                             }
@@ -1030,7 +1030,7 @@ exports.dropDatabase = {
 exports.getUserDocuments = {
 
     setUp: function(callback) {
-        agent = new dbSchema.agentModel({
+        agent = new gebo.registrantModel({
                 name: 'Joey Joe Joe Jr. Shabadoo',
                 email: 'jjjj@shabadoo.com',
                 password: 'abc123',
@@ -1114,7 +1114,7 @@ exports.registerAgent = {
 
     setUp: function(callback) {
     	try{
-            var agent = new dbSchema.agentModel(
+            var agent = new gebo.registrantModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
@@ -1132,7 +1132,7 @@ exports.registerAgent = {
     }, 
 
     tearDown: function(callback) {
-        dbSchema.connection.db.dropDatabase(function(err) {
+        gebo.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -1142,7 +1142,7 @@ exports.registerAgent = {
 
     'Add a new agent to the database': function(test) {
         test.expect(4);
-        dbSchema.agentModel.find({}, function(err, agents) {
+        gebo.registrantModel.find({}, function(err, agents) {
                 if (err) {
                   test.ok(false, err);
                   test.done();
@@ -1193,7 +1193,7 @@ exports.deregisterAgent = {
 
     setUp: function(callback) {
     	try{
-            var agent = new dbSchema.agentModel(
+            var agent = new gebo.registrantModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
@@ -1211,7 +1211,7 @@ exports.deregisterAgent = {
     }, 
 
     tearDown: function(callback) {
-        dbSchema.connection.db.dropDatabase(function(err) {
+        gebo.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -1224,7 +1224,7 @@ exports.deregisterAgent = {
 
         action.deregisterAgent('dan@hg.com').
             then(function(err, ack) {
-                    dbSchema.agentModel.find({}, function(err, agents) {
+                    gebo.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);
                           test.done();
@@ -1239,7 +1239,7 @@ exports.deregisterAgent = {
         test.expect(1);
         action.deregisterAgent('nosuchagent@hg.com').
             then(function(err, ack) {
-                    dbSchema.agentModel.find({}, function(err, agents) {
+                    gebo.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);
                           test.done();

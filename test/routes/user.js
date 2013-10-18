@@ -1,7 +1,7 @@
 var config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
-    dbSchema = require('../../config/dbschema');
+    gebo = require('../../schemata/gebo');
 
 var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '1234',

@@ -17,7 +17,7 @@ var oauth2orize = require('oauth2orize'),
     mongoose = require('mongoose');
 
 nconf.argv().env().file({ file: 'local.json' });
-var db = require('../config/dbschema')(nconf.get('email'));
+var db = require('../schemata/gebo')(nconf.get('email'));
 
 // create OAuth 2.0 server
 var server = oauth2orize.createServer();

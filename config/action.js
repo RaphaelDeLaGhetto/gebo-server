@@ -277,11 +277,11 @@ module.exports = function(dbName) {
     var _getUsers = function(params) {
         var deferred = q.defer();
         if (params.admin) {
-          var db = require('./dbschema')(dbName);
-          var query = db.userModel.find({}, { password: false });
+          var db = require('../schemata/gebo')(dbName);
+          var query = db.registrantModel.find({}, { password: false });
           query.exec().
-            then(function(users) {
-                    deferred.resolve(users);
+            then(function(registrants) {
+                    deferred.resolve(registrants);
                   });
         }
         else {
@@ -415,8 +415,8 @@ module.exports = function(dbName) {
     var _registerAgent = function(newAgent) {
         var deferred = q.defer();
 
-        var db = require('./dbschema')(dbName);
-        var agent = new db.agentModel(newAgent);
+        var db = require('../schemata/gebo')(dbName);
+        var agent = new db.registrantModel(newAgent);
         agent.save(function(err, agent) {
             if (err) {
               deferred.reject(err);
@@ -437,8 +437,8 @@ module.exports = function(dbName) {
     var _deregisterAgent = function(email) {
         var deferred = q.defer();
 
-        var db = require('./dbschema')(dbName);
-        db.agentModel.remove({ email: email}, function(err) {
+        var db = require('../schemata/gebo')(dbName);
+        db.registrantModel.remove({ email: email}, function(err) {
                 if (err) {
                   deferred.reject(err);
                 }

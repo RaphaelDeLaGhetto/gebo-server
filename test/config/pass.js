@@ -7,7 +7,7 @@ var COL_NAME = 'appCollection',
     USER_TOKEN = '5678';
 
 nconf.argv().env().file({ file: 'local.json' });
-var dbSchema = require('../../config/dbschema')(nconf.get('testDb')),
+var gebo = require('../../schemata/gebo')(nconf.get('testDb')),
     pass = require('../../config/pass')(nconf.get('testDb'));
 
 /**
@@ -17,7 +17,7 @@ exports.localStrategy = {
 
     setUp: function(callback) {
     	try{
-            var agent = new dbSchema.agentModel(
+            var agent = new gebo.registrantModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
@@ -36,7 +36,7 @@ exports.localStrategy = {
     },
 
     tearDown: function(callback) {
-        dbSchema.connection.db.dropDatabase(function(err) {
+        gebo.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -88,4 +88,82 @@ exports.localStrategy = {
     },
 };
 
-
+/**
+ * bearerStrategy
+ */
+//exports.bearerStrategy = {
+//
+//    setUp: function(callback) {
+//    	try{
+//            var agent = new gebo.registrantModel(
+//                            { name: 'dan', email: 'dan@hg.com',
+//                              password: 'password123', admin: true,  
+//                              _id: new mongo.ObjectID('0123456789AB') });
+//
+//            agent.save(function(err){
+//                if (err) {
+//                  console.log(err);
+//                }
+//                callback();       
+//              });
+//    	}
+//        catch(e) {
+//            console.log(e);
+//            callback();
+//    	}
+//    },
+//
+//    tearDown: function(callback) {
+//        gebo.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//            callback();
+//          });
+//    },
+//
+//    'Return an agent object when provided correct email and password': function(test) {
+//        test.expect(3);
+//        pass.localStrategy('dan@hg.com', 'password123', function(err, agent) {
+//            if (err) {
+//              test.ok(false, err);
+//            } 
+//            else {
+//              test.equal(agent.name, 'dan');
+//              test.equal(agent.email, 'dan@hg.com');
+//              test.equal(agent.admin, true);
+//            }
+//            test.done();
+//          });
+//    },
+//
+//    'Return false agent if an invalid email is provided': function(test) {
+//        test.expect(2);
+//        pass.localStrategy('wrongemail@hg.com', 'password123', function(err, agent, message) {
+//            if (err) {
+//              test.ok(false, err);
+//            } 
+//            else {
+//              test.equal(agent, false);
+//              test.equal(message.message, 'Invalid email or password');
+//            }
+//            test.done();
+//          });
+//    },
+//
+//    'Return false agent if a valid email and invalid password are provided': function(test) {
+//        test.expect(2);
+//        pass.localStrategy('dan@hg.com', 'wrongpassword123', function(err, agent, message) {
+//            if (err) {
+//              test.ok(false, err);
+//            } 
+//            else {
+//              test.equal(agent, false);
+//              test.equal(message.message, 'Invalid email or password');
+//            }
+//            test.done();
+//          });
+//    },
+//};
+//
+//

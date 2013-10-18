@@ -3,7 +3,8 @@
 var passport = require('passport'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),
-    dbSchema = require('../config/dbschema'),
+    geboSchema = require('../schemata/gebo'),
+    agentSchema = require('../schemata/agent'),
     q = require('q');
 
 module.exports = function(dbName) {
@@ -49,25 +50,25 @@ module.exports = function(dbName) {
      * @return promise
      */
     var _verify = function(token, email) {
-        var db = new dbSchema(dbName);
+        var agent = new agentSchema(dbName);
 
         var deferred = q.defer();
     
         var _token, _agent, _client;
     
         // Retrieve the token
-        var tokenQuery = db.tokenModel.findOne({ token: token });
+        var tokenQuery = agent.tokenModel.findOne({ token: token });
     
         tokenQuery.exec().
             then(function(token) {
                 _token = token;
-                var agentQuery = db.agentModel.findOne({ _id: _token.agentId });
+                var agentQuery = agent.agentModel.findOne({ _id: _token.agentId });
                 return agentQuery.exec();
               }).
             // User
             then(function(agent) {
                 _agent = agent;
-                var clientQuery = db.clientModel.findOne({ _id: _token.clientId });
+                var clientQuery = agent.clientModel.findOne({ _id: _token.clientId });
                 return clientQuery.exec();
               }).
             // Client

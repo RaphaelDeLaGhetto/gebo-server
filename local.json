@@ -2,6 +2,7 @@
     "name":"gebo-server",
     "email":"gebo-server@example.com",
     "domain":"http://localhost",
+    "oauth2callback": "/callback",
     "port":3000,
     "cachify":false,
     "assets":{

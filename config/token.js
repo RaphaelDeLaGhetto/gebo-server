@@ -4,6 +4,10 @@ var q = require('q'),
     http = require('http'),
     base64url = require('base64url'),
     crypto = require('crypto'),
+    agentSchema = require('../schemata/agent'),
+    geboSchema = require('../schemata/gebo'),
+    utils = require('../lib/utils'),
+    nconf = require('nconf'),
     fs = require('fs');
 
 module.exports = function(dbName) {
@@ -17,9 +21,8 @@ module.exports = function(dbName) {
     /**
      * Set the database name, if not set already 
      */
+    nconf.argv().env().file({ file: 'local.json' });
     if (!dbName) {
-      var nconf = require('nconf');
-      nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('email');
     }
 
@@ -33,105 +36,119 @@ module.exports = function(dbName) {
      * Communication endpoints for the agent who
      * grants the token 
      */
-    var _agent = {
-            uri: null,
-            clientId: null,
-            redirectUri: null,
-            authorization: null,
-            request: null,
-            verification: null,
-//            scopes: []
-        };
+    var _friend = {};// {
+//            uri: null,
+//            clientId: null,
+//            redirectUri: null,
+//            authorization: null,
+//            request: null,
+//            verification: null,
+//        };
     
     /**
      * set the configuration options
      */
 //    exports.setParams = function(config) {
-//        _agent = config;
+//        _friend = config;
 //      };
     
     /**
-     * Load a friend's token verification parameters
-     * from the database
+     * Load a friend's profile from the database
      *
      * @param string
      *
      * @return Object
      */
-    exports.getParams = function(email) {
-        var db = require('./dbschema')(dbName);
+    exports.loadFriend = function(email) {
+        var agent = new agentSchema(dbName);
         var deferred = q.defer();
 
-        db.friendModel.findOne({ email: email }, function(err, friend) {
+        agent.friendModel.findOne({ email: email }, function(err, friend) {
             if (err) {
               deferred.reject(err);
             }
             else {
-              deferred.resolve(friend);
+              _friend = friend;
+              deferred.resolve(_friend);
             }
           });
 
         return deferred.promise;
-//        var requiredAndMissing = [];
-//    
-//        Object.keys(_agent).forEach(function(key) {
-//                if (!_agent[key]) {
-//                  requiredAndMissing.push(key);
-//                }
-//              });
-//    
-//        if (requiredAndMissing.length) {
-//          throw new Error('Token is insufficiently configured. Please ' +
-//                          'configure the following options: ' +
-//                          requiredAndMissing.join(', '));
-//        }
-//    
-//        return {
-//            response_type: RESPONSE_TYPE,
-//            client_id: _agent.clientId,
-//            redirect_uri: _agent.redirectUri,
-////            scope: _agent.scopes.join(' '),
-//        };
+      };
+
+    /**
+     * Get the OAuth2-relevant handshake info
+     *
+     * @param string
+     *
+     * @return Object
+     */
+    exports.getParams = function() {
+
+        if (Object.keys(_friend).length === 0) {
+          return null;
+        }
+
+        var redirect = nconf.get('domain') + ':' + nconf.get('port') + nconf.get('oauth2callback');
+        
+        return {
+            response_type: RESPONSE_TYPE,
+            client_id: utils.getMongoDbName(dbName),
+            redirect_uri: redirect,
+        };
       };
     
     /**
-     * Get the agent collection associated with the
-     * given agent name
+     * Get the access token associated with the
+     * given email
+     *
+     * @param string
      *
      * @return Promise
      */
-    var _get = function(email) {
-        var db = require('./dbschema')(dbName);
-
+    exports.get = function(email) {
+        var agent = new agentSchema(dbName);
         var deferred = q.defer();
 
-        var query = db.agentModel.findOne({
-                clientId: _agent.clientId,
-                verification: _agent.verification });
-        query.exec().
-                then(function(agent) {
-                      deferred.resolve(agent);
-                  });
+        agent.friendModel.findOne({ email: email }, function(err, friend) {
+                if (err) {
+                  deferred.reject(err);
+                }
+                else if (!friend) {
+                  deferred.resolve(null);
+                }
+                else {
+                  deferred.resolve(friend.myToken);
+                }
+            });
   
         return deferred.promise;
       };
-    exports.get = _get;
+//    exports.get = _get;
             
     /**
      * Store the access token associated with the
      * endpoint configured above
      *
      * @param string
+     * @param string
      *
      * @return promise
      */
-    exports.set = function(accessToken) {
+    exports.set = function(email, accessToken) {
+        var agent = new agentSchema(dbName);
         var deferred = q.defer();
 
-        _get().
-            then(function(agent) {
-                agent.token = accessToken;
-                agent.save(function(err) {
+        agent.friendModel.findOne({ email: email }, function(err, friend) {
+                if (err) {
+                  deferred.reject(err);
+                }
+                else if (!friend) {
+                  deferred.reject('No such friend: ' + email);
+                }
+                else {
+                  friend.myToken = accessToken;
+                  friend.save(function(err, savedFriend) {
                     if (err) {
                       deferred.reject(err);
                     }
@@ -139,29 +156,8 @@ module.exports = function(dbName) {
                       deferred.resolve();
                     }
                   });
-              });
-        return deferred.promise;
-      };
-
-    /**
-     * Remove token from database collection and clear
-     * authentication data
-     */
-    exports.clear = function() {
-        var deferred = q.defer();
-
-        _get().
-            then(function(agent) {
-                agent.token = null;
-                agent.save(function(err) {
-                    if (err) {
-                      deferred.reject(err);
-                    }
-                    else {
-                      deferred.resolve();
-                    }
-                  });
-              });
+                }
+            });
         return deferred.promise;
       };
 
@@ -173,27 +169,27 @@ module.exports = function(dbName) {
      *
      * @return promise
      */
-    exports.verify = function(token) {
-        var deferred = q.defer();
-
-        var options = {
-                host: _agent.uri,
-                path: _agent.verification + '?access_token=' + token,
-                method: 'GET'
-              };
-        var req = http.get(options, function(res) {
-                        res.setEncoding('utf8');
-                        res.on('data', function(data) {
-                            _data = JSON.parse(data);
-                            deferred.resolve(_data);
-                          });
-                      })
-                    .on('error', function(err){
-                        deferred.reject(err);
-                      });
-
-        return deferred.promise;
-      };
+//    exports.verify = function(token) {
+//        var deferred = q.defer();
+//
+//        var options = {
+//                host: _friend.uri,
+//                path: _friend.verification + '?access_token=' + token,
+//                method: 'GET'
+//              };
+//        var req = http.get(options, function(res) {
+//                        res.setEncoding('utf8');
+//                        res.on('data', function(data) {
+//                            _data = JSON.parse(data);
+//                            deferred.resolve(_data);
+//                          });
+//                      })
+//                    .on('error', function(err){
+//                        deferred.reject(err);
+//                      });
+//
+//        return deferred.promise;
+//      };
 
     /**
      * Request a token
@@ -214,8 +210,8 @@ module.exports = function(dbName) {
         // Make the claim 
         var claim = {
                 iss: 'some@email.com',
-                scope: _agent.request,
-                aud: _agent.authorization,
+                scope: _friend.request,
+                aud: _friend.authorization,
                 exp: new Date()/1000 + 3600*1000,
                 iat: new Date()/1000, 
             };
@@ -238,8 +234,8 @@ module.exports = function(dbName) {
 
         // Make the request
         var options = {
-                host: _agent.uri,
-                path: _agent.authorization,
+                host: _friend.uri,
+                path: _friend.authorization,
                 method: 'POST'
               };
         var req = http.request(options, function(res) {

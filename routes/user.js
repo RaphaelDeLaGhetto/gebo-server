@@ -21,7 +21,6 @@ module.exports = function(dbName) {
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
-            //var db = require('../config/dbschema')(utils.getMongoDbName(req.user.email));
             res.render('account', { agent: req.user });
           }
       ];
@@ -34,9 +33,9 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
-            var db = require('../config/dbschema')(dbName);
-            db.agentModel.find({}, function(err, agents) {
-                res.render('admin', { agent: req.user, agents: agents, error: err });
+            var gebo = require('../schemata/gebo')(dbName);
+            gebo.registrantModel.find({}, function(err, registrants) {
+                res.render('admin', { agent: req.user, agents: registrants, error: err });
               });
           }
       ];
@@ -56,18 +55,18 @@ module.exports = function(dbName) {
      * POST /signup
      */
     exports.signUp = function(req, res) {
-        var db = require('../config/dbschema')(dbName);
+        var gebo = require('../schemata/gebo')(dbName);
 
         // Add the admin param
 //        req.body.admin = false;
-        var newAgent = new db.agentModel(req.body);
+        var registrant = new gebo.registrantModel(req.body);
 
-        newAgent.save(function(err, agent) {
+        registrant.save(function(err, registrant) {
             if (err) {
               res.redirect('/');
             }
             else {
-              res.render('login', { agent: agent });
+              res.render('login', { agent: registrant });
             }
           });
       };

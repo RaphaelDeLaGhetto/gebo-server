@@ -1,14 +1,14 @@
 var config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
-    dbSchema = require('../../config/dbschema');
+    geboSchema = require('../../schemata/gebo');
+    agentSchema = require('../../schemata/agent');
 
 var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '1234',
     USER_TOKEN = '5678';
 
 var TEST_DB = nconf.argv().env().file({ file: 'local.json' }).get('testDb');
-//var dbSchema = require('../../config/dbschema')(nconf.get('testDb'));
 var performative = require('../../routes/performative')(TEST_DB);
 
 /**
@@ -18,24 +18,24 @@ exports.verify = {
 
     setUp: function(callback) {
     	try{
-            this.db = new dbSchema(TEST_DB);
+            this.gebo = new geboSchema(TEST_DB);
             /**
              * Setup the app database
              */
             // Registered agents
-            var agent = new this.db.agentModel(
+            var agent = new this.gebo.registrantModel(
                             { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
             agent.save();
-            agent = new this.db.agentModel(
+            agent = new this.gebo.registrantModel(
                             { name: 'yanfen', email: 'yanfen@hg.com',
                               password: 'password123', admin: false,  
                               _id: new mongo.ObjectID('123456789ABC') });
             agent.save();
             
             // Registered client app
-            var client = new this.db.clientModel(
+            var client = new this.gebo.clientModel(
                             { name: 'todoApp',
                               clientId: 'todoApp123', 
                               secret: 'todo-secret',
@@ -105,7 +105,7 @@ exports.verify = {
             }
         });
 
-        this.db.connection.db.dropDatabase(function(err) {
+        this.gebo.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }

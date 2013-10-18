@@ -28,7 +28,7 @@ module.exports = function(dbName) {
       dbName = nconf.get('email');
     }
 
-    var db = require('./dbschema')(dbName);
+    var db = require('../schemata/gebo')(dbName);
 
     /**
      * LocalStrategy
@@ -42,9 +42,7 @@ module.exports = function(dbName) {
      * @param function
      */
     var _localStrategy = function(email, password, done) {
-        console.log(email);
-        db.agentModel.findOne({ email: email }, function(err, agent) {
-            console.log(agent);
+        db.registrantModel.findOne({ email: email }, function(err, agent) {
             if (err) {
               return done(err);
             }
@@ -72,7 +70,7 @@ module.exports = function(dbName) {
       });
     
     passport.deserializeUser(function(id, done) {
-        db.agentModel.findById(id, function (err, agent) {
+        db.registrantModel.findById(id, function (err, agent) {
             done(err, agent);
           });
       });
@@ -121,7 +119,6 @@ module.exports = function(dbName) {
                 if (client.secret !== password) {
                   return done(null, false);
                 }
-                console.log(client);
                 return done(null, client);
               });
           }
@@ -151,33 +148,64 @@ module.exports = function(dbName) {
      * bearer token).  The user must have previously authorized a client
      * application, which is issued an access token to make requests on behalf of
      * the authorizing user.
+     *
+     * @param string
+     * @param function
      */
-    passport.use(new BearerStrategy(
-        function(accessToken, done) {
-            db.tokenModel.findOne({ token: accessToken }, function(err, token) {
+    var _bearerStrategy = function(accessToken, done) {
+            
+        db.tokenModel.findOne({ token: accessToken }, function(err, token) {
+            if (err) {
+              return done(err);
+            }
+            if (!token) {
+              return done(null, false);
+            }
+            
+            db.userModel.findOne({ _id: token.userId }, function(err, user) {
                 if (err) {
                   return done(err);
                 }
-                if (!token) {
+                if (!user) {
                   return done(null, false);
                 }
-                
-                db.userModel.findOne({ _id: token.userId }, function(err, user) {
-                    if (err) {
-                      return done(err);
-                    }
-                    if (!user) {
-                      return done(null, false);
-                    }
     
-                    // To keep this example simple, restricted scopes are not implemented,
-                    // and this is just for illustrative purposes
-                    var info = { scope: '*' };
-                    done(null, user, info);
-                  });
+                // To keep this example simple, restricted scopes are not implemented,
+                // and this is just for illustrative purposes
+                var info = { scope: '*' };
+                done(null, user, info);
               });
-          }
-      ));
+          });
+      };
+    exports.bearerStrategy = _bearerStrategy;
+    passport.use(new BearerStrategy(_bearerStrategy));
+
+//    passport.use(new BearerStrategy(
+//        function(accessToken, done) {
+//            db.tokenModel.findOne({ token: accessToken }, function(err, token) {
+//                if (err) {
+//                  return done(err);
+//                }
+//                if (!token) {
+//                  return done(null, false);
+//                }
+//                
+//                db.userModel.findOne({ _id: token.userId }, function(err, user) {
+//                    if (err) {
+//                      return done(err);
+//                    }
+//                    if (!user) {
+//                      return done(null, false);
+//                    }
+//    
+//                    // To keep this example simple, restricted scopes are not implemented,
+//                    // and this is just for illustrative purposes
+//                    var info = { scope: '*' };
+//                    done(null, user, info);
+//                  });
+//              });
+//          }
+//      ));
     
     /**
      * Client JWT Bearer Strategy
