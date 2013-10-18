@@ -87,6 +87,7 @@ exports.getParams = {
                     if (err) {
                       console.log(err);
                     }
+                    console.log('friend should be saved');
                     callback();
                   });
               });
