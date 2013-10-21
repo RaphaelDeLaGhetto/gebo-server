@@ -149,26 +149,30 @@ module.exports = function(email) {
      */
     var _bearerStrategy = function(accessToken, done) {
             
-        db.tokenModel.findOne({ token: accessToken }, function(err, token) {
+        db.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
               return done(err);
             }
             if (!token) {
               return done(null, false);
             }
-            
-            db.userModel.findOne({ _id: token.userId }, function(err, user) {
+
+            if (token.expires && new Date(token.expires) < new Date()) {
+              return done(null, false);
+            }
+             
+            db.registrantModel.findOne({ _id: token.registrantId }, function(err, registrant) {
                 if (err) {
                   return done(err);
                 }
-                if (!user) {
+                if (!registrant) {
                   return done(null, false);
                 }
     
                 // To keep this example simple, restricted scopes are not implemented,
                 // and this is just for illustrative purposes
                 var info = { scope: '*' };
-                done(null, user, info);
+                done(null, registrant, info);
               });
           });
       };
