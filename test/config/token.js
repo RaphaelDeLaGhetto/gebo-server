@@ -71,7 +71,7 @@ exports.getParams = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisStuff.push({ email: 'someapp@example.com' });
+            friend.hisPermissions.push({ email: 'someapp@example.com' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -160,7 +160,7 @@ exports.loadFriend = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisStuff.push({ email: 'someapp@example.com' });
+            friend.hisPermissions.push({ email: 'someapp@example.com' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -262,7 +262,7 @@ exports.get = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisStuff.push({ email: 'someapp@example.com' });
+            friend.hisPermissions.push({ email: 'someapp@example.com' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -357,7 +357,7 @@ exports.set = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisStuff.push({ email: 'someapp@example.com' });
+            friend.hisPermissions.push({ email: 'someapp@example.com' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -458,7 +458,7 @@ exports.set = {
 //            /**
 //             * Create access permissions for imaginary collection
 //             */
-//            friend.hisStuff.push({ email: 'someapp@example.com' });
+//            friend.hisPermissions.push({ email: 'someapp@example.com' });
 //
 //            registrant.save(function(err) {
 //                if (err) {
@@ -548,7 +548,7 @@ exports.getTokenWithJwt = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisStuff.push({ email: 'someapp@example.com' });
+            friend.hisPermissions.push({ email: 'someapp@example.com' });
 
             registrant.save(function(err) {
                 if (err) {
