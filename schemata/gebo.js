@@ -55,7 +55,7 @@ module.exports = function (email) {
         name: { type: String, required: true, unique: false },
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true},
-        admin: { type: Boolean, required: true, default: true },
+        admin: { type: Boolean, required: true, default: false },
       });
 
     /**
@@ -112,10 +112,16 @@ module.exports = function (email) {
      * Token schema
      */
     var tokenSchema = new Schema({
-        agentId: { type: ObjectId, required: true, unique: false },
-        clientId: { type: ObjectId, required: true, unique: false },
-        token: { type: String, required: true, unique: true },
+        registrantId: { type: ObjectId, required: true, unique: false },
+        friendId: { type: ObjectId, required: true, unique: false },
+        string: { type: String, required: true, unique: false },
+        expires: { type: Date, required: false, default: null },
       });
+//    var tokenSchema = new Schema({
+//        agentId: { type: ObjectId, required: true, unique: false },
+//        clientId: { type: ObjectId, required: true, unique: false },
+//        token: { type: String, required: true, unique: true },
+//      });
     
     // Export token model
     try {

@@ -199,14 +199,17 @@ module.exports = function (email) {
 
         // Current access tokens
         myToken: { type: String, default: null, unique: false },
-        hisToken: {
-            string: { type: String, default: null, unique: false },
-            expiry: { type: Date, default: null },
-          },
+        // I don't think I need to store his token. The gebo does that.
+        // Access can be granted or denied with permissions. Friendship
+        // implies the ability to obtain an access token
+//        hisToken: {
+//            string: { type: String, default: null, unique: false },
+//            expiry: { type: Date, default: null },
+//          },
 
         // Permissions
         myStuff: [permissionSchema],
-        hisStuff: [permissionSchema],
+        hisPermissions: [permissionSchema],
 
         // Agent communication
         uri: { type: String, required: false, unique: false },
