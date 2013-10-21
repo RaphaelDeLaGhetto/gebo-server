@@ -2,15 +2,10 @@
 
 var utils = require('../lib/utils');
 
-module.exports = function (dbName) {
+module.exports = function (email) {
 
-    if (!dbName) {
-      var nconf = require('nconf');
-      nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('email');
-    }
-
-    dbName = utils.getMongoDbName(dbName);
+    // Turn the email into a mongo-friend database name
+    var dbName = utils.ensureDbName(email);
 
     /** 
      * Thank you to jaredhanson/passport-local

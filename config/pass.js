@@ -11,22 +11,17 @@
 var passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
     nconf = require('nconf'),
+    utils = require('../lib/utils'),
     // jaredhanson/oauth2orize
     BasicStrategy = require('passport-http').BasicStrategy,
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
     ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy;
 
-module.exports = function(dbName) {
+module.exports = function(email) {
 
-    /**
-     * Start up the database connection
-     */
-    if (!dbName) {
-      var nconf = require('nconf');
-      nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('email');
-    }
+    // Turn the email into a mongo-friend database name
+    var dbName = utils.ensureDbName(email);
 
     var db = require('../schemata/gebo')(dbName);
 

@@ -6,13 +6,10 @@ var config = require('./config'),
     utils = require('../lib/utils'),
     q = require('q');
 
-module.exports = function(dbName) {
+module.exports = function(email) {
 
-    if (!dbName) {
-      nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('name');
-    }
-    dbName = utils.getMongoDbName(dbName);
+    // Turn the email into a mongo-friend database name
+    var dbName = utils.ensureDbName(email);
 
     /**
      * Determine if the database exists. To do this,

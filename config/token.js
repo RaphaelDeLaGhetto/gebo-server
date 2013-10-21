@@ -10,21 +10,16 @@ var q = require('q'),
     nconf = require('nconf'),
     fs = require('fs');
 
-module.exports = function(dbName) {
+module.exports = function(email) {
+
+    // Turn the email into a mongo-friend database name
+    var dbName = utils.ensureDbName(email);
 
     /**
      * Data returned upon token verification
      */
     var _data = {};
     exports.data = function() { return _data; };
-
-    /**
-     * Set the database name, if not set already 
-     */
-    nconf.argv().env().file({ file: 'local.json' });
-    if (!dbName) {
-      dbName = nconf.get('email');
-    }
 
     /**
      *  This response type must be passed to the authorization endpoint using

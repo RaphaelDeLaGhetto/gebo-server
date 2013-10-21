@@ -7,13 +7,10 @@ var passport = require('passport'),
     agentSchema = require('../schemata/agent'),
     q = require('q');
 
-module.exports = function(dbName) {
+module.exports = function(email) {
 
-    if (!dbName) {
-      nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('name');
-    }
-
+    // Turn the email into a mongo-friend database name
+    var dbName = utils.ensureDbName(email);
 
     /**
      * Receive a request for consideration
@@ -51,6 +48,8 @@ module.exports = function(dbName) {
      */
     var _verify = function(token, email) {
         var agent = new agentSchema(dbName);
+        console.log('dbName');
+        console.log(dbName);
 
         var deferred = q.defer();
     

@@ -2,15 +2,10 @@
 
 var utils = require('../lib/utils');
 
-module.exports = function (dbName) {
+module.exports = function (email) {
 
-    if (!dbName) {
-      var nconf = require('nconf');
-      nconf.argv().env().file({ file: 'local.json' });
-      dbName = nconf.get('email');
-    }
-
-    dbName = utils.getMongoDbName(dbName);
+    // Turn the email into a mongo-friend database name
+    var dbName = utils.ensureDbName(email);
 
     /** 
      * Thank you to jaredhanson/passport-local
@@ -197,6 +192,11 @@ module.exports = function (dbName) {
         name: { type: String, required: true, unique: false },
         email: { type: String, required: true, unique: true },
 
+        // Experimental... the friendSchema takes the place of the the clientSchema.
+        // As such, name == name, email == clientId, secret == secret (which equals 
+        // a mongo-friendly conversion of the email plus a random string)
+        //secret: { type: String, required: true, unique: true },
+
         // Current access tokens
         myToken: { type: String, default: null, unique: false },
         hisToken: {
@@ -216,8 +216,8 @@ module.exports = function (dbName) {
 
         // OAuth2
         verify: { type: String, required: false, unique: false, default: '/verify' },
-//        authorize: { type: String, required: false, unique: false, default: '/authorize' },
-//        redirect: { type: String, required: false, unique: false, default: '/callback' }, 
+        authorize: { type: String, required: false, unique: false, default: '/authorize' },
+        redirect: { type: String, required: false, unique: false, default: '/callback' }, 
       });
 
     // Export friend model
