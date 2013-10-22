@@ -4,7 +4,9 @@ var config = require('./config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
-    q = require('q');
+    q = require('q'),
+    agentSchema = require('../schemata/agent'),
+    geboSchema = require('../schemata/gebo');
 
 module.exports = function(email) {
 
@@ -279,7 +281,7 @@ module.exports = function(email) {
     var _getUsers = function(params) {
         var deferred = q.defer();
         if (params.admin) {
-          var db = require('../schemata/gebo')(dbName);
+          var db = new geboSchema(dbName);
           var query = db.registrantModel.find({}, { password: false });
           query.exec().
             then(function(registrants) {
@@ -415,19 +417,26 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    //var _registerAgent = function(newAgent) {
     var _registerAgent = function(verified, params) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          var db = require('../schemata/gebo')(dbName);
-          var agent = new db.registrantModel(params.newAgent);
-          agent.save(function(err, agent) {
-              if (err) {
-                deferred.reject(err);
+          var db = new geboSchema(dbName);
+
+          db.registrantModel.findOne({ email: params.newAgent.email }, function(err, registrant) {
+              if (registrant) {
+                deferred.reject('That email address has already been registered');
               }
               else {
-                deferred.resolve(agent);
+                var agent = new db.registrantModel(params.newAgent);
+                agent.save(function(err, agent) {
+                    if (err) {
+                      deferred.reject(err);
+                    }
+                    else {
+                      deferred.resolve(agent);
+                    }
+                  });
               }
             });
         }
@@ -448,7 +457,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          var db = require('../schemata/gebo')(dbName);
+          var db = new geboSchema(dbName);
           db.registrantModel.remove({ email: params.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);
@@ -464,6 +473,66 @@ module.exports = function(email) {
         return deferred.promise; 
       };
     exports.deregisterAgent = _deregisterAgent;
+
+    /**
+     * This adds a new friend to the registrant's
+     * database
+     *
+     * @param Object
+     * @param Object
+     */
+    var _friend = function(verified, params) {
+        var deferred = q.defer();
+
+        if (verified.write) {
+          var db = new agentSchema(verified.dbName);
+
+          db.friendModel.findOneAndUpdate(
+                          { email: params.newFriend.email }, params.newFriend, { upsert: true },
+                          function(err, friend) {
+                                  if (err) {
+                                    deferred.reject(err);
+                                  }
+                                  else {
+                                    deferred.resolve(friend);
+                                  }
+                            });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+        return deferred.promise; 
+      };
+    exports.friend = _friend;
+
+    /**
+     * Remove a friend from this registrant's database
+     *
+     * @param Object
+     * @param Object
+     */
+    var _defriend = function(verified, params) {
+        var deferred = q.defer();
+
+        if (verified.write) {
+          var db = new agentSchema(verified.dbName);
+          console.log(params);
+          db.friendModel.remove({ email: params.email }, function(err, ack) {
+                  if (err) {
+                    deferred.reject(err);
+                  }
+                  else {
+                    deferred.resolve(ack);
+                  }
+                });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+        return deferred.promise; 
+      };
+    exports.defriend = _defriend;
+
 
     return exports;
   };

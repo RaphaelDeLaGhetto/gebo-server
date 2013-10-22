@@ -25,6 +25,7 @@ nconf.argv().env().file({ file: 'local.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 var gebo = require('../../schemata/gebo')(TEST_DB),
+    agentSchema = require('../../schemata/agent'),
     action = require('../../config/action')(TEST_DB);
 
 /**
@@ -1250,7 +1251,7 @@ exports.registerAgent = {
                 test.done();
              }).
            catch(function(err) {
-               test.ok(true, err);
+               test.equal(err, 'That email address has already been registered');
                test.done();
              });
     },
@@ -1353,3 +1354,261 @@ exports.deregisterAgent = {
                   });
     },
 };
+
+/**
+ * friend 
+ */
+exports.friend = {
+
+    setUp: function(callback) {
+        try {
+            /**
+             * Setup a registrant
+             */
+            var registrant = new gebo.registrantModel({
+                    name: 'dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+          
+            /**
+             * Make a friend for the registrant
+             */
+            this.agentDb = new agentSchema('dan@hg.com');
+            var friend = new this.agentDb.friendModel({
+                    name: 'john',
+                    email: 'john@painter.com',
+                    uri: 'http://theirhost.com',
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
+
+            registrant.save(function(err) {
+                    friend.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        callback();
+                      });
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+       
+        gebo.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+        this.agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+     }, 
+
+    'Add a new friend to the database if permitted': function(test) {
+        test.expect(4);
+        var newFriend = {
+                name: 'yanfen',
+                email: 'yanfen@hg.com',
+                uri: 'http://theirhost.com',
+            };
+        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { newFriend: newFriend }).
+            then(function(friend) {  
+                test.equal(friend.name, 'yanfen');
+                test.equal(friend.email, 'yanfen@hg.com');
+                test.equal(friend.uri, 'http://theirhost.com');
+
+                var agentDb = new agentSchema('dan@hg.com');
+                agentDb.friendModel.find({}, function(err, friends) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(friends.length, 2); 
+                        test.done();
+                  });
+
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Do not add a new friend to the database if not permitted': function(test) {
+        test.expect(2);
+        var newFriend = {
+                name: 'yanfen',
+                email: 'yanfen@hg.com',
+                uri: 'http://theirhost.com',
+            };
+        action.friend({ write: false }, { newFriend: newFriend }).
+            then(function(friend) {  
+                test.ok(false, 'Should not be allowed to add a new friend');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You are not permitted to request or propose that action');
+                var agentDb = new agentSchema('dan@hg.com');
+                agentDb.friendModel.find({}, function(err, friends) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(friends.length, 1); 
+                        test.done();
+                  });
+              });
+    },
+
+    'Update an existing friend': function(test) {
+        test.expect(3);
+        var existingFriend = {
+                    name: 'john',
+                    email: 'john@painter.com',
+                    uri: 'http://someotherhost.com',
+                };
+
+        action.friend({ write: true }, { newFriend: existingFriend }).
+                then(function(friend) {
+                    test.equal(friend.name, 'john');
+                    test.equal(friend.email, 'john@painter.com');
+                    test.equal(friend.uri, 'http://someotherhost.com');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+    },
+};
+
+/**
+ * defriend 
+ */
+exports.defriend = {
+
+    setUp: function(callback) {
+        try {
+            /**
+             * Setup a registrant
+             */
+            var registrant = new gebo.registrantModel({
+                    name: 'dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+          
+            /**
+             * Make a friend for the registrant
+             */
+            this.agentDb = new agentSchema('dan@hg.com');
+            var friend = new this.agentDb.friendModel({
+                    name: 'john',
+                    email: 'john@painter.com',
+                    uri: 'http://theirhost.com',
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
+
+            registrant.save(function(err) {
+                    friend.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        callback();
+                      });
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+       
+        gebo.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+        this.agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+     }, 
+
+    'Remove a friend from the database if permitted': function(test) {
+        test.expect(2);
+        action.defriend({ write: true, dbName: 'dan_at_hg_dot_com' }, { email: 'john@painter.com' }).
+            then(function(ack) {  
+                test.equal(ack, 1);
+
+                var agentDb = new agentSchema('dan@hg.com');
+                agentDb.friendModel.find({}, function(err, friends) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(friends.length, 0); 
+                        test.done();
+                  });
+
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Do not remove a friend from the database if not permitted': function(test) {
+        test.expect(2);
+        action.defriend({ write: false }, { email: 'john@painter.com' }).
+            then(function(friend) {  
+                test.ok(false, 'Should not be allowed to delete a friend');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You are not permitted to request or propose that action');
+                var agentDb = new agentSchema('dan@hg.com');
+                agentDb.friendModel.find({}, function(err, friends) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(friends.length, 1); 
+                        test.done();
+                  });
+              });
+    },
+
+    'Don\'t barf if the email provided matches no friend': function(test) {
+        test.expect(1);
+        action.defriend({ write: true }, { email: 'yanfen@hg.com' }).
+                then(function(ack) {
+                    test.equal(ack, 0);
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+    },
+};
+
+
