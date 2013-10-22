@@ -103,12 +103,6 @@ exports.bearerStrategy = {
                                     _id: new mongo.ObjectID('0123456789AB')
                                 });
 
-            agent.save(function(err){
-                if (err) {
-                  console.log(err);
-                }
-              });
-
             // A good token
             var token = new this.gebo.tokenModel({
                                     registrantId: new mongo.ObjectID('0123456789AB'),
@@ -144,13 +138,22 @@ exports.bearerStrategy = {
                                     expires: Date.now() - 60*60*1000,
                                 });
 
-            token.save(function(err){
+            // Save the agent and last token here to make sure
+            // it's in the database in time for testing (this wasn't 
+            // happening before. I.e., tests were failing because 
+            // the agent hadn't been added in time)
+            agent.save(function(err){
                 if (err) {
                   console.log(err);
                 }
-                callback();
-              });
+                token.save(function(err){
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
+                  });
 
+              });
      	}
         catch(e) {
             console.log(e);
