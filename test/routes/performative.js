@@ -182,6 +182,7 @@ exports.verify = {
                 test.equal(permissions.execute, false);
                 test.equal(permissions.collectionName, 'someotherapp@example.com');
                 test.equal(permissions.dbName, 'yanfen_at_hg_dot_com');
+                test.equal(permissions.admin, false);
                 test.done();
               });
     },
