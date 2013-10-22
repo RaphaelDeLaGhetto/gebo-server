@@ -1156,7 +1156,7 @@ exports.registerAgent = {
           });
     }, 
 
-    'Add a new agent to the database': function(test) {
+    'Add a new agent to the database if admin': function(test) {
         test.expect(4);
         gebo.registrantModel.find({}, function(err, agents) {
                 if (err) {
@@ -1172,11 +1172,65 @@ exports.registerAgent = {
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
                     };
-                action.registerAgent(newAgent).
+                action.registerAgent({ admin: true }, { newAgent: newAgent }).
                     then(function(agent) {  
                         test.equal(agent.name, 'yanfen');
                         test.equal(agent.email, 'yanfen@hg.com');
                         test.equal(agent.admin, false);
+                        test.done();
+                      });
+          });
+    },
+
+    'Add a new agent to the database with execute permissions': function(test) {
+        test.expect(4);
+        gebo.registrantModel.find({}, function(err, agents) {
+                if (err) {
+                  test.ok(false, err);
+                  test.done();
+                }
+                test.equal(agents.length, 1); 
+
+                var newAgent = {
+                        name: 'yanfen',
+                        email: 'yanfen@hg.com',
+                        password: 'password456',
+                        admin: false,
+                        _id: new mongo.ObjectID('123456789ABC')
+                    };
+                action.registerAgent({ admin: false, execute: true }, { newAgent: newAgent }).
+                    then(function(agent) {  
+                        test.equal(agent.name, 'yanfen');
+                        test.equal(agent.email, 'yanfen@hg.com');
+                        test.equal(agent.admin, false);
+                        test.done();
+                      });
+          });
+    },
+
+    'Do not add a new agent to the database without proper permissions': function(test) {
+        test.expect(2);
+        gebo.registrantModel.find({}, function(err, agents) {
+                if (err) {
+                  test.ok(false, err);
+                  test.done();
+                }
+                test.equal(agents.length, 1); 
+
+                var newAgent = {
+                        name: 'yanfen',
+                        email: 'yanfen@hg.com',
+                        password: 'password456',
+                        admin: false,
+                        _id: new mongo.ObjectID('123456789ABC')
+                    };
+                action.registerAgent({ admin: false, execute: false }, { newAgent: newAgent }).
+                    then(function(agent) {  
+                        test.ok(false, 'I should not be able to add a new agent');
+                        test.done();
+                      }).
+                    catch(function(err) {
+                        test.equal(err, 'You are not permitted to request or propose that action');
                         test.done();
                       });
           });
@@ -1190,7 +1244,7 @@ exports.registerAgent = {
                 password: 'password123',
                 admin: true
             };
-        action.registerAgent(existingAgent).
+        action.registerAgent({ admin: false, execute: true }, { newAgent: existingAgent }).
            then(function(agent) {
                 test.ok(false, 'Must not overwrite an existing agent');
                 test.done();
@@ -1235,11 +1289,12 @@ exports.deregisterAgent = {
           });
     }, 
 
-    'Remove an agent from the database': function(test) {
-        test.expect(1);
+    'Remove an agent from the database if an admin': function(test) {
+        test.expect(2);
 
-        action.deregisterAgent('dan@hg.com').
-            then(function(err, ack) {
+        action.deregisterAgent({ admin: true }, { email: 'dan@hg.com' }).
+            then(function(ack) {
+                    test.equal(ack, 1);
                     gebo.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);
@@ -1251,10 +1306,42 @@ exports.deregisterAgent = {
                   });
     },
 
+    'Remove an agent from the database with execute permission': function(test) {
+        test.expect(2);
+
+        action.deregisterAgent({ admin: false, execute: true }, { email: 'dan@hg.com' }).
+            then(function(ack) {
+                    test.equal(ack, 1);
+                    gebo.registrantModel.find({}, function(err, agents) {
+                        if (err) {
+                          test.ok(false, err);
+                          test.done();
+                        }
+                        test.equal(agents.length, 0); 
+                        test.done();
+                      });
+                  });
+    },
+
+    'Do not remove an agent without execute permission or admin status': function(test) {
+        test.expect(1);
+
+        action.deregisterAgent({ admin: false, execute: false }, { email: 'dan@hg.com' }).
+            then(function(ack) {
+                    test.ok(false, 'I should not be allowed to deregister an agent'); 
+                    test.done();
+              }).
+            catch(function(err) {
+                    test.equal(err, 'You are not permitted to request or propose that action');
+                    test.done();
+              });
+    },
+
+
     'Should not barf if agent does not exist': function(test) {
         test.expect(1);
-        action.deregisterAgent('nosuchagent@hg.com').
-            then(function(err, ack) {
+        action.deregisterAgent({ admin: true }, { email: 'nosuchagent@hg.com' }).
+            then(function(ack) {
                     gebo.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);

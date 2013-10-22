@@ -413,20 +413,27 @@ module.exports = function(email) {
      * This adds a new agent for this gebo to represent
      *
      * @param Object
+     * @param Object
      */
-    var _registerAgent = function(newAgent) {
+    //var _registerAgent = function(newAgent) {
+    var _registerAgent = function(verified, params) {
         var deferred = q.defer();
 
-        var db = require('../schemata/gebo')(dbName);
-        var agent = new db.registrantModel(newAgent);
-        agent.save(function(err, agent) {
-            if (err) {
-              deferred.reject(err);
-            }
-            else {
-              deferred.resolve(agent);
-            }
-          });
+        if (verified.admin || verified.execute) {
+          var db = require('../schemata/gebo')(dbName);
+          var agent = new db.registrantModel(params.newAgent);
+          agent.save(function(err, agent) {
+              if (err) {
+                deferred.reject(err);
+              }
+              else {
+                deferred.resolve(agent);
+              }
+            });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise; 
       };
     exports.registerAgent = _registerAgent;
@@ -434,20 +441,26 @@ module.exports = function(email) {
     /**
      * Remove an agent from this agent's database
      *
-     * @param string
+     * @param Object
+     * @param Object
      */
-    var _deregisterAgent = function(email) {
+    var _deregisterAgent = function(verified, params) {
         var deferred = q.defer();
 
-        var db = require('../schemata/gebo')(dbName);
-        db.registrantModel.remove({ email: email}, function(err) {
-                if (err) {
-                  deferred.reject(err);
-                }
-                else {
-                  deferred.resolve();
-                }
-              });
+        if (verified.admin || verified.execute) {
+          var db = require('../schemata/gebo')(dbName);
+          db.registrantModel.remove({ email: params.email }, function(err, ack) {
+                  if (err) {
+                    deferred.reject(err);
+                  }
+                  else {
+                    deferred.resolve(ack);
+                  }
+                });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise; 
       };
     exports.deregisterAgent = _deregisterAgent;
