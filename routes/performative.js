@@ -52,6 +52,7 @@ module.exports = function(email) {
         var gebo = new geboSchema(dbName);
 
         var deferred = q.defer();
+        var _dbName;
     
         gebo.tokenModel.findOne({ string: tokenStr }).exec().
             then(function(token) {
@@ -68,6 +69,7 @@ module.exports = function(email) {
                 }
                 else {
                   var agent = new agentSchema(registrant.email);
+                  _dbName = utils.getMongoDbName(registrant.email);
                   return agent.friendModel.findOne({ email: friendEmail }).exec();
                 }
               }).
@@ -81,6 +83,8 @@ module.exports = function(email) {
                     var found = false;
                     for (var i = 0; i < friend.hisPermissions.length; i++) {
                       if (friend.hisPermissions[i].email === resourceEmail) {
+                        friend.hisPermissions[i].collectionName = utils.getMongoCollectionName(resourceEmail);
+                        friend.hisPermissions[i].dbName = _dbName;
                         deferred.resolve(friend.hisPermissions[i]);
                         found = true;
                         break;
