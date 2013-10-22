@@ -244,22 +244,27 @@ module.exports = function(email) {
      */
     var _ls = function(params) {
         var deferred = q.defer();
-        _getCollection(params.dbName, params.collectionName).
-            then(function(collection) {
-                    collection.find({}, ['_id', 'name']).
-                        sort('name').
-                        toArray(function(err, docs) {
-                            if (err) {
-                              deferred.reject(err);
-                            }
-                            else {
-                              deferred.resolve(docs);
-                            }
-                          });
-                  }).
-            catch(function(err) {
-                    deferred.reject(err);
-                  });
+        if (params.admin || params.read) { 
+          _getCollection(params.dbName, params.collectionName).
+              then(function(collection) {
+                      collection.find({}, ['_id', 'name']).
+                          sort('name').
+                          toArray(function(err, docs) {
+                              if (err) {
+                                deferred.reject(err);
+                              }
+                              else {
+                                deferred.resolve(docs);
+                              }
+                            });
+                    }).
+              catch(function(err) {
+                      deferred.reject(err);
+                    });
+        }
+        else {
+          deferred.reject('You are not allowed access to that resource');
+        }
         return deferred.promise;
       };
     exports.ls = _ls;
@@ -298,25 +303,25 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _getUserDocuments = function(verified, params) {
-        var deferred = q.defer();
-        if (verified.admin) {
-          var dbName = utils.getMongoDbName(params.email);
-          _ls({ dbName: dbName, collectionName: verified.collectionName }).
-		then(function(data) {
-                        deferred.resolve(data);
-                      }).
-                catch(function(err) {
-                        deferred.reject(err);
-                      });
-        }
-        else {
-          deferred.reject('You don\'t have permission to view user documents');
-        }
-
-        return deferred.promise;
-      };
-    exports.getUserDocuments = _getUserDocuments;
+//    var _getUserDocuments = function(verified, params) {
+//        var deferred = q.defer();
+//        if (verified.admin) {
+//          var dbName = utils.getMongoDbName(params.email);
+//          _ls({ dbName: dbName, collectionName: verified.collectionName }).
+//		then(function(data) {
+//                        deferred.resolve(data);
+//                      }).
+//                catch(function(err) {
+//                        deferred.reject(err);
+//                      });
+//        }
+//        else {
+//          deferred.reject('You don\'t have permission to view user documents');
+//        }
+//
+//        return deferred.promise;
+//      };
+//    exports.getUserDocuments = _getUserDocuments;
 
     /**
      * Create a new database
@@ -405,7 +410,7 @@ module.exports = function(email) {
     exports.dropDatabase = _dropDatabase;
 
     /**
-     * This adds a new agent for this agent to represent
+     * This adds a new agent for this gebo to represent
      *
      * @param Object
      */

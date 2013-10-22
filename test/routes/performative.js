@@ -173,7 +173,7 @@ exports.verify = {
     },
 
     'Return permissions for a friend requesting another app\'s resources': function(test) {
-        test.expect(5);
+        test.expect(6);
         var performative = new performativeRoute(nconf.get('testDb'));
         performative.verify(USER_TOKEN, 'richard@construction.com', 'someotherapp@example.com').
             then(function(permissions) {

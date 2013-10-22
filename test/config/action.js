@@ -659,9 +659,9 @@ exports.ls = {
         });
     },
 
-    'Return a list of documents contained in the collection': function(test) {
+    'Return a list of documents contained in the collection if permitted': function(test) {
         test.expect(3);
-        action.ls({ dbName: 'existing_database', collectionName: cname }).
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true }).
             then(function(list) {
                 test.equal(list.length, 2);
                 test.equal(list[0].name, 'dan');
@@ -676,9 +676,9 @@ exports.ls = {
                  });
     },
 
-    'Return an empty list from an empty collection': function(test) {
+    'Return an empty list from an empty collection if permitted': function(test) {
         test.expect(1);
-        action.ls({ dbName: 'existing_database', collectionName: 'no_such_collection' }).
+        action.ls({ dbName: 'existing_database', collectionName: 'no_such_collection', read: true }).
             then(function(list) {
                 test.equal(list.length, 0);
                 test.done();
@@ -690,6 +690,22 @@ exports.ls = {
                     test.done();
                  });
     },
+
+    'Reject an ls request if the agent is not permitted': function(test) {
+        test.expect(1);
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: false }).
+            then(function(list) {
+                // Shouldn't get here
+                test.ok(false, 'Shouldn\'t get here!!!');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You are not allowed access to that resource');
+                test.done();
+              });
+    },
+
+
 };
 
 /**
@@ -1027,85 +1043,85 @@ exports.dropDatabase = {
 /**
  * getUserDocuments 
  */
-exports.getUserDocuments = {
-
-    setUp: function(callback) {
-        agent = new gebo.registrantModel({
-                name: 'Joey Joe Joe Jr. Shabadoo',
-                email: 'jjjj@shabadoo.com',
-                password: 'abc123',
-                admin: 'true'
-              });
-
-        var dbName = utils.getMongoDbName(agent.email);
-
-    	try {
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
-                if (err) {
-                  throw err;
-                }
-                this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
-                        {
-                            _id: new mongo.ObjectID('0123456789AB'),
-                            name: 'doc 1',
-                        },
-                        {
-                            _id: new mongo.ObjectID('123456789ABC'),
-                            name: 'doc 2',
-                        }
-                    ],
-                    function() {
-                        callback();
-                    });
-            });
-    	} catch(e) {
-            console.dir(e);
-    	}
-    },
-
-    tearDown: function (callback) {
-        // Lose the database for next time
-        this.db.dropDatabase(function(err) {
-            if(err) {
-              console.log(err);
-            }
-            callback();
-        });
-    },
-
-    'Should return a list of a agent\'s documents': function(test) {
-        test.expect(1);
-	action.getUserDocuments(
-			{ dbName: 'don\'t matter', collectionName: cname, admin: true },
-			{ email: agent.email }).
-		then(function(data) {
-		    test.ok(data);
-		    test.done();
-		  }).
-		catch(function(err) {
-		    test.ok(false, err);
-		    test.done();
-		  });
-    },
-
-    'Should throw an error when accessed by non-admin': function(test) {
-	test.expect(1);
-	action.getUserDocuments({ email: agent.email, admin: false }).
-		then(function(data) {
-		    test.ok(false, 'This should not be accessible');
-		    test.done();
-		  }).
-		catch(function(err) {
-		    test.ok(err);
-		    test.done();
-		  });
-    },
-};
+//exports.getUserDocuments = {
+//
+//    setUp: function(callback) {
+//        agent = new gebo.registrantModel({
+//                name: 'Joey Joe Joe Jr. Shabadoo',
+//                email: 'jjjj@shabadoo.com',
+//                password: 'abc123',
+//                admin: 'true'
+//              });
+//
+//        var dbName = utils.getMongoDbName(agent.email);
+//
+//    	try {
+//            var server = new mongo.Server(config.mongo.host,
+//                                          config.mongo.port,
+//                                          config.mongo.serverOptions);
+//            this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+//            this.db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//                this.collection = new mongo.Collection(client, cname);
+//                this.collection.insert([
+//                        {
+//                            _id: new mongo.ObjectID('0123456789AB'),
+//                            name: 'doc 1',
+//                        },
+//                        {
+//                            _id: new mongo.ObjectID('123456789ABC'),
+//                            name: 'doc 2',
+//                        }
+//                    ],
+//                    function() {
+//                        callback();
+//                    });
+//            });
+//    	} catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//
+//    tearDown: function (callback) {
+//        // Lose the database for next time
+//        this.db.dropDatabase(function(err) {
+//            if(err) {
+//              console.log(err);
+//            }
+//            callback();
+//        });
+//    },
+//
+//    'Should return a list of an agent\'s documents': function(test) {
+//        test.expect(1);
+//	action.getUserDocuments(
+//			{ dbName: 'don\'t matter', collectionName: cname, admin: true },
+//			{ email: agent.email }).
+//		then(function(data) {
+//		    test.ok(data);
+//		    test.done();
+//		  }).
+//		catch(function(err) {
+//		    test.ok(false, err);
+//		    test.done();
+//		  });
+//    },
+//
+//    'Should throw an error when accessed by non-admin': function(test) {
+//	test.expect(1);
+//	action.getUserDocuments({ email: agent.email, admin: false }).
+//		then(function(data) {
+//		    test.ok(false, 'This should not be accessible');
+//		    test.done();
+//		  }).
+//		catch(function(err) {
+//		    test.ok(err);
+//		    test.done();
+//		  });
+//    },
+//};
 
 /**
  * registerAgent
