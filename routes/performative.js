@@ -55,49 +55,42 @@ module.exports = function(email) {
     
         gebo.tokenModel.findOne({ string: tokenStr }).exec().
             then(function(token) {
-                return gebo.registrantModel.findOne({ _id: token.registrantId }).exec();        
+                if (!token) {
+                  deferred.reject('The token provided is invalid');
+                }
+                else {
+                  return gebo.registrantModel.findOne({ _id: token.registrantId }).exec();        
+                }
               }).
             then(function(registrant) {
-                var agent = new agentSchema(registrant.email);
-                return agent.friendModel.findOne({ email: friendEmail }).exec();
+                if (!registrant) {
+                  deferred.reject('That agent is not registered here');
+                }
+                else {
+                  var agent = new agentSchema(registrant.email);
+                  return agent.friendModel.findOne({ email: friendEmail }).exec();
+                }
               }).
             then(function(friend) {
-                console.log(friend.hisPermissions);
-                console.log(resourceEmail);
-                // Search the array for requested resource.
-                // There's got to be a better way to do this...
-                var found = false;
-                for (var i = 0; i < friend.hisPermissions.length; i++) {
-                  if (friend.hisPermissions[i].email === resourceEmail) {
-                    deferred.resolve(friend.hisPermissions[i].email);
-                    found = true;
-                    break;
-                  }
+                if (!friend) {
+                  deferred.reject('I don\'t know you');
                 }
-                if (!found) {
-                  deferred.reject('You don\'t have access to that resource');
+                else {
+                    // Search the array for requested resource.
+                    // There's got to be a better way to do this...
+                    var found = false;
+                    for (var i = 0; i < friend.hisPermissions.length; i++) {
+                      if (friend.hisPermissions[i].email === resourceEmail) {
+                        deferred.resolve(friend.hisPermissions[i]);
+                        found = true;
+                        break;
+                      }
+                    }
+                    if (!found) {
+                      deferred.reject('You don\'t have access to that resource');
+                    }
                 }
               });
-    
-//                var verified = {
-//                    dbName: utils.getMongoDbName(_agent.email),
-//                    collectionName: utils.getMongoCollectionName(_client.name),
-//                    admin: _agent.admin,
-//                  };
-//    
-//                // Admins may operate on DBs not their own
-//                if (email && verified.admin) {
-//                  verified.dbName = utils.getMongoDbName(email);
-//                  deferred.resolve(verified);
-//                }
-//                else if (email && email !== _agent.email && !verified.admin) {
-//                  deferred.reject('You are not permitted to access that resource');
-//                }
-//                else {
-//                  deferred.resolve(verified);
-//                }
-//              });
-   
         return deferred.promise;
       };
     exports.verify = _verify;

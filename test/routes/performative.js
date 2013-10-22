@@ -10,12 +10,9 @@ var COL_NAME = 'appCollection',
     ACCESS_TOKEN = '9012';
 
 // Agent configs
-var ADMIN_EMAIL = 'test@testoclese.com',
-    BASE_ADDRESS = 'http://theirhost.com';
+var BASE_ADDRESS = 'http://theirhost.com';
 
-
-//var TEST_DB = nconf.argv().env().file({ file: 'local.json' }).get('testDb');
-var performativeRoute = require('../../routes/performative');//(TEST_DB);
+var performativeRoute = require('../../routes/performative');
 
 
 /**
@@ -29,9 +26,9 @@ exports.verify = {
              * Setup a registrant
              */
             this.geboDb = new geboSchema(nconf.get('testDb'));
-            var registrant = new this.geboDb.registrantModel({
+            var adminRegistrant = new this.geboDb.registrantModel({
                     name: 'dan',
-                    email: ADMIN_EMAIL,
+                    email: 'dan@hg.com',
                     password: 'password123',
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -40,11 +37,10 @@ exports.verify = {
             /**
              * Make a friend for the registrant
              */
-            this.adminAgentDb = new agentSchema(ADMIN_EMAIL);
-            var friend = new this.adminAgentDb.friendModel({
+            this.adminAgentDb = new agentSchema('dan@hg.com');
+            var adminFriend = new this.adminAgentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
-                    hisToken: ADMIN_TOKEN,
                     uri: BASE_ADDRESS,
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
@@ -52,38 +48,21 @@ exports.verify = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisPermissions.push({ email: 'someapp@example.com' });
+            adminFriend.hisPermissions.push({ email: 'john@painter.com' });
 
             /**
              * Create an access token for the friend
              */
-            var token = new this.geboDb.tokenModel({
+            var adminToken = new this.geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
                     friendId: new mongo.ObjectID('23456789ABCD'),
                     string: ADMIN_TOKEN,
                 });
 
-
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                token.save(function(err) {
-                     if (err) {
-                      console.log(err);
-                    }
-                    friend.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
-                      });
-                });
-             });
-
             /** 
              * Set up another registrant
              */
-            registrant = new this.geboDb.registrantModel({
+            var registrant = new this.geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@hg.com',
                     password: 'password123',
@@ -95,10 +74,9 @@ exports.verify = {
              * Make a friend for the new registrant
              */
             this.regularAgentDb = new agentSchema('yanfen@hg.com');
-            friend = new this.regularAgentDb.friendModel({
+            var friend = new this.regularAgentDb.friendModel({
                     name: 'richard',
                     email: 'richard@construction.com',
-                    hisToken: USER_TOKEN,
                     uri: BASE_ADDRESS,
                     _id: new mongo.ObjectID('3456789ABCDE')
                 });
@@ -107,16 +85,18 @@ exports.verify = {
              * Create access permissions for imaginary collection
              */
             friend.hisPermissions.push({ email: 'someotherapp@example.com' });
+            friend.hisPermissions.push({ email: 'richard@construction.com' });
 
             /**
              * Create an access token for the friend
              */
-            token = new this.geboDb.tokenModel({
+            var token = new this.geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('123456789ABC'),
                     friendId: new mongo.ObjectID('3456789ABCDE'),
                     string: USER_TOKEN,
                 });
 
+            // There has got to be a better way to do this...
             registrant.save(function(err) {
                 if (err) {
                   console.log(err);
@@ -129,9 +109,24 @@ exports.verify = {
                         if (err) {
                           console.log(err);
                         }
-                        callback();
-                    });
-                });
+                        adminRegistrant.save(function(err) {
+                            if (err) {
+                              console.log(err);
+                            }
+                            adminToken.save(function(err) {
+                                 if (err) {
+                                  console.log(err);
+                                }
+                                adminFriend.save(function(err) {
+                                    if (err) {
+                                      console.log(err);
+                                    }
+                                    callback();
+                                  });
+                              });
+                          });
+                      });
+                  });
               });
         }
         catch(err) {
@@ -141,6 +136,12 @@ exports.verify = {
     },
 
     tearDown: function(callback) {
+        this.regularAgentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
         this.geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
@@ -151,92 +152,77 @@ exports.verify = {
             if (err) {
               console.log(err)
             }
-          });
-
-        this.regularAgentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
             callback();
           });
     },
 
-   'Allow agent access to his database': function(test) {
-//        test.expect(3);
+    /**
+     * The friend doesn't own the resource, his app just created the data.
+     * That is, the friendEmail and resourceEmail parameters are the same.
+     */
+    'Return permissions for a friend requesting his own app\'s resources': function(test) {
+        test.expect(3);
+        var performative = new performativeRoute(nconf.get('testDb'));
+        performative.verify(USER_TOKEN, 'richard@construction.com', 'richard@construction.com').
+            then(function(permissions) {
+                test.equal(permissions.read, true);
+                test.equal(permissions.write, false);
+                test.equal(permissions.execute, false);
+                test.done();
+              });
+    },
+
+    'Return permissions for a friend requesting another app\'s resources': function(test) {
+        test.expect(3);
         var performative = new performativeRoute(nconf.get('testDb'));
         performative.verify(USER_TOKEN, 'richard@construction.com', 'someotherapp@example.com').
-            then(function(verified) {
-//                test.equal(verified.dbName, 'yanfen_at_hg_dot_com');
-//                test.equal(verified.collectionName, 'todoApp');
-//                test.equal(verified.admin, false);
+            then(function(permissions) {
+                test.equal(permissions.read, true);
+                test.equal(permissions.write, false);
+                test.equal(permissions.execute, false);
                 test.done();
-              });//.
-//            catch(function(err) {
-//                console.log('ERRORRRRRRRRRRRR: ' + err);
-//                test.ok(false, err);
-//                test.done();
-//              });
-//        performative.verify(USER_TOKEN, 'yanfen@hg.com').
-//            then(function(verified) {
-//                test.equal(verified.dbName, 'yanfen_at_hg_dot_com');
-//                test.equal(verified.collectionName, 'todoApp');
-//                test.equal(verified.admin, false);
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                console.log('ERRORRRRRRRRRRRR: ' + err);
-//                test.ok(false, err);
-//                test.done();
-//              });
-   }, 
+              });
+    },
 
-   'Do not allow agent access to another agent\'s database': function(test) {
-//        test.expect(1);
-//        var performative = new performativeRoute(ADMIN_EMAIL);
-//        performative.verify(USER_TOKEN, 'dan@hg.com').
-//           then(function(verified) {
-//                test.ok(false, 'Should not get here');
-//                test.done();
-//             }).
-//           catch(function(err) {
-//                test.equal(err, 'You are not permitted to access that resource');
+    'Do not barf if access has not been granted to the requested resource': function(test) {
+        test.expect(1);
+        var performative = new performativeRoute(nconf.get('testDb'));
+        performative.verify(ADMIN_TOKEN, 'john@painter.com', 'someotherapp@example.com').
+            then(function(permissions) {
+                test.ok(false, 'Permission should not have been granted');
                 test.done();
-//             });
-   },
+              }).
+            catch(function(err) {
+                test.equal(err, 'You don\'t have access to that resource');       
+                test.done();
+              });
+    },
 
-   'Do not barf if access has not been granted to the requested resource': function(test) {
-        test.done();
-   },
-//   'Allow admin access to his database': function(test) {
-//        test.expect(3);
-//        var performative = new performativeRoute(ADMIN_EMAIL);
-//        performative.verify(ADMIN_TOKEN, 'dan@hg.com').
-//            then(function(verified) {
-//                test.equal(verified.dbName, 'dan_at_hg_dot_com');
-//                test.equal(verified.collectionName, 'todoApp');
-//                test.equal(verified.admin, true);
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.ok(false, err);
-//                test.done();
-//              });
-//   },
-//
-//   'Allow admin access to another agent\'s database': function(test) {
-//        test.expect(3);
-//        var performative = new performativeRoute(ADMIN_EMAIL);
-//        performative.verify(ADMIN_TOKEN, 'yanfen@hg.com').
-//            then(function(verified) {
-//                test.equal(verified.dbName, 'yanfen_at_hg_dot_com');
-//                test.equal(verified.collectionName, 'todoApp');
-//                test.equal(verified.admin, true);
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.ok(false, err);
-//                test.done();
-//              });
-//   },
+    'Do not barf if a non-friend requests a resource': function(test) {
+        test.expect(1);
+        var performative = new performativeRoute(nconf.get('testDb'));
+        performative.verify(ADMIN_TOKEN, 'my@enemy.com', 'someotherapp@example.com').
+            then(function(permissions) {
+                test.ok(false, 'Permission should not have been granted');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'I don\'t know you');       
+                test.done();
+              });
+    },
 
+    'Do not barf if the token provided does not exist': function(test) {
+        test.expect(1);
+        var performative = new performativeRoute(nconf.get('testDb'));
+        performative.verify('n0sucht0ken', 'john@painter.com', 'john@painter.com').
+            then(function(permissions) {
+                test.ok(false, 'Permission should not have been granted');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'The token provided is invalid');       
+                test.done();
+              });
+    },
 };
