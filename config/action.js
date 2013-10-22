@@ -374,18 +374,21 @@ module.exports = function(email) {
     /**
      * Drop a database
      * 
-     * @param string
+     * @param Object
      *
      * @return promise
      */
-    var _dropDatabase = function(dbName) {
+    //var _dropDatabase = function(dbName) {
+    var _dropDatabase = function(verified) {
         var deferred = q.defer();
-        _dbExists(dbName).
+
+        if (verified.admin || verified.execute) {
+        _dbExists(verified.dbName).
                 then(function() {
                     var server = new mongo.Server(config.mongo.host,
                                      config.mongo.port,
                                      config.mongo.serverOptions);
-                    var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+                    var db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
 
                     db.open(function (err) {
                         if (err) {
@@ -407,6 +410,10 @@ module.exports = function(email) {
                 catch(function(err) {
                     deferred.reject(err);
                   });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise;
       };
     exports.dropDatabase = _dropDatabase;
@@ -516,7 +523,6 @@ module.exports = function(email) {
 
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
-          console.log(params);
           db.friendModel.remove({ email: params.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);

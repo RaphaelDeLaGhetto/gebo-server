@@ -930,7 +930,7 @@ exports.dropDatabase = {
     },
 
 
-    'Should delete the database specified': function(test) {
+    'Should delete the database specified if admin': function(test) {
         test.expect(3);
 
         // Make sure the DB exists
@@ -944,7 +944,41 @@ exports.dropDatabase = {
                     test.done();
                   });
 
-        action.dropDatabase(dbName).
+        action.dropDatabase({ admin: true, dbName: dbName }).
+                then(function() {
+                    test.ok(true);
+
+                    action.dbExists(dbName).
+                        then(function(client) {
+                            test.ok(false, dbName + ' should not exist');
+                            test.done();
+                          }).
+                        catch(function(err) {
+                            test.ok(true, err);
+                            test.done();
+                          });
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+    },
+
+    'Should delete the database specified with execute permissions': function(test) {
+        test.expect(3);
+
+        // Make sure the DB exists
+        var dbName = utils.getMongoDbName('existing_db');
+        action.dbExists(dbName).
+                then(function(client) {
+                    test.ok(true);
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+
+        action.dropDatabase({ admin: false, execute: true, dbName: dbName }).
                 then(function() {
                     test.ok(true);
 
@@ -978,7 +1012,7 @@ exports.dropDatabase = {
                     test.ok(true);
                  });
 
-        action.dropDatabase(dbName).
+        action.dropDatabase({ admin: true, dbName: dbName }).
                 then(function() {
                     test.ok(false, dbName + ' should not exist');
                     test.done();
@@ -988,6 +1022,32 @@ exports.dropDatabase = {
                     test.done();
                  });
     },
+
+    'Do not delete the database specified without permission': function(test) {
+       test.expect(1);
+
+        // Make sure the DB exists
+        var dbName = utils.getMongoDbName('existing_db');
+//        action.dbExists(dbName).
+//                then(function(client) {
+//                    test.ok(true);
+//                  }).
+//                catch(function(err) {
+//                    test.ok(false, err);
+//                    test.done();
+//                  });
+//
+        action.dropDatabase({ admin: false, execute: false, dbName: dbName }).
+                then(function() {
+                    test.ok(false, 'Should not be able to drop database');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.equal(err, 'You are not permitted to request or propose that action');
+                    test.done();
+                  });
+    },
+
 };
 
 /**
