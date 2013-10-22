@@ -278,9 +278,9 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _getUsers = function(params) {
+    var _getRegistrants = function(verified) {
         var deferred = q.defer();
-        if (params.admin) {
+        if (verified.admin || verified.read) {
           var db = new geboSchema(dbName);
           var query = db.registrantModel.find({}, { password: false });
           query.exec().
@@ -289,12 +289,12 @@ module.exports = function(email) {
                   });
         }
         else {
-          deferred.reject('You don\'t have permission to view registered users');
+          deferred.reject('You are not permitted to request or propose that action');
         }
 
         return deferred.promise;
       };
-    exports.getUsers = _getUsers;
+    exports.getRegistrants = _getRegistrants;
 
     /**
      * Return a list of a registered user's 

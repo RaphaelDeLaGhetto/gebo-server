@@ -991,55 +991,80 @@ exports.dropDatabase = {
 };
 
 /**
- * getUsers 
+ * getRegistrants 
  */
-//exports.getUsers = {
-//
-//    setUp: function(callback) {
-//    	try {
-//            var server = new mongo.Server(config.mongo.host,
-//                                          config.mongo.port,
-//                                          config.mongo.serverOptions);
-//            this.db = new mongo.Db('existing_db', server, config.mongo.clientOptions);
-//            this.db.open(function (err, client) {
-//                if (err) {
-//                  throw err;
-//                }
-//                this.collection = new mongo.Collection(client, cname);
-//                this.collection.insert([
-//                        {
-//                            _id: new mongo.ObjectID('0123456789AB'),
-//                            name: 'dan',
-//                            occupation: 'Batman'
-//                        },
-//                        {
-//                            _id: new mongo.ObjectID('123456789ABC'),
-//                            name: 'yanfen',
-//                            occupation: 'Being cool'
-//                        }
-//                    ],
-//                    function() {
-//                        callback();
-//                    });
-//            });
-//    	} catch(e) {
-//            console.dir(e);
-//    	}
-//    },
-//
-//    tearDown: function (callback) {
-//        // Lose the database for next time
-//        this.db.dropDatabase(function(err) {
-//            callback();
-//        });
-//    },
-//
-//    'Should return a list of registered agents': function(test) {
-//        test.expect(1);
-//	test.done();
-//    },
-//
-//};
+exports.getRegistrants = {
+
+    setUp: function(callback) {
+    	try{
+            var agent = new gebo.registrantModel(
+                            { name: 'dan', email: 'dan@hg.com',
+                              password: 'password123', admin: true,  
+                              _id: new mongo.ObjectID('0123456789AB') });
+            agent.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    },
+
+    tearDown: function (callback) {
+        gebo.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    },
+
+    'Return a list of registered agents if admin': function(test) {
+        test.expect(5);
+        action.getRegistrants({ admin: true }).
+                then(function(registrants) {
+                    test.equal(registrants.length, 1);
+                    test.equal(registrants[0].name, 'dan');
+                    test.equal(registrants[0].email, 'dan@hg.com');
+                    test.equal(registrants[0].admin, true);
+                    test.equal(registrants[0].password, undefined);
+	            test.done();
+                  });
+    },
+
+    'Return a list of registered agents with read access': function(test) {
+        test.expect(5);
+        action.getRegistrants({ admin: false, read: true }).
+                then(function(registrants) {
+                    test.equal(registrants.length, 1);
+                    test.equal(registrants[0].name, 'dan');
+                    test.equal(registrants[0].email, 'dan@hg.com');
+                    test.equal(registrants[0].admin, true);
+                    test.equal(registrants[0].password, undefined);
+	            test.done();
+                  });
+
+    },
+
+    'Do not return a list of registered agents without permission': function(test) {
+        test.expect(1);
+        action.getRegistrants({ admin: false, read: false }).
+                then(function(registrants) {
+                    test.ok(false, 'Should not be able to get a list of registrants');
+	            test.done();
+                  }).
+                catch(function(err) {
+                    test.equal(err, 'You are not permitted to request or propose that action');
+	            test.done();
+                  });
+
+
+    },
+};
 
 /**
  * getUserDocuments 
