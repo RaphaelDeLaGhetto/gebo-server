@@ -14,6 +14,9 @@ var BASE_ADDRESS = 'http://theirhost.com';
 
 var performativeRoute = require('../../routes/performative');
 
+var geboDb = new geboSchema(nconf.get('testDb')),
+    adminAgentDb = new agentSchema('dan@hg.com'),
+    regularAgentDb = new agentSchema('yanfen@hg.com');
 
 /**
  * verify
@@ -25,8 +28,7 @@ exports.verify = {
             /**
              * Setup a registrant
              */
-            this.geboDb = new geboSchema(nconf.get('testDb'));
-            var adminRegistrant = new this.geboDb.registrantModel({
+            var adminRegistrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@hg.com',
                     password: 'password123',
@@ -37,8 +39,7 @@ exports.verify = {
             /**
              * Make a friend for the registrant
              */
-            this.adminAgentDb = new agentSchema('dan@hg.com');
-            var adminFriend = new this.adminAgentDb.friendModel({
+            var adminFriend = new adminAgentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
                     uri: BASE_ADDRESS,
@@ -53,7 +54,7 @@ exports.verify = {
             /**
              * Create an access token for the friend
              */
-            var adminToken = new this.geboDb.tokenModel({
+            var adminToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
                     friendId: new mongo.ObjectID('23456789ABCD'),
                     string: ADMIN_TOKEN,
@@ -62,7 +63,7 @@ exports.verify = {
             /** 
              * Set up another registrant
              */
-            var registrant = new this.geboDb.registrantModel({
+            var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@hg.com',
                     password: 'password123',
@@ -73,8 +74,7 @@ exports.verify = {
             /**
              * Make a friend for the new registrant
              */
-            this.regularAgentDb = new agentSchema('yanfen@hg.com');
-            var friend = new this.regularAgentDb.friendModel({
+            var friend = new regularAgentDb.friendModel({
                     name: 'richard',
                     email: 'richard@construction.com',
                     uri: BASE_ADDRESS,
@@ -90,7 +90,7 @@ exports.verify = {
             /**
              * Create an access token for the friend
              */
-            var token = new this.geboDb.tokenModel({
+            var token = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('123456789ABC'),
                     friendId: new mongo.ObjectID('3456789ABCDE'),
                     string: USER_TOKEN,
@@ -136,19 +136,19 @@ exports.verify = {
     },
 
     tearDown: function(callback) {
-        this.regularAgentDb.connection.db.dropDatabase(function(err) {
+        regularAgentDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.geboDb.connection.db.dropDatabase(function(err) {
+        geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.adminAgentDb.connection.db.dropDatabase(function(err) {
+        adminAgentDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
