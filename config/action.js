@@ -66,21 +66,25 @@ module.exports = function(email) {
     /**
      * Get the app's collection
      *
-     * @param string
+     * @param Object
      *
      * @return promise
      */
-    var _getCollection = function(dbName, colName) {
+    var _getCollection = function(verified) {
         var deferred = q.defer();
-        _dbExists(dbName).
-            then(function(client) {
-                var collectionName = utils.getMongoCollectionName(colName);
-                var collection = new mongo.Collection(client, collectionName);
-                deferred.resolve(collection);
-              }).
-            catch(function(err) {
-                deferred.reject(err);
-              });
+        if (verified.admin || verified.read || verified.write || verified.execute) { 
+          _dbExists(verified.dbName).
+              then(function(client) {
+                  var collection = new mongo.Collection(client, verified.collectionName);
+                  deferred.resolve(collection);
+                }).
+              catch(function(err) {
+                  deferred.reject(err);
+                });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise;
       };
     exports.getCollection = _getCollection;
@@ -97,7 +101,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) { 
-          _getCollection(verified.dbName, verified.collectionName).
+          _getCollection(verified).//dbName, verified.collectionName).
               then(function(collection) {
   
                       // Make data._id a string (because it might
@@ -138,7 +142,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.read) { 
-          _getCollection(verified.dbName, verified.collectionName).
+          _getCollection(verified).//dbName, verified.collectionName).
               then(function(collection) {
                       collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
                               function(err, docs) {
@@ -172,7 +176,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) { 
-          _getCollection(verified.dbName, verified.collectionName).
+          _getCollection(verified).//.dbName, verified.collectionName).
               then(function(collection) {
                       // Does this collection exist?
                       collection.count(function(err, count) {
@@ -220,7 +224,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) { 
-          _getCollection(verified.dbName, verified.collectionName).
+          _getCollection(verified).//.dbName, verified.collectionName).
               then(function(collection) {
                       // Does this collection exist?
                       collection.count(function(err, count) {
@@ -266,7 +270,7 @@ module.exports = function(email) {
     var _ls = function(params) {
         var deferred = q.defer();
         if (params.admin || params.read) { 
-          _getCollection(params.dbName, params.collectionName).
+          _getCollection(params).//.dbName, params.collectionName).
               then(function(collection) {
                       collection.find({}, ['_id', 'name']).
                           sort('name').

@@ -112,11 +112,12 @@ exports.getCollection = {
         });
     },
 
-    'Return a mongo collection object': function (test) {
+    'Return a mongo collection object as admin': function (test) {
         test.expect(2);
-        action.getCollection(
-                        utils.getMongoDbName('dan@email.com'),
-                        utils.getMongoCollectionName(cname)).
+        var dbName = utils.getMongoDbName('dan@email.com');
+        action.getCollection({ dbName: dbName,
+                               collectionName: cname,
+                               admin: true }).
                 then(function(collection) {
                     test.ok(true);    
                     collection.save({ greeting: 'Hello' },
@@ -135,6 +136,53 @@ exports.getCollection = {
                     test.done();
                 });
     }, 
+
+    'Return a mongo collection object with execute permission': function (test) {
+        test.expect(2);
+        var dbName = utils.getMongoDbName('dan@email.com');
+        action.getCollection({ dbName: dbName,
+                               collectionName: cname,
+                               admin: false,
+                               execute: true }).
+                then(function(collection) {
+                    test.ok(true);    
+                    collection.save({ greeting: 'Hello' },
+                            { upsert: true, safe: true },
+                            function(err, ack) {
+                                if (err) {
+                                  test.ok(false, err);
+                                  test.done();
+                                }
+                                test.ok(true, ack);
+                                test.done();
+                            });
+                }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                });
+    },
+
+    'Do not return a mongo collection without permission': function (test) {
+        test.expect(1);
+        var dbName = utils.getMongoDbName('dan@email.com');
+        action.getCollection({ dbName: dbName,
+                               collectionName: cname,
+                               admin: false,
+                               read: false,
+                               write: false,
+                               execute: false }).
+                then(function(collection) {
+                    test.ok(false, 'I should not be able to create a collection here');    
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.equal(err, 'You are not permitted to request or propose that action');
+                    test.done();
+                  });
+    },
+
+
 };
 
 /**
@@ -324,11 +372,29 @@ exports.save = {
                 });
     },
 
+   'Do not save without permission': function (test) {
+        test.expect(1);
+        
+        action.save({ dbName: 'yanfen_at_hg_dot_com',
+  		      collectionName: cname,
+		      admin: false,
+                      write: false },
+                    { data: 'junk' }).
+                then(function(docs) {
+                        test.ok(false, 'I shouldn\'t be able to save');
+                        test.done();
+                  }).
+                catch(function(err) {
+                        test.equal(err, 'You are not permitted to request or propose that action');
+                        test.done();
+                  });
+   }, 
+
 
 };
 
 /**
- * Retrieve document from the database
+ * dbExists
  */
 exports.dbExists = {
 
@@ -1029,7 +1095,7 @@ exports.createDatabase = {
         action.createDatabase({ admin: true, dbName: dbName }, { profile: this.agent }).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created'); //
-                    action.getCollection(dbName, 'profile').
+                    action.getCollection({ admin: true, dbName: dbName, collectionName: 'profile' }).
                             then(function(collection) {
                                 collection.findOne({ email: 'jjjj@shabadoo.com' },
                                         function(err, doc) {
@@ -1077,7 +1143,7 @@ exports.createDatabase = {
         action.createDatabase({ admin: false, execute: true, dbName: dbName }, { profile: this.agent }).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created');
-                    action.getCollection(dbName, 'profile').
+                    action.getCollection({ admin: false, execute: true, dbName: dbName, collectionName: 'profile' }).
                             then(function(collection) {
                                 collection.findOne({ email: 'jjjj@shabadoo.com' },
                                         function(err, doc) {
@@ -1154,7 +1220,7 @@ exports.createDatabase = {
                   }).
                 catch(function(err) {
                     test.ok(true);
-                    action.getCollection(dbName, cname).
+                    action.getCollection({ admin: true, execute: true, dbName: dbName, collectionName: cname }).
                         then(function(collection) {
                             test.ok(true, 'Collection retrieved');
                             collection.find().toArray(function(err, docs) {
