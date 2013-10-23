@@ -132,22 +132,27 @@ module.exports = function(email) {
     var _cp = function(verified, params) {
         var deferred = q.defer();
 
-        _getCollection(verified.dbName, verified.collectionName).
-            then(function(collection) {
-                    collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
-                            function(err, docs) {
-                                    if (err) {
-                                      deferred.reject(err);
-                                    }
-                                    else {
-                                      // Should I check for multiple matches?
-                                      deferred.resolve(docs[0]);
-                                    }
-                                  });
-                  }).
-                catch(function(err) {
-                        deferred.reject(err);
-                      });
+        if (verified.admin || verified.read) { 
+          _getCollection(verified.dbName, verified.collectionName).
+              then(function(collection) {
+                      collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
+                              function(err, docs) {
+                                      if (err) {
+                                        deferred.reject(err);
+                                      }
+                                      else {
+                                        // Should I check for multiple matches?
+                                        deferred.resolve(docs[0]);
+                                      }
+                                    });
+                    }).
+                  catch(function(err) {
+                          deferred.reject(err);
+                        });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise;
       };
     exports.cp = _cp;
@@ -161,34 +166,39 @@ module.exports = function(email) {
     var _rm = function(verified, params) {
         var deferred = q.defer();
 
-        _getCollection(verified.dbName, verified.collectionName).
-            then(function(collection) {
-                    // Does this collection exist?
-                    collection.count(function(err, count) {
-                        if (count === 0) {
-                          deferred.reject(
-                                  new Error('Collection: ' +
-                                          verified.collectionName + ' does not exist'));
-                        }
-                        else {
-                          collection.remove({ _id: new mongo.ObjectID(params.id) },
-                          function(err, ack) {
-                              if (err || ack === 0) {
-                                deferred.reject(
-                                        new Error('Could not delete document: ' +
-                                                params.id));
-                              }
-                              else {
-                                deferred.resolve();
-                              }
-                            });
-                        }
-                      });
-                  }).
-                catch(function(err) {
-                        deferred.reject(err);
-                      }).
-                done();
+        if (verified.admin || verified.write) { 
+          _getCollection(verified.dbName, verified.collectionName).
+              then(function(collection) {
+                      // Does this collection exist?
+                      collection.count(function(err, count) {
+                          if (count === 0) {
+                            deferred.reject(
+                                    new Error('Collection: ' +
+                                            verified.collectionName + ' does not exist'));
+                          }
+                          else {
+                            collection.remove({ _id: new mongo.ObjectID(params.id) },
+                            function(err, ack) {
+                                if (err || ack === 0) {
+                                  deferred.reject(
+                                          new Error('Could not delete document: ' +
+                                                  params.id));
+                                }
+                                else {
+                                  deferred.resolve();
+                                }
+                              });
+                          }
+                        });
+                    }).
+                  catch(function(err) {
+                          deferred.reject(err);
+                        }).
+                  done();
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
  
         return deferred.promise;
       };
@@ -197,7 +207,6 @@ module.exports = function(email) {
     /**
      * Remove a collection from the user's profile
      *
-     * @param Object
      * @param Object
      *
      * @return promise

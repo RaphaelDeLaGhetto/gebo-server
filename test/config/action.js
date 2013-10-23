@@ -18,6 +18,7 @@ var verifiedUser = {
 	dbName: utils.getMongoDbName('yanfen@hg.com'),
         collectionName: cname,
 	admin: false,
+	read: true,
     };
 
 // Start up the test database
@@ -360,9 +361,12 @@ exports.cp = {
                 });
    }, 
 
-   'Copy from existing database': function (test) {
+   'Copy from existing database as admin': function (test) {
         test.expect(3);
-        action.cp(verifiedUser, { id: '0123456789AB' }).
+        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: true },
+                  { id: '0123456789AB' }).
              then(function(docs) {
                     test.ok(docs, 'Document copied');
                     test.equal(docs.name, 'dan');
@@ -371,12 +375,48 @@ exports.cp = {
                 }).
             catch(function(err) {
 		    // Shouldn't get here
-                    console.log('Shouldn\'t get here!!!');
-                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.ok(false, err); 
                     test.done();
                  });
- 
    }, 
+
+   'Copy from existing database with read permission': function (test) {
+        test.expect(3);
+        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: false,
+                    read: true },
+                  { id: '0123456789AB' }).
+             then(function(docs) {
+                    test.ok(docs, 'Document copied');
+                    test.equal(docs.name, 'dan');
+                    test.equal(docs.occupation, 'Batman');
+                    test.done();
+                }).
+            catch(function(err) {
+		    // Shouldn't get here
+                    test.ok(false, err); 
+                    test.done();
+                 });
+   },
+
+   'Do not copy from existing database without permission': function (test) {
+        test.expect(1);
+        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: false,
+                    read: false },
+                  { id: '0123456789AB' }).
+             then(function(docs) {
+                    test.ok(false, 'I should not be able to copy from the database');
+                    test.done();
+                }).
+            catch(function(err) {
+                   test.equal(err, 'You are not permitted to request or propose that action');
+                   test.done();
+                 });
+   },
+
 
 };
 
@@ -449,7 +489,7 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-        action.rm({ dbName: 'existing_database',
+        action.rm({ dbName: 'yanfen_at_hg_dot_com',
 		    collectionName: 'NoSuchCollection',
 		    admin: true },
                   { id: '0123456789AB' }).
@@ -466,11 +506,10 @@ exports.rm = {
                 });
    }, 
 
-
    'Do not delete non-existent document': function (test) {
         test.expect(1);
 
-        action.rm({ dbName: 'existing_database',
+        action.rm({ dbName: 'yanfen_at_hg_dot_com',
 		    collectionName: cname,
 		    admin: true },
                   { id: 'NoSuchDocABC' }).
@@ -487,14 +526,17 @@ exports.rm = {
                 });
    }, 
 
-   'Delete from an existing database': function (test) {
+   'Delete from an existing database as admin': function (test) {
         test.expect(3);
 
         collection.count(function(err, count) {
             test.equal(count, 2);
         });
 
-        action.rm(verifiedUser, { id: '123456789ABC' }).
+        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: true },
+                    { id: '123456789ABC' }).
             then(function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {
@@ -504,12 +546,58 @@ exports.rm = {
                 }).
             catch(function(err) {
                     // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.ok(false, err);
                     test.done();
                  });
- 
    }, 
 
+   'Delete from an existing database with write permission': function (test) {
+        test.expect(3);
+
+        collection.count(function(err, count) {
+            test.equal(count, 2);
+        });
+
+        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: false,
+                    write: true },
+                    { id: '123456789ABC' }).
+            then(function() {
+                    test.ok(true, 'The doc has been deleted, I think');
+                    collection.count(function(err, count) {
+                        test.equal(count, 1);
+                        test.done();
+                    });
+                }).
+            catch(function(err) {
+                    // Shouldn't get here
+                    test.ok(false, err);
+                    test.done();
+                 });
+   },
+
+   'Delete from an existing database without permission': function (test) {
+        test.expect(2);
+
+        collection.count(function(err, count) {
+            test.equal(count, 2);
+        });
+
+        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: false,
+                    write: false },
+                    { id: '123456789ABC' }).
+            then(function() {
+                    test.ok(false, 'I should not be able to delete from this database');
+                    test.done();
+                }).
+            catch(function(err) {
+                    test.equal(err, 'You are not permitted to request or propose that action');
+                    test.done();
+                 });
+   },
 };
 
 /**
