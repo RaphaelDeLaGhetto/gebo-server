@@ -527,7 +527,7 @@ exports.rmdir = {
                 if (err) {
                   throw err;
                 }
-        	    this.collection = new mongo.Collection(client, cname);
+        	this.collection = new mongo.Collection(client, cname);
                 this.collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
@@ -561,7 +561,8 @@ exports.rmdir = {
 
         action.rmdir({ dbName: 'no_one_at_not_here_dot_com',
   		       collectionName: cname,
-		       admin: true }).
+		       admin: true,
+                       execute: true }).
             then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
@@ -578,7 +579,8 @@ exports.rmdir = {
 
         action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
   		       collectionName: 'NoSuchCollection',
-		       admin: true }).
+		       admin: true,
+                       execute: true }).
             then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
@@ -590,14 +592,17 @@ exports.rmdir = {
                 });
    }, 
 
-   'Delete collection from an existing database': function (test) {
+   'Delete collection from an existing database as admin': function (test) {
         test.expect(3);
 
         collection.count(function(err, count) {
             test.equal(count, 2);
         });
 
-        action.rmdir(verifiedUser).
+        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+  		       collectionName: cname,
+		       admin: true,
+                       execute: true }).
             then(function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {
@@ -610,9 +615,54 @@ exports.rmdir = {
                     test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
- 
    }, 
-   
+
+   'Delete collection from an existing database with execute permission': function (test) {
+        test.expect(3);
+
+        collection.count(function(err, count) {
+            test.equal(count, 2);
+        });
+
+        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+  		       collectionName: cname,
+		       admin: false,
+                       execute: true }).
+            then(function() {
+                    test.ok(true, 'The doc has been deleted, I think');
+                    collection.count(function(err, count) {
+                        test.equal(count, 0);
+                        test.done();
+                    });
+                }).
+            catch(function(err) {
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+   },
+
+   'Do not delete collection without permission': function (test) {
+        test.expect(2);
+
+        collection.count(function(err, count) {
+            test.equal(count, 2);
+        });
+
+        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+  		       collectionName: cname,
+		       admin: false,
+                       execute: false }).
+            then(function() {
+                    test.ok(false, 'I should not be able to rmdir');
+                    test.done();
+                }).
+            catch(function(err) {
+                    // Shouldn't get here
+                    test.equal(err, 'You are not permitted to request or propose that action');
+                    test.done();
+                 });
+   },
 };
 
 /**
@@ -712,7 +762,6 @@ exports.ls = {
 /**
  * createDatabase
  */
-//var agent;
 exports.createDatabase = {
 
     setUp: function(callback) {

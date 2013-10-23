@@ -205,34 +205,39 @@ module.exports = function(email) {
     var _rmdir = function(verified) {
         var deferred = q.defer();
 
-        _getCollection(verified.dbName, verified.collectionName).
-            then(function(collection) {
-                    // Does this collection exist?
-                    collection.count(function(err, count) {
-                        if (count === 0) {
-                          deferred.reject(
-                            new Error('Collection: ' +
-                                    verified.collectionName + ' does not exist'));
-                        }
-                        else {
-                          collection.drop(
-                              function(err, ack) {
-                                  if (err || ack === 0) {
-                                    deferred.reject(
-                                            new Error('Could not delete collection: ' +
-                                                    verified.collectionName));
-                                  }
-                                  else {
-                                    deferred.resolve();
-                                  }
-                                });
-                        }
-                      });
-                  }).
-            catch(function(err) {
-                    deferred.reject(err);
-                  }).
-            done();
+        if (verified.admin || verified.execute) { 
+          _getCollection(verified.dbName, verified.collectionName).
+              then(function(collection) {
+                      // Does this collection exist?
+                      collection.count(function(err, count) {
+                          if (count === 0) {
+                            deferred.reject(
+                              new Error('Collection: ' +
+                                      verified.collectionName + ' does not exist'));
+                          }
+                          else {
+                            collection.drop(
+                                function(err, ack) {
+                                    if (err || ack === 0) {
+                                      deferred.reject(
+                                              new Error('Could not delete collection: ' +
+                                                      verified.collectionName));
+                                    }
+                                    else {
+                                      deferred.resolve();
+                                    }
+                                  });
+                          }
+                        });
+                    }).
+              catch(function(err) {
+                      deferred.reject(err);
+                    }).
+              done();
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise;
       };
     exports.rmdir = _rmdir;
