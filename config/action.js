@@ -19,48 +19,55 @@ module.exports = function(email) {
      * collections is counted. If the number is zero,
      * this is a new database that did not previously
      * exist.
-     * @param string
+     *
+     * @param verified
      *
      * @return bool
      */
-    var _dbExists = function(dbName) {
-            var deferred = q.defer();
-            var server = new mongo.Server(
-                            config.mongo.host,
-                            config.mongo.port,
-                            config.mongo.serverOptions);
-            var db = new mongo.Db(dbName, server, config.mongo.clientOptions);
+    var _dbExists = function(verified) {
+        var deferred = q.defer();
 
-            db.open(function (err, client) {
-                    if (err) {
-                      console.log('ERROR! What is happening here?');
-                      console.log(err);
-                      throw(err);
-                    }
-                    client.collectionNames(function(err, names) {
-                        if (err) {
-                          console.log(err);
-                          throw(err);
-                        }
+        if (verified.admin || verified.read || verified.write || verified.execute) { 
+          var server = new mongo.Server(
+                          config.mongo.host,
+                          config.mongo.port,
+                          config.mongo.serverOptions);
+          var db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
+
+          db.open(function (err, client) {
+                  if (err) {
+                    console.log('ERROR! What is happening here?');
+                    console.log(err);
+                    throw(err);
+                  }
+                  client.collectionNames(function(err, names) {
+                      if (err) {
+                        console.log(err);
+                        throw(err);
+                      }
     
-                        if (names.length === 0) {
-                          deferred.reject(
-                                  new Error('Database: ' + dbName + ' does not exist'));
-                          db.dropDatabase(function(err) {
-                            if (err) {
-                              deferred.reject(new Error('Database: ' +
-                                              dbName + ' was not dropped'));
-                            }
-                          });
-                        }
-                        else {
-                          deferred.resolve(client);
-                        }
-                      });
-                  });
-
-            return deferred.promise;
-          };
+                      if (names.length === 0) {
+                        deferred.reject(
+                                new Error('Database: ' + verified.dbName + ' does not exist'));
+                        db.dropDatabase(function(err) {
+                          if (err) {
+                            deferred.reject(new Error('Database: ' +
+                                            verified.dbName + ' was not dropped'));
+                          }
+                        });
+                      }
+                      else {
+                        deferred.resolve(client);
+                      }
+                    });
+                });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+ 
+        return deferred.promise;
+      };
     exports.dbExists = _dbExists;
 
     /**
@@ -73,7 +80,7 @@ module.exports = function(email) {
     var _getCollection = function(verified) {
         var deferred = q.defer();
         if (verified.admin || verified.read || verified.write || verified.execute) { 
-          _dbExists(verified.dbName).
+          _dbExists(verified).
               then(function(client) {
                   var collection = new mongo.Collection(client, verified.collectionName);
                   deferred.resolve(collection);
@@ -360,7 +367,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          _dbExists(verified.dbName).
+          _dbExists(verified).
                   then(function() {
                       deferred.reject();
                     }).
@@ -410,7 +417,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-        _dbExists(verified.dbName).
+        _dbExists(verified).
                 then(function() {
                     var server = new mongo.Server(config.mongo.host,
                                      config.mongo.port,

@@ -425,10 +425,10 @@ exports.dbExists = {
         });
     },
  
-   'Return an error if the database does not exist': function (test) {
+   'Return an error if the database does not exist as admin': function (test) {
         test.expect(1);
 
-        action.dbExists('non_existent_database').
+        action.dbExists({ admin: true, dbName: 'non_existent_database' }).
                         then(function() {
                                 // Shouldn't get here
                                 console.log('Shouldn\'t get here!!!');
@@ -441,10 +441,10 @@ exports.dbExists = {
                             });
    }, 
 
-   'Return a promise if the database does exist': function (test) {
+   'Return a promise if the database does exist as admin': function (test) {
         test.expect(1);
 
-        action.dbExists('existing_database').
+        action.dbExists({ admin: true, dbName: 'existing_database' }).
                 then(function() {
                         test.ok(true, 'Verified the database exists');
                         test.done();
@@ -455,6 +455,20 @@ exports.dbExists = {
                         test.done();
                      });
    }, 
+
+   'Do not confirm database existence without permission': function (test) {
+        test.expect(1);
+
+        action.dbExists({ dbName: 'existing_database' }).
+                then(function() {
+                        test.ok(false, 'I should not be able to confirm database existence');
+                        test.done();
+                    }).
+                catch(function(err) {
+                        test.equal(err, 'You are not permitted to request or propose that action');
+                        test.done();
+                     });
+   },
 };
 
 /**
@@ -1083,7 +1097,7 @@ exports.createDatabase = {
 
         // Make sure the DB doesn't exist already
         var dbName = utils.getMongoDbName(this.agent.email);
-        action.dbExists(dbName).
+        action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
                     test.done();
@@ -1131,7 +1145,7 @@ exports.createDatabase = {
 
         // Make sure the DB doesn't exist already
         var dbName = utils.getMongoDbName(this.agent.email);
-        action.dbExists(dbName).
+        action.dbExists({ admin: false, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
                     test.done();
@@ -1179,7 +1193,7 @@ exports.createDatabase = {
 
         // Make sure the DB doesn't exist already
         var dbName = utils.getMongoDbName(this.agent.email);
-        action.dbExists(dbName).
+        action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
                     test.done();
@@ -1204,7 +1218,7 @@ exports.createDatabase = {
 
         // Make sure the DB exists
         var dbName = utils.getMongoDbName(TEST_DB);
-        action.dbExists(dbName).
+        action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(true);
                   }).
@@ -1297,7 +1311,7 @@ exports.dropDatabase = {
 
         // Make sure the DB exists
         var dbName = utils.getMongoDbName('existing_db');
-        action.dbExists(dbName).
+        action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(true);
                   }).
@@ -1310,7 +1324,7 @@ exports.dropDatabase = {
                 then(function() {
                     test.ok(true);
 
-                    action.dbExists(dbName).
+                    action.dbExists({ admin: true, dbName: dbName }).
                         then(function(client) {
                             test.ok(false, dbName + ' should not exist');
                             test.done();
@@ -1331,7 +1345,7 @@ exports.dropDatabase = {
 
         // Make sure the DB exists
         var dbName = utils.getMongoDbName('existing_db');
-        action.dbExists(dbName).
+        action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(true);
                   }).
@@ -1344,7 +1358,7 @@ exports.dropDatabase = {
                 then(function() {
                     test.ok(true);
 
-                    action.dbExists(dbName).
+                    action.dbExists({ admin: true, dbName: dbName }).
                         then(function(client) {
                             test.ok(false, dbName + ' should not exist');
                             test.done();
@@ -1365,7 +1379,7 @@ exports.dropDatabase = {
 
         // Make sure the database doesn't exist
         var dbName = utils.getMongoDbName('no_such_database');
-        action.dbExists(dbName).
+        action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, dbName + ' should not exist. Why is it in the db?');
                     test.done();
