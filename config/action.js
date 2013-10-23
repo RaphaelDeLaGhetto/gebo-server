@@ -96,29 +96,34 @@ module.exports = function(email) {
     var _save = function(verified, params) {
         var deferred = q.defer();
 
-        _getCollection(verified.dbName, verified.collectionName).
-            then(function(collection) {
-
-                    // Make data._id a string (because it might
-                    // otherwise be interpreted as an int or hex)
-                    if (params.data._id) {
-                      params.data._id = new mongo.ObjectID(params.data._id + '');
-                    }
-
-                    collection.save(params.data, { safe: true },
-                            function(err, ack) {
-                                    if (err) {
-                                      deferred.reject(err);
-                                    }
-                                    else {
-                                      deferred.resolve(ack);
-                                    }
-                                  });
-                  }).
-                catch(function(err) {
-                    deferred.reject(err);
-                  }).
-                done();
+        if (verified.admin || verified.write) { 
+          _getCollection(verified.dbName, verified.collectionName).
+              then(function(collection) {
+  
+                      // Make data._id a string (because it might
+                      // otherwise be interpreted as an int or hex)
+                      if (params.data._id) {
+                        params.data._id = new mongo.ObjectID(params.data._id + '');
+                      }
+  
+                      collection.save(params.data, { safe: true },
+                              function(err, ack) {
+                                      if (err) {
+                                        deferred.reject(err);
+                                      }
+                                      else {
+                                        deferred.resolve(ack);
+                                      }
+                                    });
+                    }).
+                  catch(function(err) {
+                      deferred.reject(err);
+                    }).
+                  done();
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise;
       };
     exports.save = _save;

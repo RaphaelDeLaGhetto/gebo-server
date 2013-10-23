@@ -192,10 +192,13 @@ exports.save = {
                     }).done();
    }, 
 
-   'Save to existing database': function (test) {
+   'Save to existing database as admin': function (test) {
         test.expect(3);
 
-        action.save(verifiedUser, { data: { junk: 'I like to move it move it' } }).
+        action.save({ dbName: 'yanfen_at_hg_dot_com',
+		      collectionName: cname,
+		      admin: true },
+                    { data: { junk: 'I like to move it move it' } }).
                 then(function(docs) {
                         test.ok(docs);
 			// If it's already saved, it doesn't return
@@ -211,22 +214,33 @@ exports.save = {
                     });
    }, 
 
-   'Update existing document': function(test) {
+   'Update existing document as admin': function(test) {
         test.expect(8);
 
         // Retrieve the existing document
-        action.cp(verifiedUser, { id: '0123456789AB' }).
+        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: true },
+                  { id: '0123456789AB' }).
             then(function(docs) {
                     test.ok(docs, 'Docs successfully copied');
                     test.equal(docs.name, 'dan');
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
-                    return action.save(verifiedUser, { data: docs });
+                    return action.save(
+                            { dbName: 'yanfen_at_hg_dot_com',
+          		      collectionName: cname,
+		              admin: true },
+                            { data: docs });
                 }).
             then(function(ack) {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
-                    return action.cp(verifiedUser, { id: '0123456789AB' });
+                    return action.cp(
+                            { dbName: 'yanfen_at_hg_dot_com',
+          		      collectionName: cname,
+		              admin: true },
+                            { id: '0123456789AB' });
                 }).
             then(function(docs) {
                     test.ok(docs, 'Retrieved the saved doc again');
@@ -239,7 +253,78 @@ exports.save = {
                     test.ifError(err);        
                     test.done();
                 });
-    }
+    },
+
+   'Save to existing database with write permission': function (test) {
+        test.expect(3);
+
+        action.save({ dbName: 'yanfen_at_hg_dot_com',
+		      collectionName: cname,
+		      admin: false,
+                      write: true },
+                    { data: { junk: 'I like to move it move it' } }).
+                then(function(docs) {
+                        test.ok(docs);
+			// If it's already saved, it doesn't return
+			// the mongo ID
+                        test.equal(docs.junk, 'I like to move it move it');
+                        test.ok(docs._id);
+                        test.done();
+                    }).
+                catch(function(err) {
+                        test.ok(false, err);
+                        test.done();
+                    });
+   }, 
+
+   'Update existing document with write permission': function(test) {
+        test.expect(8);
+
+        // Retrieve the existing document
+        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+		    collectionName: cname,
+		    admin: false,
+                    read: true,
+                    write: true },
+                  { id: '0123456789AB' }).
+            then(function(docs) {
+                    test.ok(docs, 'Docs successfully copied');
+                    test.equal(docs.name, 'dan');
+                    test.equal(docs.occupation, 'Batman');
+                    docs.occupation = 'AI Practitioner';
+                    return action.save(
+                            { dbName: 'yanfen_at_hg_dot_com',
+          		      collectionName: cname,
+		              admin: false,
+                              read: true,
+                              write: true },
+                            { data: docs });
+                }).
+            then(function(ack) {
+                    test.ok(ack, 'Doc successfully saved');
+		    test.equal(ack, '1');
+                    return action.cp(
+                            { dbName: 'yanfen_at_hg_dot_com',
+          		      collectionName: cname,
+		              admin: false,
+                              read: true,
+                              write: true },
+                            { id: '0123456789AB' });
+                }).
+            then(function(docs) {
+                    test.ok(docs, 'Retrieved the saved doc again');
+                    test.equal(docs.name, 'dan');
+                    test.equal(docs.occupation, 'AI Practitioner');
+                    test.done();
+                }).
+            catch(function(err) {
+                    console.log(err);
+                    test.ifError(err);        
+                    test.done();
+                });
+    },
+
+
 };
 
 /**
