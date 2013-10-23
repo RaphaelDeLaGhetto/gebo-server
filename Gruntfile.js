@@ -98,17 +98,19 @@ module.exports = function (grunt) {
      * https://github.com/jaredhanson/passport-local
      */
     grunt.registerTask('dbseed', 'seed the database', function () {
-        grunt.task.run('addagent:admin:admin@example.com:secret:true');
-        grunt.task.run('addagent:bob:bob@example.com:secret:false');
-        grunt.task.run('addclient:Samplr:abc123:ssh-secret');
+        grunt.task.run('registeragent:admin:admin@example.com:secret:true');
+        grunt.task.run('registeragent:bob:bob@example.com:secret:false');
+        grunt.task.run('addfriend:bob:bob@example.com:admin@example.com');
+        grunt.task.run('addfriend:admin:admin@example.com:bob@example.com');
+        //grunt.task.run('addclient:Samplr:abc123:ssh-secret');
       });
 
-    grunt.registerTask('addagent', 'add a agent to the database',
+    grunt.registerTask('registeragent', 'add a agent to the database',
         function (usr, emailaddress, pass, adm) {
             // convert adm string to bool
             adm = (adm === 'true');
 
-            var agent = new db.agentModel({
+            var agent = new db.registrantModel({
                 name: usr,
                 email: emailaddress,
                 password: pass,
@@ -124,10 +126,10 @@ module.exports = function (grunt) {
                   done(false);
                 }
                 else {
-                  console.log('saved agent: ' + agent.name);
-                  action.createDatabase(
-                          utils.getMongoDbName(emailaddress),
-                          agent).
+                  console.log('Registered ' + agent.name);
+                  action.createDatabase({ admin: true,
+                                          dbName: utils.getMongoDbName(emailaddress) },
+                                        { profile: agent }).
                     then(function() {
                         done();
                       }).
@@ -147,8 +149,8 @@ module.exports = function (grunt) {
             // async mode
             var done = this.async();
 
-            db.mongoose.db.on('open', function () {
-                db.mongoose.db.dropDatabase(function (err) {
+            db.connection.db.on('open', function () {
+                db.connection.db.dropDatabase(function (err) {
                     if (err) {
                       console.log('Error: ' + err);
                       done(false);
@@ -162,30 +164,63 @@ module.exports = function (grunt) {
           });
 
     /**
-     * addclient
+     * addfriend
      */
-    grunt.registerTask('addclient', 'add a client to the database',
-        function (name, clientId, secret) {
+    grunt.registerTask('addfriend', 'add a friend to the agent specified',
+        function (name, email, agentEmail) {
+            var agentDb = require('./schemata/agent')(agentEmail);
 
-            var client = new db.clientModel({
-                name: name,
-                clientId: clientId,
-                secret: secret,
-              });
-    
-            // save call is async, put grunt into async mode to work
+            var friend = agentDb.friendModel({
+                    name: name,
+                    email: email,
+                });
+
+            // Can't modify ID in findOneAndUpdate
+            friend._id = undefined;
+
+            // Save call is async. Put grunt into async mode to work
             var done = this.async();
 
-            client.save(function (err) {
-                if (err) {
-                  console.log('Error: ' + err);
-                  done(false);
-                }
-                else {
-                  console.log('saved client: ' + client.name);
-                  done();
-                }
-              });
+            agentDb.friendModel.findOneAndUpdate({ email: friend.email },
+                    friend.toObject(),
+                    { upsert: true },
+                    function (err) {
+                        if (err) {
+                          console.log('Error: ' + err);
+                          done(false);
+                        }
+                        else {
+                          console.log('Saved friend: ' + friend.name);
+                          done();
+                        }
+                      });
           });
+
+    /**
+     * addclient
+     */
+//    grunt.registerTask('addclient', 'add a client to the database',
+//        function (name, clientId, secret) {
+//
+//            var client = new db.clientModel({
+//                name: name,
+//                clientId: clientId,
+//                secret: secret,
+//              });
+//    
+//            // save call is async, put grunt into async mode to work
+//            var done = this.async();
+//
+//            client.save(function (err) {
+//                if (err) {
+//                  console.log('Error: ' + err);
+//                  done(false);
+//                }
+//                else {
+//                  console.log('saved client: ' + client.name);
+//                  done();
+//                }
+//              });
+//          });
 
   };
