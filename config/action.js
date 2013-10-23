@@ -333,39 +333,44 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _createDatabase = function(dbName, profile) {
+    var _createDatabase = function(verified, params) {
         var deferred = q.defer();
 
-        _dbExists(dbName).
-                then(function() {
-                    deferred.reject();
-                  }).
-                catch(function() {
-                        var server = new mongo.Server(config.mongo.host,
-                                         config.mongo.port,
-                                         config.mongo.serverOptions);
-                        var db = new mongo.Db(
-				dbName, server, config.mongo.clientOptions);
-
-                        db.open(function (err, client) {
-                            if (err) {
-                              deferred.reject(err);
-                            }
-                            else {
-                              var collection = new mongo.Collection(client, 'profile');
-                              collection.save(profile.toObject(), { safe: true },
-                                      function(err, ack) {
-                                          if (err) {
-                                            deferred.reject(err);
-                                          }
-                                          else {
-                                            deferred.resolve(ack);
-                                          }
-                                          db.close();
-                                        });
-                            }
-                          });
-                      });
+        if (verified.admin || verified.execute) {
+          _dbExists(verified.dbName).
+                  then(function() {
+                      deferred.reject();
+                    }).
+                  catch(function() {
+                          var server = new mongo.Server(config.mongo.host,
+                                           config.mongo.port,
+                                           config.mongo.serverOptions);
+                          var db = new mongo.Db(
+  				verified.dbName, server, config.mongo.clientOptions);
+  
+                          db.open(function (err, client) {
+                              if (err) {
+                                deferred.reject(err);
+                              }
+                              else {
+                                var collection = new mongo.Collection(client, 'profile');
+                                collection.save(params.profile.toObject(), { safe: true },
+                                        function(err, ack) {
+                                            if (err) {
+                                              deferred.reject(err);
+                                            }
+                                            else {
+                                              deferred.resolve(ack);
+                                            }
+                                            db.close();
+                                          });
+                              }
+                            });
+                        });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
 
         return deferred.promise;
       };
@@ -378,7 +383,6 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    //var _dropDatabase = function(dbName) {
     var _dropDatabase = function(verified) {
         var deferred = q.defer();
 
@@ -538,7 +542,6 @@ module.exports = function(email) {
         return deferred.promise; 
       };
     exports.defriend = _defriend;
-
 
     return exports;
   };

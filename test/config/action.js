@@ -712,17 +712,18 @@ exports.ls = {
 /**
  * createDatabase
  */
-var agent;
+//var agent;
 exports.createDatabase = {
 
     setUp: function(callback) {
     	try{
-            agent = new gebo.registrantModel({
+            this.agent = new gebo.registrantModel({
                     name: 'Joey Joe Joe Jr. Shabadoo',
                     email: 'jjjj@shabadoo.com',
                     password: 'abc123',
                     admin: 'true'
                   });
+            this.agent.save();
 
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
@@ -733,7 +734,6 @@ exports.createDatabase = {
                 if (err) {
                   throw err;
                 }
-                agent.save();
                 this.collection = new mongo.Collection(client, cname);
                 this.collection.insert([
                         {
@@ -758,6 +758,8 @@ exports.createDatabase = {
     },
 
     tearDown: function (callback) {
+        var email = this.agent.email;
+
         // Drop the existing database defined in setup
         this.db.dropDatabase(function(err) {
 
@@ -765,7 +767,7 @@ exports.createDatabase = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            var testDb = new mongo.Db(utils.getMongoDbName(agent.email),
+            var testDb = new mongo.Db(utils.getMongoDbName(email),
                             server, config.mongo.clientOptions);
 
             testDb.open(function(err, client) {
@@ -788,11 +790,11 @@ exports.createDatabase = {
           });
     },
 
-    'Should add a new database with a profile collection': function(test) {
+    'Add a new database with a profile collection as admin': function(test) {
         test.expect(5);
 
         // Make sure the DB doesn't exist already
-        var dbName = utils.getMongoDbName(agent.email);
+        var dbName = utils.getMongoDbName(this.agent.email);
         action.dbExists(dbName).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
@@ -802,7 +804,7 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase(dbName, agent).
+        action.createDatabase({ admin: true, dbName: dbName }, { profile: this.agent }).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created'); //
                     action.getCollection(dbName, 'profile').
@@ -834,7 +836,79 @@ exports.createDatabase = {
                     test.ok(false, err);
                     test.done();
                   });
+    },
 
+    'Add a new database with a profile collection with execute permission': function(test) {
+        test.expect(5);
+
+        // Make sure the DB doesn't exist already
+        var dbName = utils.getMongoDbName(this.agent.email);
+        action.dbExists(dbName).
+                then(function(client) {
+                    test.ok(false, 'This database shouldn\'t exist. Delete manually???');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.ok(true, 'This database does not exist, which is good');
+                  });
+
+        action.createDatabase({ admin: false, execute: true, dbName: dbName }, { profile: this.agent }).
+                then(function() {
+                    test.ok(true, 'Looks like ' + dbName + ' was created');
+                    action.getCollection(dbName, 'profile').
+                            then(function(collection) {
+                                collection.findOne({ email: 'jjjj@shabadoo.com' },
+                                        function(err, doc) {
+                                            if (err) {
+                                              test.ok(false, err);
+                                              test.done();
+                                            }
+                                            else {
+                                              test.equal(doc.name,
+                                                      'Joey Joe Joe Jr. Shabadoo');
+                                              test.equal(doc.email, 'jjjj@shabadoo.com');
+                                              test.ok(doc.admin);
+                                              test.done();
+                                            }
+                                          }); 
+                              }).
+                            catch(function(err) {
+                                test.ok(false, err);
+                                test.done();
+                              });
+ 
+
+
+                  }).
+                catch(function(err) {
+                    test.ok(false, err);
+                    test.done();
+                  });
+    },
+    
+    'Do not add a new database without proper permission': function(test) {
+        test.expect(2);
+
+        // Make sure the DB doesn't exist already
+        var dbName = utils.getMongoDbName(this.agent.email);
+        action.dbExists(dbName).
+                then(function(client) {
+                    test.ok(false, 'This database shouldn\'t exist. Delete manually???');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.ok(true, 'This database does not exist, which is good');
+                  });
+
+        action.createDatabase({ admin: false, execute: false, dbName: dbName }, { profile: this.agent }).
+                then(function() {
+                    test.ok(false, 'Should not be able to add a new datase');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    test.equal(err, 'You are not permitted to request or propose that action');
+                    test.done();
+                  });
     },
 
     'Should not overwrite an existing database': function(test) {
@@ -851,7 +925,7 @@ exports.createDatabase = {
                     test.done();
                   });
 
-        action.createDatabase(dbName).
+        action.createDatabase({ admin: true, execute: true, dbName: dbName }, { profile: this.agent }).
                 then(function() {
                     test.ok(false, dbName + ' should not have been created');
                     test.done();
