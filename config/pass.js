@@ -29,8 +29,8 @@ module.exports = function(email) {
      * LocalStrategy
      *
      * This strategy is used to authenticate an agent's email and password.
-     * Anytime a request is made to authorize an application, we must ensure that
-     * a user is logged in before asking them to approve the request.
+     * Any time a request is made to authorize an application, we must ensure that
+     * a user is logged in before asking him to approve the request.
      *
      * @param string
      * @param string
@@ -179,33 +179,6 @@ module.exports = function(email) {
     exports.bearerStrategy = _bearerStrategy;
     passport.use(new BearerStrategy(_bearerStrategy));
 
-//    passport.use(new BearerStrategy(
-//        function(accessToken, done) {
-//            db.tokenModel.findOne({ token: accessToken }, function(err, token) {
-//                if (err) {
-//                  return done(err);
-//                }
-//                if (!token) {
-//                  return done(null, false);
-//                }
-//                
-//                db.userModel.findOne({ _id: token.userId }, function(err, user) {
-//                    if (err) {
-//                      return done(err);
-//                    }
-//                    if (!user) {
-//                      return done(null, false);
-//                    }
-//    
-//                    // To keep this example simple, restricted scopes are not implemented,
-//                    // and this is just for illustrative purposes
-//                    var info = { scope: '*' };
-//                    done(null, user, info);
-//                  });
-//              });
-//          }
-//      ));
-    
     /**
      * Client JWT Bearer Strategy
      *

@@ -156,14 +156,16 @@ exports.objectToQueryString = {
  * ensureDbName
  */
 exports.ensureDbName = {
-    'Return the default gebo name if no email specified': function(test) {
-        test.expect(2);
-        var dbName = utils.ensureDbName();
-        test.equal(dbName, 'gebo-server_at_example_dot_com');
-        dbName = utils.ensureDbName(null);
-        test.equal(dbName, 'gebo-server_at_example_dot_com');
-        test.done();
-    },
+//    This was causing tests to overwrite/drop the dev database
+//
+//    'Return the default gebo name if no email specified': function(test) {
+//        test.expect(2);
+//        var dbName = utils.ensureDbName();
+//        test.equal(dbName, 'gebo-server_at_example_dot_com');
+//        dbName = utils.ensureDbName(null);
+//        test.equal(dbName, 'gebo-server_at_example_dot_com');
+//        test.done();
+//    },
 
     'Return a mongo-friendly database name': function(test) {
         test.expect(2);

@@ -178,11 +178,11 @@ module.exports = function (email) {
       });
 
     // Export permission model
-//    try {
-//        var permissionModel = connection.model('Permission', permissionSchema);
-//        exports.permissionModel = permissionModel;
-//      }
-//    catch (error) {}
+    try {
+        var permissionModel = connection.model('Permission', permissionSchema);
+        exports.permissionModel = permissionModel;
+      }
+    catch (error) {}
 
 
     /**
@@ -227,6 +227,53 @@ module.exports = function (email) {
     try {
         var friendModel = connection.model('Friend', friendSchema);
         exports.friendModel = friendModel;
+      }
+    catch (error) {}
+
+    /**
+     * HAI schema
+     */
+    var haiSchema = new Schema({
+        name: { type: String, required: true, unique: false },
+        email: { type: String, required: true, unique: true },
+        redirect: { type: String, required: true, unique: false },
+        permissions: [permissionSchema],
+      });
+
+    /**
+     * Get an array of permissions
+     *
+     * @param string
+     */
+    haiSchema.methods.getPermissions = function(email) {
+        var permissions = [],
+            permissionsObj;
+        for (var i = 0; i < this.permissions.length; i++) {
+          if (this.permissions[i].email === email) {
+            permissionsObj = this.permissions[i];
+            break;
+          }
+        }
+
+        if (permissionsObj) {
+          if (permissionsObj.read) {
+            permissions.push('read');
+          }
+          if (permissionsObj.write) {
+            permissions.push('write');
+          }
+          if (permissionsObj.execute) {
+            permissions.push('execute');
+          }
+        }
+        return permissions;
+      };
+
+
+    // Export HAI model
+    try {
+        var haiModel = connection.model('Hai', haiSchema);
+        exports.haiModel = haiModel;
       }
     catch (error) {}
 

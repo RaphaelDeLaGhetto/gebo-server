@@ -1913,7 +1913,7 @@ exports.friend = {
                 email: 'yanfen@hg.com',
                 uri: 'http://theirhost.com',
             };
-        action.friend({ write: false }, { newFriend: newFriend }).
+        action.friend({ write: false, dbName: 'dan_at_hg_dot_com' }, { newFriend: newFriend }).
             then(function(friend) {  
                 test.ok(false, 'Should not be allowed to add a new friend');
                 test.done();
@@ -1940,7 +1940,7 @@ exports.friend = {
                     uri: 'http://someotherhost.com',
                 };
 
-        action.friend({ write: true }, { newFriend: existingFriend }).
+        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { newFriend: existingFriend }).
                 then(function(friend) {
                     test.equal(friend.name, 'john');
                     test.equal(friend.email, 'john@painter.com');

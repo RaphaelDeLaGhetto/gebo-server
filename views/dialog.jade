@@ -1,9 +1,17 @@
 extends layout
 
 block content
-    p.lead Hello, #{user.name}
-    p #{oauthClient.name} wants access to your account.
-    p Do you approve?
+    p.lead Hello, #{oauth.user.name}
+    p
+        i #{oauth.req.clientName} 
+        | needs #{oauth.req.scope.join('/')} access to the files it stores in your account
+
+    div Email: #{oauth.req.clientID}
+    div Callback: #{oauth.req.redirectURI}
+
+    br
+    p.
+        Do you trust this application?
 
     form(action="/dialog/authorize/decision", method="post")
         input(name="transaction_id", type="hidden", value="#{transactionID}")

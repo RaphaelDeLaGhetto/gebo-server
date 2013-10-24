@@ -46,7 +46,7 @@ exports.getParams = {
     setUp: function (callback) {
         try {
             /**
-             * Setup an registrant
+             * Setup a registrant
              */
             this.geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new this.geboDb.registrantModel({
