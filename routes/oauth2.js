@@ -13,11 +13,13 @@ var oauth2orize = require('oauth2orize'),
     login = require('connect-ensure-login'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),
+    q = require('q'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
     mongoose = require('mongoose');
 
 nconf.argv().env().file({ file: 'local.json' });
-var db = require('../schemata/gebo')(nconf.get('email'));
+var geboDb = require('../schemata/gebo')(nconf.get('email')),
+    agentSchema = require('../schemata/agent');
 
 // create OAuth 2.0 server
 var server = oauth2orize.createServer();
@@ -35,17 +37,26 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function (client, done) {
-    return done(null, client.id);
+server.serializeClient(function (emails, done) {
+    console.log('serializeClient');
+    console.log(emails);
+    return done(null, emails);
   });
 
-server.deserializeClient(function (id, done) {
-    db.clientModel.findOne({ '_id': mongoose.Types.ObjectId(id) }, function (err, client) {
-        if (err) {
-          return done(err);
-        }
-        return done(null, client);
-      });
+server.deserializeClient(function (emails, done) {
+    console.log('deserializeClient');
+    console.log(emails);
+    return done(null, emails);
+//    var agentDb = new agentSchema(emails.agent);
+//    agentDb.friendModel.findOne({ email: emails.friend }, function (err, friend) {
+//            console.log('findFriend');
+//            console.log(err);
+//            console.log(friend);
+//            if (err) {
+//              return done(err);
+//            }
+//            return done(null, friend);
+//      });
   });
 
 // Register supported grant types.
@@ -65,7 +76,7 @@ server.deserializeClient(function (id, done) {
 server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, done) {
     var code = utils.uid(16);
   
-    var authorization = new db.authorizationModel({
+    var authorization = new geboDb.authorizationModel({
         userId: user.id,
         clientId: client.id,
         redirectUri: redirectUri,
@@ -86,19 +97,29 @@ server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, d
  */
 server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
     console.log('------ implicit grant');
+    console.log(client);
+    console.log(user);
+    console.log(ares);
     var tokenStr = utils.uid(256);
 
-    var token = new db.tokenModel({
-        userId: user._id,
-        clientId: client._id,
-        token: tokenStr,
+//    var token = new geboDb.tokenModel({
+//        userId: user._id,
+//        clientId: client._id,
+//        token: tokenStr,
+//      });
+    var token = new geboDb.tokenModel({
+        registrantId: user._id,
+        haiId: client.friend,
+        string: tokenStr,
       });
+
 
     token.save(function (err, token) {
         if (err) {
           return done(err);
         }
-        return done(null, token.token);
+
+        return done(null, token.string);
       });
   }));
 
@@ -110,7 +131,7 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 
 server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
     console.log('------ regular exchange, no no');
-    db.authorizationModel.findOne({ code: code }, function (err, authCode) {
+    geboDb.authorizationModel.findOne({ code: code }, function (err, authCode) {
         if (err) {
           return done(err);
         }
@@ -123,7 +144,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
     
         var tokenStr = utils.uid(256);
 
-        var token = new db.tokenModel({
+        var token = new geboDb.tokenModel({
             userId: authCode.userId,
             clientId: client.id,
             token: tokenStr,
@@ -153,7 +174,7 @@ server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(functio
 
       var tokenStr = utils.uid(256);
 
-      var token = new db.tokenModel({
+      var token = new geboDb.tokenModel({
           userId: client.id,
           clientId: client.id,
           token: tokenStr,
@@ -186,27 +207,92 @@ server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(functio
 
 exports.authorization = [
     login.ensureLoggedIn(),
-    server.authorization(function (clientId, redirectUri, done) {
-        db.clientModel.findOne({ clientId: clientId }, function (err, client) {
-            if (err) {
-              return done(err);
-            }
-            // WARNING: For security purposes, it is highly advisable to check that
-            //          redirectURI provided by the client matches one registered with
-            //          the server.  For simplicity, this example does not.  You have
-            //          been warned.
-            return done(null, client, redirectUri);
-          });
+    server.authorization(function (email, redirectUri, done) {
+        console.log('authorization');
+        // { friend: email } gets passed to the serializeClient function's
+        // emails parameter. The agent email is added before the dialog 
+        // window is rendered
+        return done(null, { friend: email }, redirectUri);
       }),
 
+    // The req.oauth2.client object is passed through
+    // the emails parameter in the [de]serializeClient functions.
+    // Hence, req.oauth2.client.agent = req.user.email
     function (req, res) {
+        console.log('render dialog');
+        console.log(req.query);
+
+        req.oauth2.client.agent = req.user.email;
+        req.oauth2.req.clientName = req.query.client_name;
+
+        console.log('oauth2');
+        console.log(req.oauth2);
+
         res.render('dialog', {
             transactionID: req.oauth2.transactionID,
-            user: req.user,
-            oauthClient: req.oauth2.client
+            oauth: req.oauth2,
           });
       }
   ];
+
+/**
+ * Find the differences between the HAI on record 
+ * and the one requiring access
+ *
+ * @param string
+ * @param string
+ *
+ * @return promise
+ */
+function _verifyHai(agentEmail, haiProfile) {
+    var deferred = q.defer();
+
+    geboDb.registrantModel.findOne({ email: agentEmail }, function(err, registrant) {
+        if (err) {
+          deferred.reject(err);
+        }
+        else if (!registrant) {
+          deferred.reject('That agent is not registered');
+        }
+        else {
+          var db = new agentSchema(agentEmail);
+          db.haiModel.findOne({ email: haiProfile.clientID }, function(err, hai) {
+                if (err) {
+                  deferred.resolve(err);
+                }
+                else if (!hai) {
+                  deferred.resolve(false);
+                }
+                else {
+                  var delta = {};
+        
+                  if (hai.redirect !== haiProfile.redirectURI) {
+                    delta.redirectURI = hai.redirect;
+                  }
+
+                  var haiScope = hai.getPermissions(haiProfile.clientID);
+                  if (haiScope.join() !== haiProfile.scope.join()) {
+                    delta.scope = haiScope;
+                  }
+
+                  if (hai.name !== haiProfile.clientName) {
+                    delta.clientName = hai.name;
+                  }
+
+                  if (Object.keys(delta).length) {
+                    deferred.resolve(delta);
+                  }
+                  else {
+                    deferred.resolve(true);
+                  }
+                }
+              });
+        }
+      });
+
+    return deferred.promise;
+  };
+exports.verifyHai = _verifyHai;
 
 // user decision endpoint
 //
