@@ -230,6 +230,29 @@ exports.authorization = [
 
         _getHaiProfileChanges(req.user.email, req.oauth2.req).
             then(function(delta) {
+            
+                // This HAI has never been seen before
+                if (delta && delta.clientID) {
+                  // This has to happen here, because I haven't figured out
+                  // how to get the authorizing agent's email address to 
+                  // the server.authorization call. This solution is not
+                  // satisfactory
+                  //
+                  // Save the untrusted HAI profile to the agent's database
+//                  var db = new agentSchema(req.user.email);
+//                  var hai = new db.haiModel({ name: delta.clientName,
+//                                              email: delta.clientID,
+//                                              redirect: delta.redirectURI,
+//                                              trusted: false,
+//                                            });
+//                  hai.permissions.push({ email: delta.clientID,
+//                                         read: delta.scope.indexOf('read') > -1,
+//                                         write: delta.scope.indexOf('write') > -1,
+//                                         execute: delta.scope.indexOf('execute') > -1,
+//                                       });
+//                  hai.save();
+                }
+
                 res.render('dialog', {
                     transactionID: req.oauth2.transactionID,
                     oauth: req.oauth2,
@@ -243,9 +266,12 @@ exports.authorization = [
  * Find the differences between the HAI on record 
  * and the one requiring access.
  *
+ * If there is no HAI on record, add an untrusted profile
+ * to the agent's database.
+ *
  * The haiProfile Object is produced by Jared Hanson's
  * oauth2orize. See the calling function in the authorization
- * array
+ * array.
  *
  * @param string
  * @param Object
@@ -276,6 +302,12 @@ function _getHaiProfileChanges(agentEmail, haiProfile) {
 
                   // Compare the submitted profile with the stored profile
                   if (hai) {
+
+                    // The HAI profile may be stored, but untrusted
+                    if (hai.trusted) {
+                      delta.clientID = haiProfile.clientID;
+                    }
+
                     if (hai.redirect !== haiProfile.redirectURI) {
                       delta.redirectURI = hai.redirect;
                     }
@@ -289,12 +321,34 @@ function _getHaiProfileChanges(agentEmail, haiProfile) {
                     }
 
                   }
-                  // If never registered, return the profile submitted
+                  // If never registered, save an untrusted profile and
+                  // compile the profile submitted
                   else {
                     delta.clientID = haiProfile.clientID;
                     delta.redirectURI = haiProfile.redirectURI;
                     delta.clientName = haiProfile.clientName;
                     delta.scope = haiScope;
+
+                    // Save untrusted profile
+                    var hai = new db.haiModel({ name: delta.clientName,
+                                                email: delta.clientID,
+                                                redirect: delta.redirectURI,
+                                                trusted: false,
+                                              });
+                    hai.permissions.push({ email: delta.clientID,
+                                           read: delta.scope.indexOf('read') > -1,
+                                           write: delta.scope.indexOf('write') > -1,
+                                           execute: delta.scope.indexOf('execute') > -1,
+                                         });
+
+                    hai.save(function(err, hai) {
+                        if (err) {
+                          deferred.reject(err);
+                        }
+                        else {
+                          deferred.resolve(delta);
+                        }        
+                      });
                   }
 
                   // Are there any differences?
@@ -317,7 +371,7 @@ exports.getHaiProfileChanges = _getHaiProfileChanges;
 //
 // `decision` middleware processes a user's decision to allow or deny access
 // requested by a client application.  Based on the grant type requested by the
-// client, the above grant middleware configured above will be invoked to send
+// client, the grant middleware configured above will be invoked to send
 // a response.
 
 exports.decision = [

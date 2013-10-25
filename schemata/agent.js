@@ -237,6 +237,7 @@ module.exports = function (email) {
         name: { type: String, required: true, unique: false },
         email: { type: String, required: true, unique: true },
         redirect: { type: String, required: true, unique: false },
+        trusted: { type: Boolean, required: true, default: false },
         permissions: [permissionSchema],
       });
 

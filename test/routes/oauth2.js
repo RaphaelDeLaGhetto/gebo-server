@@ -135,6 +135,43 @@ exports.getHaiProfileChanges = {
               });
     },
 
+    'Add an untrusted HAI profile to the agent\'s DB if never seen before': function(test) {
+        test.expect(9);
+        oauth2.getHaiProfileChanges('yanfen@hg.com',
+                        { type: 'token',
+                          clientID: 'unknownapp@mystery.com',
+                          redirectURI: 'http://rainbow.com/oauth2callback.html',
+                          scope: [ 'write', 'execute' ],
+                          state: undefined,
+                          clientName: 'Some app from over the rainbow'
+                        }).
+            then(function(delta) {
+                agentDb.haiModel.findOne({ email: 'unknownapp@mystery.com' }).exec().
+                    then(function(hai) {
+                        if (hai) {
+                          test.equal(hai.name, 'Some app from over the rainbow');
+                          test.equal(hai.email, 'unknownapp@mystery.com');
+                          test.equal(hai.redirect, 'http://rainbow.com/oauth2callback.html');
+                          test.equal(hai.trusted, false);
+                          test.equal(hai.permissions.length, 1);
+                          test.equal(hai.permissions[0].email, 'unknownapp@mystery.com');
+                          test.equal(hai.permissions[0].read, false);
+                          test.equal(hai.permissions[0].write, true);
+                          test.equal(hai.permissions[0].execute, true);
+                        }
+                        else {
+                          test.ok(false, 'The untrusted HAI was not saved');
+                        }
+                        test.done();
+                    });
+                
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
     'Return false if the given profile matches the saved profile': function(test) {
         test.expect(1);
         oauth2.getHaiProfileChanges('yanfen@hg.com', HAI_PROFILE).
