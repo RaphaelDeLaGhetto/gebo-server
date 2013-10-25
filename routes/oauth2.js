@@ -228,11 +228,14 @@ exports.authorization = [
         console.log('oauth2');
         console.log(req.oauth2);
 
-        res.render('dialog', {
-            transactionID: req.oauth2.transactionID,
-            oauth: req.oauth2,
-            delta: _getHaiProfileChanges(req.user.email, req.oauth2.req),
-          });
+        _getHaiProfileChanges(req.user.email, req.oauth2.req).
+            then(function(delta) {
+                res.render('dialog', {
+                    transactionID: req.oauth2.transactionID,
+                    oauth: req.oauth2,
+                    delta: delta,
+                  });
+              });
       }
   ];
 

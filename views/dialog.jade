@@ -6,11 +6,30 @@ block content
         i #{oauth.req.clientName} 
         | needs #{oauth.req.scope.join('/')} access to the files it stores in your account
 
-    ul.unstyled
-        li Email: #{oauth.req.clientID}
-        li Callback: #{oauth.req.redirectURI}
+    if delta.clientID
+        p You have not trusted this application before
 
-    br
+    pre
+        ul.unstyled
+            li Email: 
+                if delta.clientID
+                    | #{delta.clientID} (new)  
+                else
+                    | #{oauth.req.clientID}
+            li Callback: 
+                if delta.redirectURI
+                    | #{delta.redirectURI} (new)  
+                else
+                    | #{oauth.req.redirectURI}
+                if !delta.clientID
+                    | (old)
+            li Permissions: 
+                if delta.scope
+                    | #{delta.scope.join('/')} (new)
+                else
+                    | #{oauth.req.scope.join('/')}
+                if !delta.clientID
+                    | (old)
     p.
         Do you trust this application?
 
