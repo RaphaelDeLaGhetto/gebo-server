@@ -16,7 +16,8 @@ var passport = require('passport'),
     BasicStrategy = require('passport-http').BasicStrategy,
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
-    ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy;
+    ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy,
+    agentSchema = require('../schemata/agent');
 
 module.exports = function(email) {
 
@@ -160,7 +161,8 @@ module.exports = function(email) {
             if (token.expires && new Date(token.expires) < new Date()) {
               return done(null, false);
             }
-             
+            
+            // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, function(err, registrant) {
                 if (err) {
                   return done(err);
@@ -168,11 +170,28 @@ module.exports = function(email) {
                 if (!registrant) {
                   return done(null, false);
                 }
-    
-                // To keep this example simple, restricted scopes are not implemented,
-                // and this is just for illustrative purposes
-                var info = { scope: '*' };
-                done(null, registrant, info);
+            
+                // Is the bearer the resource owner or a friend?
+                if (token.friendId) {
+                  var agentDb = new agentSchema(registrant.email);
+
+                  agentDb.friendModel.findOne({ _id: token.friendId }, function(err, friend) {
+                        if (err) {
+                          return done(err);
+                        }
+                        if (!friend) {
+                          return done(null, false);
+                        }
+                        done(null, friend, token);
+                    });
+                }
+                else {
+                  // To keep this example simple, restricted scopes are not implemented,
+                  // and this is just for illustrative purposes
+//                  var info = { scope: '*' };
+//                  done(null, registrant, info);
+                  done(null, registrant, token);
+                }
               });
           });
       };

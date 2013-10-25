@@ -37,16 +37,33 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function (emails, done) {
+server.serializeClient(function (haiEmail, done) {
     console.log('serializeClient');
-    console.log(emails);
-    return done(null, emails);
+    console.log(haiEmail);
+    return done(null, haiEmail);
   });
 
-server.deserializeClient(function (emails, done) {
+server.deserializeClient(function (requestDetails, done) {
     console.log('deserializeClient');
-    console.log(emails);
-    return done(null, emails);
+
+//    return done(null, requestDetails);
+
+    var agentDb = new agentSchema(requestDetails.agent);
+    agentDb.friendModel.findOne({ email: requestDetails.friend }, function (err, friend) {
+            console.log('friendModel');
+            console.log(err);
+            console.log(friend);
+            var id = null;
+            if (friend) {
+              id = friend._id;
+            }
+            requestDetails.friend = id;
+            console.log(requestDetails);
+            if (err) {
+              return done(err);
+            }
+            return done(null, requestDetails);
+      });
 //    var agentDb = new agentSchema(emails.agent);
 //    agentDb.friendModel.findOne({ email: emails.friend }, function (err, friend) {
 //            console.log('findFriend');
@@ -95,30 +112,27 @@ server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, d
 /**
  * Here's my attempt at an implicit grant
  */
-server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
+server.grant(oauth2orize.grant.token(function(requestDetails, user, ares, done) {
     console.log('------ implicit grant');
-    console.log(client);
+    console.log(requestDetails);
     console.log(user);
     console.log(ares);
-    var tokenStr = utils.uid(256);
 
-//    var token = new geboDb.tokenModel({
-//        userId: user._id,
-//        clientId: client._id,
-//        token: tokenStr,
-//      });
+    var tokenStr = utils.uid(256);
+  
     var token = new geboDb.tokenModel({
         registrantId: user._id,
-        haiId: client.friend,
+        friendId: requestDetails.friend,
+        hai: requestDetails.hai,
+        ip: requestDetails.ip,
         string: tokenStr,
       });
-
-
+  
     token.save(function (err, token) {
         if (err) {
           return done(err);
         }
-
+        console.log(token);
         return done(null, token.string);
       });
   }));
@@ -209,10 +223,10 @@ exports.authorization = [
     login.ensureLoggedIn(),
     server.authorization(function (email, redirectUri, done) {
         console.log('authorization');
-        // { friend: email } gets passed to the serializeClient function's
-        // emails parameter. The agent email is added before the dialog 
-        // window is rendered
-        return done(null, { friend: email }, redirectUri);
+        // { hai: email } gets passed to the serializeClient function's
+        // haiEmail parameter. The agent email and originating IP address
+        // is added just before the dialog window is rendered
+        return done(null, { hai: email }, redirectUri);
       }),
 
     // The req.oauth2.client object is passed through
@@ -222,43 +236,25 @@ exports.authorization = [
         console.log('render dialog');
         console.log(req.query);
 
+        // Add some details to the oauth2 object
+        // created by oauth2orize. This will all get
+        // passed through deserializeClient on its way to
+        // the implicit grant.
         req.oauth2.client.agent = req.user.email;
+        req.oauth2.client.friend = req.query.friend;
+        req.oauth2.client.ip = req.headers['x-forwarded-for'] || 
+                               req.connection.remoteAddress || 
+                               req.socket.remoteAddress ||
+                               req.connection.socket.remoteAddress; 
         req.oauth2.req.clientName = req.query.client_name;
 
         console.log('oauth2');
         console.log(req.oauth2);
 
-        _getHaiProfileChanges(req.user.email, req.oauth2.req).
-            then(function(delta) {
-            
-                // This HAI has never been seen before
-                if (delta && delta.clientID) {
-                  // This has to happen here, because I haven't figured out
-                  // how to get the authorizing agent's email address to 
-                  // the server.authorization call. This solution is not
-                  // satisfactory
-                  //
-                  // Save the untrusted HAI profile to the agent's database
-//                  var db = new agentSchema(req.user.email);
-//                  var hai = new db.haiModel({ name: delta.clientName,
-//                                              email: delta.clientID,
-//                                              redirect: delta.redirectURI,
-//                                              trusted: false,
-//                                            });
-//                  hai.permissions.push({ email: delta.clientID,
-//                                         read: delta.scope.indexOf('read') > -1,
-//                                         write: delta.scope.indexOf('write') > -1,
-//                                         execute: delta.scope.indexOf('execute') > -1,
-//                                       });
-//                  hai.save();
-                }
-
-                res.render('dialog', {
-                    transactionID: req.oauth2.transactionID,
-                    oauth: req.oauth2,
-                    delta: delta,
-                  });
-              });
+        res.render('dialog', {
+                transactionID: req.oauth2.transactionID,
+                oauth: req.oauth2,
+            });
       }
   ];
 

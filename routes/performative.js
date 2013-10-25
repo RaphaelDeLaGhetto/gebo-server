@@ -18,6 +18,10 @@ module.exports = function(email) {
     exports.request = [
         passport.authenticate('bearer', { session: false }),
         function(req, res) {
+            console.log('request');
+            console.log(req.body);
+            console.log(req.user);
+            console.log(req.authInfo);
             var action = require('../config/action')(dbName);
 
             // client_id is your friend's email address,

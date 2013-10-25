@@ -112,8 +112,15 @@ module.exports = function (email) {
      * Token schema
      */
     var tokenSchema = new Schema({
+        // The resource owner
         registrantId: { type: ObjectId, required: true, unique: false },
-        friendId: { type: ObjectId, required: true, unique: false },
+        // The ID of the friend granted access to the resource
+        friendId: { type: ObjectId, required: false, default: null },
+        // The resource
+        hai: { type: String, required: true, unique: false },
+        // The authorized IP address
+        ip: { type: String, required: true, unique: false },
+        // The token itself
         string: { type: String, required: true, unique: false },
         expires: { type: Date, required: false, default: null },
       });

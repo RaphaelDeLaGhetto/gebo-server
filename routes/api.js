@@ -9,6 +9,8 @@ var gebo = require('../schemata/gebo')(nconf.get('email'));
 exports.verify = [
     passport.authenticate('bearer', { session: false }),
     function (req, res) {
+        console.log('api');
+        console.log(req.user);
         // req.authInfo is set using the `info` argument supplied by
         // `BearerStrategy`.  It is typically used to indicate scope of the token,
         // and used in access control checks.  For illustrative purposes, this

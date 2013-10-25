@@ -6,35 +6,17 @@ block content
         i #{oauth.req.clientName} 
         | needs #{oauth.req.scope.join('/')} access to the files it stores in your account
 
-    if delta.clientID
-        p You have not trusted this application before
-
     pre
         ul.unstyled
-            li Email: 
-                if delta.clientID
-                    | #{delta.clientID} (new)  
-                else
-                    | #{oauth.req.clientID}
-            li Callback: 
-                if delta.redirectURI
-                    | #{delta.redirectURI} (new)  
-                else
-                    | #{oauth.req.redirectURI}
-                if !delta.clientID
-                    | (old)
-            li Permissions: 
-                if delta.scope
-                    | #{delta.scope.join('/')} (new)
-                else
-                    | #{oauth.req.scope.join('/')}
-                if !delta.clientID
-                    | (old)
+            li Email: #{oauth.req.clientID}
+            li Callback: #{oauth.req.redirectURI}
+            li Permissions: #{oauth.req.scope.join('/')}
+            li Your IP: #{oauth.client.ip}
     p.
         Do you trust this application?
 
     form(action="/dialog/authorize/decision", method="post")
         input(name="transaction_id", type="hidden", value="#{transactionID}")
         div
-            input(type="submit", value="Allow", id="allow")
-            input(type="submit", value="Deny", name="cancel", id="deny")
+            input(type="submit", value="Yes", id="allow")
+            input(type="submit", value="No", name="cancel", id="deny")
