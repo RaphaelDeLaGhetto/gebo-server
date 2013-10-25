@@ -231,20 +231,25 @@ exports.authorization = [
         res.render('dialog', {
             transactionID: req.oauth2.transactionID,
             oauth: req.oauth2,
+            delta: _getHaiProfileChanges(req.user.email, req.oauth2.req),
           });
       }
   ];
 
 /**
  * Find the differences between the HAI on record 
- * and the one requiring access
+ * and the one requiring access.
+ *
+ * The haiProfile Object is produced by Jared Hanson's
+ * oauth2orize. See the calling function in the authorization
+ * array
  *
  * @param string
- * @param string
+ * @param Object
  *
  * @return promise
  */
-function _verifyHai(agentEmail, haiProfile) {
+function _getHaiProfileChanges(agentEmail, haiProfile) {
     var deferred = q.defer();
 
     geboDb.registrantModel.findOne({ email: agentEmail }, function(err, registrant) {
@@ -260,30 +265,41 @@ function _verifyHai(agentEmail, haiProfile) {
                 if (err) {
                   deferred.resolve(err);
                 }
-                else if (!hai) {
-                  deferred.resolve(false);
-                }
                 else {
                   var delta = {};
         
-                  if (hai.redirect !== haiProfile.redirectURI) {
-                    delta.redirectURI = hai.redirect;
-                  }
+                  // Scope
+                  var haiScope = hai == null ? haiProfile.scope: hai.getPermissions(haiProfile.clientID);
 
-                  var haiScope = hai.getPermissions(haiProfile.clientID);
-                  if (haiScope.join() !== haiProfile.scope.join()) {
+                  // Compare the submitted profile with the stored profile
+                  if (hai) {
+                    if (hai.redirect !== haiProfile.redirectURI) {
+                      delta.redirectURI = hai.redirect;
+                    }
+
+                    if (hai && hai.name !== haiProfile.clientName) {
+                      delta.clientName = hai.name;
+                    }
+
+                    if (haiScope.join() !== haiProfile.scope.join()) {
+                      delta.scope = haiScope;
+                    }
+
+                  }
+                  // If never registered, return the profile submitted
+                  else {
+                    delta.clientID = haiProfile.clientID;
+                    delta.redirectURI = haiProfile.redirectURI;
+                    delta.clientName = haiProfile.clientName;
                     delta.scope = haiScope;
                   }
 
-                  if (hai.name !== haiProfile.clientName) {
-                    delta.clientName = hai.name;
-                  }
-
+                  // Are there any differences?
                   if (Object.keys(delta).length) {
                     deferred.resolve(delta);
                   }
                   else {
-                    deferred.resolve(true);
+                    deferred.resolve(false);
                   }
                 }
               });
@@ -292,7 +308,7 @@ function _verifyHai(agentEmail, haiProfile) {
 
     return deferred.promise;
   };
-exports.verifyHai = _verifyHai;
+exports.getHaiProfileChanges = _getHaiProfileChanges;
 
 // user decision endpoint
 //

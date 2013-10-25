@@ -6,8 +6,9 @@ block content
         i #{oauth.req.clientName} 
         | needs #{oauth.req.scope.join('/')} access to the files it stores in your account
 
-    div Email: #{oauth.req.clientID}
-    div Callback: #{oauth.req.redirectURI}
+    ul.unstyled
+        li Email: #{oauth.req.clientID}
+        li Callback: #{oauth.req.redirectURI}
 
     br
     p.

@@ -25,9 +25,9 @@ var HAI_PROFILE = { type: 'token',
                     clientName: 'Some awesome app' };
 
 /**
- * verifyHai
+ * getHaiProfileChanges
  */
-exports.verifyHai = {
+exports.getHaiProfileChanges = {
 
     setUp: function(callback) {
         try {
@@ -112,15 +112,32 @@ exports.verifyHai = {
           });
     },
 
-    'Return false if the HAI has never been authorized before': function(test) {
+    'Return the same profile as submitted with the clientID (email) if the HAI has not been authorized before': function(test) {
+        test.expect(4);
+        oauth2.getHaiProfileChanges('yanfen@hg.com',
+                        { type: 'token',
+                          clientID: 'unknownapp@mystery.com',
+                          redirectURI: 'http://rainbow.com/oauth2callback.html',
+                          scope: [ 'write', 'execute' ],
+                          state: undefined,
+                          clientName: 'Some app from over the rainbow'
+                        }).
+            then(function(delta) {
+                test.equal(delta.clientID, 'unknownapp@mystery.com');
+                test.equal(delta.redirectURI, 'http://rainbow.com/oauth2callback.html');
+                test.equal(delta.clientName, 'Some app from over the rainbow');
+                test.equal(delta.scope.join(), ['write', 'execute'].join());
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Return false if the given profile matches the saved profile': function(test) {
         test.expect(1);
-        oauth2.verifyHai('yanfen@hg.com', { type: 'token',
-                                            clientID: 'unknownapp@mystery.com',
-                                            redirectURI: 'http://rainbow.com/oauth2callback.html',
-                                            scope: [ 'execute', 'write' ],
-                                            state: undefined,
-                                            clientName: 'Some app from over the rainbow'
-                                          }).
+        oauth2.getHaiProfileChanges('yanfen@hg.com', HAI_PROFILE).
             then(function(delta) {
                 test.equal(delta, false);
                 test.done();
@@ -131,23 +148,9 @@ exports.verifyHai = {
               });
     },
 
-    'Return true if the given profile matches the saved profile': function(test) {
-        test.expect(1);
-        oauth2.verifyHai('yanfen@hg.com', HAI_PROFILE).
-            then(function(delta) {
-                console.log(delta);
-                test.equal(delta, true);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
     'Return an Object of deltas if the give profile differs from the saved profile': function(test) {
         test.expect(3);
-        oauth2.verifyHai('yanfen@hg.com', { type: 'token',
+        oauth2.getHaiProfileChanges('yanfen@hg.com', { type: 'token',
                                             clientID: 'app@awesome.com',
                                             redirectURI: 'http://rainbow.com/oauth2callback.html',
                                             scope: [ 'write', 'execute' ],
@@ -168,7 +171,7 @@ exports.verifyHai = {
 
     'Should not barf if the agent email provided is not registered': function(test) {
         test.expect(1);
-        oauth2.verifyHai('dan@hg.com', HAI_PROFILE).
+        oauth2.getHaiProfileChanges('dan@hg.com', HAI_PROFILE).
             then(function(delta) {
                 test.ok(false, 'This agent should not be registered');
                 test.done();
