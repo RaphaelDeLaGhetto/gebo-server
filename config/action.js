@@ -37,6 +37,7 @@ module.exports = function(email) {
           db.open(function (err, client) {
                   if (err) {
                     console.log('ERROR! What is happening here?');
+                    console.log('Check ulimit -n??');
                     console.log(err);
                     throw(err);
                   }
