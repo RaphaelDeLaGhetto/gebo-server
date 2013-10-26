@@ -12,6 +12,7 @@ var COL_NAME = 'appCollection',
     FRIEND_TOKEN = '5678',
     ADMIN_TOKEN = '9012',
     REGULAR_TOKEN = '3456',
+    EXPIRED_TOKEN = '7890',
     HAI_EMAIL = 'human-agent@interface.org',
     IP = '127.0.0.1';
 
@@ -209,6 +210,17 @@ exports.bearerStrategy = {
                     string: FRIEND_TOKEN,
                 });
 
+            /**
+             * Create an expired token
+             */
+            var expiredToken = new geboDb.tokenModel({
+                    registrantId: new mongo.ObjectID('456789ABCDEF'),
+                    friendId: null,
+                    hai: HAI_EMAIL,
+                    ip: IP,
+                    string: EXPIRED_TOKEN,
+                    expires: Date.now() - 60*60*1000,
+                });
 
             // There has got to be a better way to do this...
             registrant.save(function(err) {
@@ -243,7 +255,12 @@ exports.bearerStrategy = {
                                            if (err) {
                                              console.log(err);
                                            }
-                                           callback();
+                                           expiredToken.save(function(err) {
+                                               if (err) {
+                                                 console.log(err);
+                                               }
+                                               callback();
+                                             });
                                          });
                                       });
                                   });
@@ -341,7 +358,7 @@ exports.bearerStrategy = {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.dbName, ADMIN_AGENT_EMAIL); 
+              test.equal(verified.dbName, REGULAR_AGENT_EMAIL); 
               test.equal(verified.collectionName, HAI_EMAIL); 
               test.equal(verified.read, true); 
               test.equal(verified.write, true); 
@@ -352,279 +369,31 @@ exports.bearerStrategy = {
         });
     },
 
-
-    /**
-     * The friend doesn't own the resource, his app just created the data.
-     * That is, the friendEmail and resourceEmail parameters are the same.
-     */
-    'Return permissions for a friend requesting his own app\'s resources': function(test) {
-//        test.expect(3);
-//        var performative = new performativeRoute(nconf.get('testDb'));
-//        performative.verify(FRIEND_TOKEN, 'richard@construction.com', 'richard@construction.com').
-//            then(function(permissions) {
-//                test.equal(permissions.read, true);
-//                test.equal(permissions.write, false);
-//                test.equal(permissions.execute, false);
-                test.done();
-//              });
+    'Do not barf if the token provided does not exist': function(test) {
+        test.expect(1);
+        pass.bearerStrategy('n0sucht0ken', function(err, verified) {
+            if (err) {
+              test.equal(err, 'The token provided is invalid');       
+            }
+            else {
+              test.ok(false, 'Permission should not have been granted');
+            }
+            test.done();
+        });
     },
 
-//    'Return permissions for a friend requesting another app\'s resources': function(test) {
-//        test.expect(6);
-//        var performative = new performativeRoute(nconf.get('testDb'));
-//        performative.verify(FRIEND_TOKEN, 'richard@construction.com', 'someotherapp@example.com').
-//            then(function(permissions) {
-//                test.equal(permissions.read, true);
-//                test.equal(permissions.write, false);
-//                test.equal(permissions.execute, false);
-//                test.equal(permissions.collectionName, 'someotherapp@example.com');
-//                test.equal(permissions.dbName, 'yanfen_at_hg_dot_com');
-//                test.equal(permissions.admin, false);
-//                test.done();
-//              });
-//    },
-//
-//    'Do not barf if access has not been granted to the requested resource': function(test) {
-//        test.expect(1);
-//        var performative = new performativeRoute(nconf.get('testDb'));
-//        performative.verify(ADMIN_FRIEND_TOKEN, 'john@painter.com', 'someotherapp@example.com').
-//            then(function(permissions) {
-//                test.ok(false, 'Permission should not have been granted');
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.equal(err, 'You don\'t have access to that resource');       
-//                test.done();
-//              });
-//    },
-//
-//    'Do not barf if a non-friend requests a resource': function(test) {
-//        test.expect(1);
-//        var performative = new performativeRoute(nconf.get('testDb'));
-//        performative.verify(ADMIN_FRIEND_TOKEN, 'my@enemy.com', 'someotherapp@example.com').
-//            then(function(permissions) {
-//                test.ok(false, 'Permission should not have been granted');
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.equal(err, 'I don\'t know you');       
-//                test.done();
-//              });
-//    },
-//
-//    'Do not barf if the token provided does not exist': function(test) {
-//        test.expect(1);
-//        var performative = new performativeRoute(nconf.get('testDb'));
-//        performative.verify('n0sucht0ken', 'john@painter.com', 'john@painter.com').
-//            then(function(permissions) {
-//                test.ok(false, 'Permission should not have been granted');
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.equal(err, 'The token provided is invalid');       
-//                test.done();
-//              });
-//    },
-//
-//    'Return false if the token provided is expired': function(test) {
-//        test.expect(1);
-//        pass.bearerStrategy(ACCESS_TOKEN + '56', function(err, friend) {
-//            if (err) {
-//              test.ok(false, err);
-//            } 
-//            else {
-//              test.equal(friend, false);
-//            }
-//            test.done();
-//          });
-//    },
-
-// The old way
-//    setUp: function(callback) {
-//    	try{
-//            var agent = new geboDb.registrantModel({
-//                                    name: 'dan',
-//                                    email: ADMIN_AGENT_EMAIL,
-//                                    password: 'password123',
-//                                    admin: true,
-//                                    _id: new mongo.ObjectID('0123456789AB')
-//                                });
-//
-//            // A good token
-//            var token = new geboDb.tokenModel({
-//                                    registrantId: new mongo.ObjectID('0123456789AB'),
-//                                    friendId: new mongo.ObjectID('123456789ABC'),
-//                                    hai: HAI_EMAIL,
-//                                    ip: IP,
-//                                    string: ACCESS_TOKEN,
-//                                });
-//
-//            token.save(function(err){
-//                if (err) {
-//                  console.log(err);
-//                }
-//              });
-//
-//            // Another good token
-//            token = new geboDb.tokenModel({
-//                                    registrantId: new mongo.ObjectID('0123456789AB'),
-//                                    friendId: new mongo.ObjectID('123456789ABC'),
-//                                    hai: HAI_EMAIL,
-//                                    ip: IP,
-//                                    string: ACCESS_TOKEN + '5',
-//                                    expires: Date.now() + 60*60*1000,
-//                                });
-//
-//            token.save(function(err){
-//                if (err) {
-//                  console.log(err);
-//                }
-//              });
-//
-//            // An expired token
-//            token = new geboDb.tokenModel({
-//                                    registrantId: new mongo.ObjectID('0123456789AB'),
-//                                    friendId: new mongo.ObjectID('123456789ABC'),
-//                                    string: ACCESS_TOKEN + '56',
-//                                    hai: HAI_EMAIL,
-//                                    ip: IP,
-//                                    expires: Date.now() - 60*60*1000,
-//                                });
-//
-//            token.save(function(err){
-//                if (err) {
-//                  console.log(err);
-//                }
-//              });
-//
-//            // A token with no friend
-//            token = new geboDb.tokenModel({
-//                                    registrantId: new mongo.ObjectID('0123456789AB'),
-//                                    friendId: null, 
-//                                    string: ACCESS_TOKEN + '567',
-//                                    hai: HAI_EMAIL,
-//                                    ip: IP,
-//                                });
-//
-//
-//            // Make a friend for this agent
-//            var friend = new regularAgentDb.friendModel({
-//                                    _id: new mongo.ObjectID('123456789ABC'),
-//                                    name: 'yanfen',
-//                                    email: REGULAR_AGENT_EMAIL,
-//                                });
-//
-//            // Save the agent and last token here to make sure
-//            // it's in the database in time for testing (this wasn't 
-//            // happening before. I.e., tests were failing because 
-//            // the agent hadn't been added in time)
-//            agent.save(function(err){
-//                if (err) {
-//                  console.log(err);
-//                }
-//                token.save(function(err){
-//                    if (err) {
-//                      console.log(err);
-//                    }
-//                    friend.save(function(err) {
-//                        if (err) {
-//                          console.log(err);
-//                        }
-//                        callback();
-//                      });
-//                  });
-//              });
-//     	}
-//        catch(e) {
-//            console.log(e);
-//            callback();
-//    	}
-//    },
-//
-//    tearDown: function(callback) {
-//        geboDb.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//          });
-//        
-//        regularAgentDb.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//            callback();
-//          });
-//    },
-//
-//    'Return a registrant object when provided a token with no friend attached': function(test) {
-//        test.expect(3);
-//        pass.bearerStrategy(ACCESS_TOKEN + '567', function(err, registrant) {
-//            if (err) {
-//              test.ok(false, err);
-//            } 
-//            else {
-//              test.equal(registrant.name, 'dan');
-//              test.equal(registrant.email, ADMIN_AGENT_EMAIL);
-//              test.equal(registrant.admin, true);
-//            }
-//            test.done();
-//          });
-//    },
-//
-//
-//    'Return a friend object when provided a valid token with no expiry': function(test) {
-//        test.expect(2);
-//        pass.bearerStrategy(ACCESS_TOKEN, function(err, friend) {
-//            if (err) {
-//              test.ok(false, err);
-//            } 
-//            else {
-//              test.equal(friend.name, 'yanfen');
-//              test.equal(friend.email, REGULAR_AGENT_EMAIL);
-//            }
-//            test.done();
-//          });
-//    },
-//
-//    'Return a friend object when provided a valid token with expiry': function(test) {
-//        test.expect(2);
-//        pass.bearerStrategy(ACCESS_TOKEN + '5', function(err, friend) {
-//            if (err) {
-//              test.ok(false, err);
-//            } 
-//            else {
-//              test.equal(friend.name, 'yanfen');
-//              test.equal(friend.email, REGULAR_AGENT_EMAIL);
-//            }
-//            test.done();
-//          });
-//    },
-//
-//    'Return false if the token provided is expired': function(test) {
-//        test.expect(1);
-//        pass.bearerStrategy(ACCESS_TOKEN + '56', function(err, friend) {
-//            if (err) {
-//              test.ok(false, err);
-//            } 
-//            else {
-//              test.equal(friend, false);
-//            }
-//            test.done();
-//          });
-//    },
-//
-//    'Return false if a non-existent token is provided': function(test) {
-//        test.expect(1);
-//        pass.bearerStrategy('N0SUchT0k3n', function(err, friend) {
-//            if (err) {
-//              test.ok(false, err);
-//            } 
-//            else {
-//              test.equal(friend, false);
-//            }
-//            test.done();
-//          });
-//    },
+    'Return error if the token provided is expired': function(test) {
+        test.expect(1);
+        pass.bearerStrategy(EXPIRED_TOKEN, function(err, friend) {
+            if (err) {
+              test.equal(err, 'The token provided is invalid');       
+            } 
+            else {
+              test.ok(false, 'Permission should not have been granted');
+            }
+            test.done();
+          });
+    },
 };
 
 
