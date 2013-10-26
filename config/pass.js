@@ -190,6 +190,11 @@ module.exports = function(email) {
                   // and this is just for illustrative purposes
 //                  var info = { scope: '*' };
 //                  done(null, registrant, info);
+
+                  // This can't be a good idea
+                  registrant.read = true;
+                  registrant.write = true;
+                  registrant.execute = true;
                   done(null, registrant, token);
                 }
               });

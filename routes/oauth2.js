@@ -235,6 +235,7 @@ exports.authorization = [
     function (req, res) {
         console.log('render dialog');
         console.log(req.query);
+        console.log(req.user);
 
         // Add some details to the oauth2 object
         // created by oauth2orize. This will all get
@@ -245,7 +246,7 @@ exports.authorization = [
         req.oauth2.client.ip = req.headers['x-forwarded-for'] || 
                                req.connection.remoteAddress || 
                                req.socket.remoteAddress ||
-                               req.connection.socket.remoteAddress; 
+                           userreq.connection.socket.remoteAddress; 
         req.oauth2.req.clientName = req.query.client_name;
 
         console.log('oauth2');
@@ -254,6 +255,7 @@ exports.authorization = [
         res.render('dialog', {
                 transactionID: req.oauth2.transactionID,
                 oauth: req.oauth2,
+                user: req.user,
             });
       }
   ];

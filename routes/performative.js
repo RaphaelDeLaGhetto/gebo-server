@@ -24,22 +24,38 @@ module.exports = function(email) {
             console.log(req.authInfo);
             var action = require('../config/action')(dbName);
 
-            // client_id is your friend's email address,
-            // scope is the email of the requested resource
-            _verify(req.body.access_token, req.body.client_id, req.body.scope).
-                then(function(verified) {
-                    return action[req.body.action](verified, req.body);
-                  }).
-                // Results of action
+            // I don't think I need the _verify function anymore
+            var verified = { dbName: req.user.email,
+                             collectionName: req.authInfo.hai,
+                             admin: req.user.admin }
+
+            console.log('verified');
+            console.log(verified);
+            action[req.body.action](verified, req.body).
                 then(function(data) {
                     res.send(data);
                   }).
-                // Something blew up
                 catch(function(err) {
-                    console.log('err');
                     console.log(err);
                     res.send(404, err);
                   });
+
+            // client_id is your friend's email address,
+            // scope is the email of the requested resource
+//            _verify(req.body.access_token, req.body.client_id, req.body.scope).
+//                then(function(verified) {
+//                    return action[req.body.action](verified, req.body);
+//                  }).
+//                // Results of action
+//                then(function(data) {
+//                    res.send(data);
+//                  }).
+//                // Something blew up
+//                catch(function(err) {
+//                    console.log('err');
+//                    console.log(err);
+//                    res.send(404, err);
+//                  });
           }
       ];
     
