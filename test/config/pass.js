@@ -17,14 +17,12 @@ var COL_NAME = 'appCollection',
     IP = '127.0.0.1';
 
 
-var ADMIN_AGENT_EMAIL = 'dan@hg.com',
-    REGULAR_AGENT_EMAIL = 'yanfen@hg.com',
-    FRIEND_GEBO_URI = 'http://theirhost.com';
+var FRIEND_GEBO_URI = 'http://theirhost.com';
 
 nconf.argv().env().file({ file: 'local.json' });
 var geboDb = require('../../schemata/gebo')(nconf.get('testDb')),
-    regularAgentDb = new agentSchema(REGULAR_AGENT_EMAIL),
-    adminAgentDb = new agentSchema(ADMIN_AGENT_EMAIL),
+    adminAgentDb = new agentSchema('dan@hg.com'),
+    regularAgentDb = new agentSchema('yanfen@hg.com'),
     pass = require('../../config/pass')(nconf.get('testDb'));
 
 /**
@@ -35,7 +33,7 @@ exports.localStrategy = {
     setUp: function(callback) {
     	try{
             var agent = new geboDb.registrantModel(
-                            { name: 'dan', email: ADMIN_AGENT_EMAIL,
+                            { name: 'dan', email: 'dan@hg.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
 
@@ -63,13 +61,13 @@ exports.localStrategy = {
 
     'Return an agent object when provided correct email and password': function(test) {
         test.expect(3);
-        pass.localStrategy(ADMIN_AGENT_EMAIL, 'password123', function(err, agent) {
+        pass.localStrategy('dan@hg.com', 'password123', function(err, agent) {
             if (err) {
               test.ok(false, err);
             } 
             else {
               test.equal(agent.name, 'dan');
-              test.equal(agent.email, ADMIN_AGENT_EMAIL);
+              test.equal(agent.email, 'dan@hg.com');
               test.equal(agent.admin, true);
             }
             test.done();
@@ -92,7 +90,7 @@ exports.localStrategy = {
 
     'Return false agent if a valid email and invalid password are provided': function(test) {
         test.expect(2);
-        pass.localStrategy(ADMIN_AGENT_EMAIL, 'wrongpassword123', function(err, agent, message) {
+        pass.localStrategy('dan@hg.com', 'wrongpassword123', function(err, agent, message) {
             if (err) {
               test.ok(false, err);
             } 
@@ -117,7 +115,7 @@ exports.bearerStrategy = {
              */
             var adminRegistrant = new geboDb.registrantModel({
                     name: 'dan',
-                    email: ADMIN_AGENT_EMAIL,
+                    email: 'dan@hg.com',
                     password: 'password123',
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -166,7 +164,7 @@ exports.bearerStrategy = {
              */
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
-                    email: REGULAR_AGENT_EMAIL,
+                    email: 'yanfen@hg.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
@@ -298,13 +296,38 @@ exports.bearerStrategy = {
     },
 
     'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
-        test.expect(6);
+        test.expect(7);
+	// Make sure the friend is in the friend list
+	console.log('regularAgentDb');
+	console.log(regularAgentDb.friendModel.db.name);
+	console.log(adminAgentDb.friendModel.db.name);
+	regularAgentDb.friendModel.findOne({ email: 'richard@construction.com' }, 
+			function(err, friend) {
+			  if (err) {
+			    test.ok(false, err);
+			    test.done();
+			  }
+			  test.equal(friend.email, 'richard@construction.com');
+			});
+	regularAgentDb.friendModel.find({}, 
+			function(err, friends) {
+			  if (err) {
+			    test.ok(false, err);
+			    test.done();
+			  }
+			  console.log('friends');
+			  console.log(friends);
+			});
+	
+	console.log('friend requesting a resource from a regular');
         pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
+	    console.log('verified');
+	    console.log(verified);
             if (err) {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.dbName, ADMIN_AGENT_EMAIL); 
+              test.equal(verified.dbName, 'dan@hg.com'); 
               test.equal(verified.collectionName, 'someotherapp@example.com'); 
               test.equal(verified.read, true); 
               test.equal(verified.write, false); 
@@ -322,7 +345,7 @@ exports.bearerStrategy = {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.dbName, ADMIN_AGENT_EMAIL); 
+              test.equal(verified.dbName, 'dan@hg.com'); 
               test.equal(verified.collectionName, 'painting@app.com'); 
               test.equal(verified.read, true); 
               test.equal(verified.write, false); 
@@ -340,7 +363,7 @@ exports.bearerStrategy = {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.dbName, ADMIN_AGENT_EMAIL); 
+              test.equal(verified.dbName, 'dan@hg.com'); 
               test.equal(verified.collectionName, HAI_EMAIL); 
               test.equal(verified.read, true); 
               test.equal(verified.write, true); 
@@ -358,7 +381,7 @@ exports.bearerStrategy = {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.dbName, REGULAR_AGENT_EMAIL); 
+              test.equal(verified.dbName, 'yanfen@hg.com'); 
               test.equal(verified.collectionName, HAI_EMAIL); 
               test.equal(verified.read, true); 
               test.equal(verified.write, true); 

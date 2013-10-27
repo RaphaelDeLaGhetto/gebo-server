@@ -32,7 +32,7 @@ exports.getHaiProfileChanges = {
     setUp: function(callback) {
         try {
             /** 
-             * Set up aregistrant
+             * Set up a registrant
              */
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
