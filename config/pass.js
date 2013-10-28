@@ -155,21 +155,17 @@ module.exports = function(email) {
               return done(err);
             }
             if (!token) {
-              return done(null, false);
+              return done('The token provided is invalid', null);
             }
 
             if (token.expires && new Date(token.expires) < new Date()) {
-              return done(null, false);
+              return done('The token provided is invalid', null);
             }
             
-	    console.log('token');
-	    console.log(token);
 	    var verified = { collectionName: token.hai };
 
             // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, function(err, registrant) {
-		console.log('registrant');
-		console.log(registrant);
                 if (err) {
                   return done(err);
                 }
@@ -178,58 +174,40 @@ module.exports = function(email) {
                 }
             
 	    	verified.dbName = registrant.email;
+                verified.admin = registrant.admin;
 
-                 // Is the bearer the resource owner or a friend?
-	       	 console.log('token');
-		 console.log(token);
-	         if (token.friendId) {
-	       	   console.log('in scope');
-		   console.log(registrant.email);
-                   var agentDb = new agentSchema(registrant.email);
+                // Is the bearer the resource owner or a friend?
+	        if (token.friendId) {
+                  var agentDb = new agentSchema(registrant.email);
  
-		   agentDb.friendModel.find({}, function(err, friends) {
-			   if (err) {
-                             return done(err);
-                           }
- 			   console.log('yanfen friends'); 	
- 			   console.log(friends); 	
-		   	});
-                   agentDb.friendModel.findOne({ _id: token.friendId }, function(err, friend) {
- 			console.log('friend');
- 			console.log(friend);
-                         if (err) {
-                           return done(err);
-                         }
-                         if (!friend) {
-                           return done(null, false);
-                         }
+                  agentDb.friendModel.findOne({ _id: token.friendId }, function(err, friend) {
+                        if (err) {
+                          return done(err);
+                        }
+                        if (!friend) {
+                          return done(null, false);
+                        }
  
- 			// Search the array for requested resource.
-                     	// There's got to be a better way to do this...
- 	                var found = false;
-                         for (var i = 0; i < friend.hisPermissions.length; i++) {
-                           if (friend.hisPermissions[i].email === verified.collectionName) {
-                             verified.read = friend.hisPermissions[i].read;
-                             verified.write = friend.hisPermissions[i].write;
-                             verified.execute = friend.hisPermissions[i].execute;
-                             break;
-                           }
- 			}
+ 		       // Search the array for requested resource.
+                    	// There's got to be a better way to do this...
+ 	               var found = false;
+                        for (var i = 0; i < friend.hisPermissions.length; i++) {
+                          if (friend.hisPermissions[i].email === verified.collectionName) {
+                            verified.read = friend.hisPermissions[i].read;
+                            verified.write = friend.hisPermissions[i].write;
+                            verified.execute = friend.hisPermissions[i].execute;
+                            break;
+                          }
+ 		       }
   
-                         done(null, verified);
-                     });
+                       done(null, verified);
+                    });
                 }
                 else {
-                  // To keep this example simple, restricted scopes are not implemented,
-                  // and this is just for illustrative purposes
-//                  var info = { scope: '*' };
-//                  done(null, registrant, info);
-
                   // This can't be a good idea
                   verified.read = true;
                   verified.write = true;
                   verified.execute = true;
-                  verified.admin = registrant.admin;
 
                   done(null, verified);
                 }

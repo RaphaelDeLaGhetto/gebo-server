@@ -121,7 +121,7 @@ module.exports = function (email) {
         // The authorized IP address
         ip: { type: String, required: true, unique: false },
         // The token itself
-        string: { type: String, required: true, unique: false },
+        string: { type: String, required: true, unique: true },
         expires: { type: Date, required: false, default: null },
       });
 //    var tokenSchema = new Schema({

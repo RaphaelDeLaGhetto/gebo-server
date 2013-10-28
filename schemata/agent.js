@@ -15,6 +15,7 @@ module.exports = function (email) {
      * https://github.com/jaredhanson/oauth2orize
      */
     var mongoose = require('mongoose'),
+//    var mongoose = require('mongeese').create(),
         bcrypt = require('bcrypt'),
         SALT_WORK_FACTOR = 10;
 
@@ -32,6 +33,7 @@ module.exports = function (email) {
      * Connect to mongo
      */
     var connection = mongoose.createConnection(uristring, mongoOptions);
+
     connection.on('open', function() {
         console.log ('Successfully connected to: ' + uristring);
       });
@@ -40,8 +42,10 @@ module.exports = function (email) {
         console.log ('ERROR connecting to: ' + uristring + '. ' + err);
       });
 
-    // This is handy for when I need to drop a database
-    // during testing
+    /**
+     * This is handy for when I need to drop a database
+     * during testing
+     */
     exports.connection = connection;
 
     //******* Database schema TODO add more validation
@@ -178,11 +182,11 @@ module.exports = function (email) {
       });
 
     // Export permission model
-    try {
+    //try {
         var permissionModel = connection.model('Permission', permissionSchema);
         exports.permissionModel = permissionModel;
-      }
-    catch (error) {}
+    //  }
+    //catch (error) {}
 
 
     /**
@@ -224,11 +228,11 @@ module.exports = function (email) {
       });
 
     // Export friend model
-    try {
+//    try {
         var friendModel = connection.model('Friend', friendSchema);
         exports.friendModel = friendModel;
-      }
-    catch (error) {}
+//      }
+//    catch (error) {}
 
     /**
      * HAI schema
@@ -272,11 +276,11 @@ module.exports = function (email) {
 
 
     // Export HAI model
-    try {
+//    try {
         var haiModel = connection.model('Hai', haiSchema);
         exports.haiModel = haiModel;
-      }
-    catch (error) {}
+//      }
+//    catch (error) {}
 
 
     /**
@@ -300,6 +304,7 @@ module.exports = function (email) {
 //        created: { type: Date, default: Date.now },
 //        changed: { type: Date, default: Date.now },
 //      });
+
 
     /**
      * API

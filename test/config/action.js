@@ -2060,7 +2060,7 @@ exports.defriend = {
 
     'Don\'t barf if the email provided matches no friend': function(test) {
         test.expect(1);
-        action.defriend({ write: true }, { email: 'yanfen@hg.com' }).
+        action.defriend({ write: true, dbName: 'dan_at_hg_dot_com' }, { email: 'yanfen@hg.com' }).
                 then(function(ack) {
                     test.equal(ack, 0);
                     test.done();

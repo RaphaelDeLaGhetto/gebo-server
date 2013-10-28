@@ -1,6 +1,8 @@
 var config = require('../../config/config'),
     nconf = require('nconf'),
-    agentSchema = require('../../schemata/agent');
+    agentSchema = require('../../schemata/agent'),
+    regularSchema = require('../../schemata/agent'),
+    utils = require('../../lib/utils'),
     mongo = require('mongodb');
 
 //var ACCESS_TOKEN = '1234',
@@ -21,10 +23,10 @@ var FRIEND_GEBO_URI = 'http://theirhost.com';
 
 nconf.argv().env().file({ file: 'local.json' });
 var geboDb = require('../../schemata/gebo')(nconf.get('testDb')),
-    adminAgentDb = new agentSchema('dan@hg.com'),
-    regularAgentDb = new agentSchema('yanfen@hg.com'),
     pass = require('../../config/pass')(nconf.get('testDb'));
 
+//console.log('adminAgentDb');
+//console.log(adminAgentDb.connection);
 /**
  * localStrategy
  */
@@ -120,10 +122,12 @@ exports.bearerStrategy = {
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
+            adminRegistrant.save();
           
             /**
              * Make a friend for the registrant
              */
+            var adminAgentDb = new agentSchema('dan@hg.com');
             var adminFriend = new adminAgentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -134,7 +138,9 @@ exports.bearerStrategy = {
             /**
              * Create access permissions for imaginary collection
              */
-            adminFriend.hisPermissions.push({ email: 'painting@app.com' });
+            adminFriend.hisPermissions.push({ email: HAI_EMAIL });
+
+            adminFriend.save();
 
             /**
              * Create an access token for the friend
@@ -146,6 +152,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: ADMIN_FRIEND_TOKEN,
                 });
+            adminFriendToken.save();
 
             /**
              * Create an access token for the friend
@@ -157,7 +164,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: ADMIN_TOKEN,
                 });
-
+            adminToken.save();
 
             /** 
              * Set up another registrant
@@ -169,10 +176,12 @@ exports.bearerStrategy = {
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
                 });
+            registrant.save();
 
             /**
              * Make a friend for the new registrant
              */
+            var regularAgentDb = new agentSchema('yanfen@hg.com');
             var friend = new regularAgentDb.friendModel({
                     name: 'richard',
                     email: 'richard@construction.com',
@@ -184,7 +193,10 @@ exports.bearerStrategy = {
              * Create access permissions for imaginary collection
              */
             friend.hisPermissions.push({ email: 'someotherapp@example.com' });
-            friend.hisPermissions.push({ email: 'richard@construction.com' });
+            //friend.hisPermissions.push({ email: 'richard@construction.com' });
+            friend.hisPermissions.push({ email: HAI_EMAIL });
+
+            friend.save();
 
             /**
              * Create an access token for the friend
@@ -196,6 +208,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: FRIEND_TOKEN,
                 });
+            friendToken.save();
 
             /**
              * Create an access token for regular user 
@@ -205,8 +218,9 @@ exports.bearerStrategy = {
                     friendId: null,
                     hai: HAI_EMAIL,
                     ip: IP,
-                    string: FRIEND_TOKEN,
+                    string: REGULAR_TOKEN,
                 });
+            regularToken.save();
 
             /**
              * Create an expired token
@@ -219,53 +233,11 @@ exports.bearerStrategy = {
                     string: EXPIRED_TOKEN,
                     expires: Date.now() - 60*60*1000,
                 });
-
-            // There has got to be a better way to do this...
-            registrant.save(function(err) {
+            expiredToken.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
-                friendToken.save(function(err) {
-                     if (err) {
-                      console.log(err);
-                    }
-                    friend.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
-                        adminRegistrant.save(function(err) {
-                            if (err) {
-                              console.log(err);
-                            }
-                            adminFriendToken.save(function(err) {
-                                 if (err) {
-                                  console.log(err);
-                                }
-                                adminFriend.save(function(err) {
-                                    if (err) {
-                                      console.log(err);
-                                    }
-                                    adminToken.save(function(err) {
-                                        if (err) {
-                                          console.log(err);
-                                        }
-                                        regularToken.save(function(err) {
-                                           if (err) {
-                                             console.log(err);
-                                           }
-                                           expiredToken.save(function(err) {
-                                               if (err) {
-                                                 console.log(err);
-                                               }
-                                               callback();
-                                             });
-                                         });
-                                      });
-                                  });
-                              });
-                          });
-                      });
-                  });
+                callback();        
               });
         }
         catch(err) {
@@ -275,11 +247,6 @@ exports.bearerStrategy = {
     },
 
     tearDown: function(callback) {
-        regularAgentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
 
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
@@ -287,48 +254,38 @@ exports.bearerStrategy = {
             }
           });
 
-        adminAgentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var regularAgentDb = new agentSchema('yanfen@hg.com');
+        regularAgentDb.connection.on('open', function(err) {
+            regularAgentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                regularAgentDb.connection.db.close();
+
+                var adminAgentDb = new agentSchema('dan@hg.com');
+                adminAgentDb.connection.on('open', function(err) {
+                    adminAgentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        adminAgentDb.connection.db.close();
+                        callback();
+                      });
+                  });
+              });
           });
     },
 
     'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
-        test.expect(7);
-	// Make sure the friend is in the friend list
-	console.log('regularAgentDb');
-	console.log(regularAgentDb.friendModel.db.name);
-	console.log(adminAgentDb.friendModel.db.name);
-	regularAgentDb.friendModel.findOne({ email: 'richard@construction.com' }, 
-			function(err, friend) {
-			  if (err) {
-			    test.ok(false, err);
-			    test.done();
-			  }
-			  test.equal(friend.email, 'richard@construction.com');
-			});
-	regularAgentDb.friendModel.find({}, 
-			function(err, friends) {
-			  if (err) {
-			    test.ok(false, err);
-			    test.done();
-			  }
-			  console.log('friends');
-			  console.log(friends);
-			});
-	
-	console.log('friend requesting a resource from a regular');
+        test.expect(6);
+
         pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
-	    console.log('verified');
-	    console.log(verified);
             if (err) {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.dbName, 'dan@hg.com'); 
-              test.equal(verified.collectionName, 'someotherapp@example.com'); 
+              test.equal(verified.dbName, 'yanfen@hg.com'); 
+              test.equal(verified.collectionName, 'human-agent@interface.org'); 
               test.equal(verified.read, true); 
               test.equal(verified.write, false); 
               test.equal(verified.execute, false); 
@@ -346,7 +303,7 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(verified.dbName, 'dan@hg.com'); 
-              test.equal(verified.collectionName, 'painting@app.com'); 
+              test.equal(verified.collectionName, 'human-agent@interface.org'); 
               test.equal(verified.read, true); 
               test.equal(verified.write, false); 
               test.equal(verified.execute, false); 
@@ -356,7 +313,7 @@ exports.bearerStrategy = {
         });
     },
     
-    'Return permissions object for an admin agent requesting access to its own resource': function(test) {
+    'Return permissions object for an admin agent requesting access to his own resource': function(test) {
         test.expect(6);
         pass.bearerStrategy(ADMIN_TOKEN, function(err, verified) {
             if (err) {
@@ -374,7 +331,7 @@ exports.bearerStrategy = {
         });
     },
 
-    'Return permissions object for a regular agent requesting access to its own resource': function(test) {
+    'Return permissions object for a regular agent requesting access to his own resource': function(test) {
         test.expect(6);
         pass.bearerStrategy(REGULAR_TOKEN, function(err, verified) {
             if (err) {
