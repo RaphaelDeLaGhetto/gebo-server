@@ -76,6 +76,20 @@ Then, install your UI dependencies:
 bower install
 ```
 
+### your SSL certificates
+
+There are a couple of files already set up, but it's best that you create your own self-signed certificate:
+
+```
+cd cert
+rm *
+openssl genrsa -out key.pem
+openssl req -new -key key.pem -out csr.pem
+openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
+rm csr.pem
+cd ..
+```
+
 # Seed the database
 You may need to install [grunt-cli](https://github.com/gruntjs/grunt-cli) first:
 
