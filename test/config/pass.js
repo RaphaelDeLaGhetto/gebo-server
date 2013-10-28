@@ -277,13 +277,14 @@ exports.bearerStrategy = {
     },
 
     'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
-        test.expect(6);
+        test.expect(7);
 
         pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
             if (err) {
               test.ok(false, err);
             }
             else {
+              test.equal(verified.agentName, 'yanfen'); 
               test.equal(verified.dbName, 'yanfen@hg.com'); 
               test.equal(verified.collectionName, 'human-agent@interface.org'); 
               test.equal(verified.read, true); 
@@ -296,12 +297,13 @@ exports.bearerStrategy = {
     },
 
     'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
-        test.expect(6);
+        test.expect(7);
         pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
             if (err) {
               test.ok(false, err);
             }
             else {
+              test.equal(verified.agentName, 'dan'); 
               test.equal(verified.dbName, 'dan@hg.com'); 
               test.equal(verified.collectionName, 'human-agent@interface.org'); 
               test.equal(verified.read, true); 
@@ -314,12 +316,13 @@ exports.bearerStrategy = {
     },
     
     'Return permissions object for an admin agent requesting access to his own resource': function(test) {
-        test.expect(6);
+        test.expect(7);
         pass.bearerStrategy(ADMIN_TOKEN, function(err, verified) {
             if (err) {
               test.ok(false, err);
             }
             else {
+              test.equal(verified.agentName, 'dan'); 
               test.equal(verified.dbName, 'dan@hg.com'); 
               test.equal(verified.collectionName, HAI_EMAIL); 
               test.equal(verified.read, true); 
@@ -332,12 +335,13 @@ exports.bearerStrategy = {
     },
 
     'Return permissions object for a regular agent requesting access to his own resource': function(test) {
-        test.expect(6);
+        test.expect(7);
         pass.bearerStrategy(REGULAR_TOKEN, function(err, verified) {
             if (err) {
               test.ok(false, err);
             }
             else {
+              test.equal(verified.agentName, 'yanfen'); 
               test.equal(verified.dbName, 'yanfen@hg.com'); 
               test.equal(verified.collectionName, HAI_EMAIL); 
               test.equal(verified.read, true); 

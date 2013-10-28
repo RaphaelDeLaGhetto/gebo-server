@@ -173,6 +173,7 @@ module.exports = function(email) {
                   return done(null, false);
                 }
             
+                verified.agentName = registrant.name;
 	    	verified.dbName = registrant.email;
                 verified.admin = registrant.admin;
 

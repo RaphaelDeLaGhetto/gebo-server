@@ -1,9 +1,10 @@
 {
     "name":"gebo-server",
     "email":"gebo-server@example.com",
-    "domain":"http://localhost",
+    "domain":"https://localhost",
     "oauth2callback": "/callback",
     "port":3000,
+    "httpsPort":3443,
     "cachify":false,
     "assets":{
         "/components/bootstrap/docs/assets/css/bootstrap.css":[

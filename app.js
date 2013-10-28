@@ -1,4 +1,6 @@
 var express = require('express'),
+    http = require('http'),
+    https = require('https'),
     app = express(),
     nconf = require('nconf'),
     winston = require('winston'),
@@ -7,7 +9,8 @@ var express = require('express'),
     api_routes = require('./routes/api'),
     basic_routes = require('./routes/basic'),
     oauth2_routes = require('./routes/oauth2'),
-    util = require('util');
+    util = require('util'),
+    fs = require('fs');
     
 // Expose the Express app so that it may be run
 // as a virtual host
@@ -25,6 +28,16 @@ nconf.argv().env().file({ file: 'local.json' });
 // Requirements
 var performative_routes = require('./routes/performative')(nconf.get('email')),
     user_routes = require('./routes/user')(nconf.get('email'));
+
+// Redirect to HTTPS
+//function requireHttps(req, res, next) {
+//    console.log('requireHttps');
+//    if (!req.secure) {
+//      return res.redirect('https://' + req.get('host') + req.url);
+//    }
+//    next();
+//  }
+//app.use(requireHttps);
 
 // Basic routes
 app.get('/', basic_routes.index);
@@ -49,5 +62,14 @@ app.post('/request', performative_routes.request);
 app.get('/verify', api_routes.verify);
 
 logger.info('listening on', nconf.get('port'));
-app.listen(process.env.PORT || nconf.get('port'));
+
+
+http.createServer(app).listen(nconf.get('port'));
+// Start the secure server
+var options = {
+    key: fs.readFileSync('./cert/key.pem'),
+    cert: fs.readFileSync('./cert/cert.pem'),
+};
+https.createServer(options, app).listen(nconf.get('httpsPort'));
+
 

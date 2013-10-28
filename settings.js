@@ -40,6 +40,19 @@ module.exports = function (app, express, passport, logger) {
         }
     };
 
+    /**
+     * Redirect to HTTPS
+     */
+    function requireHttps(req, res, next) {
+        console.log('requireHttps');
+        if (!req.secure) {
+//          var url = 
+          return res.redirect('https://' + req.get('host') + req.url);
+        }
+        next();
+      }
+
+
     // Cachify Asset Configuration
     app.use(cachify.setup(assets, {
         root: __dirname + '/public',
@@ -59,6 +72,7 @@ module.exports = function (app, express, passport, logger) {
         app.use(express.static(__dirname + '/public'));
         app.use(express.favicon(__dirname + '/favicon.ico'));
         app.use(express.session({secret: 'keyboard cat'}));
+        app.use(requireHttps);
         // Initialize Passport!  Also use passport.session() middleware, to support
         // persistent login sessions (recommended).
         app.use(passport.initialize());

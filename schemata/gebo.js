@@ -124,11 +124,6 @@ module.exports = function (email) {
         string: { type: String, required: true, unique: true },
         expires: { type: Date, required: false, default: null },
       });
-//    var tokenSchema = new Schema({
-//        agentId: { type: ObjectId, required: true, unique: false },
-//        clientId: { type: ObjectId, required: true, unique: false },
-//        token: { type: String, required: true, unique: true },
-//      });
     
     // Export token model
     try {

@@ -24,150 +24,150 @@ var geboDb = new geboSchema(nconf.get('testDb')),
 /**
  * verify
  */
-exports.verify = {
-
-    setUp: function(callback) {
-        try {
-            /**
-             * Setup a registrant
-             */
-            var adminRegistrant = new geboDb.registrantModel({
-                    name: 'dan',
-                    email: 'dan@hg.com',
-                    password: 'password123',
-                    admin: true,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-          
-            /**
-             * Make a friend for the registrant
-             */
-            var adminFriend = new adminAgentDb.friendModel({
-                    name: 'john',
-                    email: 'john@painter.com',
-                    uri: BASE_ADDRESS,
-                    _id: new mongo.ObjectID('23456789ABCD')
-                });
-
-            /**
-             * Create access permissions for imaginary collection
-             */
-            adminFriend.hisPermissions.push({ email: 'john@painter.com' });
-
-            /**
-             * Create an access token for the friend
-             */
-            var adminToken = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('0123456789AB'),
-                    friendId: new mongo.ObjectID('23456789ABCD'),
-                    hai: HAI,
-                    ip: IP,
-                    string: ADMIN_TOKEN,
-                });
-
-            /** 
-             * Set up another registrant
-             */
-            var registrant = new geboDb.registrantModel({
-                    name: 'yanfen',
-                    email: 'yanfen@hg.com',
-                    password: 'password123',
-                    admin: false,
-                    _id: new mongo.ObjectID('123456789ABC')
-                });
-
-            /**
-             * Make a friend for the new registrant
-             */
-            var friend = new regularAgentDb.friendModel({
-                    name: 'richard',
-                    email: 'richard@construction.com',
-                    uri: BASE_ADDRESS,
-                    _id: new mongo.ObjectID('3456789ABCDE')
-                });
-
-            /**
-             * Create access permissions for imaginary collection
-             */
-            friend.hisPermissions.push({ email: 'someotherapp@example.com' });
-            friend.hisPermissions.push({ email: 'richard@construction.com' });
-
-            /**
-             * Create an access token for the friend
-             */
-            var token = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('123456789ABC'),
-                    friendId: new mongo.ObjectID('3456789ABCDE'),
-                    hai: HAI,
-                    ip: IP,
-                    string: USER_TOKEN,
-                });
-
-            // There has got to be a better way to do this...
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                token.save(function(err) {
-                     if (err) {
-                      console.log(err);
-                    }
-                    friend.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
-                        adminRegistrant.save(function(err) {
-                            if (err) {
-                              console.log(err);
-                            }
-                            adminToken.save(function(err) {
-                                 if (err) {
-                                  console.log(err);
-                                }
-                                adminFriend.save(function(err) {
-                                    if (err) {
-                                      console.log(err);
-                                    }
-                                    callback();
-                                  });
-                              });
-                          });
-                      });
-                  });
-              });
-        }
-        catch(err) {
-            console.log(err);
-            callback();
-        }
-    },
-
-    tearDown: function(callback) {
-        regularAgentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        adminAgentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
-          });
-    },
-
-    /**
-     * The friend doesn't own the resource, his app just created the data.
-     * That is, the friendEmail and resourceEmail parameters are the same.
-     */
-    'Return permissions for a friend requesting his own app\'s resources': function(test) {
+//exports.verify = {
+//
+//    setUp: function(callback) {
+//        try {
+//            /**
+//             * Setup a registrant
+//             */
+//            var adminRegistrant = new geboDb.registrantModel({
+//                    name: 'dan',
+//                    email: 'dan@hg.com',
+//                    password: 'password123',
+//                    admin: true,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//          
+//            /**
+//             * Make a friend for the registrant
+//             */
+//            var adminFriend = new adminAgentDb.friendModel({
+//                    name: 'john',
+//                    email: 'john@painter.com',
+//                    uri: BASE_ADDRESS,
+//                    _id: new mongo.ObjectID('23456789ABCD')
+//                });
+//
+//            /**
+//             * Create access permissions for imaginary collection
+//             */
+//            adminFriend.hisPermissions.push({ email: 'john@painter.com' });
+//
+//            /**
+//             * Create an access token for the friend
+//             */
+//            var adminToken = new geboDb.tokenModel({
+//                    registrantId: new mongo.ObjectID('0123456789AB'),
+//                    friendId: new mongo.ObjectID('23456789ABCD'),
+//                    hai: HAI,
+//                    ip: IP,
+//                    string: ADMIN_TOKEN,
+//                });
+//
+//            /** 
+//             * Set up another registrant
+//             */
+//            var registrant = new geboDb.registrantModel({
+//                    name: 'yanfen',
+//                    email: 'yanfen@hg.com',
+//                    password: 'password123',
+//                    admin: false,
+//                    _id: new mongo.ObjectID('123456789ABC')
+//                });
+//
+//            /**
+//             * Make a friend for the new registrant
+//             */
+//            var friend = new regularAgentDb.friendModel({
+//                    name: 'richard',
+//                    email: 'richard@construction.com',
+//                    uri: BASE_ADDRESS,
+//                    _id: new mongo.ObjectID('3456789ABCDE')
+//                });
+//
+//            /**
+//             * Create access permissions for imaginary collection
+//             */
+//            friend.hisPermissions.push({ email: 'someotherapp@example.com' });
+//            friend.hisPermissions.push({ email: 'richard@construction.com' });
+//
+//            /**
+//             * Create an access token for the friend
+//             */
+//            var token = new geboDb.tokenModel({
+//                    registrantId: new mongo.ObjectID('123456789ABC'),
+//                    friendId: new mongo.ObjectID('3456789ABCDE'),
+//                    hai: HAI,
+//                    ip: IP,
+//                    string: USER_TOKEN,
+//                });
+//
+//            // There has got to be a better way to do this...
+//            registrant.save(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                token.save(function(err) {
+//                     if (err) {
+//                      console.log(err);
+//                    }
+//                    friend.save(function(err) {
+//                        if (err) {
+//                          console.log(err);
+//                        }
+//                        adminRegistrant.save(function(err) {
+//                            if (err) {
+//                              console.log(err);
+//                            }
+//                            adminToken.save(function(err) {
+//                                 if (err) {
+//                                  console.log(err);
+//                                }
+//                                adminFriend.save(function(err) {
+//                                    if (err) {
+//                                      console.log(err);
+//                                    }
+//                                    callback();
+//                                  });
+//                              });
+//                          });
+//                      });
+//                  });
+//              });
+//        }
+//        catch(err) {
+//            console.log(err);
+//            callback();
+//        }
+//    },
+//
+//    tearDown: function(callback) {
+//        regularAgentDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        geboDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        adminAgentDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//            callback();
+//          });
+//    },
+//
+//    /**
+//     * The friend doesn't own the resource, his app just created the data.
+//     * That is, the friendEmail and resourceEmail parameters are the same.
+//     */
+//    'Return permissions for a friend requesting his own app\'s resources': function(test) {
 //        test.expect(3);
 //        var performative = new performativeRoute(nconf.get('testDb'));
 //        performative.verify(USER_TOKEN, 'richard@construction.com', 'richard@construction.com').
@@ -175,9 +175,9 @@ exports.verify = {
 //                test.equal(permissions.read, true);
 //                test.equal(permissions.write, false);
 //                test.equal(permissions.execute, false);
-                test.done();
+//                test.done();
 //              });
-    },
+//    },
 
 //    'Return permissions for a friend requesting another app\'s resources': function(test) {
 //        test.expect(6);
@@ -235,4 +235,4 @@ exports.verify = {
 //                test.done();
 //              });
 //    },
-};
+//};
