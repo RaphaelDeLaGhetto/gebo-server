@@ -4,6 +4,8 @@ var config = require('../../config/config'),
     databaseCleaner = new DatabaseCleaner('mongodb'),
     mongo = require('mongodb'),
     nconf = require('nconf'),
+    rimraf = require('rimraf'),
+    fs = require('fs'),
     q = require('q');
 
 var cname = 'unitTest';
@@ -186,7 +188,7 @@ exports.getCollection = {
 /**
  * Save to the database
  */
-exports.save = {
+exports.saveToDb = {
 
     setUp: function (callback) {
     	try{
@@ -238,7 +240,7 @@ exports.save = {
                     }).done();
    }, 
 
-   'Save to existing database as admin': function (test) {
+   'Save JSON to existing database as admin': function (test) {
         test.expect(3);
 
         action.save({ dbName: 'yanfen_at_hg_dot_com',
@@ -260,7 +262,7 @@ exports.save = {
                     });
    }, 
 
-   'Update existing document as admin': function(test) {
+   'Update existing JSON document as admin': function(test) {
         test.expect(8);
 
         // Retrieve the existing document
@@ -301,7 +303,7 @@ exports.save = {
                 });
     },
 
-   'Save to existing database with write permission': function (test) {
+   'Save JSON to existing database with write permission': function (test) {
         test.expect(3);
 
         action.save({ dbName: 'yanfen_at_hg_dot_com',
@@ -323,7 +325,7 @@ exports.save = {
                     });
    }, 
 
-   'Update existing document with write permission': function(test) {
+   'Update existing JSON document with write permission': function(test) {
         test.expect(8);
 
         // Retrieve the existing document
@@ -388,7 +390,155 @@ exports.save = {
                   });
    }, 
 
+};
 
+/**
+ * Save to file system
+ *
+ * These tests are for the same function as above. They are distinguished 
+ * so as to simplify setUp and tearDown operations
+ */
+exports.saveToFs = {
+
+    setUp: function (callback) {
+    	try{
+            /**
+             * Write a file to /tmp
+             */
+            fs.writeFileSync('/tmp/gebo-server-test.txt', 'Word to your mom');
+            
+            /**
+             * Setup a registrant
+             */
+            var registrant = new gebo.registrantModel({
+                    name: 'dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+            registrant.save();
+
+
+            /**
+             * Make a friend for the registrant
+             */
+            var agentDb = new agentSchema('dan@hg.com');
+            var friend = new agentDb.friendModel({
+                    name: 'john',
+                    email: 'john@painter.com',
+                    uri: 'http://theirhost.com',
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
+
+            /**
+             * Set permissions for this friend
+             */
+            friend.hisPermissions.push({ email: 'canwrite@app.com', write: true });
+            friend.hisPermissions.push({ email: 'cannotwrite@app.com' });
+
+            friend.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                agentDb.connection.db.close();
+                callback();
+            });
+    	}
+        catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        rimraf.sync('docs/dan_at_hg_dot_com');
+
+        gebo.connection.db.dropDatabase(function(err) { 
+            if (err) {
+              console.log(err);
+            }
+          });
+
+        var agentDb = new agentSchema('dan@hg.com'); 
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
+          });
+    },
+
+    'Create agent and app directories on the file system if they do not exist': function(test) {
+        //test.expect(4);
+//        test.expect(2);
+
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+                  '/' + utils.getMongoCollectionName('canwrite@app.com');
+
+        // Make sure the directory isn't there
+        try {
+            fs.readdirSync('docs/' + utils.getMongoDbName('dan@hg.com'));
+        }
+        catch (err) {
+            test.ok(err);
+        }
+
+        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      write: true },
+                    { files: {
+                        test: {
+                            path: '/tmp/gebo-server-test.txt',
+                            name: 'gebo-server-test.txt',
+                            type: 'text/plain',
+                            size: 21,
+                        },
+                      },
+                    }).
+            then(function() {
+                console.log('I got all the way here');
+                var files = fs.readdirSync(dir);//, function(err, files) {
+                console.log(files);
+                test.equal(files.indexOf('gebo-server-test.txt', 0));
+                test.done();
+//                                    console.log('files');
+//                                    console.log(files);
+//                                    test.ifError(err);
+//                                    test.equal(files.indexOf('gebo-server-test.txt', 0));
+//                                    test.done();
+//                                  });
+              }).
+            catch(function(err) {
+                console.log('what is causing this error?');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Write a file object to the agent\'s file collection in the DB': function(test) {
+        test.done();
+    },
+   
+    'Do not allow an agent to save to the file system without permission': function(test) {
+        test.done();
+    },
+    
+    'Allow an agent to save to the file system with permission': function(test) {
+        test.done();
+    },
+
+    'Should not overwrite files with the same name': function(test) {
+        test.done();
+    },
+
+    'Write multiple files to disk': function(test) {
+        test.done();
+    },
+    
 };
 
 /**
@@ -1835,8 +1985,8 @@ exports.friend = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema('dan@hg.com');
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema('dan@hg.com');
+            var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
                     uri: 'http://theirhost.com',
@@ -1848,6 +1998,7 @@ exports.friend = {
                         if (err) {
                           console.log(err);
                         }
+                        agentDb.connection.db.close();
                         callback();
                       });
                   });
@@ -1866,11 +2017,15 @@ exports.friend = {
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema('dan@hg.com'); 
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
      }, 
 
@@ -1973,8 +2128,8 @@ exports.defriend = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema('dan@hg.com');
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema('dan@hg.com'); 
+            var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
                     uri: 'http://theirhost.com',
@@ -1986,6 +2141,7 @@ exports.defriend = {
                         if (err) {
                           console.log(err);
                         }
+                        agentDb.connection.db.close();
                         callback();
                       });
                   });
@@ -2004,11 +2160,15 @@ exports.defriend = {
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema('dan@hg.com'); 
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
      }, 
 

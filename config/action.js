@@ -5,6 +5,9 @@ var config = require('./config'),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q'),
+    fs = require('fs'),
+    mv = require('mv'),
+    mkdirp = require('mkdirp'),
     agentSchema = require('../schemata/agent'),
     geboSchema = require('../schemata/gebo');
 
@@ -110,36 +113,104 @@ module.exports = function(email) {
 
         if (verified.admin || verified.write) { 
           _getCollection(verified).
-              then(function(collection) {
-  
-                      // Make data._id a string (because it might
-                      // otherwise be interpreted as an int or hex)
-                      if (params.data._id) {
-                        params.data._id = new mongo.ObjectID(params.data._id + '');
+              then(function(collection) { 
+                      // For database objects
+                      if (params.data) {
+                        // Make data._id a string (because it might
+                        // otherwise be interpreted as an int or hex)
+                        if (params.data._id) {
+                          params.data._id = new mongo.ObjectID(params.data._id + '');
+                        }
+    
+                        collection.save(params.data, { safe: true },
+                                function(err, ack) {
+                                        if (err) {
+                                          console.log('collection save reject');
+                                          deferred.reject(err);
+                                        }
+                                        else {
+                                          deferred.resolve(ack);
+                                        }
+                                      });
                       }
-  
-                      collection.save(params.data, { safe: true },
-                              function(err, ack) {
-                                      if (err) {
+
+                      // For uploaded files 
+                      if (params.files) {
+                        console.log('params.files');
+                        var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName + '/';
+
+                        _saveFilesToAgentDirectory(params.files, dir, Object.keys(params.files), index).
+                                then(function() {
+                                        deferred.resolve();
+                                  }).
+                                catch(function(err) {
                                         deferred.reject(err);
-                                      }
-                                      else {
-                                        deferred.resolve(ack);
-                                      }
-                                    });
+                                  });
+//                        var keys = Object.keys(params.files);
+//                        for (var i = 0; i < keys.length; i++) {
+
+//                          _saveToFilesAgentDirectory(params.files[keys[i]].path, dir + params.files[keys[i]].name);
+
+                          // Move the file from /tmp to the agent's directory on the file system
+//                          mv(params.files[keys[i]].path, dir + params.files[keys[i]].name, { mkdirp: true },
+//                                          function(err) {
+//                                                console.log('mv did not work');
+//                                                console.log(err);
+//                                                if (err) {
+//                                                  console.log('rejected err');
+//                                                  console.log(err);
+//                                                  deferred.reject(err);
+//                                                }  
+//                                            });
+//                        }
+                        console.log('done loop');
+                        deferred.resolve('hello');
+                      }
                     }).
                   catch(function(err) {
+                      console.log('big error');
                       deferred.reject(err);
                     }).
                   done();
         }
         else {
+          console.log('You are not permitted to request or propose that action');
           deferred.reject('You are not permitted to request or propose that action');
         }
         return deferred.promise;
       };
     exports.save = _save;
-        
+
+    /**
+     * Recursively save a batch of files
+     *
+     * @param Object - req.files
+     * @param string - the base directory
+     * @param array - keys in the req.files object
+     * @param index - the current index in the array
+     *
+     * @return promise
+     */
+    function _saveFilesToAgentDirectory(files, dir, keys, index) {
+        var deferred = q.defer();
+//        var keys = Object.keys(params.files);
+//        for (var i = 0; i < keys.length; i++) {
+        _saveFilesToAgentDirectory(files, dir, keys, index).
+            then(function() {
+
+              });
+        mv(src, dest, { mkdirp: true },
+                        function(err) {
+                            if (err) {
+                              deferred.reject(err);
+                            }
+                            else {
+                              deferred.resolve();
+                            }
+                          });
+        return deferred.promise;
+      };
+
     /**
      * Copy JSON from a user's profile
      *
@@ -150,7 +221,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.read) { 
-          _getCollection(verified).//dbName, verified.collectionName).
+          _getCollection(verified).
               then(function(collection) {
                       collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
                               function(err, docs) {
@@ -184,7 +255,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) { 
-          _getCollection(verified).//.dbName, verified.collectionName).
+          _getCollection(verified).
               then(function(collection) {
                       // Does this collection exist?
                       collection.count(function(err, count) {
@@ -232,7 +303,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) { 
-          _getCollection(verified).//.dbName, verified.collectionName).
+          _getCollection(verified).
               then(function(collection) {
                       // Does this collection exist?
                       collection.count(function(err, count) {
@@ -278,7 +349,7 @@ module.exports = function(email) {
     var _ls = function(params) {
         var deferred = q.defer();
         if (params.admin || params.read) { 
-          _getCollection(params).//.dbName, params.collectionName).
+          _getCollection(params).
               then(function(collection) {
                       collection.find({}, ['_id', 'name']).
                           sort('name').
