@@ -47,7 +47,6 @@ module.exports = function (app, express, passport, logger) {
      * http://stackoverflow.com/questions/15813677/https-redirection-for-all-routes-node-js-express-security-concerns
      */
     function requireHttps(req, res, next) {
-        console.log('requireHttps');
         if (!req.secure) {
           var url = nconf.get('domain') + ':' + nconf.get('httpsPort') + req.url;
           console.log(url);
