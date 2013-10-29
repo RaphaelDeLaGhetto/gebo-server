@@ -149,7 +149,7 @@ module.exports = function(email) {
      * @param function
      */
     var _bearerStrategy = function(accessToken, done) {
-            
+
         db.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
               return done(err);
