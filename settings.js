@@ -45,10 +45,11 @@ module.exports = function (app, express, passport, logger) {
      */
     function requireHttps(req, res, next) {
         console.log('requireHttps');
-        if (!req.secure) {
-//          var url = 
-          return res.redirect('https://' + req.get('host') + req.url);
-        }
+        console.log(req.secure);
+//        if (!req.secure) {
+////          var url = 
+//          return res.redirect('https://' + req.get('host') + req.url);
+//        }
         next();
       }
 

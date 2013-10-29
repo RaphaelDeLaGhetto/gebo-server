@@ -61,15 +61,22 @@ app.post('/request', performative_routes.request);
 // API routes
 app.get('/verify', api_routes.verify);
 
-logger.info('listening on', nconf.get('port'));
 
-
+//http.createServer(app).listen(nconf.get('port'));
 http.createServer(app).listen(nconf.get('port'));
+//http.get('/test', function(req, res) {
+//        console.log('hello world\n');
+//        res.end("hello world\n");
+//    });
+//http.listen(nconf.get('port'));
+logger.info('HTTP listening on', nconf.get('port'));
+
 // Start the secure server
 var options = {
     key: fs.readFileSync('./cert/key.pem'),
     cert: fs.readFileSync('./cert/cert.pem'),
 };
+logger.info('HTTPS listening on', nconf.get('httpsPort'));
 https.createServer(options, app).listen(nconf.get('httpsPort'));
 
 
