@@ -162,7 +162,7 @@ module.exports = function(email) {
               return done('The token provided is invalid', null);
             }
             
-	    var verified = { collectionName: token.hai };
+	    var verified = { collectionName: utils.getMongoCollectionName(token.hai) };
 
             // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, function(err, registrant) {
@@ -174,7 +174,7 @@ module.exports = function(email) {
                 }
             
                 verified.agentName = registrant.name;
-	    	verified.dbName = registrant.email;
+	    	verified.dbName = utils.getMongoDbName(registrant.email);
                 verified.admin = registrant.admin;
 
                 // Is the bearer the resource owner or a friend?

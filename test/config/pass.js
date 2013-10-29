@@ -285,8 +285,8 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(verified.agentName, 'yanfen'); 
-              test.equal(verified.dbName, 'yanfen@hg.com'); 
-              test.equal(verified.collectionName, 'human-agent@interface.org'); 
+              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
               test.equal(verified.read, true); 
               test.equal(verified.write, false); 
               test.equal(verified.execute, false); 
@@ -304,8 +304,8 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(verified.agentName, 'dan'); 
-              test.equal(verified.dbName, 'dan@hg.com'); 
-              test.equal(verified.collectionName, 'human-agent@interface.org'); 
+              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
               test.equal(verified.read, true); 
               test.equal(verified.write, false); 
               test.equal(verified.execute, false); 
@@ -323,8 +323,8 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(verified.agentName, 'dan'); 
-              test.equal(verified.dbName, 'dan@hg.com'); 
-              test.equal(verified.collectionName, HAI_EMAIL); 
+              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
               test.equal(verified.read, true); 
               test.equal(verified.write, true); 
               test.equal(verified.execute, true); 
@@ -342,8 +342,8 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(verified.agentName, 'yanfen'); 
-              test.equal(verified.dbName, 'yanfen@hg.com'); 
-              test.equal(verified.collectionName, HAI_EMAIL); 
+              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
               test.equal(verified.read, true); 
               test.equal(verified.write, true); 
               test.equal(verified.execute, true); 
