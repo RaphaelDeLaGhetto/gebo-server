@@ -119,7 +119,7 @@ exports.getParams = {
                 var params = token.getParams();
                 test.equals(params.response_type, 'token');
                 test.equals(params.client_id, utils.getMongoDbName(TEST_AGENT_EMAIL));
-                test.equals(params.redirect_uri, 'http://localhost:3000/callback');
+                test.equals(params.redirect_uri, 'https://localhost:3000/callback');
                 test.done();
         });
     },
