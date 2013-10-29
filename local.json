@@ -5,6 +5,7 @@
     "oauth2callback": "/callback",
     "port":3000,
     "httpsPort":3443,
+    "docs": "docs",
     "cachify":false,
     "assets":{
         "/components/bootstrap/docs/assets/css/bootstrap.css":[

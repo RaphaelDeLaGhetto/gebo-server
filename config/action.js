@@ -109,7 +109,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) { 
-          _getCollection(verified).//dbName, verified.collectionName).
+          _getCollection(verified).
               then(function(collection) {
   
                       // Make data._id a string (because it might

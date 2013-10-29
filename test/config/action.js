@@ -181,8 +181,6 @@ exports.getCollection = {
                     test.done();
                   });
     },
-
-
 };
 
 /**
