@@ -29,16 +29,6 @@ nconf.argv().env().file({ file: 'local.json' });
 var performative_routes = require('./routes/performative')(nconf.get('email')),
     user_routes = require('./routes/user')(nconf.get('email'));
 
-// Redirect to HTTPS
-//function requireHttps(req, res, next) {
-//    console.log('requireHttps');
-//    if (!req.secure) {
-//      return res.redirect('https://' + req.get('host') + req.url);
-//    }
-//    next();
-//  }
-//app.use(requireHttps);
-
 // Basic routes
 app.get('/', basic_routes.index);
 
@@ -62,15 +52,11 @@ app.post('/request', performative_routes.request);
 app.get('/verify', api_routes.verify);
 
 
-//http.createServer(app).listen(nconf.get('port'));
-http.createServer(app).listen(nconf.get('port'));
-//http.get('/test', function(req, res) {
-//        console.log('hello world\n');
-//        res.end("hello world\n");
-//    });
-//http.listen(nconf.get('port'));
+// HTTP
 logger.info('HTTP listening on', nconf.get('port'));
+http.createServer(app).listen(nconf.get('port'));
 
+// HTTPS
 // Start the secure server
 var options = {
     key: fs.readFileSync('./cert/key.pem'),
