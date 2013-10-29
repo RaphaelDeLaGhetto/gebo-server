@@ -163,6 +163,24 @@ module.exports = function (email) {
     catch (error) {}
 
     /**
+     * File schema
+     */
+    var fileSchema = new Schema({
+        name: { type: String, required: true, unique: true },
+        collectionName: { type: String, required: true, unique: true },
+        type: { type: String, required: false, unique: false },
+        size: { type: Number, required: false, unique: false },
+        lastModified: { type: Date, required: true, default: Date.now() },
+      });
+
+    // Export fileSchema model
+    try {
+        var fileModel = connection.model('File', fileSchema);
+        exports.fileModel = fileModel;
+      }
+    catch (error) {}
+   
+    /**
      * API
      */
     return exports;
