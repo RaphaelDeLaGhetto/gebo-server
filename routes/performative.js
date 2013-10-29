@@ -5,6 +5,7 @@ var passport = require('passport'),
     utils = require('../lib/utils'),
     geboSchema = require('../schemata/gebo'),
     agentSchema = require('../schemata/agent'),
+    extend = require('extend'),
     q = require('q');
 
 module.exports = function(email) {
@@ -18,18 +19,21 @@ module.exports = function(email) {
     exports.request = [
         passport.authenticate('bearer', { session: false }),
         function(req, res) {
+
+            // There might be files attached to the request
+            var params = req.body;
+            extend(true, params, req.files);
+
             console.log('request');
             console.log(req.body);
             console.log(req.user);
             console.log(req.authInfo);
+            console.log('params');
+            console.log(params);
+
             var action = require('../config/action')(dbName);
-
-            // Convert email address to mongo-friendly DB
-            // and collection strings
-            req.user.dbName = utils.getMongoDbName(req.user.dbName);
-            req.user.collectionName = utils.getMongoCollectionName(req.user.collectionName);
-
-            action[req.body.action](req.user, req.body).
+            //action[req.body.action](req.user, req.body).
+            action[req.body.action](req.user, params).
                 then(function(data) {
                     res.send(data);
                   }).
@@ -37,7 +41,6 @@ module.exports = function(email) {
                     console.log(err);
                     res.send(404, err);
                   });
-
           }
       ];
     
