@@ -2,6 +2,7 @@
 var utils = require('../../lib/utils'),
     config = require('../../config/config'),
     fs = require('fs'),
+    mkdirp = require('mkdirp'),
     rimraf = require('rimraf');
 
 /**
@@ -296,3 +297,96 @@ exports.saveFilesToAgentDirectory = {
 
 };
 
+/**
+ * getSafeFileName
+ */
+exports.getSafeFileName = {
+
+    setUp: function (callback) {
+    	try{
+            /**
+             * Write some files to /tmp
+             */
+            mkdirp.sync('docs/safeFileNameTests');
+            fs.writeFileSync('docs/safeFileNameTests/aTestFile.txt', 'Word to your mom');
+            fs.writeFileSync('docs/safeFileNameTests/anotherTestFile(5).txt', 'I like to move it move it!');
+            fs.writeFileSync('docs/safeFileNameTests/noExtension', 'Bass! How low can you go?');
+            fs.writeFileSync('docs/safeFileNameTests/.invisible', 'I live for the applause');
+            callback();
+    	}
+        catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        rimraf.sync('docs/safeFileNameTests');
+        callback();
+    },
+
+    'Return the same file name given if there is no danger of an overwrite': function(test) {
+        test.expect(1);
+        utils.getSafeFileName('uniqueFilename.txt', 'docs/safeFileNameTests').
+            then(function(filename) {
+                test.equal(filename, 'uniqueFilename.txt');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);    
+                test.done();
+              });
+    },
+ 
+    'Append copy number to end of filename but before file extension': function(test) {
+        test.expect(1);
+        utils.getSafeFileName('aTestFile.txt', 'docs/safeFileNameTests').
+            then(function(filename) {
+                test.equal(filename, 'aTestFile(1).txt');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);    
+                test.done();
+              });
+    },
+
+    'Append copy number to end of filename without extension': function(test) {
+        test.expect(1);
+        utils.getSafeFileName('noExtension', 'docs/safeFileNameTests').
+            then(function(filename) {
+                test.equal(filename, 'noExtension(1)');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);    
+                test.done();
+              });
+    },
+
+    'Append copy number to end of hidden file': function(test) {
+        test.expect(1);
+        utils.getSafeFileName('.invisible', 'docs/safeFileNameTests').
+            then(function(filename) {
+                test.equal(filename, '.invisible(1)');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);    
+                test.done();
+              });
+    },
+      
+    'Increment existing copy number': function(test) {
+        test.expect(1);
+        utils.getSafeFileName('anotherTestFile(5).txt', 'docs/safeFileNameTests').
+            then(function(filename) {
+                test.equal(filename, 'anotherTestFile(6).txt');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);    
+                test.done();
+              });
+    },
+ 
+}; 
