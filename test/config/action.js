@@ -529,6 +529,44 @@ exports.saveToFs = {
     'Write multiple files to disk': function(test) {
         test.done();
     },
+
+    'Write a file and data to the database': function(test) {
+        test.expect(2);
+
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+                  '/' + utils.getMongoCollectionName('canwrite@app.com');
+
+        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      write: true },
+                    { files: {
+                        test: {
+                            path: '/tmp/gebo-server-test.txt',
+                            name: 'gebo-server-test.txt',
+                            type: 'text/plain',
+                            size: 21,
+                        },
+                      },
+                      data: {
+                        test: 'Some test data'
+                      },
+                    }).
+            then(function(doc) {
+                var files = fs.readdirSync(dir);
+                test.equal(files.indexOf('gebo-server-test.txt'), 0);
+                // Make sure the data was written to the collection
+                test.equal(doc.test, 'Some test data');
+
+                test.done();
+              }).
+            catch(function(err) {
+                console.log('what is causing this error?');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+        
+    },
     
 };
 
