@@ -336,6 +336,21 @@ exports.getSafeFileName = {
                 test.done();
               });
     },
+
+    'Return the same file name given if the directory doesn\'t exist': function(test) {
+        test.expect(1);
+        utils.getSafeFileName('uniqueFilename.txt', 'docs/noSuchDirectory').
+            then(function(filename) {
+                test.equal(filename, 'uniqueFilename.txt');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);    
+                test.done();
+              });
+    },
  
     'Append copy number to end of filename but before file extension': function(test) {
         test.expect(1);
