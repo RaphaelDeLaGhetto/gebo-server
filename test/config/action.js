@@ -472,8 +472,7 @@ exports.saveToFs = {
     },
 
     'Create agent and app directories on the file system if they do not exist': function(test) {
-        //test.expect(4);
-//        test.expect(2);
+        test.expect(2);
 
         var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
@@ -499,17 +498,9 @@ exports.saveToFs = {
                       },
                     }).
             then(function() {
-                console.log('I got all the way here');
-                var files = fs.readdirSync(dir);//, function(err, files) {
-                console.log(files);
-                test.equal(files.indexOf('gebo-server-test.txt', 0));
+                var files = fs.readdirSync(dir);
+                test.equal(files.indexOf('gebo-server-test.txt'), 0);
                 test.done();
-//                                    console.log('files');
-//                                    console.log(files);
-//                                    test.ifError(err);
-//                                    test.equal(files.indexOf('gebo-server-test.txt', 0));
-//                                    test.done();
-//                                  });
               }).
             catch(function(err) {
                 console.log('what is causing this error?');

@@ -136,45 +136,20 @@ module.exports = function(email) {
 
                       // For uploaded files 
                       if (params.files) {
-                        console.log('params.files');
-                        var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName + '/';
+                        var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName;
 
-//                        _saveFilesToAgentDirectory(params.files, dir, Object.keys(params.files), index).
-//                                then(function() {
-//                                        deferred.resolve();
-//                                  }).
-//                                catch(function(err) {
-//                                        deferred.reject(err);
-//                                  });
-//                        var keys = Object.keys(params.files);
-//                        for (var i = 0; i < keys.length; i++) {
-
-//                          _saveToFilesAgentDirectory(params.files[keys[i]].path, dir + params.files[keys[i]].name);
-
-                          // Move the file from /tmp to the agent's directory on the file system
-//                          mv(params.files[keys[i]].path, dir + params.files[keys[i]].name, { mkdirp: true },
-//                                          function(err) {
-//                                                console.log('mv did not work');
-//                                                console.log(err);
-//                                                if (err) {
-//                                                  console.log('rejected err');
-//                                                  console.log(err);
-//                                                  deferred.reject(err);
-//                                                }  
-//                                            });
-//                        }
-                        console.log('done loop');
-                        deferred.resolve('hello');
+                        utils.saveFilesToAgentDirectory(params.files, dir).
+                            then(function() {
+                                deferred.resolve();        
+                              });
                       }
                     }).
                   catch(function(err) {
-                      console.log('big error');
                       deferred.reject(err);
                     }).
                   done();
         }
         else {
-          console.log('You are not permitted to request or propose that action');
           deferred.reject('You are not permitted to request or propose that action');
         }
         return deferred.promise;
