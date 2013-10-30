@@ -295,6 +295,29 @@ exports.saveFilesToAgentDirectory = {
               });
     },
 
+    'Don\'t barf if the files object is empty, null, or undefined': function(test) {
+        test.expect(3);
+
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com');
+        utils.saveFilesToAgentDirectory({}, dir).
+            then(function() {
+                test.ok(true);
+                return utils.saveFilesToAgentDirectory(null, dir);
+              }).
+            then(function() {
+                test.ok(true);
+                return utils.saveFilesToAgentDirectory(undefined, dir);
+               }).
+            then(function() {
+                test.ok(true);
+                test.done(); 
+               }).
+             catch(function(err) {
+                test.ok(false, err);
+                test.done(); 
+              });
+    },
+
 };
 
 /**
