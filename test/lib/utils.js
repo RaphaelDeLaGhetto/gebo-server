@@ -1,6 +1,8 @@
 
 var utils = require('../../lib/utils'),
-    config = require('../../config/config');
+    config = require('../../config/config'),
+    fs = require('fs'),
+    rimraf = require('rimraf');
 
 /**
  * getMongoDbName
@@ -177,3 +179,120 @@ exports.ensureDbName = {
     },
 
 };
+
+/**
+ *saveFilesToAgentDirectory
+ */
+exports.saveFilesToAgentDirectory = {
+
+    setUp: function (callback) {
+    	try{
+            /**
+             * Write some files to /tmp
+             */
+            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
+            fs.writeFileSync('/tmp/gebo-server-utils-test-2.txt', 'It\'s Christmas time in Hollis, Queens');
+            fs.writeFileSync('/tmp/gebo-server-utils-test-3.txt', 'Yes I eat cow, I am not proud');
+            fs.writeFileSync('/tmp/gebo-server-utils-test-4.txt', 'Genesis 9:6');
+            callback();
+    	}
+        catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        rimraf.sync('docs/dan_at_hg_dot_com');
+        callback();
+    },
+
+    'Move one file from /tmp to destination': function(test) {
+        test.expect(2);
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com');
+
+        // Make sure the directory isn't there
+        try {
+            fs.readdirSync('docs/' + utils.getMongoDbName('dan@hg.com'));
+        }
+        catch (err) {
+            test.ok(err);
+        }
+
+        utils.saveFilesToAgentDirectory(
+                        {
+                            test: {
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            },
+                        }, 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com')).
+            then(function() {
+                var files = fs.readdirSync(dir);
+                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+
+    },
+
+    'Move multiple files from /tmp to destination': function(test) {
+        test.expect(5);
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com');
+
+        // Make sure the directory isn't there
+        try {
+            fs.readdirSync('docs/' + utils.getMongoDbName('dan@hg.com'));
+        }
+        catch (err) {
+            test.ok(err);
+        }
+
+        utils.saveFilesToAgentDirectory(
+                        {
+                            test1: {
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            },
+                            test2: {
+                                path: '/tmp/gebo-server-utils-test-2.txt',
+                                name: 'gebo-server-utils-test-2.txt',
+                                type: 'text/plain',
+                                size: 37,
+                            },
+                            test3: {
+                                path: '/tmp/gebo-server-utils-test-3.txt',
+                                name: 'gebo-server-utils-test-3.txt',
+                                type: 'text/plain',
+                                size: 29,
+                            },
+                            test4: {
+                                path: '/tmp/gebo-server-utils-test-4.txt',
+                                name: 'gebo-server-utils-test-4.txt',
+                                type: 'text/plain',
+                                size: 11,
+                            },
+                        }, 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com')).
+            then(function() {
+                var files = fs.readdirSync(dir);
+                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
+                test.equal(files.indexOf('gebo-server-utils-test-2.txt'), 1);
+                test.equal(files.indexOf('gebo-server-utils-test-3.txt'), 2);
+                test.equal(files.indexOf('gebo-server-utils-test-4.txt'), 3);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+};
+

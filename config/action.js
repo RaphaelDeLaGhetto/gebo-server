@@ -139,13 +139,13 @@ module.exports = function(email) {
                         console.log('params.files');
                         var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName + '/';
 
-                        _saveFilesToAgentDirectory(params.files, dir, Object.keys(params.files), index).
-                                then(function() {
-                                        deferred.resolve();
-                                  }).
-                                catch(function(err) {
-                                        deferred.reject(err);
-                                  });
+//                        _saveFilesToAgentDirectory(params.files, dir, Object.keys(params.files), index).
+//                                then(function() {
+//                                        deferred.resolve();
+//                                  }).
+//                                catch(function(err) {
+//                                        deferred.reject(err);
+//                                  });
 //                        var keys = Object.keys(params.files);
 //                        for (var i = 0; i < keys.length; i++) {
 
@@ -180,36 +180,6 @@ module.exports = function(email) {
         return deferred.promise;
       };
     exports.save = _save;
-
-    /**
-     * Recursively save a batch of files
-     *
-     * @param Object - req.files
-     * @param string - the base directory
-     * @param array - keys in the req.files object
-     * @param index - the current index in the array
-     *
-     * @return promise
-     */
-    function _saveFilesToAgentDirectory(files, dir, keys, index) {
-        var deferred = q.defer();
-//        var keys = Object.keys(params.files);
-//        for (var i = 0; i < keys.length; i++) {
-        _saveFilesToAgentDirectory(files, dir, keys, index).
-            then(function() {
-
-              });
-        mv(src, dest, { mkdirp: true },
-                        function(err) {
-                            if (err) {
-                              deferred.reject(err);
-                            }
-                            else {
-                              deferred.resolve();
-                            }
-                          });
-        return deferred.promise;
-      };
 
     /**
      * Copy JSON from a user's profile
