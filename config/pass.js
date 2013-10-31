@@ -156,10 +156,12 @@ module.exports = function(email) {
             }
             if (!token) {
               return done('The token provided is invalid', null);
+              //return done('No token found', null);
             }
 
             if (token.expires && new Date(token.expires) < new Date()) {
               return done('The token provided is invalid', null);
+              //return done('The token is expired', null);
             }
             
 	    var verified = { collectionName: utils.getMongoCollectionName(token.hai) };

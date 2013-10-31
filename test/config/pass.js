@@ -122,7 +122,7 @@ exports.bearerStrategy = {
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
-            adminRegistrant.save();
+//            adminRegistrant.save();
           
             /**
              * Make a friend for the registrant
@@ -140,7 +140,7 @@ exports.bearerStrategy = {
              */
             adminFriend.hisPermissions.push({ email: HAI_EMAIL });
 
-            adminFriend.save();
+//            adminFriend.save();
 
             /**
              * Create an access token for the friend
@@ -152,7 +152,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: ADMIN_FRIEND_TOKEN,
                 });
-            adminFriendToken.save();
+//            adminFriendToken.save();
 
             /**
              * Create an access token for the friend
@@ -164,7 +164,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: ADMIN_TOKEN,
                 });
-            adminToken.save();
+//            adminToken.save();
 
             /** 
              * Set up another registrant
@@ -176,7 +176,7 @@ exports.bearerStrategy = {
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
                 });
-            registrant.save();
+//            registrant.save();
 
             /**
              * Make a friend for the new registrant
@@ -196,7 +196,7 @@ exports.bearerStrategy = {
             //friend.hisPermissions.push({ email: 'richard@construction.com' });
             friend.hisPermissions.push({ email: HAI_EMAIL });
 
-            friend.save();
+//            friend.save();
 
             /**
              * Create an access token for the friend
@@ -208,7 +208,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: FRIEND_TOKEN,
                 });
-            friendToken.save();
+//            friendToken.save();
 
             /**
              * Create an access token for regular user 
@@ -220,7 +220,7 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: REGULAR_TOKEN,
                 });
-            regularToken.save();
+//            regularToken.save();
 
             /**
              * Create an expired token
@@ -233,11 +233,56 @@ exports.bearerStrategy = {
                     string: EXPIRED_TOKEN,
                     expires: Date.now() - 60*60*1000,
                 });
+
+            // Tokens weren't getting saved in time for tests...
+            // There has got to be a better way to do this.
             expiredToken.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
-                callback();        
+                regularToken.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    friendToken.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        friend.save(function(err) {
+                            if (err) {
+                              console.log(err);
+                            }
+                            registrant.save(function(err) {
+                                if (err) {
+                                  console.log(err);
+                                }
+                                adminToken.save(function(err) {
+                                    if (err) {
+                                      console.log(err);
+                                    }
+                                    adminFriendToken.save(function(err) {
+                                        if (err) {
+                                          console.log(err);
+                                        }
+                                        adminFriend.save(function(err) {
+                                            if (err) {
+                                              console.log(err);
+                                            }
+                                            adminRegistrant.save(function(err) {
+                                                if (err) {
+                                                  console.log(err);
+                                                }
+                                                adminAgentDb.connection.db.close();
+                                                regularAgentDb.connection.db.close();
+                                                callback();
+                                              });
+                                          });
+                                      });
+                                  });
+                              });
+                          });
+                      });
+                  });
               });
         }
         catch(err) {
@@ -300,6 +345,8 @@ exports.bearerStrategy = {
         test.expect(7);
         pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
             if (err) {
+              console.log('err');
+              console.log(err);
               test.ok(false, err);
             }
             else {
