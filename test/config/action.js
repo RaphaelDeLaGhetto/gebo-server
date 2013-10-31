@@ -405,7 +405,8 @@ exports.saveToFs = {
             /**
              * Write a file to /tmp
              */
-            fs.writeFileSync('/tmp/gebo-server-test.txt', 'Word to your mom');
+            fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+            fs.writeFileSync('/tmp/gebo-server-save-test-2.txt', 'How you doin\'?');
             
             /**
              * Setup a registrant
@@ -490,8 +491,8 @@ exports.saveToFs = {
                       write: true },
                     { files: {
                         test: {
-                            path: '/tmp/gebo-server-test.txt',
-                            name: 'gebo-server-test.txt',
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
                             type: 'text/plain',
                             size: 21,
                         },
@@ -499,7 +500,7 @@ exports.saveToFs = {
                     }).
             then(function() {
                 var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-test.txt'), 0);
+                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
                 test.done();
               }).
             catch(function(err) {
@@ -515,13 +516,28 @@ exports.saveToFs = {
     },
    
     'Do not allow an agent to save to the file system without permission': function(test) {
-        test.done();
+        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      write: false },
+                    { files: {
+                        test: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 21,
+                        },
+                      },
+                    }).
+            then(function() {
+                test.ok(false, 'Should not be allowed to save without permission');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You are not permitted to request or propose that action');
+                test.done();
+              });
     },
     
-    'Allow an agent to save to the file system with permission': function(test) {
-        test.done();
-    },
-
     'Should not overwrite files with the same name': function(test) {
         test.expect(4);
 
@@ -533,8 +549,8 @@ exports.saveToFs = {
                       write: true },
                     { files: {
                         test: {
-                            path: '/tmp/gebo-server-test.txt',
-                            name: 'gebo-server-test.txt',
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
                             type: 'text/plain',
                             size: 21,
                         },
@@ -542,16 +558,16 @@ exports.saveToFs = {
                     }).
             then(function() {
                 var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-test.txt'), 0);
+                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
 
-                fs.writeFileSync('/tmp/gebo-server-test.txt', 'Word to your mom');
+                fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
                 action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
                               collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                               write: true },
                             { files: {
                                 test: {
-                                    path: '/tmp/gebo-server-test.txt',
-                                    name: 'gebo-server-test.txt',
+                                    path: '/tmp/gebo-server-save-test-1.txt',
+                                    name: 'gebo-server-save-test-1.txt',
                                     type: 'text/plain',
                                     size: 21,
                                 },
@@ -560,8 +576,8 @@ exports.saveToFs = {
                     then(function() {
                         var files = fs.readdirSync(dir);
                         test.equal(files.length, 2);
-                        test.equal(files.indexOf('gebo-server-test(1).txt'), 0);
-                        test.equal(files.indexOf('gebo-server-test.txt'), 1);
+                        test.equal(files.indexOf('gebo-server-save-test-1(1).txt'), 0);
+                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 1);
                         test.done();
                     });
               }).
@@ -572,7 +588,39 @@ exports.saveToFs = {
     },
 
     'Write multiple files to disk': function(test) {
-        test.done();
+        test.expect(2);
+
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+                  '/' + utils.getMongoCollectionName('canwrite@app.com');
+
+        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      write: true },
+                    { files: {
+                        test1: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 21,
+                        },
+                        test2: {
+                            path: '/tmp/gebo-server-save-test-2.txt',
+                            name: 'gebo-server-save-test-2.txt',
+                            type: 'text/plain',
+                            size: 14,
+                        },
+                      },
+                    }).
+            then(function() {
+                var files = fs.readdirSync(dir);
+                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+                test.equal(files.indexOf('gebo-server-save-test-2.txt'), 1);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
     },
 
     'Write a file and data to the database': function(test) {
@@ -586,8 +634,8 @@ exports.saveToFs = {
                       write: true },
                     { files: {
                         test: {
-                            path: '/tmp/gebo-server-test.txt',
-                            name: 'gebo-server-test.txt',
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
                             type: 'text/plain',
                             size: 21,
                         },
@@ -598,7 +646,7 @@ exports.saveToFs = {
                     }).
             then(function(doc) {
                 var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-test.txt'), 0);
+                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
 
                 // Make sure the data was written to the collection
                 test.equal(doc.test, 'Some test data');
@@ -610,7 +658,6 @@ exports.saveToFs = {
                 test.ok(false, err);
                 test.done();
               });
-        
     },
     
 };
