@@ -3,7 +3,13 @@ var utils = require('../../lib/utils'),
     config = require('../../config/config'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
+//    nconf = require('nconf'),
+    agentSchema = require('../../schemata/agent'),
     rimraf = require('rimraf');
+
+
+//nconf.argv().env().file({ file: 'local.json' });
+//var gebo = require('../../schemata/gebo')(nconf.get('testDb'));
 
 /**
  * getMongoDbName
@@ -204,7 +210,23 @@ exports.saveFilesToAgentDirectory = {
     
     tearDown: function (callback) {
         rimraf.sync('docs/dan_at_hg_dot_com');
-        callback();
+
+//        gebo.connection.db.dropDatabase(function(err) { 
+//            if (err) {
+//              console.log(err);
+//            }
+//          });
+
+        var agentDb = new agentSchema('dan@hg.com'); 
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
+          });
     },
 
     'Move one file from /tmp to destination': function(test) {
@@ -220,14 +242,17 @@ exports.saveFilesToAgentDirectory = {
         }
 
         utils.saveFilesToAgentDirectory(
-                        {
-                            test: {
+                        { test: {
                                 path: '/tmp/gebo-server-utils-test-1.txt',
                                 name: 'gebo-server-utils-test-1.txt',
                                 type: 'text/plain',
                                 size: 16,
                             },
-                        }, 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com')).
+                        //}, 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com')).
+                        },
+                        { dbName: utils.getMongoDbName('dan@hg.com'),
+                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        }).
             then(function() {
                 var files = fs.readdirSync(dir);
                 test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
@@ -278,7 +303,10 @@ exports.saveFilesToAgentDirectory = {
                                 type: 'text/plain',
                                 size: 11,
                             },
-                        }, 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com')).
+                        },
+                        { dbName: utils.getMongoDbName('dan@hg.com'),
+                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        }).
             then(function() {
                 var files = fs.readdirSync(dir);
                 test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
@@ -315,6 +343,104 @@ exports.saveFilesToAgentDirectory = {
              catch(function(err) {
                 test.ok(false, err);
                 test.done(); 
+              });
+    },
+
+    'Write a file object to the agent\'s file collection in the DB': function(test) {
+        test.expect(5);
+
+        utils.saveFilesToAgentDirectory(
+                        { test: {
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            },
+                        },
+                        { dbName: utils.getMongoDbName('dan@hg.com'),
+                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        }).
+            then(function() {
+                var db = new agentSchema('dan@hg.com');
+                db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
+                                       collectionName: utils.getMongoCollectionName('test@hg.com') },
+                    function(err, file) {
+                        if (err || !file) {
+                          test.ok(false, err);
+                        }
+                        else {
+                          test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
+                          test.equal(file.collectionName, utils.getMongoCollectionName('test@hg.com')); 
+                          test.equal(file.type, 'text/plain'); 
+                          test.equal(file.size, 16); 
+                          test.equal(file.lastModified === null, false); 
+                        }
+                        test.done();
+                      });
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Write multiple file objects to the agent\'s file collection in the DB': function(test) {
+        test.expect(5);
+
+        utils.saveFilesToAgentDirectory(
+                        {
+                            test1: {
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            },
+                            test2: {
+                                path: '/tmp/gebo-server-utils-test-2.txt',
+                                name: 'gebo-server-utils-test-2.txt',
+                                type: 'text/plain',
+                                size: 37,
+                            },
+                            test3: {
+                                path: '/tmp/gebo-server-utils-test-3.txt',
+                                name: 'gebo-server-utils-test-3.txt',
+                                type: 'text/plain',
+                                size: 29,
+                            },
+                            test4: {
+                                path: '/tmp/gebo-server-utils-test-4.txt',
+                                name: 'gebo-server-utils-test-4.txt',
+                                type: 'text/plain',
+                                size: 11,
+                            },
+                        },
+                        { dbName: utils.getMongoDbName('dan@hg.com'),
+                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        }).
+            then(function() {
+                var db = new agentSchema('dan@hg.com');
+                db.fileModel.find({},
+                    function(err, files) {
+                        if (err) {
+                          test.ok(false, err);
+                        }
+                        else {
+                          test.equal(files.length, 4);
+                          test.equal(files[0].name, 'gebo-server-utils-test-1.txt'); 
+                          test.equal(files[1].name, 'gebo-server-utils-test-2.txt'); 
+                          test.equal(files[2].name, 'gebo-server-utils-test-3.txt'); 
+                          test.equal(files[3].name, 'gebo-server-utils-test-4.txt'); 
+                        }
+                        test.done();
+                      });
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
               });
     },
 

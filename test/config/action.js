@@ -420,7 +420,6 @@ exports.saveToFs = {
                 });
             registrant.save();
 
-
             /**
              * Make a friend for the registrant
              */
@@ -512,7 +511,43 @@ exports.saveToFs = {
     },
 
     'Write a file object to the agent\'s file collection in the DB': function(test) {
-        test.done();
+        test.expect(5);
+        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      write: true },
+                    { files: {
+                        test: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 21,
+                        },
+                      },
+                    }).
+            then(function() {
+                var db = new agentSchema('dan@hg.com');
+                db.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
+                                       collectionName: utils.getMongoCollectionName('canwrite@app.com') },
+                    function(err, file) {
+                        if (err) {
+                          test.ok(false, err);
+                        }
+                        else {
+                          test.equal(file.name, 'gebo-server-save-test-1.txt'); 
+                          test.equal(file.collectionName, utils.getMongoCollectionName('canwrite@app.com')); 
+                          test.equal(file.type, 'text/plain'); 
+                          test.equal(file.size, 21); 
+                          test.equal(file.lastModified === null, false); 
+                        }
+                        test.done();
+                      });
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     },
    
     'Do not allow an agent to save to the file system without permission': function(test) {

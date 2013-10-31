@@ -114,9 +114,9 @@ module.exports = function(email) {
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) { 
-                    var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName;
+//                    var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName;
 
-                    utils.saveFilesToAgentDirectory(params.files, dir).
+                    utils.saveFilesToAgentDirectory(params.files, verified).
                       then(function() {
                             if (params.data) {
                               if (params.data._id) {
