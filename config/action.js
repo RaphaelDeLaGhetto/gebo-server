@@ -118,7 +118,6 @@ module.exports = function(email) {
 
                     utils.saveFilesToAgentDirectory(params.files, dir).
                       then(function() {
-
                             if (params.data) {
                               if (params.data._id) {
                                 params.data._id = new mongo.ObjectID(params.data._id + '');
@@ -139,36 +138,6 @@ module.exports = function(email) {
                               deferred.resolve();
                             }
                           });
-
-                       // For database objects
-//                      if (params.data) {
-//                        // Make data._id a string (because it might
-//                        // otherwise be interpreted as an int or hex)
-//                        if (params.data._id) {
-//                          params.data._id = new mongo.ObjectID(params.data._id + '');
-//                        }
-//    
-//                        collection.save(params.data, { safe: true },
-//                                function(err, ack) {
-//                                        if (err) {
-//                                          console.log('collection save reject');
-//                                          deferred.reject(err);
-//                                        }
-//                                        else {
-//                                          deferred.resolve(ack);
-//                                        }
-//                                      });
-//                      }
-//
-//                      // For uploaded files 
-//                      if (params.files) {
-//                        var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName;
-//
-//                        utils.saveFilesToAgentDirectory(params.files, dir).
-//                            then(function() {
-//                                deferred.resolve();        
-//                              });
-//                      }
                     }).
                   catch(function(err) {
                       deferred.reject(err);

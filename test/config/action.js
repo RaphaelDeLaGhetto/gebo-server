@@ -395,7 +395,7 @@ exports.saveToDb = {
 /**
  * Save to file system
  *
- * These tests are for the same function as above. They are distinguished 
+ * These tests are for the same function as above. They are set apart 
  * so as to simplify setUp and tearDown operations
  */
 exports.saveToFs = {
@@ -523,7 +523,52 @@ exports.saveToFs = {
     },
 
     'Should not overwrite files with the same name': function(test) {
-        test.done();
+        test.expect(4);
+
+        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+                  '/' + utils.getMongoCollectionName('canwrite@app.com');
+
+        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      write: true },
+                    { files: {
+                        test: {
+                            path: '/tmp/gebo-server-test.txt',
+                            name: 'gebo-server-test.txt',
+                            type: 'text/plain',
+                            size: 21,
+                        },
+                      },
+                    }).
+            then(function() {
+                var files = fs.readdirSync(dir);
+                test.equal(files.indexOf('gebo-server-test.txt'), 0);
+
+                fs.writeFileSync('/tmp/gebo-server-test.txt', 'Word to your mom');
+                action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                              collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                              write: true },
+                            { files: {
+                                test: {
+                                    path: '/tmp/gebo-server-test.txt',
+                                    name: 'gebo-server-test.txt',
+                                    type: 'text/plain',
+                                    size: 21,
+                                },
+                              },
+                            }).
+                    then(function() {
+                        var files = fs.readdirSync(dir);
+                        test.equal(files.length, 2);
+                        test.equal(files.indexOf('gebo-server-test(1).txt'), 0);
+                        test.equal(files.indexOf('gebo-server-test.txt'), 1);
+                        test.done();
+                    });
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
     },
 
     'Write multiple files to disk': function(test) {
@@ -554,9 +599,9 @@ exports.saveToFs = {
             then(function(doc) {
                 var files = fs.readdirSync(dir);
                 test.equal(files.indexOf('gebo-server-test.txt'), 0);
+
                 // Make sure the data was written to the collection
                 test.equal(doc.test, 'Some test data');
-
                 test.done();
               }).
             catch(function(err) {
