@@ -114,8 +114,6 @@ module.exports = function(email) {
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) { 
-//                    var dir = nconf.get('docs') + '/' + verified.dbName + '/' + verified.collectionName;
-
                     utils.saveFilesToAgentDirectory(params.files, verified).
                       then(function() {
                             if (params.data) {
@@ -126,7 +124,6 @@ module.exports = function(email) {
                               collection.save(params.data, { safe: true },
                                       function(err, ack) {
                                           if (err) {
-                                            console.log('collection save reject');
                                             deferred.reject(err);
                                           }
                                           else {
