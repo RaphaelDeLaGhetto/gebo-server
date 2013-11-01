@@ -133,25 +133,6 @@ module.exports = function (email) {
     catch(err) {}
 
     /**
-     * HAI Token schema
-     */
-    var haiTokenSchema = new Schema({
-        registrantId: { type: ObjectId, required: true, unique: false },
-        haiId: { type: ObjectId, required: true, unique: false },
-        string: { type: String, required: true, unique: false },
-        expires: { type: Date, required: false, default: null },
-      });
-    
-    // Export haiToken model
-    try {
-        var haiTokenModel = connection.model('HaiToken', haiTokenSchema);
-        exports.haiTokenModel = haiTokenModel;
-      }
-    catch(err) {}
-
-
-
-    /**
      * API
      */
     return exports;
