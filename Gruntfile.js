@@ -160,7 +160,7 @@ module.exports = function (grunt) {
                       done();
                     }
                   });
-              });
+              })
           });
 
     /**
@@ -197,30 +197,39 @@ module.exports = function (grunt) {
           });
 
     /**
-     * addclient
+     * setpermission
      */
-//    grunt.registerTask('addclient', 'add a client to the database',
-//        function (name, clientId, secret) {
-//
-//            var client = new db.clientModel({
-//                name: name,
-//                clientId: clientId,
-//                secret: secret,
-//              });
-//    
-//            // save call is async, put grunt into async mode to work
-//            var done = this.async();
-//
-//            client.save(function (err) {
-//                if (err) {
-//                  console.log('Error: ' + err);
-//                  done(false);
-//                }
-//                else {
-//                  console.log('saved client: ' + client.name);
-//                  done();
-//                }
-//              });
-//          });
+    grunt.registerTask('setpermission', 'Set access to an agent\'s resource',
+        function(friendAgent, ownerAgent, resource, read, write, execute) {
+            var agentDb = require('./schemata/agent')(ownerAgent);
+            
+            // Save call is async. Put grunt into async mode to work
+            var done = this.async();
+
+            agentDb.friendModel.findOne({ email: friendAgent },
+                function(err, friend) {
+                    if (err) {
+                      console.log(err);
+                    }
+
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', resource);
+
+                    if (index > -1) {
+                      friend.hisPermissions.splice(index, 1);
+                    }
+                    friend.hisPermissions.push({ email: resource,
+                                                 read: read === 'true', 
+                                                 write: write === 'true', 
+                                                 execute: execute === 'true', 
+                                               });
+
+                    friend.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        done();
+                      });
+                  });
+          });
 
   };
