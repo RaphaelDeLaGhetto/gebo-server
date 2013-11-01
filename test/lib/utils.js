@@ -552,5 +552,48 @@ exports.getSafeFileName = {
                 test.done();
               });
     },
- 
 }; 
+
+/**
+ * getIndexOfObject
+ */
+exports.getIndexOfObject = {
+    setUp: function (callback) {
+        this.array = [
+                { key1: 'value1', key2: 'value2' },    
+                { key1: 'value3', key2: 'value4' },    
+                { key1: 'value5', key2: 'value6' },    
+            ];
+        callback();
+    },
+    
+    'Return the index of the object matching the given key value pair': function(test) {
+        test.expect(6);
+        test.equal(utils.getIndexOfObject(this.array, 'key1', 'value1'), 0);
+        test.equal(utils.getIndexOfObject(this.array, 'key2', 'value2'), 0);
+        test.equal(utils.getIndexOfObject(this.array, 'key1', 'value3'), 1);
+        test.equal(utils.getIndexOfObject(this.array, 'key2', 'value4'), 1);
+        test.equal(utils.getIndexOfObject(this.array, 'key1', 'value5'), 2);
+        test.equal(utils.getIndexOfObject(this.array, 'key2', 'value6'), 2);
+        test.done();
+    },
+
+    'Return -1 if the objects have no such key': function(test) {
+        test.expect(1);
+        test.equal(utils.getIndexOfObject(this.array, 'noSuchKey', 'value1'), -1);
+        test.done();
+    },
+
+    'Return -1 if the objects have no such value': function(test) {
+        test.expect(1);
+        test.equal(utils.getIndexOfObject(this.array, 'key1', 'noSuchValue'), -1);
+        test.done();
+    },
+
+    'Return -1 if the objects have no such key-value pair': function(test) {
+        test.expect(1);
+        test.equal(utils.getIndexOfObject(this.array, 'noSuchKey', 'noSuchValue'), -1);
+        test.done();
+    },
+};
+
