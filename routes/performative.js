@@ -41,11 +41,13 @@ module.exports = function(email) {
                                 res.send(data);
                               }).
                             catch(function(err) {
+                                console.log('action error');
                                 console.log(err);
                                 res.send(404, err);
                               });
                       }).
                 catch(function(err) {
+                    console.log('verification error');
                     console.log(err);
                     res.send(401, err);
                   });
@@ -78,6 +80,8 @@ module.exports = function(email) {
           var agentDb = new agentSchema(verified.dbName);
   
           agentDb.friendModel.findOne({ email: agent.email}, function(err, friend) {
+                console.log('friend');
+                console.log(friend);
                 if (err) {
                   deferred.reject(err);
                 }
