@@ -80,8 +80,6 @@ module.exports = function(email) {
           var agentDb = new agentSchema(verified.dbName);
   
           agentDb.friendModel.findOne({ email: agent.email}, function(err, friend) {
-                console.log('friend');
-                console.log(friend);
                 if (err) {
                   deferred.reject(err);
                 }

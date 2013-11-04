@@ -280,13 +280,14 @@ module.exports = function(email) {
      * Return a list of documents contained in the app's collection
      *
      * @param Object
+     * @param Object
      *
      * @return promise
      */
-    var _ls = function(params) {
+    var _ls = function(verified, params) {
         var deferred = q.defer();
-        if (params.admin || params.read) { 
-          _getCollection(params).
+        if (verified.admin || verified.read) { 
+          _getCollection(verified).
               then(function(collection) {
                       collection.find({}, ['_id', 'name']).
                           sort('name').
@@ -317,23 +318,23 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _getRegistrants = function(verified) {
-        var deferred = q.defer();
-        if (verified.admin || verified.read) {
-          var db = new geboSchema(dbName);
-          var query = db.registrantModel.find({}, { password: false });
-          query.exec().
-            then(function(registrants) {
-                    deferred.resolve(registrants);
-                  });
-        }
-        else {
-          deferred.reject('You are not permitted to request or propose that action');
-        }
-
-        return deferred.promise;
-      };
-    exports.getRegistrants = _getRegistrants;
+//    var _getRegistrants = function(verified) {
+//        var deferred = q.defer();
+//        if (verified.admin || verified.read) {
+//          var db = new geboSchema(dbName);
+//          var query = db.registrantModel.find({}, { password: false });
+//          query.exec().
+//            then(function(registrants) {
+//                    deferred.resolve(registrants);
+//                  });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+//
+//        return deferred.promise;
+//      };
+//    exports.getRegistrants = _getRegistrants;
 
     /**
      * Return a list of a registered user's 

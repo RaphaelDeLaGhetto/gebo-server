@@ -1733,78 +1733,78 @@ exports.dropDatabase = {
 /**
  * getRegistrants 
  */
-exports.getRegistrants = {
-
-    setUp: function(callback) {
-    	try{
-            var agent = new gebo.registrantModel(
-                            { name: 'dan', email: 'dan@hg.com',
-                              password: 'password123', admin: true,  
-                              _id: new mongo.ObjectID('0123456789AB') });
-            agent.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    callback();
-                  });
-     	}
-        catch(e) {
-            console.dir(e);
-            callback();
-    	}
-    },
-
-    tearDown: function (callback) {
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
-          });
-    },
-
-    'Return a list of registered agents if admin': function(test) {
-        test.expect(5);
-        action.getRegistrants({ admin: true }).
-                then(function(registrants) {
-                    test.equal(registrants.length, 1);
-                    test.equal(registrants[0].name, 'dan');
-                    test.equal(registrants[0].email, 'dan@hg.com');
-                    test.equal(registrants[0].admin, true);
-                    test.equal(registrants[0].password, undefined);
-	            test.done();
-                  });
-    },
-
-    'Return a list of registered agents with read access': function(test) {
-        test.expect(5);
-        action.getRegistrants({ admin: false, read: true }).
-                then(function(registrants) {
-                    test.equal(registrants.length, 1);
-                    test.equal(registrants[0].name, 'dan');
-                    test.equal(registrants[0].email, 'dan@hg.com');
-                    test.equal(registrants[0].admin, true);
-                    test.equal(registrants[0].password, undefined);
-	            test.done();
-                  });
-
-    },
-
-    'Do not return a list of registered agents without permission': function(test) {
-        test.expect(1);
-        action.getRegistrants({ admin: false, read: false }).
-                then(function(registrants) {
-                    test.ok(false, 'Should not be able to get a list of registrants');
-	            test.done();
-                  }).
-                catch(function(err) {
-                    test.equal(err, 'You are not permitted to request or propose that action');
-	            test.done();
-                  });
-
-
-    },
-};
+//exports.getRegistrants = {
+//
+//    setUp: function(callback) {
+//    	try{
+//            var agent = new gebo.registrantModel(
+//                            { name: 'dan', email: 'dan@hg.com',
+//                              password: 'password123', admin: true,  
+//                              _id: new mongo.ObjectID('0123456789AB') });
+//            agent.save(function(err) {
+//                    if (err) {
+//                      console.log(err);
+//                    }
+//                    callback();
+//                  });
+//     	}
+//        catch(e) {
+//            console.dir(e);
+//            callback();
+//    	}
+//    },
+//
+//    tearDown: function (callback) {
+//        gebo.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//            callback();
+//          });
+//    },
+//
+//    'Return a list of registered agents if admin': function(test) {
+//        test.expect(5);
+//        action.getRegistrants({ admin: true }).
+//                then(function(registrants) {
+//                    test.equal(registrants.length, 1);
+//                    test.equal(registrants[0].name, 'dan');
+//                    test.equal(registrants[0].email, 'dan@hg.com');
+//                    test.equal(registrants[0].admin, true);
+//                    test.equal(registrants[0].password, undefined);
+//	            test.done();
+//                  });
+//    },
+//
+//    'Return a list of registered agents with read access': function(test) {
+//        test.expect(5);
+//        action.getRegistrants({ admin: false, read: true }).
+//                then(function(registrants) {
+//                    test.equal(registrants.length, 1);
+//                    test.equal(registrants[0].name, 'dan');
+//                    test.equal(registrants[0].email, 'dan@hg.com');
+//                    test.equal(registrants[0].admin, true);
+//                    test.equal(registrants[0].password, undefined);
+//	            test.done();
+//                  });
+//
+//    },
+//
+//    'Do not return a list of registered agents without permission': function(test) {
+//        test.expect(1);
+//        action.getRegistrants({ admin: false, read: false }).
+//                then(function(registrants) {
+//                    test.ok(false, 'Should not be able to get a list of registrants');
+//	            test.done();
+//                  }).
+//                catch(function(err) {
+//                    test.equal(err, 'You are not permitted to request or propose that action');
+//	            test.done();
+//                  });
+//
+//
+//    },
+//};
 
 /**
  * getUserDocuments 
