@@ -154,23 +154,23 @@ module.exports = function(email) {
             if (err) {
               return done(err);
             }
+
             if (!token) {
               return done('The token provided is invalid', null);
-              //return done('No token found', null);
             }
 
             if (token.expires && new Date(token.expires) < new Date()) {
               return done('The token provided is invalid', null);
-              //return done('The token is expired', null);
             }
             
-	    var verified = { collectionName: utils.getMongoCollectionName(token.hai) };
+	    var verified = { collectionName: utils.getMongoCollectionName(token.collectionName) };
 
             // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, function(err, registrant) {
                 if (err) {
                   return done(err);
                 }
+
                 if (!registrant) {
                   return done(null, false);
                 }

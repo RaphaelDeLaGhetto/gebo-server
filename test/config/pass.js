@@ -148,7 +148,7 @@ exports.bearerStrategy = {
             var adminFriendToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
                     friendId: new mongo.ObjectID('23456789ABCD'),
-                    hai: HAI_EMAIL,
+                    collectionName: HAI_EMAIL,
                     ip: IP,
                     string: ADMIN_FRIEND_TOKEN,
                 });
@@ -160,7 +160,7 @@ exports.bearerStrategy = {
             var adminToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
                     friendId: null,
-                    hai: HAI_EMAIL,
+                    collectionName: HAI_EMAIL,
                     ip: IP,
                     string: ADMIN_TOKEN,
                 });
@@ -204,7 +204,7 @@ exports.bearerStrategy = {
             var friendToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('123456789ABC'),
                     friendId: new mongo.ObjectID('3456789ABCDE'),
-                    hai: HAI_EMAIL,
+                    collectionName: HAI_EMAIL,
                     ip: IP,
                     string: FRIEND_TOKEN,
                 });
@@ -216,7 +216,7 @@ exports.bearerStrategy = {
             var regularToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('123456789ABC'),
                     friendId: null,
-                    hai: HAI_EMAIL,
+                    collectionName: HAI_EMAIL,
                     ip: IP,
                     string: REGULAR_TOKEN,
                 });
@@ -228,7 +228,7 @@ exports.bearerStrategy = {
             var expiredToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('456789ABCDEF'),
                     friendId: null,
-                    hai: HAI_EMAIL,
+                    collectionName: HAI_EMAIL,
                     ip: IP,
                     string: EXPIRED_TOKEN,
                     expires: Date.now() - 60*60*1000,
