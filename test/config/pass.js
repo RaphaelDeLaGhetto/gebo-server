@@ -5,10 +5,6 @@ var config = require('../../config/config'),
     utils = require('../../lib/utils'),
     mongo = require('mongodb');
 
-//var ACCESS_TOKEN = '1234',
-//    HAI_EMAIL = 'A human-agent interface',
-//    IP = '127.0.0.1';
-
 var COL_NAME = 'appCollection',
     ADMIN_FRIEND_TOKEN = '1234',
     FRIEND_TOKEN = '5678',
@@ -25,8 +21,6 @@ nconf.argv().env().file({ file: 'local.json' });
 var geboDb = require('../../schemata/gebo')(nconf.get('testDb')),
     pass = require('../../config/pass')(nconf.get('testDb'));
 
-//console.log('adminAgentDb');
-//console.log(adminAgentDb.connection);
 /**
  * localStrategy
  */
@@ -122,7 +116,6 @@ exports.bearerStrategy = {
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
-//            adminRegistrant.save();
           
             /**
              * Make a friend for the registrant
@@ -140,8 +133,6 @@ exports.bearerStrategy = {
              */
             adminFriend.hisPermissions.push({ email: HAI_EMAIL });
 
-//            adminFriend.save();
-
             /**
              * Create an access token for the friend
              */
@@ -152,7 +143,6 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: ADMIN_FRIEND_TOKEN,
                 });
-//            adminFriendToken.save();
 
             /**
              * Create an access token for the friend
@@ -164,7 +154,6 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: ADMIN_TOKEN,
                 });
-//            adminToken.save();
 
             /** 
              * Set up another registrant
@@ -176,7 +165,6 @@ exports.bearerStrategy = {
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
                 });
-//            registrant.save();
 
             /**
              * Make a friend for the new registrant
@@ -193,10 +181,7 @@ exports.bearerStrategy = {
              * Create access permissions for imaginary collection
              */
             friend.hisPermissions.push({ email: 'someotherapp@example.com' });
-            //friend.hisPermissions.push({ email: 'richard@construction.com' });
             friend.hisPermissions.push({ email: HAI_EMAIL });
-
-//            friend.save();
 
             /**
              * Create an access token for the friend
@@ -208,7 +193,6 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: FRIEND_TOKEN,
                 });
-//            friendToken.save();
 
             /**
              * Create an access token for regular user 
@@ -220,7 +204,6 @@ exports.bearerStrategy = {
                     ip: IP,
                     string: REGULAR_TOKEN,
                 });
-//            regularToken.save();
 
             /**
              * Create an expired token
