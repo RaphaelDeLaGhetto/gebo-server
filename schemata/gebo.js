@@ -115,7 +115,7 @@ module.exports = function (email) {
         // The resource owner
         registrantId: { type: ObjectId, required: true, unique: false },
         // The ID of the friend granted access to the resource
-        friendId: { type: ObjectId, required: false, default: null },
+        //friendId: { type: ObjectId, required: false, default: null },
         // The resource
         collectionName: { type: String, required: true, unique: false },
         // The authorized IP address

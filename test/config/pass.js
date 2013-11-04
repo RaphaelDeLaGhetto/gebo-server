@@ -120,36 +120,36 @@ exports.bearerStrategy = {
             /**
              * Make a friend for the registrant
              */
-            var adminAgentDb = new agentSchema('dan@hg.com');
-            var adminFriend = new adminAgentDb.friendModel({
-                    name: 'john',
-                    email: 'john@painter.com',
-                    uri: FRIEND_GEBO_URI,
-                    _id: new mongo.ObjectID('23456789ABCD')
-                });
-
-            /**
-             * Create access permissions for imaginary collection
-             */
-            adminFriend.hisPermissions.push({ email: HAI_EMAIL });
+//            var adminAgentDb = new agentSchema('dan@hg.com');
+//            var adminFriend = new adminAgentDb.friendModel({
+//                    name: 'john',
+//                    email: 'john@painter.com',
+//                    uri: FRIEND_GEBO_URI,
+//                    _id: new mongo.ObjectID('23456789ABCD')
+//                });
+//
+//            /**
+//             * Create access permissions for imaginary collection
+//             */
+//            adminFriend.hisPermissions.push({ email: HAI_EMAIL });
 
             /**
              * Create an access token for the friend
              */
-            var adminFriendToken = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('0123456789AB'),
-                    friendId: new mongo.ObjectID('23456789ABCD'),
-                    collectionName: HAI_EMAIL,
-                    ip: IP,
-                    string: ADMIN_FRIEND_TOKEN,
-                });
+//            var adminFriendToken = new geboDb.tokenModel({
+//                    registrantId: new mongo.ObjectID('0123456789AB'),
+////                    friendId: new mongo.ObjectID('23456789ABCD'),
+//                    collectionName: HAI_EMAIL,
+//                    ip: IP,
+//                    string: ADMIN_FRIEND_TOKEN,
+//                });
 
             /**
              * Create an access token for the friend
              */
             var adminToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
-                    friendId: null,
+//                    friendId: null,
                     collectionName: HAI_EMAIL,
                     ip: IP,
                     string: ADMIN_TOKEN,
@@ -169,37 +169,37 @@ exports.bearerStrategy = {
             /**
              * Make a friend for the new registrant
              */
-            var regularAgentDb = new agentSchema('yanfen@hg.com');
-            var friend = new regularAgentDb.friendModel({
-                    name: 'richard',
-                    email: 'richard@construction.com',
-                    uri: FRIEND_GEBO_URI,
-                    _id: new mongo.ObjectID('3456789ABCDE')
-                });
+//            var regularAgentDb = new agentSchema('yanfen@hg.com');
+//            var friend = new regularAgentDb.friendModel({
+//                    name: 'richard',
+//                    email: 'richard@construction.com',
+//                    uri: FRIEND_GEBO_URI,
+//                    _id: new mongo.ObjectID('3456789ABCDE')
+//                });
+//
+//            /**
+//             * Create access permissions for imaginary collection
+//             */
+//            friend.hisPermissions.push({ email: 'someotherapp@example.com' });
+//            friend.hisPermissions.push({ email: HAI_EMAIL });
 
-            /**
-             * Create access permissions for imaginary collection
-             */
-            friend.hisPermissions.push({ email: 'someotherapp@example.com' });
-            friend.hisPermissions.push({ email: HAI_EMAIL });
-
-            /**
-             * Create an access token for the friend
-             */
-            var friendToken = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('123456789ABC'),
-                    friendId: new mongo.ObjectID('3456789ABCDE'),
-                    collectionName: HAI_EMAIL,
-                    ip: IP,
-                    string: FRIEND_TOKEN,
-                });
+//            /**
+//             * Create an access token for the friend
+//             */
+//            var friendToken = new geboDb.tokenModel({
+//                    registrantId: new mongo.ObjectID('123456789ABC'),
+////                    friendId: new mongo.ObjectID('3456789ABCDE'),
+//                    collectionName: HAI_EMAIL,
+//                    ip: IP,
+//                    string: FRIEND_TOKEN,
+//                });
 
             /**
              * Create an access token for regular user 
              */
             var regularToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('123456789ABC'),
-                    friendId: null,
+//                    friendId: null,
                     collectionName: HAI_EMAIL,
                     ip: IP,
                     string: REGULAR_TOKEN,
@@ -210,7 +210,7 @@ exports.bearerStrategy = {
              */
             var expiredToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('456789ABCDEF'),
-                    friendId: null,
+//                    friendId: null,
                     collectionName: HAI_EMAIL,
                     ip: IP,
                     string: EXPIRED_TOKEN,
@@ -227,14 +227,14 @@ exports.bearerStrategy = {
                     if (err) {
                       console.log(err);
                     }
-                    friendToken.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
-                        friend.save(function(err) {
-                            if (err) {
-                              console.log(err);
-                            }
+//                    friendToken.save(function(err) {
+//                        if (err) {
+//                          console.log(err);
+//                        }
+//                        friend.save(function(err) {
+//                            if (err) {
+//                              console.log(err);
+//                            }
                             registrant.save(function(err) {
                                 if (err) {
                                   console.log(err);
@@ -243,28 +243,28 @@ exports.bearerStrategy = {
                                     if (err) {
                                       console.log(err);
                                     }
-                                    adminFriendToken.save(function(err) {
-                                        if (err) {
-                                          console.log(err);
-                                        }
-                                        adminFriend.save(function(err) {
-                                            if (err) {
-                                              console.log(err);
-                                            }
+//                                    adminFriendToken.save(function(err) {
+//                                        if (err) {
+//                                          console.log(err);
+//                                        }
+//                                        adminFriend.save(function(err) {
+//                                            if (err) {
+//                                              console.log(err);
+//                                            }
                                             adminRegistrant.save(function(err) {
                                                 if (err) {
                                                   console.log(err);
                                                 }
-                                                adminAgentDb.connection.db.close();
-                                                regularAgentDb.connection.db.close();
+//                                                adminAgentDb.connection.db.close();
+//                                                regularAgentDb.connection.db.close();
                                                 callback();
                                               });
-                                          });
-                                      });
+//                                          });
+//                                      });
                                   });
                               });
-                          });
-                      });
+//                          });
+//                      });
                   });
               });
         }
@@ -280,108 +280,142 @@ exports.bearerStrategy = {
             if (err) {
               console.log(err)
             }
+            callback();
           });
 
-        var regularAgentDb = new agentSchema('yanfen@hg.com');
-        regularAgentDb.connection.on('open', function(err) {
-            regularAgentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                regularAgentDb.connection.db.close();
+//        var regularAgentDb = new agentSchema('yanfen@hg.com');
+//        regularAgentDb.connection.on('open', function(err) {
+//            regularAgentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err)
+//                }
+//                regularAgentDb.connection.db.close();
+//
+//                var adminAgentDb = new agentSchema('dan@hg.com');
+//                adminAgentDb.connection.on('open', function(err) {
+//                    adminAgentDb.connection.db.dropDatabase(function(err) {
+//                        if (err) {
+//                          console.log(err)
+//                        }
+//                        adminAgentDb.connection.db.close();
+//                        callback();
+//                      });
+//                  });
+//              });
+//          });
+    },
 
-                var adminAgentDb = new agentSchema('dan@hg.com');
-                adminAgentDb.connection.on('open', function(err) {
-                    adminAgentDb.connection.db.dropDatabase(function(err) {
-                        if (err) {
-                          console.log(err)
-                        }
-                        adminAgentDb.connection.db.close();
-                        callback();
-                      });
-                  });
-              });
+    'Return registrant object for an admin with a valid token': function(test) {
+        test.expect(4);
+        pass.bearerStrategy(ADMIN_TOKEN, function(err, registrant) {
+            if (err) {
+              test.ok(false, err);
+            }
+            else {
+              test.equal(registrant.name, 'dan');
+              test.equal(registrant.email, 'dan@hg.com');
+              test.equal(registrant.admin, true);
+              test.equal(registrant.password, undefined);
+            }
+            test.done();
           });
     },
 
-    'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
-        test.expect(7);
-
-        pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
+    'Return registrant object for a regular agent with a valid token': function(test) {
+        test.expect(4);
+        pass.bearerStrategy(REGULAR_TOKEN, function(err, registrant) {
             if (err) {
               test.ok(false, err);
             }
             else {
-              test.equal(verified.agentName, 'yanfen'); 
-              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
-              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
-              test.equal(verified.read, true); 
-              test.equal(verified.write, false); 
-              test.equal(verified.execute, false); 
-              test.equal(verified.admin, false); 
+              test.equal(registrant.name, 'yanfen');
+              test.equal(registrant.email, 'yanfen@hg.com');
+              test.equal(registrant.admin, false);
+              test.equal(registrant.password, undefined);
             }
             test.done();
-        });
+          });
     },
 
-    'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
-        test.expect(7);
-        pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
-            if (err) {
-              console.log('err');
-              console.log(err);
-              test.ok(false, err);
-            }
-            else {
-              test.equal(verified.agentName, 'dan'); 
-              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
-              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
-              test.equal(verified.read, true); 
-              test.equal(verified.write, false); 
-              test.equal(verified.execute, false); 
-              test.equal(verified.admin, true); 
-            }
-            test.done();
-        });
-    },
-    
-    'Return permissions object for an admin agent requesting access to his own resource': function(test) {
-        test.expect(7);
-        pass.bearerStrategy(ADMIN_TOKEN, function(err, verified) {
-            if (err) {
-              test.ok(false, err);
-            }
-            else {
-              test.equal(verified.agentName, 'dan'); 
-              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
-              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
-              test.equal(verified.read, true); 
-              test.equal(verified.write, true); 
-              test.equal(verified.execute, true); 
-              test.equal(verified.admin, true); 
-            }
-            test.done();
-        });
-    },
 
-    'Return permissions object for a regular agent requesting access to his own resource': function(test) {
-        test.expect(7);
-        pass.bearerStrategy(REGULAR_TOKEN, function(err, verified) {
-            if (err) {
-              test.ok(false, err);
-            }
-            else {
-              test.equal(verified.agentName, 'yanfen'); 
-              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
-              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
-              test.equal(verified.read, true); 
-              test.equal(verified.write, true); 
-              test.equal(verified.execute, true); 
-              test.equal(verified.admin, false); 
-            }
-            test.done();
-        });
-    },
+//    'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
+//        test.expect(7);
+//
+//        pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
+//            if (err) {
+//              test.ok(false, err);
+//            }
+//            else {
+//              test.equal(verified.agentName, 'yanfen'); 
+//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+//              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
+//              test.equal(verified.read, true); 
+//              test.equal(verified.write, false); 
+//              test.equal(verified.execute, false); 
+//              test.equal(verified.admin, false); 
+//            }
+//            test.done();
+//        });
+//    },
+//
+//    'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
+//        test.expect(7);
+//        pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
+//            if (err) {
+//              console.log('err');
+//              console.log(err);
+//              test.ok(false, err);
+//            }
+//            else {
+//              test.equal(verified.agentName, 'dan'); 
+//              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+//              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
+//              test.equal(verified.read, true); 
+//              test.equal(verified.write, false); 
+//              test.equal(verified.execute, false); 
+//              test.equal(verified.admin, true); 
+//            }
+//            test.done();
+//        });
+//    },
+//    
+//    'Return permissions object for an admin agent requesting access to his own resource': function(test) {
+//        test.expect(7);
+//        pass.bearerStrategy(ADMIN_TOKEN, function(err, verified) {
+//            if (err) {
+//              test.ok(false, err);
+//            }
+//            else {
+//              test.equal(verified.agentName, 'dan'); 
+//              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+//              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
+//              test.equal(verified.read, true); 
+//              test.equal(verified.write, true); 
+//              test.equal(verified.execute, true); 
+//              test.equal(verified.admin, true); 
+//            }
+//            test.done();
+//        });
+//    },
+//
+//    'Return permissions object for a regular agent requesting access to his own resource': function(test) {
+//        test.expect(7);
+//        pass.bearerStrategy(REGULAR_TOKEN, function(err, verified) {
+//            if (err) {
+//              test.ok(false, err);
+//            }
+//            else {
+//              test.equal(verified.agentName, 'yanfen'); 
+//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+//              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
+//              test.equal(verified.read, true); 
+//              test.equal(verified.write, true); 
+//              test.equal(verified.execute, true); 
+//              test.equal(verified.admin, false); 
+//            }
+//            test.done();
+//        });
+//    },
 
     'Do not barf if the token provided does not exist': function(test) {
         test.expect(1);
