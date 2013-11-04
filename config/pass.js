@@ -191,19 +191,16 @@ module.exports = function(email) {
                           return done(null, false);
                         }
  
- 		       // Search the array for requested resource.
-                    	// There's got to be a better way to do this...
- 	               var found = false;
-                        for (var i = 0; i < friend.hisPermissions.length; i++) {
-                          if (friend.hisPermissions[i].email === verified.collectionName) {
-                            verified.read = friend.hisPermissions[i].read;
-                            verified.write = friend.hisPermissions[i].write;
-                            verified.execute = friend.hisPermissions[i].execute;
-                            break;
-                          }
- 		       }
-  
-                       done(null, verified);
+                        // Search the array for requested resource
+                        var index = utils.getIndexOfObject(friend.hisPermissions, 'email', verified.collectionName);
+
+                        if (index > -1) {
+                          verified.read = friend.hisPermissions[index].read;
+                          verified.write = friend.hisPermissions[index].write;
+                          verified.execute = friend.hisPermissions[index].execute;
+                        }
+
+                        done(null, verified);
                     });
                 }
                 else {
