@@ -24,22 +24,30 @@ module.exports = function(email) {
             var params = req.body;
             extend(true, params, req.files);
 
-            console.log('request');
-            console.log(req.body);
-            console.log(req.user);
-            console.log(req.authInfo);
-            console.log('params');
-            console.log(params);
-
-            var action = require('../config/action')(dbName);
-            //action[req.body.action](req.user, req.body).
-            action[req.body.action](req.user, params).
-                then(function(data) {
-                    res.send(data);
-                  }).
+            _verify(req.user, params).
+                then(function(verified) {
+                        console.log('request');
+                        console.log(req.body);
+                        console.log(req.user);
+                        console.log(req.authInfo);
+                        console.log('params');
+                        console.log(params);
+                        console.log('verified');
+                        console.log(verified);
+            
+                        var action = require('../config/action')(dbName);
+                        action[req.body.action](verified, params).
+                            then(function(data) {
+                                res.send(data);
+                              }).
+                            catch(function(err) {
+                                console.log(err);
+                                res.send(404, err);
+                              });
+                      }).
                 catch(function(err) {
                     console.log(err);
-                    res.send(404, err);
+                    res.send(401, err);
                   });
           }
       ];
