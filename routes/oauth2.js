@@ -37,10 +37,10 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function (haiEmail, done) {
+server.serializeClient(function (resourceEmail, done) {
     console.log('serializeClient');
-    console.log(haiEmail);
-    return done(null, haiEmail);
+    console.log(resourceEmail);
+    return done(null, resourceEmail);
   });
 
 server.deserializeClient(function (requestDetails, done) {
@@ -123,7 +123,7 @@ server.grant(oauth2orize.grant.token(function(requestDetails, user, ares, done) 
     var token = new geboDb.tokenModel({
         registrantId: user._id,
         friendId: requestDetails.friend,
-        collectionName: utils.getMongoCollectionName(requestDetails.hai),
+        collectionName: utils.getMongoCollectionName(requestDetails.resource),
         ip: requestDetails.ip,
         string: tokenStr,
       });
@@ -223,10 +223,10 @@ exports.authorization = [
     login.ensureLoggedIn(),
     server.authorization(function (email, redirectUri, done) {
         console.log('authorization');
-        // { hai: email } gets passed to the serializeClient function's
-        // haiEmail parameter. The agent email and originating IP address
+        // { resource: email } gets passed to the serializeClient function's
+        // resourceEmail parameter. The agent email and originating IP address
         // is added just before the dialog window is rendered
-        return done(null, { hai: email }, redirectUri);
+        return done(null, { resource: email }, redirectUri);
       }),
 
     // The req.oauth2.client object is passed through
