@@ -223,21 +223,21 @@ module.exports = function(email) {
      * This should let this server authenticate against
      * other servers, but time will tell.
      */
-    passport.use(new ClientJwtBearerStrategy(
-        function(claimSetIss, done) {
-            console.log('ClientJwtBearerStrategy');
-    
-            db.clientModel.findOne({ clientId: claimSetIss }, function(err, client) {
-                if (err) {
-                  return done(err);
-                }
-                if (!client) {
-                  return done(null, false);
-                }
-                return done(null, client);
-              });
-          }
-      ));
+//    passport.use(new ClientJwtBearerStrategy(
+//        function(claimSetIss, done) {
+//            console.log('ClientJwtBearerStrategy');
+//    
+//            db.clientModel.findOne({ clientId: claimSetIss }, function(err, client) {
+//                if (err) {
+//                  return done(err);
+//                }
+//                if (!client) {
+//                  return done(null, false);
+//                }
+//                return done(null, client);
+//              });
+//          }
+//      ));
 
 
     /**

@@ -117,50 +117,50 @@ module.exports = function (email) {
     /**
      * HAI schema
      */
-    var haiSchema = new Schema({
-        name: { type: String, required: true, unique: false },
-        email: { type: String, required: true, unique: true },
-        redirect: { type: String, required: true, unique: false },
-        trusted: { type: Boolean, required: true, default: false },
-        permissions: [permissionSchema],
-      });
-
-    /**
-     * Get an array of permissions
-     *
-     * @param string
-     */
-    haiSchema.methods.getPermissions = function(email) {
-        var permissions = [],
-            permissionsObj;
-        for (var i = 0; i < this.permissions.length; i++) {
-          if (this.permissions[i].email === email) {
-            permissionsObj = this.permissions[i];
-            break;
-          }
-        }
-
-        if (permissionsObj) {
-          if (permissionsObj.read) {
-            permissions.push('read');
-          }
-          if (permissionsObj.write) {
-            permissions.push('write');
-          }
-          if (permissionsObj.execute) {
-            permissions.push('execute');
-          }
-        }
-        return permissions;
-      };
-
-
-    // Export HAI model
-    try {
-        var haiModel = connection.model('Hai', haiSchema);
-        exports.haiModel = haiModel;
-      }
-    catch (error) {}
+//    var haiSchema = new Schema({
+//        name: { type: String, required: true, unique: false },
+//        email: { type: String, required: true, unique: true },
+//        redirect: { type: String, required: true, unique: false },
+//        trusted: { type: Boolean, required: true, default: false },
+//        permissions: [permissionSchema],
+//      });
+//
+//    /**
+//     * Get an array of permissions
+//     *
+//     * @param string
+//     */
+//    haiSchema.methods.getPermissions = function(email) {
+//        var permissions = [],
+//            permissionsObj;
+//        for (var i = 0; i < this.permissions.length; i++) {
+//          if (this.permissions[i].email === email) {
+//            permissionsObj = this.permissions[i];
+//            break;
+//          }
+//        }
+//
+//        if (permissionsObj) {
+//          if (permissionsObj.read) {
+//            permissions.push('read');
+//          }
+//          if (permissionsObj.write) {
+//            permissions.push('write');
+//          }
+//          if (permissionsObj.execute) {
+//            permissions.push('execute');
+//          }
+//        }
+//        return permissions;
+//      };
+//
+//
+//    // Export HAI model
+//    try {
+//        var haiModel = connection.model('Hai', haiSchema);
+//        exports.haiModel = haiModel;
+//      }
+//    catch (error) {}
 
     /**
      * File schema

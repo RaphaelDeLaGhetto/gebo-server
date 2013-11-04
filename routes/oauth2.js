@@ -123,7 +123,7 @@ server.grant(oauth2orize.grant.token(function(requestDetails, user, ares, done) 
     var token = new geboDb.tokenModel({
         registrantId: user._id,
         friendId: requestDetails.friend,
-        hai: requestDetails.hai,
+        collectionName: utils.getMongoCollectionName(requestDetails.hai),
         ip: requestDetails.ip,
         string: tokenStr,
       });
@@ -280,7 +280,7 @@ exports.decision = [
 // authenticate when making requests to this endpoint.
 
 exports.token = [
-    passport.authenticate(['basic', 'oauth2-client-password', 'oauth2-jwt-bearer'], { session: false }),
+    passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
     server.token(),
     server.errorHandler()
   ];
