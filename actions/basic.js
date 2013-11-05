@@ -1,6 +1,6 @@
 'use strict';
 
-var config = require('./config'),
+var config = require('../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
@@ -315,60 +315,6 @@ module.exports = function(email) {
       };
     exports.ls = _ls;
     
-    /**
-     * Return a list of registered users 
-     *
-     * @param Object
-     *
-     * @return promise
-     */
-//    var _getRegistrants = function(verified) {
-//        var deferred = q.defer();
-//        if (verified.admin || verified.read) {
-//          var db = new geboSchema(dbName);
-//          var query = db.registrantModel.find({}, { password: false });
-//          query.exec().
-//            then(function(registrants) {
-//                    deferred.resolve(registrants);
-//                  });
-//        }
-//        else {
-//          deferred.reject('You are not permitted to request or propose that action');
-//        }
-//
-//        return deferred.promise;
-//      };
-//    exports.getRegistrants = _getRegistrants;
-
-    /**
-     * Return a list of a registered user's 
-     * documents
-     *
-     * @param Object
-     * @param Object
-     *
-     * @return promise
-     */
-//    var _getUserDocuments = function(verified, params) {
-//        var deferred = q.defer();
-//        if (verified.admin) {
-//          var dbName = utils.getMongoDbName(params.email);
-//          _ls({ dbName: dbName, collectionName: verified.collectionName }).
-//		then(function(data) {
-//                        deferred.resolve(data);
-//                      }).
-//                catch(function(err) {
-//                        deferred.reject(err);
-//                      });
-//        }
-//        else {
-//          deferred.reject('You don\'t have permission to view user documents');
-//        }
-//
-//        return deferred.promise;
-//      };
-//    exports.getUserDocuments = _getUserDocuments;
-
     /**
      * Create a new database
      *

@@ -29,7 +29,7 @@ var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 var gebo = require('../../schemata/gebo')(TEST_DB),
     agentSchema = require('../../schemata/agent'),
-    action = require('../../config/action')(TEST_DB);
+    action = require('../../actions/basic')(TEST_DB);
 
 /**
  * testConnection

@@ -5,7 +5,7 @@ var utils = require('./lib/utils'),
 
 nconf.argv().env().file({ file: 'local.json' });
 var db = require('./schemata/gebo')(nconf.get('email')),
-    action = require('./config/action')(nconf.get('email'));
+    action = require('./actions/basic')(nconf.get('email'));
 
 
 module.exports = function (grunt) {
