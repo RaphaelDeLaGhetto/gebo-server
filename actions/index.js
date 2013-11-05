@@ -14,16 +14,14 @@ module.exports = function(email) {
 
     require('fs').readdirSync(__dirname + '/').forEach(function(file) {
         if (file.match(/^\w+\.js/g) !== null && file !== 'index.js') {
-//          var name = file.replace('.js', '');
           var actions = require('./' + file)(dbName);
           var keys = Object.keys(actions);
 
           for (var i = 0; i < keys.length; i++) {
             if (exports[keys[i]]) {
-              throw new Exception('Two actions cannot have the same name');
+              throw 'Two actions cannot have the same name';
             }
             exports[keys[i]] = actions[keys[i]];
-//            exports[name] = require('./' + file)(dbName);
           }
         }
       });
