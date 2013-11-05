@@ -1267,7 +1267,7 @@ exports.ls = {
         });
     },
 
-    'Return a list of documents contained in the collection if permitted': function(test) {
+    'Return a list of document names contained in the collection if permitted': function(test) {
         test.expect(3);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true }).
             then(function(list) {
@@ -1283,6 +1283,26 @@ exports.ls = {
                     test.done();
                  });
     },
+
+    'Return a list of documents containing the fields specified': function(test) {
+        test.expect(5);
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true }, { fields: ['occupation'] }).
+            then(function(list) {
+                test.equal(list.length, 2);
+                test.equal(list[0].name, undefined);
+                test.equal(list[0].occupation, 'Batman');
+                test.equal(list[1].name, undefined);
+                test.equal(list[1].occupation, 'Being cool');
+                test.done();
+            }).
+            catch(
+                function(err) {
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+    },
+
 
     'Return an empty list from an empty collection if permitted': function(test) {
         test.expect(1);

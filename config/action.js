@@ -289,8 +289,12 @@ module.exports = function(email) {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
-                      collection.find({}, ['_id', 'name']).
-                          sort('name').
+                      var fields = ['name', '_id'];
+                      if (params && params.fields) {
+                        fields = params.fields;
+                      }
+                      collection.find({}, fields).
+                          sort(fields[0]).
                           toArray(function(err, docs) {
                               if (err) {
                                 deferred.reject(err);
