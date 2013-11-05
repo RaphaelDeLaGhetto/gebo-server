@@ -27,7 +27,6 @@ module.exports = function(email) {
             _verify(req.user, params).
                 then(function(verified) {
                         console.log('request');
-                        console.log(req.body);
                         console.log(req.user);
                         console.log(req.authInfo);
                         console.log('params');
@@ -35,7 +34,7 @@ module.exports = function(email) {
                         console.log('verified');
                         console.log(verified);
             
-                        var action = require('../actions/basic')(dbName);
+                        var action = require('../actions')(dbName);
                         action[req.body.action](verified, params).
                             then(function(data) {
                                 res.send(data);
