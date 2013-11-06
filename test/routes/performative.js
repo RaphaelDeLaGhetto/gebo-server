@@ -19,6 +19,8 @@ var BASE_ADDRESS = 'http://theirhost.com';
 var performativeRoute = require('../../routes/performative');
 var performative = new performativeRoute(nconf.get('testDb'));
 
+//var performative = require('../../routes/performative')(nconf.get('testDb'));
+
 var geboDb = new geboSchema(nconf.get('testDb'));
 
 /**
