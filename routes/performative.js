@@ -12,6 +12,7 @@ module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
+    var action = require('../actions')(dbName);
 
     /**
      * Receive a request for consideration
@@ -34,7 +35,6 @@ module.exports = function(email) {
                         console.log('verified');
                         console.log(verified);
             
-                        var action = require('../actions')(dbName);
                         action[req.body.action](verified, params).
                             then(function(data) {
                                 res.send(data);
