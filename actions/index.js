@@ -9,7 +9,7 @@ var utils = require('../lib/utils');
  */
 module.exports = function(email) {
 
-    // Turn the email into a mongo-friend database name
+    // Turn the email into a mongo-friendly database name
     var dbName = utils.ensureDbName(email);
 
     require('fs').readdirSync(__dirname + '/').forEach(function(file) {

@@ -14,6 +14,7 @@ var oauth2orize = require('oauth2orize'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),
     q = require('q'),
+    fs = require('fs'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
     mongoose = require('mongoose');
 
@@ -46,8 +47,6 @@ server.serializeClient(function (resourceEmail, done) {
 server.deserializeClient(function (requestDetails, done) {
     console.log('deserializeClient');
 
-//    return done(null, requestDetails);
-
     var agentDb = new agentSchema(requestDetails.agent);
     agentDb.friendModel.findOne({ email: requestDetails.friend }, function (err, friend) {
             console.log('friendModel');
@@ -64,16 +63,6 @@ server.deserializeClient(function (requestDetails, done) {
             }
             return done(null, requestDetails);
       });
-//    var agentDb = new agentSchema(emails.agent);
-//    agentDb.friendModel.findOne({ email: emails.friend }, function (err, friend) {
-//            console.log('findFriend');
-//            console.log(err);
-//            console.log(friend);
-//            if (err) {
-//              return done(err);
-//            }
-//            return done(null, friend);
-//      });
   });
 
 // Register supported grant types.
@@ -176,10 +165,10 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
 /**
  * For server login
  */
-server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(function(client, data, signature, done) {
+var _jwtBearerExchange = function(client, data, signature, done) {
     console.log('------ JWT, yeah yeah');
     var crypto = require('crypto'),
-        pub = 'somePublicKey',
+        pub = fs.readFileSync('../cert/key.pem'),
         verifier = crypto.createVerify('RSA-SHA256');
 
     verifier.update(JSON.stringify(data));
@@ -201,7 +190,9 @@ server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(functio
           return done(null, token.token);
         });
     }
-  }));
+  }
+exports.jwtBearerExchange = _jwtBearerExchange;
+server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(_jwtBearerExchange));
 
 // user authorization endpoint
 //
@@ -255,7 +246,7 @@ exports.authorization = [
         res.render('dialog', {
                 transactionID: req.oauth2.transactionID,
                 oauth: req.oauth2,
-                user: req.user,
+                agent: req.user,
             });
       }
   ];
@@ -280,7 +271,7 @@ exports.decision = [
 // authenticate when making requests to this endpoint.
 
 exports.token = [
-    passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
+    passport.authenticate(['basic', 'oauth2-client-password', 'oauth2-jwt-bearer'], { session: false }),
     server.token(),
     server.errorHandler()
   ];

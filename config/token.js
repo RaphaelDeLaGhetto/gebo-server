@@ -12,6 +12,8 @@ var q = require('q'),
 
 module.exports = function(email) {
 
+    nconf.argv().env().file({ file: 'local.json' });
+
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
 
@@ -204,9 +206,9 @@ module.exports = function(email) {
 
         // Make the claim 
         var claim = {
-                iss: 'some@email.com',
-                scope: _friend.request,
-                aud: _friend.authorization,
+                iss: nconf.get('email'),
+                scope: 'read write',
+                aud: nconf.get('domain') + '/oauth/token',
                 exp: new Date()/1000 + 3600*1000,
                 iat: new Date()/1000, 
             };
@@ -248,6 +250,32 @@ module.exports = function(email) {
 
         return deferred.promise;
       };
+
+    /**
+     * makeJwt
+     *
+     * @param Object
+     * @param Object
+     *
+     * @return string
+     */
+    var _makeJwt = function(header, claim) {
+        var jwt = base64url(JSON.stringify(header)) + '.';
+        jwt += base64url(JSON.stringify(claim));
+
+        // Sign the request
+        var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
+        var key = pem.toString('ascii');
+
+        var sign = crypto.createSign('sha256WithRSAEncryption');
+        sign.update(new Buffer(jwt, 'base64'));
+        var signature = sign.sign(key);
+
+        jwt += '.' + base64url(signature);
+
+        return jwt;
+      };
+    exports.makeJwt = _makeJwt;
 
     /**
      * API

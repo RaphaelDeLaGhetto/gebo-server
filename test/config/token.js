@@ -4,6 +4,9 @@ var nock = require('nock'),
     mongo = require('mongodb'),
     http = require('http'),
     utils = require('../../lib/utils'),
+    base64url = require('base64url'),
+    crypto = require('crypto'),
+    fs = require('fs'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent');
 
@@ -584,8 +587,7 @@ exports.getTokenWithJwt = {
           });
     },
 
-
-//    'Get a token from the server agent': function(test) {
+    'Get a token from the server agent': function(test) {
 //        test.expect(3);
 //        var scope = nock('http://' + BASE_ADDRESS).
 //                post(AUTHORIZATION_ENDPOINT).
@@ -598,7 +600,44 @@ exports.getTokenWithJwt = {
 //                    test.equal(t.access_token, JWT_RESPONSE.access_token);
 //                    test.equal(t.token_type, JWT_RESPONSE.token_type);
 //                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
-//                    test.done();
+                    test.done();
 //                  });
-//    },
+    },
+};
+
+
+/**
+ * makeJwt
+ */
+exports.makeJwt = {
+
+    'Return an encoded claim set': function(test) {
+        test.expect(1);
+        var header = { alg: 'RS256', typ: 'JWT' };
+        var claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
+                      scope: 'https://www.googleapis.com/auth/devstorage.readonly',
+                      aud: 'https://accounts.google.com/o/oauth2/token',
+                      exp: 1328554385,
+                      iat: 1328550785 };
+
+        var headerEncoded = base64url(JSON.stringify(header)),
+            claimEncoded = base64url(JSON.stringify(claim));
+
+        // Sign the request
+        //var pem = fs.readFileSync('../../cert/key.pem');
+        var pem = fs.readFileSync(__dirname + '/../../cert/key.pem');
+        var key = pem.toString('ascii');
+
+        var sign = crypto.createSign('sha256WithRSAEncryption');
+        sign.update(new Buffer(headerEncoded + '.' + claimEncoded, 'base64'));
+        var signature = sign.sign(key);
+        var signatureEncoded = base64url(signature);
+
+        var jwt = token.makeJwt(header, claim);
+
+        test.equal(jwt, headerEncoded + '.' + claimEncoded + '.' + signatureEncoded);
+
+        test.done();
+    },
+
 };

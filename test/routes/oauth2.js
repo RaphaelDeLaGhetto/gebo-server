@@ -14,6 +14,7 @@ var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 
 var oauth2 = require('../../routes/oauth2');
 
+nconf.argv().env().file({ file: 'local.json' });
 var geboDb = new geboSchema(nconf.get('testDb')),
     agentDb = new agentSchema('yanfen@hg.com');
 
@@ -23,6 +24,30 @@ var HAI_PROFILE = { type: 'token',
                     scope: [ 'read', 'write' ],
                     state: undefined,
                     clientName: 'Some awesome app' };
+
+/**
+ * jwtBearerExchange
+ */
+exports.jwtBearerExchange = {
+
+//    setUp: function(callback) {
+//        callback();
+//    },
+//
+//    tearDown: function(callback) {
+//        geboDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//            callback();
+//          });
+//    },
+
+    'Return a token': function(test) {
+        test.done();
+    },
+
+};
 
 /**
  * getHaiProfileChanges

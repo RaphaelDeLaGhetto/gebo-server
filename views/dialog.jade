@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    p.lead Hello, #{user.name}
+    p.lead Hello, #{agent.name}
     p
         i #{oauth.req.clientName} 
         | needs #{oauth.req.scope.join('/')} access to the files it stores in your account

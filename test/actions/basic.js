@@ -1,7 +1,7 @@
 var config = require('../../config/config'),
     utils = require('../../lib/utils'),
-    DatabaseCleaner = require('database-cleaner'),
-    databaseCleaner = new DatabaseCleaner('mongodb'),
+//    DatabaseCleaner = require('database-cleaner'),
+//    databaseCleaner = new DatabaseCleaner('mongodb'),
     mongo = require('mongodb'),
     nconf = require('nconf'),
     rimraf = require('rimraf'),
@@ -2406,4 +2406,80 @@ exports.defriend = {
     },
 };
 
+/**
+ * voucher 
+ */
+exports.voucher = {
 
+    setUp: function(callback) {
+        try {
+            /**
+             * Setup a registrant
+             */
+            var registrant = new gebo.registrantModel({
+                    name: 'dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+          
+            /**
+             * Make a friend for the registrant
+             */
+            var agentDb = new agentSchema('dan@hg.com'); 
+//            var friend = new agentDb.friendModel({
+//                    name: 'john',
+//                    email: 'john@painter.com',
+//                    uri: 'http://theirhost.com',
+//                    _id: new mongo.ObjectID('23456789ABCD')
+//                });
+
+            registrant.save(function(err) {
+//                    friend.save(function(err) {
+//                        if (err) {
+//                          console.log(err);
+//                        }
+                        agentDb.connection.db.close();
+                        callback();
+//                      });
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+       
+        gebo.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+        var agentDb = new agentSchema('dan@hg.com'); 
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
+          });
+     }, 
+
+    'Add a token if registered': function(test) {
+//        action.voucher({ dbName: TEST_DB, collectionName: 'tokens' },
+//                       { foreignAgent: 'foreign@agent.com' }).
+//            then(function(token) {
+                test.done();
+//              });
+    },
+
+    'Do not add a token if not registered': function(test) {
+        test.done();
+    },
+};

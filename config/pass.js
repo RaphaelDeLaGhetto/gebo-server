@@ -163,8 +163,6 @@ module.exports = function(email) {
               return done('The token provided is invalid', null);
             }
             
-//	    var verified = { collectionName: utils.getMongoCollectionName(token.collectionName) };
-
             // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, { password: 0 }, function(err, registrant) {
                 if (err) {
@@ -175,43 +173,6 @@ module.exports = function(email) {
                   return done(null, false);
                 }
                 done(null, registrant);  
-                
-//                verified.agentName = registrant.name;
-//	    	verified.dbName = utils.getMongoDbName(registrant.email);
-//                verified.admin = registrant.admin;
-//
-//                // Is the bearer the resource owner or a friend?
-//	        if (token.friendId) {
-//                  var agentDb = new agentSchema(registrant.email);
-// 
-//                  agentDb.friendModel.findOne({ _id: token.friendId }, function(err, friend) {
-//                        if (err) {
-//                          return done(err);
-//                        }
-//                        if (!friend) {
-//                          return done(null, false);
-//                        }
-// 
-//                        // Search the array for requested resource
-//                        var index = utils.getIndexOfObject(friend.hisPermissions, 'email', verified.collectionName);
-//
-//                        if (index > -1) {
-//                          verified.read = friend.hisPermissions[index].read;
-//                          verified.write = friend.hisPermissions[index].write;
-//                          verified.execute = friend.hisPermissions[index].execute;
-//                        }
-//
-//                        done(null, verified);
-//                    });
-//                }
-//                else {
-//                  // This can't be a good idea
-//                  verified.read = true;
-//                  verified.write = true;
-//                  verified.execute = true;
-//
-//                  done(null, verified);
-//                }
               });
           });
       };
@@ -224,22 +185,22 @@ module.exports = function(email) {
      * This should let this server authenticate against
      * other servers, but time will tell.
      */
-//    passport.use(new ClientJwtBearerStrategy(
-//        function(claimSetIss, done) {
-//            console.log('ClientJwtBearerStrategy');
-//    
-//            db.clientModel.findOne({ clientId: claimSetIss }, function(err, client) {
-//                if (err) {
-//                  return done(err);
-//                }
-//                if (!client) {
-//                  return done(null, false);
-//                }
-//                return done(null, client);
-//              });
-//          }
-//      ));
+    var _clientJwtBearerStrategy = function(claimSetIss, done) {
 
+        console.log('ClientJwtBearerStrategy');
+    
+        db.registrantModel.findOne({ email: claimSetIss }, { password: 0 }, function(err, registrant) {
+            if (err) {
+              return done(err);
+            }
+            if (!registrant) {
+              return done(null, false);
+            }
+            return done(null, registrant);
+          });
+      };
+    exports.clientJwtBearerStrategy = _clientJwtBearerStrategy; 
+    passport.use(new ClientJwtBearerStrategy(_clientJwtBearerStrategy));
 
     /**
      * API
