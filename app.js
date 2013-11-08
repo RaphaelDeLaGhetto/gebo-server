@@ -44,7 +44,8 @@ app.post('/signup', user_routes.signUp);
 app.get('/dialog/authorize', oauth2_routes.authorization); 
 app.post('/dialog/authorize/decision', oauth2_routes.decision); 
 app.post('/oauth/token', oauth2_routes.token);
-app.post('/authorize', oauth2_routes.token);
+// Experimental JWT
+app.post('/authorize', oauth2_routes.testtoken);
 
 // Performative route
 app.post('/request', performative_routes.request);

@@ -38,6 +38,7 @@ module.exports = function(email) {
      * @param function
      */
     var _localStrategy = function(email, password, done) {
+        console.log('_localStrategy');
         db.registrantModel.findOne({ email: email }, function(err, agent) {
             if (err) {
               return done(err);
@@ -105,6 +106,7 @@ module.exports = function(email) {
      */
     passport.use(new BasicStrategy(
         function(clientName, password, done) {
+            console.log('BasicStrategy');
             db.clientModel.findOne({ name: clientName }, function(err, client) {
                 if (err) {
                   return done(err);
@@ -122,6 +124,7 @@ module.exports = function(email) {
     
     passport.use(new ClientPasswordStrategy(
         function(clientId, secret, done) {
+            console.log('ClientPasswordStrategy');
             db.clientModel.findOne({ clientId: clientId, secret: secret }, function(err, client) {
                 if (err) {
                   return done(err);
@@ -149,7 +152,7 @@ module.exports = function(email) {
      * @param function
      */
     var _bearerStrategy = function(accessToken, done) {
-
+        console.log('_bearerStrategy');
         db.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
               return done(err);

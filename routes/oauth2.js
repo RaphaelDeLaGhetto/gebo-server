@@ -288,7 +288,14 @@ exports.decision = [
 // authenticate when making requests to this endpoint.
 
 exports.token = [
-    passport.authenticate(['basic', 'oauth2-client-password', 'oauth2-jwt-bearer'], { session: false }),
+    passport.authenticate(['oauth2-jwt-bearer', 'basic', 'oauth2-client-password'], { session: false }),
+    server.token(),
+    server.errorHandler()
+  ];
+
+exports.testtoken = [
+    passport.authenticate(['oauth2-jwt-bearer'], { session: false }),
+    //passport.authenticate(['oauth2-client-password'], { session: false }),
     server.token(),
     server.errorHandler()
   ];
