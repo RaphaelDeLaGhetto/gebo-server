@@ -4,21 +4,22 @@ html(lang='en')
     include includes/head
 
   body
-    .navbar.navbar-fixed-top
-        .navbar-inner
-            .container
-                a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
-                    span.icon-bar
-                    span.icon-bar
-                    span.icon-bar
-                a.brand(href="/") gebo-server 
-                .nav-collapse
+    .navbar.navbar-fixed-top.navbar-inverse(role="navigation")
+        .container
+            .navbar-header
+                button.navbar-toggle(type="button" data-toggle="collapse", data-target=".nav-collapse")
+                    span.sr-only Toggle navigation
+                    span.glyphicon-bar
+                    span.glyphicon-bar
+                    span.glyphicon-bar
+                a.navbar-brand(href="/") gebo-server 
+            .collapse.navbar-collapse
                 if (!agent)
-                    ul.nav
+                    ul.nav.navbar-nav
                         li
                             a(href="/login") Login
                 else
-                    ul.nav
+                    ul.nav.navbar-nav
                         if (agent.admin)
                              li
                                 a(href="/admin") Admin
@@ -36,6 +37,6 @@ html(lang='en')
 
 
     | !{cachify_js('/components/jquery/jquery.min.js')}
-    | !{cachify_js('/components/bootstrap/docs/assets/js/bootstrap.min.js')}
+    | !{cachify_js('/components/bootstrap/dist/js/bootstrap.min.js')}
     | !{cachify_js('/js/site.js')}
     block scripts

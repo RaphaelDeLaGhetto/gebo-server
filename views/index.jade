@@ -3,7 +3,7 @@ extends layout
 block content
     .header.jumbotron.subhead
         .row
-            .span6
+            .col-xs-6
                 if (!agent)
                     h1 Welcome
                     p.lead Don't forget to seed the database:
@@ -11,17 +11,12 @@ block content
                 else
                     p.lead Hello, #{agent.name}
             if (!agent)
-                .span6
+                .col-xs-6
                     div.pull-right
-                        h2 Sign up
-                        form(action="/signup", method="post", autocomplete="off")
-                            div
-                                input(type="text", name="name", placeholder="Name")
-                            div
-                                input(type="text", name="email", placeholder="Email")
-                            div
-                                input(type="password", name="password", placeholder="Password")
-                            div
-                                input(type="submit", value="Sign up")
-
+                        h2 New to gebo? 
+                        form.form-signin(action="/signup", method="post", autocomplete="off")
+                            input.form-control(type="text", name="name", placeholder="Name")
+                            input.form-control(type="text", name="email", placeholder="Email")
+                            input.form-control(type="password", name="password", placeholder="Password")
+                            button.btn.btn-md.btn-primary.btn-block(type="submit") Sign up
 
