@@ -104,7 +104,6 @@ module.exports = function (grunt) {
         grunt.task.run('addfriend:admin:admin@example.com:bob@example.com');
         grunt.task.run('setpermission:bob@example.com:admin@example.com:gebo-server@example.com:true:false:false');
         grunt.task.run('setpermission:admin@example.com:bob@example.com:gebo-server@example.com:true:false:false');
-        //grunt.task.run('addclient:Samplr:abc123:ssh-secret');
       });
 
     grunt.registerTask('registeragent', 'add an agent to the database',
@@ -169,12 +168,13 @@ module.exports = function (grunt) {
      * addfriend
      */
     grunt.registerTask('addfriend', 'add a friend to the agent specified',
-        function (name, email, agentEmail) {
+        function (name, email, agentEmail, geboUri) {
             var agentDb = require('./schemata/agent')(agentEmail);
 
             var friend = agentDb.friendModel({
                     name: name,
                     email: email,
+                    uri: geboUri,
                 });
 
             // Can't modify ID in findOneAndUpdate
