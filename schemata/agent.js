@@ -92,7 +92,7 @@ module.exports = function (email) {
 //          },
 
         // Permissions
-        myStuff: [permissionSchema],
+//        myStuff: [permissionSchema],
         hisPermissions: [permissionSchema],
 
         // Agent communication
