@@ -105,7 +105,7 @@ module.exports = function (grunt) {
         //grunt.task.run('addclient:Samplr:abc123:ssh-secret');
       });
 
-    grunt.registerTask('registeragent', 'add a agent to the database',
+    grunt.registerTask('registeragent', 'add an agent to the database',
         function (usr, emailaddress, pass, adm) {
             // convert adm string to bool
             adm = (adm === 'true');
