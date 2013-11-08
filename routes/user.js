@@ -15,13 +15,18 @@ module.exports = function(dbName) {
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('email');
     }
-
     var pass = require('../config/pass')(dbName);
 
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
-            res.render('account', { agent: req.user });
+            var agent = require('../schemata/agent')(req.user.email);
+            agent.friendModel.find({}, function(err, friends) {
+                agent.connection.db.close();
+                res.render('account', { agent: req.user,
+                                        friends: friends,
+                                        error: err });
+              });
           }
       ];
     
@@ -35,7 +40,12 @@ module.exports = function(dbName) {
         function (req, res) {
             var gebo = require('../schemata/gebo')(dbName);
             gebo.registrantModel.find({}, function(err, registrants) {
-                res.render('admin', { agent: req.user, agents: registrants, error: err });
+                gebo.friendModel.find({}, function(err, friends) {
+                    res.render('admin', { agent: req.user,
+                                          registrants: registrants,
+                                          friends: friends,
+                                          error: err });
+                  });
               });
           }
       ];

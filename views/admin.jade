@@ -1,8 +1,12 @@
 extends layout
 
 block content
+    p.lead Friendly gebos
+    ul
+        - for (var i =0; i < friends.length; i++)
+            li #{friends[i].name} - #{friends[i].email}
     p.lead Registered agents
     ul
-        - for (var i = 0; i < agents.length; i++)
-            li #{agents[i].name} - #{agents[i].email}
+        - for (var i = 0; i < registrants.length; i++)
+            li #{registrants[i].name} - #{registrants[i].email}
 

@@ -4,3 +4,10 @@ block content
     p name: #{agent.name}
     p email: #{agent.email}
 
+    p.lead Friends
+    ul
+        - for (var i = 0; i < friends.length; i++)
+            li #{friends[i].name} - #{friends[i].email}
+            ul
+                - for (var j = 0; j < friends[i].hisPermissions.length; j++)
+                    li #{friends[i].hisPermissions.email}, #{friends[i].hisPermissions[j].read} #{friends[i].hisPermissions[j].write} #{friends[i].hisPermissions[j].execute}
