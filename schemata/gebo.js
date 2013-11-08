@@ -1,11 +1,21 @@
 'use strict';
 
-var utils = require('../lib/utils');
+var utils = require('../lib/utils'),
+    extend = require('extend');
 
 module.exports = function (email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
+
+    /**
+     * The gebo is just a specialized agent. As such,
+     * he should have all the collections associated with a 
+     * regular agent in addition to the gebo-specific
+     * task of managing registrants and tokens
+     */
+    var agent = require('./agent')(dbName);
+    extend(true, exports, agent);
 
     /** 
      * Thank you to jaredhanson/passport-local
