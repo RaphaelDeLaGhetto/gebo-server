@@ -188,6 +188,7 @@ module.exports = function(email) {
     var _clientJwtBearerStrategy = function(claimSetIss, done) {
 
         console.log('ClientJwtBearerStrategy');
+        console.log(claimSetIss);
     
         db.registrantModel.findOne({ email: claimSetIss }, { password: 0 }, function(err, registrant) {
             if (err) {

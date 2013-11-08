@@ -12,11 +12,13 @@ var COL_NAME = 'appCollection',
 // Agent configs
 var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 
-var oauth2 = require('../../routes/oauth2');
-
 nconf.argv().env().file({ file: 'local.json' });
 var geboDb = new geboSchema(nconf.get('testDb')),
     agentDb = new agentSchema('yanfen@hg.com');
+
+var oauth2 = require('../../routes/oauth2'),
+    token = require('../../config/token')(nconf.get('testDb'));
+
 
 var HAI_PROFILE = { type: 'token',
                     clientID: 'app@awesome.com',
@@ -44,7 +46,33 @@ exports.jwtBearerExchange = {
 //    },
 
     'Return a token': function(test) {
-        test.done();
+        test.expect(1);
+
+        var header = { alg: 'RS256', typ: 'JWT' },
+            claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
+                      scope: 'https://www.googleapis.com/auth/devstorage.readonly',
+                      aud: 'https://accounts.google.com/o/oauth2/token',
+                      exp: 1328554385,
+                      iat: 1328550785 };
+        var jwt = token.makeJwt(header, claim);
+        var jwtSplit = jwt.split('.');
+        var signature = jwtSplit.pop();
+        var data = jwtSplit.join('.');
+//        data += '.' + signature;
+
+        oauth2.jwtBearerExchange({ name: 'Foreign Agent',
+                                  email: 'foreign@agent.com',
+                                  admin: false,
+                                }, data, signature,
+                            function(err, token) {
+                                if (err) {
+                                  test.ok(false, err);
+                                }
+                                else {
+                                  test.equal(token, '1234');
+                                }
+                                test.done();
+                            });
     },
 
 };

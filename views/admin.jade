@@ -5,8 +5,9 @@ block content
     ul
         - for (var i =0; i < friends.length; i++)
             li #{friends[i].name} - #{friends[i].email} 
-                button.btn.btn-default.btn-mini
-                    span.glyphicon.glyicon-star Poke
+                form(action="#{friends[i].uri}#{friends[i].authorize}", method="post", autocomplete="off")
+                    button.btn.btn-default.btn-md.btn-mini(type="submit")
+                        span.glyphicon.glyphicon-pushpin Poke
     p.lead Registered agents
     ul
         - for (var i = 0; i < registrants.length; i++)

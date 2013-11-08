@@ -495,8 +495,7 @@ exports.set = {
 //            }
 //            callback();
 //          });
-//    },
-//
+//    }, //
 //
 //    'Store verification data': function(test) {
 //        test.expect(6);

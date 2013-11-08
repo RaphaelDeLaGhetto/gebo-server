@@ -14,6 +14,12 @@ module.exports = function(email) {
 
     nconf.argv().env().file({ file: 'local.json' });
 
+    // JWT header
+    var HEADER = {
+            alg: 'RS256',
+            typ: 'JWT',
+        };
+
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
 
@@ -195,14 +201,6 @@ module.exports = function(email) {
      */
     exports.getTokenWithJwt = function() {
         var deferred = q.defer();
-        var jwt = '';
-
-        // Make the header
-        var header = {
-                alg: 'RS256',
-                typ: 'JWT',
-            };
-        jwt += base64url(JSON.stringify(header)) + '.';
 
         // Make the claim 
         var claim = {
@@ -212,7 +210,8 @@ module.exports = function(email) {
                 exp: new Date()/1000 + 3600*1000,
                 iat: new Date()/1000, 
             };
-        jwt += base64url(JSON.stringify(claim));
+
+        var jwt = _makeJwt(claim, HEADER);
 
         // Sign the request
         var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
@@ -268,6 +267,7 @@ module.exports = function(email) {
         var key = pem.toString('ascii');
 
         var sign = crypto.createSign('sha256WithRSAEncryption');
+
         sign.update(new Buffer(jwt, 'base64'));
         var signature = sign.sign(key);
 
