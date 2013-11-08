@@ -10,4 +10,11 @@ block content
             li #{friends[i].name} - #{friends[i].email}
             ul
                 - for (var j = 0; j < friends[i].hisPermissions.length; j++)
-                    li #{friends[i].hisPermissions.email}, #{friends[i].hisPermissions[j].read} #{friends[i].hisPermissions[j].write} #{friends[i].hisPermissions[j].execute}
+                    li 
+                        | #{friends[i].hisPermissions[j].email}, 
+                        if friends[i].hisPermissions[j].read
+                            | read  
+                        if friends[i].hisPermissions[j].write 
+                            | write 
+                        if friends[i].hisPermissions[j].execute
+                            | execute

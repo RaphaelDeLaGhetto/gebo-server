@@ -102,6 +102,8 @@ module.exports = function (grunt) {
         grunt.task.run('registeragent:bob:bob@example.com:secret:false');
         grunt.task.run('addfriend:bob:bob@example.com:admin@example.com');
         grunt.task.run('addfriend:admin:admin@example.com:bob@example.com');
+        grunt.task.run('setpermission:bob@example.com:admin@example.com:gebo-server@example.com:true:false:false');
+        grunt.task.run('setpermission:admin@example.com:bob@example.com:gebo-server@example.com:true:false:false');
         //grunt.task.run('addclient:Samplr:abc123:ssh-secret');
       });
 

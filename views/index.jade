@@ -3,7 +3,7 @@ extends layout
 block content
     .header.jumbotron.subhead
         .row
-            .col-xs-6
+            .col-md-6
                 if (!agent)
                     h1 Welcome
                     p.lead Don't forget to seed the database:
@@ -11,7 +11,7 @@ block content
                 else
                     p.lead Hello, #{agent.name}
             if (!agent)
-                .col-xs-6
+                .col-md-6
                     div.pull-right
                         h2 New to gebo? 
                         form.form-signin(action="/signup", method="post", autocomplete="off")
