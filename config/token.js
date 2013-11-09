@@ -222,24 +222,44 @@ module.exports = function(email) {
                 assertion: jwt,
             };
 
+	var splitUri = uri.split('/'); 
+	uri = splitUri.pop();
+	splitUri = uri.split(':');
+	var port = splitUri.pop();
+	uri = splitUri.join('');
+
         // Make the request
         var options = {
                 host: uri,
+		port: port,
                 path: path,
-                method: 'POST'
+                method: 'POST',
+		headers: { 'Content-Type': 'application/json',
+			   'Content-Length': Buffer.byteLength(JSON.stringify(params)) },
               };
+	console.log('options');
+	console.log(options);
+
+
+	console.log('req');
         var req = http.request(options, function(res) {
+			console.log('req callback');
                         res.setEncoding('utf8');
                         res.on('data', function(token) {
+			    console.log('on');
                             deferred.resolve(token);
                           });
                       }).
                     on('error', function(err){
+			console.log('err');
+			console.log(err);
                         deferred.reject(err);
                       });
 
+	console.log('write');
         req.write(JSON.stringify(params));
         req.end();
+	console.log('done');
 
         return deferred.promise;
       };
