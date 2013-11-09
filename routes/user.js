@@ -3,7 +3,6 @@ var passport = require('passport'),
     nconf = require('nconf'),
     q = require('q'),
     utils = require('../lib/utils'),
-    token = require('../config/token'),
     login = require('connect-ensure-login');
 
 module.exports = function(dbName) {
@@ -18,7 +17,8 @@ module.exports = function(dbName) {
     }
     var pass = require('../config/pass')(dbName);
     var gebo = require('../schemata/gebo')(dbName);
-    
+    var token = require('../config/token')(dbName);
+
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
