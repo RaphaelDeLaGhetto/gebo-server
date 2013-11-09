@@ -238,7 +238,7 @@ module.exports = function(email) {
                         deferred.reject(err);
                       });
 
-        req.write(params);
+        req.write(JSON.stringify(params));
         req.end();
 
         return deferred.promise;
