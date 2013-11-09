@@ -171,8 +171,6 @@ var _jwtBearerExchange = function(registrant, data, signature, done) {
     console.log('------ JWT, yeah yeah');
     console.log('data');
     console.log(data);
-    console.log('JSON.stringify(data)');
-    console.log(JSON.stringify(data));
 
     console.log('signature');
     console.log(signature);
@@ -182,8 +180,8 @@ var _jwtBearerExchange = function(registrant, data, signature, done) {
         verifier = crypto.createVerify('sha256WithRSAEncryption');
         //verifier = crypto.createVerify('RSA-SHA256');
 
-    verifier.update(JSON.stringify(data));
-    //verifier.update(data);
+    //verifier.update(JSON.stringify(data));
+    verifier.update(data);
 
     console.log('after verifier update');
     console.log(verifier.verify(pub, signature, 'base64'));

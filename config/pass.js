@@ -193,14 +193,16 @@ module.exports = function(email) {
         console.log('ClientJwtBearerStrategy');
         console.log(claimSetIss);
     
-        db.registrantModel.findOne({ email: claimSetIss }, { password: 0 }, function(err, registrant) {
+        db.friendModel.findOne({ email: claimSetIss }, { password: 0 }, function(err, friend) {
             if (err) {
               return done(err);
             }
-            if (!registrant) {
+            if (!friend) {
               return done(null, false);
             }
-            return done(null, registrant);
+            console.log('friend');
+            console.log(friend);
+            return done(null, friend);
           });
       };
     exports.clientJwtBearerStrategy = _clientJwtBearerStrategy; 
