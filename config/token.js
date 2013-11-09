@@ -215,7 +215,7 @@ module.exports = function(email) {
                 iat: new Date()/1000, 
             };
 
-        var jwt = _makeJwt(claim, HEADER);
+        var jwt = _makeJwt(HEADER, claim);
 
         var params = JSON.stringify({
                 grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
