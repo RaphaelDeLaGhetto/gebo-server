@@ -3,6 +3,7 @@ var passport = require('passport'),
     nconf = require('nconf'),
     q = require('q'),
     utils = require('../lib/utils'),
+    token = require('../lib/token'),
     login = require('connect-ensure-login');
 
 module.exports = function(dbName) {
@@ -16,7 +17,8 @@ module.exports = function(dbName) {
       dbName = nconf.get('email');
     }
     var pass = require('../config/pass')(dbName);
-
+    var gebo = require('../schemata/gebo')(dbName);
+    
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
@@ -38,7 +40,7 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
-            var gebo = require('../schemata/gebo')(dbName);
+//            var gebo = require('../schemata/gebo')(dbName);
             gebo.registrantModel.find({}, function(err, registrants) {
                 gebo.friendModel.find({}, function(err, friends) {
                     res.render('admin', { agent: req.user,
@@ -50,6 +52,36 @@ module.exports = function(dbName) {
           }
       ];
     
+    /**
+     * _poke
+     */
+    var _poke = function(req, res) {
+//        var gebo = require('../schemata/gebo')(dbName);
+        token.getTokenWithJwt(req.body.uri, req.body.authorize, 'read').
+            then(function(token) {
+                res.render('index');
+              }).
+            catch(function(err) {
+                console.log('_poke err');
+                console.log(err);
+              });
+
+//        gebo.registrantModel.find({}, function(err, registrants) {
+//            gebo.friendModel.find({}, function(err, friends) {
+//                res.render('admin', { agent: req.user,
+//                                      registrants: registrants,
+//                                      friends: friends,
+//                                      error: err });
+//                  });
+//              });
+ 
+      };
+    exports.poke = [
+        pass.ensureAuthenticated,
+        pass.ensureAdmin,
+        _poke,
+      ];
+
     // POST /login
     exports.postLogin = passport.authenticate('local', {
         successReturnToOrRedirect: '/',

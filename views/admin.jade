@@ -1,11 +1,13 @@
 extends layout
 
 block content
-    p.lead Friendly gebos
+    p.lead gebo friends
     ul
         - for (var i =0; i < friends.length; i++)
-            li #{friends[i].name} - #{friends[i].email} 
-                form(action="#{friends[i].uri}#{friends[i].authorize}", method="post", autocomplete="off")
+                li #{friends[i].name} - #{friends[i].email}: #{friends[i].uri}
+                form(action="/poke", method="post", autocomplete="off")
+                    input(name="uri" type="hidden" value="#{friends[i].uri}")
+                    input(name="authorize" type="hidden" value="#{friends[i].authorize}")
                     button.btn.btn-default.btn-md.btn-mini(type="submit")
                         span.glyphicon.glyphicon-pushpin Poke
     p.lead Registered agents

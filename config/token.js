@@ -197,31 +197,25 @@ module.exports = function(email) {
     /**
      * Request a token
      *
+     * @param string
+     * @param string
+     * @param string
+     *
      * @return promise
      */
-    exports.getTokenWithJwt = function() {
+    exports.getTokenWithJwt = function(uri, path, scope) {
         var deferred = q.defer();
 
         // Make the claim 
         var claim = {
                 iss: nconf.get('email'),
-                scope: 'read write',
-                aud: nconf.get('domain') + '/oauth/token',
+                scope: scope,
+                aud: uri + path,
                 exp: new Date()/1000 + 3600*1000,
                 iat: new Date()/1000, 
             };
 
         var jwt = _makeJwt(claim, HEADER);
-
-        // Sign the request
-        var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
-        var key = pem.toString('ascii');
-
-        var sign = crypto.createSign('sha256WithRSAEncryption');
-        sign.update(new Buffer(jwt, 'base64'));
-        var signature = sign.sign(key);
-
-        jwt += '.' + base64url(signature);
 
         var params = {
                 grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -230,8 +224,8 @@ module.exports = function(email) {
 
         // Make the request
         var options = {
-                host: _friend.uri,
-                path: _friend.authorization,
+                host: uri,
+                path: path,
                 method: 'POST'
               };
         var req = http.request(options, function(res) {

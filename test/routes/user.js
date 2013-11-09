@@ -11,6 +11,13 @@ var TEST_DB = nconf.argv().env().file({ file: 'local.json' }).get('testDb');
 var user = require('../../routes/user')(TEST_DB);
 
 /**
+ * poke
+ */
+exports.poke = {
+
+};
+
+/**
  * register
  */
 //exports.register = {
