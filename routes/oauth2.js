@@ -57,6 +57,7 @@ server.deserializeClient(function (requestDetails, done) {
               id = friend._id;
             }
             requestDetails.friend = id;
+            console.log('requestDetails');
             console.log(requestDetails);
             if (err) {
               return done(err);
@@ -121,6 +122,7 @@ server.grant(oauth2orize.grant.token(function(requestDetails, user, ares, done) 
         if (err) {
           return done(err);
         }
+        console.log('token');
         console.log(token);
         return done(null, token.string);
       });
@@ -294,13 +296,13 @@ exports.token = [
   ];
 
 exports.testtoken = [
-    function(req, res) {
-        console.log('testtoken');
-        res.send(200);
-    },
-//    passport.authenticate(['oauth2-jwt-bearer'], { session: false }),
-//    //passport.authenticate(['oauth2-client-password'], { session: false }),
-//    server.token(),
-//    server.errorHandler()
+//    function(req, res) {
+//        console.log('testtoken');
+//        res.send(200);
+//    },
+    passport.authenticate(['oauth2-jwt-bearer'], { session: false }),
+    //passport.authenticate(['oauth2-client-password'], { session: false }),
+    server.token(),
+    server.errorHandler()
   ];
 
