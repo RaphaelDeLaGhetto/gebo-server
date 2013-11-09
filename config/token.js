@@ -204,63 +204,119 @@ module.exports = function(email) {
      * @return promise
      */
     exports.getTokenWithJwt = function(uri, path, scope) {
-        var deferred = q.defer();
+      var deferred = q.defer();
 
-        // Make the claim 
-        var claim = {
-                iss: nconf.get('email'),
-                scope: scope,
-                aud: uri + path,
-                exp: new Date()/1000 + 3600*1000,
-                iat: new Date()/1000, 
-            };
+      var data = JSON.stringify({
+                        firstName: 'JoaquÌn',    // <<<<<<<<<<<<<< 
+                        });
 
-        var jwt = _makeJwt(claim, HEADER);
+//      var options = {
+//                host: '127.0.0.1',
+//                port: 3000,
+//                path: '/users',
+//                method: 'POST',
+//                headers: {
+//                    'Content-Type': 'application/json',
+//                    'Content-Length': data.length    // <<<<<<<<<<
+//                    }
+//      };
 
-        var params = {
-                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                assertion: jwt,
-            };
+	    var splitUri = uri.split('/'); 
+	    uri = splitUri.pop();
+	    splitUri = uri.split(':');
+	    var port = splitUri.pop();
+	    uri = splitUri.join('');
 
-	var splitUri = uri.split('/'); 
-	uri = splitUri.pop();
-	splitUri = uri.split(':');
-	var port = splitUri.pop();
-	uri = splitUri.join('');
-
-        // Make the request
         var options = {
                 host: uri,
-		port: port,
+		        port: port,
                 path: path,
                 method: 'POST',
-		headers: { 'Content-Type': 'application/json',
-			   'Content-Length': Buffer.byteLength(JSON.stringify(params)) },
+        		headers: { 'Content-Type': 'application/json',
+	        		       'Content-Length': Buffer.byteLength(data) }
+	        		       //'Content-Length': Buffer.byteLength(JSON.stringify(params)) }
               };
-	console.log('options');
-	console.log(options);
-
-
-	console.log('req');
+	    console.log('options');
+	    console.log(options);
         var req = http.request(options, function(res) {
-			console.log('req callback');
-                        res.setEncoding('utf8');
-                        res.on('data', function(token) {
-			    console.log('on');
-                            deferred.resolve(token);
-                          });
-                      }).
-                    on('error', function(err){
-			console.log('err');
-			console.log(err);
-                        deferred.reject(err);
-                      });
+                        var result = '';
 
-	console.log('write');
-        req.write(JSON.stringify(params));
-        req.end();
-	console.log('done');
+                          res.on('data', function(chunk) {
+                                      result += chunk;
+                                        });
 
+                            res.on('end', function() {
+                                        console.log(result);
+    //                                    deferred.resolve(result);
+                                          });
+                            });
+
+      req.on('error', function(err) {
+                        console.log(err);
+                        });
+
+      req.write(data);
+      req.end();
+        // Make the claim 
+//        var claim = {
+//                iss: nconf.get('email'),
+//                scope: scope,
+//                aud: uri + path,
+//                exp: new Date()/1000 + 3600*1000,
+//                iat: new Date()/1000, 
+//            };
+//
+//        var jwt = _makeJwt(claim, HEADER);
+//
+//        var params = {
+//                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+//                assertion: jwt,
+//            };
+//
+//	var splitUri = uri.split('/'); 
+//	uri = splitUri.pop();
+//	splitUri = uri.split(':');
+//	var port = splitUri.pop();
+//	uri = splitUri.join('');
+//
+//        // Make the request
+//        var options = {
+//                host: uri,
+//		port: port,
+//                path: path,
+//                method: 'POST',
+//        		headers: { 'Content-Type': 'application/json',
+//	        		       'Content-Length': Buffer.byteLength('test') }
+//	        		       //'Content-Length': Buffer.byteLength(JSON.stringify(params)) }
+//              };
+//	console.log('options');
+//	console.log(options);
+//
+//
+//	console.log('req');
+//        var req = http.request(options, function(res) {
+//			console.log('req callback');
+//                        res.setEncoding('utf8');
+//                        res.on('data', function(token) {
+//            			    console.log('on');
+//                            deferred.resolve(token);
+//                          });
+//                        res.on('end', function() {
+//            			    console.log('end');
+//                          });
+//                      }).
+//                    on('error', function(err){
+//			console.log('err');
+//			console.log(err);
+//                        deferred.reject(err);
+//                      });
+//
+//    	console.log('write');
+//        req.write('test');
+//        //req.write(JSON.stringify(params));
+//        req.end();
+//	    console.log('done');
+//
         return deferred.promise;
       };
 

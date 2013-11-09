@@ -64,6 +64,7 @@ module.exports = function(dbName) {
             catch(function(err) {
                 console.log('_poke err');
                 console.log(err);
+                res.send(500);
               });
 
 //        gebo.registrantModel.find({}, function(err, registrants) {
