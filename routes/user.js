@@ -3,7 +3,7 @@ var passport = require('passport'),
     nconf = require('nconf'),
     q = require('q'),
     utils = require('../lib/utils'),
-    token = require('../lib/token'),
+    token = require('../config/token'),
     login = require('connect-ensure-login');
 
 module.exports = function(dbName) {
