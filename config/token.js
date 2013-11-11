@@ -244,7 +244,6 @@ module.exports = function(email) {
     	console.log('options');
     	console.log(options);
 
-
     	console.log('req');
         var req = https.request(options, function(res) {
 			console.log('req callback');

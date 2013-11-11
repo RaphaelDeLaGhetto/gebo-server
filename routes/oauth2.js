@@ -184,14 +184,18 @@ var _jwtBearerExchange = function(registrant, data, signature, done) {
     verifier.update(data);
 
     console.log('after verifier update');
-    console.log(verifier.verify(pub, signature, 'base64'));
+//    console.log(verifier.verify(pub, signature, 'base64'));
+//    console.log(verifier.verify(pub, signature, 'base64'));
     if (verifier.verify(pub, signature, 'base64')) {
+      console.log('I should be here');
       console.log('pub');
       console.log(pub);
       console.log('signature');
       console.log(signature);
       var tokenStr = utils.uid(256);
 
+      console.log('registrant');
+      console.log(registrant);
       var token = new geboDb.tokenModel({
           registrantId: registrant.id,
           string: tokenStr,
