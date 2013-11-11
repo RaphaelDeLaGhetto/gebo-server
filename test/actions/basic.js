@@ -1,7 +1,5 @@
 var config = require('../../config/config'),
     utils = require('../../lib/utils'),
-//    DatabaseCleaner = require('database-cleaner'),
-//    databaseCleaner = new DatabaseCleaner('mongodb'),
     mongo = require('mongodb'),
     nconf = require('nconf'),
     rimraf = require('rimraf'),
