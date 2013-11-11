@@ -290,7 +290,7 @@ module.exports = function(email) {
 
         var sign = crypto.createSign('sha256WithRSAEncryption');
 
-        sign.update(new Buffer(jwt, 'base64'));
+        sign.update(jwt);
         var signature = sign.sign(key);
 
         jwt += '.' + base64url(signature);

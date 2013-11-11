@@ -623,12 +623,11 @@ exports.makeJwt = {
             claimEncoded = base64url(JSON.stringify(claim));
 
         // Sign the request
-        //var pem = fs.readFileSync('../../cert/key.pem');
         var pem = fs.readFileSync(__dirname + '/../../cert/key.pem');
         var key = pem.toString('ascii');
 
         var sign = crypto.createSign('sha256WithRSAEncryption');
-        sign.update(new Buffer(headerEncoded + '.' + claimEncoded, 'base64'));
+        sign.update(headerEncoded + '.' + claimEncoded);
         var signature = sign.sign(key);
         var signatureEncoded = base64url(signature);
 
