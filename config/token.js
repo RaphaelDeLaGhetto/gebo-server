@@ -204,7 +204,7 @@ module.exports = function(email) {
      * @return promise
      */
     exports.getTokenWithJwt = function(uri, path, scope) {
-      var deferred = q.defer();443
+      var deferred = q.defer();
 
         // Make the claim 
         var claim = {
@@ -266,7 +266,7 @@ module.exports = function(email) {
     	console.log('write');
         req.write(params);
         req.end();
-	    console.log('done');
+	console.log('done');
 
         return deferred.promise;
       };

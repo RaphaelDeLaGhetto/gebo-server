@@ -41,6 +41,8 @@ var JWT_RESPONSE = {
 nconf.argv().env().file({ file: 'local.json' });
 var token = require('../../config/token')(TEST_AGENT_EMAIL);
 
+var geboDb = new geboSchema(nconf.get('testDb'));
+
 /**
  * getParams
  */
@@ -51,8 +53,7 @@ exports.getParams = {
             /**
              * Setup a registrant
              */
-            this.geboDb = new geboSchema(nconf.get('testDb'));
-            var registrant = new this.geboDb.registrantModel({
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: TEST_AGENT_EMAIL,
                     password: 'password123',
@@ -63,8 +64,8 @@ exports.getParams = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
                     myToken: ACCESS_TOKEN,
@@ -84,6 +85,7 @@ exports.getParams = {
                     if (err) {
                       console.log(err);
                     }
+                    agentDb.connection.db.close();
                     callback();
                   });
               });
@@ -95,17 +97,21 @@ exports.getParams = {
     },
 
     tearDown: function (callback) {
-        this.geboDb.connection.db.dropDatabase(function(err) {
+        geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
     }, 
 
@@ -141,8 +147,7 @@ exports.loadFriend = {
             /**
              * Setup an registrant
              */
-            this.geboDb = new geboSchema(nconf.get('testDb'));
-            var registrant = new this.geboDb.registrantModel({
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: TEST_AGENT_EMAIL,
                     password: 'password123',
@@ -153,8 +158,8 @@ exports.loadFriend = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new agentDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
                     myToken: ACCESS_TOKEN,
@@ -185,17 +190,21 @@ exports.loadFriend = {
     },
 
     tearDown: function (callback) {
-        this.geboDb.connection.db.dropDatabase(function(err) {
+        geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
     }, 
 
@@ -243,8 +252,7 @@ exports.get = {
             /**
              * Setup an registrant
              */
-            this.geboDb = new geboSchema(nconf.get('testDb'));
-            var registrant = new this.geboDb.registrantModel({
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: TEST_AGENT_EMAIL,
                     password: 'password123',
@@ -255,8 +263,8 @@ exports.get = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new agentDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
                     myToken: ACCESS_TOKEN,
@@ -287,17 +295,21 @@ exports.get = {
     },
 
     tearDown: function (callback) {
-        this.geboDb.connection.db.dropDatabase(function(err) {
+        geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
     },
 
@@ -338,8 +350,7 @@ exports.set = {
             /**
              * Setup an registrant
              */
-            this.geboDb = new geboSchema(nconf.get('testDb'));
-            var registrant = new this.geboDb.registrantModel({
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: TEST_AGENT_EMAIL,
                     password: 'password123',
@@ -350,8 +361,8 @@ exports.set = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new agentDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
                     myToken: ACCESS_TOKEN,
@@ -382,17 +393,21 @@ exports.set = {
     },
 
     tearDown: function (callback) {
-        this.geboDb.connection.db.dropDatabase(function(err) {
+        geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
     },
 
@@ -439,8 +454,7 @@ exports.set = {
 //            /**
 //             * Setup an registrant
 //             */
-//            this.geboDb = new geboSchema(nconf.get('testDb'));
-//            var registrant = new this.geboDb.registrantModel({
+//            var registrant = new geboDb.registrantModel({
 //                    name: 'dan',
 //                    email: TEST_AGENT_EMAIL,
 //                    password: 'password123',
@@ -483,7 +497,7 @@ exports.set = {
 //    },
 //
 //    tearDown: function (callback) {
-//        this.geboDb.connection.db.dropDatabase(function(err) {
+//        geboDb.connection.db.dropDatabase(function(err) {
 //            if (err) {
 //              console.log(err)
 //            }
@@ -528,8 +542,7 @@ exports.getTokenWithJwt = {
             /**
              * Setup an registrant
              */
-            this.geboDb = new geboSchema(nconf.get('testDb'));
-            var registrant = new this.geboDb.registrantModel({
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: TEST_AGENT_EMAIL,
                     password: 'password123',
@@ -540,8 +553,8 @@ exports.getTokenWithJwt = {
             /**
              * Make a friend for the registrant
              */
-            this.agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new this.agentDb.friendModel({
+            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new agentDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
                     myToken: ACCESS_TOKEN,
@@ -572,17 +585,21 @@ exports.getTokenWithJwt = {
     },
 
     tearDown: function (callback) {
-        this.geboDb.connection.db.dropDatabase(function(err) {
+        geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
           });
 
-        this.agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
           });
     },
 
