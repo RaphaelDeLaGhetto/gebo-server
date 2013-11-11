@@ -76,13 +76,9 @@ module.exports = function (email) {
         name: { type: String, required: true, unique: false },
         email: { type: String, required: true, unique: true },
 
-        // Experimental... the friendSchema takes the place of the the clientSchema.
-        // As such, name == name, email == clientId, secret == secret (which equals 
-        // a mongo-friendly conversion of the email plus a random string)
-        //secret: { type: String, required: true, unique: true },
-
         // Current access tokens
         myToken: { type: String, default: null, unique: false },
+
         // I don't think I need to store his token. The gebo does that.
         // Access can be granted or denied with permissions. Friendship
         // implies the ability to obtain an access token
