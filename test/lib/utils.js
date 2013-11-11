@@ -598,3 +598,20 @@ exports.getIndexOfObject = {
     },
 };
 
+/**
+ * getPrivateKeyAndCertificate
+ */
+exports.getPrivateKeyAndCertificate = {
+    'Return a new private key with self-signed certificate': function(test) {
+        test.expect(3);
+        utils.getPrivateKeyAndCertificate().
+            then(function(pair) {
+                test.equal(pair.privateKey.search('-----BEGIN RSA PRIVATE KEY-----'), 0);
+                // Sometimes it's 475 and sometimes it's 471
+                //test.equal(pair.privateKey.search('-----END RSA PRIVATE KEY-----'), 475);
+                test.equal(pair.certificate.search('-----BEGIN CERTIFICATE-----'), 0);
+                test.equal(pair.certificate.search('-----END CERTIFICATE-----'), 365);
+                test.done();
+              });
+    },
+};
