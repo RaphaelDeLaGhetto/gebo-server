@@ -32,18 +32,44 @@ var HAI_PROFILE = { type: 'token',
  */
 exports.jwtBearerExchange = {
 
-//    setUp: function(callback) {
-//        callback();
-//    },
-//
-//    tearDown: function(callback) {
-//        geboDb.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//            callback();
-//          });
-//    },
+    setUp: function(callback) {
+            
+            var registrant = new geboDb.registrantModel({
+                    name: nconf.get('name'),
+                    email: nconf.get('testDb'),
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+
+            var friend= new geboDb.friendModel({
+                    name: 'Some foreign gebo',
+                    email: 'foreign@agent.com',
+                    password: 'https://agent.com',
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+
+            registrant.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                friend.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                     callback();
+                  });
+              });
+    },
+
+    tearDown: function(callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    },
 
     'Return a token': function(test) {
         test.expect(1);
@@ -61,8 +87,8 @@ exports.jwtBearerExchange = {
 //        data += '.' + signature;
 
         oauth2.jwtBearerExchange({ name: 'Foreign Agent',
-                                  email: 'foreign@agent.com',
-                                  admin: false,
+                                   email: 'foreign@agent.com',
+                                   admin: false,
                                 }, data, signature,
                             function(err, token) {
                                 if (err) {

@@ -167,7 +167,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
 /**
  * For server login
  */
-var _jwtBearerExchange = function(registrant, data, signature, done) {
+var _jwtBearerExchange = function(friend, data, signature, done) {
     console.log('------ JWT, yeah yeah');
     console.log('data');
     console.log(data);
@@ -178,26 +178,25 @@ var _jwtBearerExchange = function(registrant, data, signature, done) {
     var crypto = require('crypto'),
         pub = fs.readFileSync(__dirname + '/../cert/cert.pem'),
         verifier = crypto.createVerify('sha256WithRSAEncryption');
-        //verifier = crypto.createVerify('RSA-SHA256');
 
-    //verifier.update(JSON.stringify(data));
     verifier.update(data);
 
     console.log('after verifier update');
-//    console.log(verifier.verify(pub, signature, 'base64'));
-//    console.log(verifier.verify(pub, signature, 'base64'));
     if (verifier.verify(pub, signature, 'base64')) {
       console.log('I should be here');
       console.log('pub');
       console.log(pub);
       console.log('signature');
       console.log(signature);
+
       var tokenStr = utils.uid(256);
 
-      console.log('registrant');
-      console.log(registrant);
+      console.log('friend');
+      console.log(friend);
+      
+      // !!! This is obviously wrong. Don't forget...
       var token = new geboDb.tokenModel({
-          registrantId: registrant.id,
+          registrantId: friend._id,
           string: tokenStr,
         });
 
