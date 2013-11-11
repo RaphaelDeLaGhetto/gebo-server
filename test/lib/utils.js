@@ -433,6 +433,7 @@ exports.saveFilesToAgentDirectory = {
                           test.equal(files[2].name, 'gebo-server-utils-test-3.txt'); 
                           test.equal(files[3].name, 'gebo-server-utils-test-4.txt'); 
                         }
+                        db.connection.db.close();
                         test.done();
                       });
               }).
