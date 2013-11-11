@@ -454,26 +454,25 @@ exports.clientJwtBearerStrategy = {
              * Setup a registrant
              */
             var registrant = new geboDb.registrantModel({
-                    name: 'Foreign Agent',
-                    email: 'foreign@agent.com',
+                    name: 'Home gebo',
+                    email: 'this@gebo.com',
                     password: 'password123',
-                    admin: false,
+                    admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
           
             /**
-             * Create an access token for the friend
+             * Setup a registrant
              */
-            var token = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('0123456789AB'),
-                    collectionName: HAI_EMAIL,
-                    ip: IP,
-                    string: REGULAR_TOKEN,
+            var friend = new geboDb.friendModel({
+                    name: 'Foreign Agent',
+                    email: 'foreign@agent.com',
+                    uri: 'https://agent.com',
+                    _id: new mongo.ObjectID('123456789ABC')
                 });
 
-            // Tokens weren't getting saved in time for tests...
             // There has got to be a better way to do this.
-            token.save(function(err) {
+            friend.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
@@ -503,16 +502,15 @@ exports.clientJwtBearerStrategy = {
 
 
     'Return registrant object for foreign agent with a valid email': function(test) {
-        test.expect(4);
-        pass.clientJwtBearerStrategy('foreign@agent.com', function(err, registrant) {
+        test.expect(3);
+        pass.clientJwtBearerStrategy('foreign@agent.com', function(err, friend) {
             if (err) {
               test.ok(false, err);
             }
             else {
-              test.equal(registrant.name, 'Foreign Agent');
-              test.equal(registrant.email, 'foreign@agent.com');
-              test.equal(registrant.admin, false);
-              test.equal(registrant.password, undefined);
+              test.equal(friend.name, 'Foreign Agent');
+              test.equal(friend.email, 'foreign@agent.com');
+              test.equal(friend.uri, 'https://agent.com');
             }
             test.done();
           });

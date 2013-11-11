@@ -193,7 +193,9 @@ module.exports = function(email) {
         console.log('ClientJwtBearerStrategy');
         console.log(claimSetIss);
     
-        db.friendModel.findOne({ email: claimSetIss }, { password: 0 }, function(err, friend) {
+        db.friendModel.findOne({ email: claimSetIss }, function(err, friend) {
+            console.log('friendModel');
+            console.log(err);
             if (err) {
               return done(err);
             }
