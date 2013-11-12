@@ -15,6 +15,7 @@ var oauth2orize = require('oauth2orize'),
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
+    base64url = require('base64url'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
     mongoose = require('mongoose');
 
@@ -169,11 +170,6 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
  */
 var _jwtBearerExchange = function(friend, data, signature, done) {
     console.log('------ JWT, yeah yeah');
-    console.log('data');
-    console.log(data);
-
-    console.log('signature');
-    console.log(signature);
 
     var crypto = require('crypto'),
         pub = fs.readFileSync(__dirname + '/../cert/cert.pem'),
@@ -181,19 +177,45 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
 
     verifier.update(data);
 
-    console.log('after verifier update');
     if (verifier.verify(pub, signature, 'base64')) {
-      console.log('I should be here');
-      console.log('pub');
-      console.log(pub);
-      console.log('signature');
-      console.log(signature);
 
       var tokenStr = utils.uid(256);
 
       console.log('friend');
       console.log(friend);
       
+      // Seperate the header from the claim and parse
+      data = data.split('.').pop();
+      data = JSON.parse(base64url.decode(data));
+
+      /**
+       * A vouchee does not need to be specified. If none,
+       * then the requesting agent is vouching for himself
+       */
+      if (!data.prn) {
+        data.prn = data.iss;
+      }
+
+      console.log('decoded data');
+      console.log(data);
+
+      /**
+       * The scope is a space-seperated list:
+       * '<[r][w][x]> <resource> <owner>'
+       */
+      var splitScope = data.scope.split(' ');
+      if (splitScope.length !== 3) {
+        return done('You did not correctly specify the scope of your request');
+      }
+
+      var owner = splitScope.pop(),
+          resource = splitScope.pop(),
+          read = splitScope[0].indexOf('r') > -1 ? true: false,
+          write = splitScope[0].indexOf('w') > -1 ? true: false,
+          execute = splitScope[0].indexOf('x') > -1 ? true: false;
+
+
+
       // !!! This is obviously wrong. Don't forget...
       var token = new geboDb.tokenModel({
           registrantId: friend._id,
@@ -213,6 +235,34 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
   }
 exports.jwtBearerExchange = _jwtBearerExchange;
 server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(_jwtBearerExchange));
+
+/**
+ * Take the scope provided in a JWT claim and
+ * break it into something a little more sensible
+ *
+ * @param string
+ *
+ * @return Object
+ */
+var _processScope = function(scope) {
+    if (!scope) {
+      return null;
+    }
+
+    var splitScope = scope.split(' ');
+    if (splitScope.length !== 3) {
+      return null
+    }
+
+    return {
+            owner: splitScope.pop(),
+            resource: splitScope.pop(),
+            read: splitScope[0].indexOf('r') > -1 ? true: false,
+            write: splitScope[0].indexOf('w') > -1 ? true: false,
+            execute: splitScope[0].indexOf('x') > -1 ? true: false,
+        }
+  };
+exports.processScope = _processScope;
 
 // user authorization endpoint
 //
