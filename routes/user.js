@@ -40,7 +40,6 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
-//            var gebo = require('../schemata/gebo')(dbName);
             gebo.registrantModel.find({}, function(err, registrants) {
                 gebo.friendModel.find({}, function(err, friends) {
                     res.render('admin', { agent: req.user,
@@ -54,30 +53,22 @@ module.exports = function(dbName) {
     
     /**
      * _poke
+     *
+     * This simply verifies friendship by returning a valid
+     * token with no real privileges attached.
      */
     var _poke = function(req, res) {
-//        var gebo = require('../schemata/gebo')(dbName);
-        token.get(req.body.uri, req.body.authorize, 'read').
+        //token.get(req.body.uri, req.body.authorize, nconf.get('email')).//, 'read').
+        token.get(req.body.email, '', nconf.get('email')).
             then(function(token) {
-                res.render('index');
-                res.send(200);
                 alert(token);
+                res.send(200);
               }).
             catch(function(err) {
                 console.log('_poke err');
                 console.log(err);
                 res.send(500);
               });
-
-//        gebo.registrantModel.find({}, function(err, registrants) {
-//            gebo.friendModel.find({}, function(err, friends) {
-//                res.render('admin', { agent: req.user,
-//                                      registrants: registrants,
-//                                      friends: friends,
-//                                      error: err });
-//                  });
-//              });
- 
       };
     exports.poke = [
         pass.ensureAuthenticated,
@@ -85,7 +76,9 @@ module.exports = function(dbName) {
         _poke,
       ];
 
-    // POST /login
+    /**
+     *  POST /login
+     */
     exports.postLogin = passport.authenticate('local', {
         successReturnToOrRedirect: '/',
         failureRedirect: '/login'

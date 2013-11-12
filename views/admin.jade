@@ -6,8 +6,9 @@ block content
         - for (var i =0; i < friends.length; i++)
                 li #{friends[i].name} - #{friends[i].email}: #{friends[i].uri}
                 form(action="/poke", method="post", autocomplete="off")
-                    input(name="uri" type="hidden" value="#{friends[i].uri}")
-                    input(name="authorize" type="hidden" value="#{friends[i].authorize}")
+                    input(name="email" type="hidden" value="#{friends[i].email}")
+                    //input(name="uri" type="hidden" value="#{friends[i].uri}")
+                    //input(name="authorize" type="hidden" value="#{friends[i].authorize}")
                     button.btn.btn-default.btn-md.btn-mini(type="submit")
                         span.glyphicon.glyphicon-pushpin Poke
     p.lead Registered agents
