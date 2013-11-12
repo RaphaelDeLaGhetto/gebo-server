@@ -109,25 +109,25 @@ module.exports = function(email) {
      *
      * @return Promise
      */
-    exports.get = function(email) {
-        var agent = new agentSchema(dbName);
-        var deferred = q.defer();
-
-        agent.friendModel.findOne({ email: email }, function(err, friend) {
-                if (err) {
-                  deferred.reject(err);
-                }
-                else if (!friend) {
-                  deferred.resolve(null);
-                }
-                else {
-                  deferred.resolve(friend.myToken);
-                }
-            });
-  
-        return deferred.promise;
-      };
-//    exports.get = _get;
+//    exports.get = function(email) {
+//        var agent = new agentSchema(dbName);
+//        var deferred = q.defer();
+//
+//        agent.friendModel.findOne({ email: email }, function(err, friend) {
+//                if (err) {
+//                  deferred.reject(err);
+//                }
+//                else if (!friend) {
+//                  deferred.resolve(null);
+//                }
+//                else {
+//                  deferred.resolve(friend.myToken);
+//                }
+//            });
+//  
+//        return deferred.promise;
+//      };
+////    exports.get = _get;
             
     /**
      * Store the access token associated with the
@@ -138,31 +138,31 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    exports.set = function(email, accessToken) {
-        var agent = new agentSchema(dbName);
-        var deferred = q.defer();
-
-        agent.friendModel.findOne({ email: email }, function(err, friend) {
-                if (err) {
-                  deferred.reject(err);
-                }
-                else if (!friend) {
-                  deferred.reject('No such friend: ' + email);
-                }
-                else {
-                  friend.myToken = accessToken;
-                  friend.save(function(err, savedFriend) {
-                    if (err) {
-                      deferred.reject(err);
-                    }
-                    else {
-                      deferred.resolve();
-                    }
-                  });
-                }
-            });
-        return deferred.promise;
-      };
+//    exports.set = function(email, accessToken) {
+//        var agent = new agentSchema(dbName);
+//        var deferred = q.defer();
+//
+//        agent.friendModel.findOne({ email: email }, function(err, friend) {
+//                if (err) {
+//                  deferred.reject(err);
+//                }
+//                else if (!friend) {
+//                  deferred.reject('No such friend: ' + email);
+//                }
+//                else {
+//                  friend.myToken = accessToken;
+//                  friend.save(function(err, savedFriend) {
+//                    if (err) {
+//                      deferred.reject(err);
+//                    }
+//                    else {
+//                      deferred.resolve();
+//                    }
+//                  });
+//                }
+//            });
+//        return deferred.promise;
+//      };
 
     /**
      * Verify that the token stored by this agent

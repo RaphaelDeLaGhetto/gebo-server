@@ -245,205 +245,205 @@ exports.loadFriend = {
 /**
  * get
  */
-exports.get = {
-
-    setUp: function (callback) {
-        try {
-            /**
-             * Setup an registrant
-             */
-            var registrant = new geboDb.registrantModel({
-                    name: 'dan',
-                    email: TEST_AGENT_EMAIL,
-                    password: 'password123',
-                    admin: true,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-            
-            /**
-             * Make a friend for the registrant
-             */
-            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new agentDb.friendModel({
-                    name: 'John',
-                    email: 'john@painter.com',
-                    myToken: ACCESS_TOKEN,
-                    uri: BASE_ADDRESS,
-                });
-
-            /**
-             * Create access permissions for imaginary collection
-             */
-            friend.hisPermissions.push({ email: 'someapp@example.com' });
-
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                friend.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    callback();
-                  });
-              });
-        }
-        catch(err) {
-            console.log(err);
-            callback();
-        }
-    },
-
-    tearDown: function (callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
-          });
-    },
-
-    'Don\'t barf if this friend does not exist': function(test) {
-        test.expect(1);
-        token.get('nosuchguy@friend.com').
-            then(function(token) {
-                test.equal(token, null); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();                   
-              });
-    },
-
-    'Get the access token associated with this agent': function(test) {
-        test.expect(1);
-        token.get('john@painter.com').
-            then(function(token) {
-                test.equal(token, ACCESS_TOKEN); 
-                test.done();
-              }).
-            catch(function(err) {
-                console.log(err);
-                test.ok(false);
-                test.done();
-              });
-    },
-};
+//exports.get = {
+//
+//    setUp: function (callback) {
+//        try {
+//            /**
+//             * Setup an registrant
+//             */
+//            var registrant = new geboDb.registrantModel({
+//                    name: 'dan',
+//                    email: TEST_AGENT_EMAIL,
+//                    password: 'password123',
+//                    admin: true,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//            
+//            /**
+//             * Make a friend for the registrant
+//             */
+//            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+//            var friend = new agentDb.friendModel({
+//                    name: 'John',
+//                    email: 'john@painter.com',
+//                    myToken: ACCESS_TOKEN,
+//                    uri: BASE_ADDRESS,
+//                });
+//
+//            /**
+//             * Create access permissions for imaginary collection
+//             */
+//            friend.hisPermissions.push({ email: 'someapp@example.com' });
+//
+//            registrant.save(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                friend.save(function(err) {
+//                    if (err) {
+//                      console.log(err);
+//                    }
+//                    callback();
+//                  });
+//              });
+//        }
+//        catch(err) {
+//            console.log(err);
+//            callback();
+//        }
+//    },
+//
+//    tearDown: function (callback) {
+//        geboDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err)
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
+//    },
+//
+//    'Don\'t barf if this friend does not exist': function(test) {
+//        test.expect(1);
+//        token.get('nosuchguy@friend.com').
+//            then(function(token) {
+//                test.equal(token, null); 
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();                   
+//              });
+//    },
+//
+//    'Get the access token associated with this agent': function(test) {
+//        test.expect(1);
+//        token.get('john@painter.com').
+//            then(function(token) {
+//                test.equal(token, ACCESS_TOKEN); 
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                console.log(err);
+//                test.ok(false);
+//                test.done();
+//              });
+//    },
+//};
 
 /**
  * set
  */
-exports.set = {
-    setUp: function (callback) {
-        try {
-            /**
-             * Setup an registrant
-             */
-            var registrant = new geboDb.registrantModel({
-                    name: 'dan',
-                    email: TEST_AGENT_EMAIL,
-                    password: 'password123',
-                    admin: true,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-            
-            /**
-             * Make a friend for the registrant
-             */
-            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new agentDb.friendModel({
-                    name: 'John',
-                    email: 'john@painter.com',
-                    myToken: ACCESS_TOKEN,
-                    uri: BASE_ADDRESS,
-                });
-
-            /**
-             * Create access permissions for imaginary collection
-             */
-            friend.hisPermissions.push({ email: 'someapp@example.com' });
-
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                friend.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    callback();
-                  });
-              });
-        }
-        catch(err) {
-            console.log(err);
-            callback();
-        }
-    },
-
-    tearDown: function (callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
-          });
-    },
-
-    'Don\'t barf if the specified friend does not exist': function(test) {
-        test.expect(1);
-        token.set('nosuchguy@friend.com').
-            then(function(ack){
-                test.done();
-               }).
-            catch(function(err) {
-                test.ok(true);     
-                test.done();
-              });
-    },
-
-    'Overwrite the access token value of a previously stored friend': function(test) {
-        test.expect(2);
-        token.get('john@painter.com').
-            then(function(tkn) {
-                test.equal(tkn, ACCESS_TOKEN);
-                return token.set('john@painter.com', ACCESS_TOKEN + '5678');
-              }).
-            then(function(ack) {
-                return token.get('john@painter.com');
-              }).
-            then(function(tkn) {
-                test.equal(tkn, ACCESS_TOKEN + '5678');
-                test.done(); 
-              }).
-            catch(function(err) {
-                console.log(err);
-                test.ok(false);
-                test.done();
-              });
-    },
-};
+//exports.set = {
+//    setUp: function (callback) {
+//        try {
+//            /**
+//             * Setup an registrant
+//             */
+//            var registrant = new geboDb.registrantModel({
+//                    name: 'dan',
+//                    email: TEST_AGENT_EMAIL,
+//                    password: 'password123',
+//                    admin: true,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//            
+//            /**
+//             * Make a friend for the registrant
+//             */
+//            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+//            var friend = new agentDb.friendModel({
+//                    name: 'John',
+//                    email: 'john@painter.com',
+//                    myToken: ACCESS_TOKEN,
+//                    uri: BASE_ADDRESS,
+//                });
+//
+//            /**
+//             * Create access permissions for imaginary collection
+//             */
+//            friend.hisPermissions.push({ email: 'someapp@example.com' });
+//
+//            registrant.save(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                friend.save(function(err) {
+//                    if (err) {
+//                      console.log(err);
+//                    }
+//                    callback();
+//                  });
+//              });
+//        }
+//        catch(err) {
+//            console.log(err);
+//            callback();
+//        }
+//    },
+//
+//    tearDown: function (callback) {
+//        geboDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err)
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
+//    },
+//
+//    'Don\'t barf if the specified friend does not exist': function(test) {
+//        test.expect(1);
+//        token.set('nosuchguy@friend.com').
+//            then(function(ack){
+//                test.done();
+//               }).
+//            catch(function(err) {
+//                test.ok(true);     
+//                test.done();
+//              });
+//    },
+//
+//    'Overwrite the access token value of a previously stored friend': function(test) {
+//        test.expect(2);
+//        token.get('john@painter.com').
+//            then(function(tkn) {
+//                test.equal(tkn, ACCESS_TOKEN);
+//                return token.set('john@painter.com', ACCESS_TOKEN + '5678');
+//              }).
+//            then(function(ack) {
+//                return token.get('john@painter.com');
+//              }).
+//            then(function(tkn) {
+//                test.equal(tkn, ACCESS_TOKEN + '5678');
+//                test.done(); 
+//              }).
+//            catch(function(err) {
+//                console.log(err);
+//                test.ok(false);
+//                test.done();
+//              });
+//    },
+//};
 
 /**
  * verify
