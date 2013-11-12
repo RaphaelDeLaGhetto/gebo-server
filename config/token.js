@@ -212,7 +212,6 @@ module.exports = function(email) {
             then(function(friend) {
 
             if (!friend) {
-              console.log('no friend');
               deferred.reject(friendEmail + ' is not your friend');
             }
             else {
@@ -253,7 +252,7 @@ module.exports = function(email) {
                       requestCert: true,
                       agent: false,
                       headers: { 'Content-Type': 'application/json',
-      	        	   'Content-Length': Buffer.byteLength(params) }
+      	        	         'Content-Length': Buffer.byteLength(params) }
                     };
       
               var req = https.request(options, function(res) {

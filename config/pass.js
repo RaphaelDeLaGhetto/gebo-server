@@ -194,7 +194,7 @@ module.exports = function(email) {
         console.log(claimSetIss);
     
         db.friendModel.findOne({ email: claimSetIss }, function(err, friend) {
-            console.log('friendModel');
+            console.log('err');
             console.log(err);
             if (err) {
               return done(err);
