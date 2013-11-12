@@ -199,22 +199,10 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
       console.log('decoded data');
       console.log(data);
 
-      /**
-       * The scope is a space-seperated list:
-       * '<[r][w][x]> <resource> <owner>'
-       */
-      var splitScope = data.scope.split(' ');
-      if (splitScope.length !== 3) {
+      var scope = _processScope(data.scope);
+      if (!scope) {
         return done('You did not correctly specify the scope of your request');
       }
-
-      var owner = splitScope.pop(),
-          resource = splitScope.pop(),
-          read = splitScope[0].indexOf('r') > -1 ? true: false,
-          write = splitScope[0].indexOf('w') > -1 ? true: false,
-          execute = splitScope[0].indexOf('x') > -1 ? true: false;
-
-
 
       // !!! This is obviously wrong. Don't forget...
       var token = new geboDb.tokenModel({
@@ -236,11 +224,50 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
 exports.jwtBearerExchange = _jwtBearerExchange;
 server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(_jwtBearerExchange));
 
+
+/**
+ * Given a foreign agent, a native agent, and a
+ * set of permissions, verify that the two agents are 
+ * friends.
+ *
+ * @param Object
+ * @param string
+ *
+ * @return promise
+ */
+var _verifyFriendship = function(scope, foreignAgent) {
+    var deferred = q.defer();
+    var db = new agentSchema(scope.owner);
+    db.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
+        if (err) {
+          deferred.reject(err);
+        }
+        if (!friend) {
+          deferred.resolve(false);
+        }
+        else {
+          var index = utils.getIndexOfObject(friend.hisPermissions, 'email', scope.resource);
+          if (index > -1 &&
+              friend.hisPermissions[index].read === scope.read &&
+              friend.hisPermissions[index].write === scope.write &&
+              friend.hisPermissions[index].execute === scope.execute) {
+            deferred.resolve(true);
+          }
+          else {
+            deferred.resolve(false);
+          }
+        }
+      });
+    return deferred.promise;
+  };
+exports.verifyFriendship = _verifyFriendship;
+
 /**
  * Take the scope provided in a JWT claim and
  * break it into something a little more sensible
  *
- * @param string
+ * @param string: the scope is a space-seperated list:
+ *      '<[r][w][x]> <resource> <owner>'
  *
  * @return Object
  */

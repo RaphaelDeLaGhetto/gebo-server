@@ -13,8 +13,8 @@ var COL_NAME = 'appCollection',
 var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 
 nconf.argv().env().file({ file: 'local.json' });
-var geboDb = new geboSchema(nconf.get('testDb')),
-    agentDb = new agentSchema('yanfen@hg.com');
+var geboDb = new geboSchema(nconf.get('testDb'));
+    //agentDb = new agentSchema('yanfen@hg.com');
 
 var oauth2 = require('../../routes/oauth2'),
     token = require('../../config/token')(nconf.get('testDb'));
@@ -139,6 +139,103 @@ exports.processScope = {
         test.equal(scope.execute, true);
 
         test.done();
+    },
+};
+
+/**
+ * verifyFriendship
+ */
+exports.verifyFriendship = {
+
+   setUp: function(callback) {
+           var registrant = new geboDb.registrantModel({
+                    name: 'Dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+
+            var agentDb = new agentSchema('dan@hg.com');
+            var friend = new agentDb.friendModel({
+                    name: 'Yanfen',
+                    email: 'yanfen@hg.com',
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+            friend.hisPermissions.push({ email: 'some@resource.com' });
+
+            registrant.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                friend.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    agentDb.connection.db.close();
+                    callback();
+                  });
+              });
+    },
+
+    tearDown: function(callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+        var agentDb = new agentSchema('dan@hg.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                 }
+                 callback();
+              });
+          });
+    },
+
+    'Return true when an agent is a friend with correct scope': function(test) {
+        test.expect(1);
+        var scope = oauth2.processScope('r some@resource.com dan@hg.com');
+        oauth2.verifyFriendship(scope, 'yanfen@hg.com').
+            then(function(weAreFriends) {
+                test.ok(weAreFriends);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);      
+                test.done();
+              });
+    },
+    
+    'Return false when an agent is a friend with incorrect scope': function(test) {
+        test.expect(1);
+        var scope = oauth2.processScope('rwx some@resource.com dan@hg.com');
+        oauth2.verifyFriendship(scope, 'yanfen@hg.com').
+            then(function(weAreFriends) {
+                test.equal(weAreFriends, false);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);      
+                test.done();
+              });
+    },
+
+    'Return false when an agent is not a friend': function(test) {
+        test.expect(1);
+        var scope = oauth2.processScope('rw some@resource.com dan@hg.com');
+        oauth2.verifyFriendship(scope, 'foreign@agent.com').
+            then(function(weAreFriends) {
+                test.equal(weAreFriends, false);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);      
+                test.done();
+              });
     },
 
 
