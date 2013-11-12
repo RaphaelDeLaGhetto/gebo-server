@@ -534,9 +534,9 @@ exports.loadFriend = {
 //};
 
 /**
- * getTokenWithJwt
+ * get
  */
-exports.getTokenWithJwt = {
+exports.get = {
     setUp: function (callback) {
         try {
             /**
@@ -609,7 +609,7 @@ exports.getTokenWithJwt = {
 //                post(AUTHORIZATION_ENDPOINT).
 //                reply(200, JWT_RESPONSE);  
 //
-//        token.getTokenWithJwt().
+//        token.get().
 //                then(function(t) {
 //                    t= JSON.parse(t);
 //                    scope.done();

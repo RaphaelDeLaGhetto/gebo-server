@@ -195,7 +195,7 @@ module.exports = function(email) {
 //      };
 
     /**
-     * Request a token
+     * Request a token from a gebo with a JWT
      *
      * @param string
      * @param string
@@ -203,7 +203,7 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    exports.getTokenWithJwt = function(uri, path, scope) {
+    exports.get = function(uri, path, scope) {
       var deferred = q.defer();
 
         // Make the claim 

@@ -57,9 +57,11 @@ module.exports = function(dbName) {
      */
     var _poke = function(req, res) {
 //        var gebo = require('../schemata/gebo')(dbName);
-        token.getTokenWithJwt(req.body.uri, req.body.authorize, 'read').
+        token.get(req.body.uri, req.body.authorize, 'read').
             then(function(token) {
                 res.render('index');
+                res.send(200);
+                alert(token);
               }).
             catch(function(err) {
                 console.log('_poke err');
