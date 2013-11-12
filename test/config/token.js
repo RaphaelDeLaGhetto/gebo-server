@@ -637,7 +637,7 @@ exports.get = {
                 catch(function(err) {
                     console.log('err');
                     console.log(err);
-                    test.ok(false, err);      
+                    test.ok(false, err);
                     test.done();
                   });
     },

@@ -11,7 +11,6 @@ module.exports = function(dbName) {
      * Set the database name, if not set already 
      */
     if (!dbName) {
-      var nconf = require('nconf');
       nconf.argv().env().file({ file: 'local.json' });
       dbName = nconf.get('email');
     }
@@ -58,11 +57,11 @@ module.exports = function(dbName) {
      * token with no real privileges attached.
      */
     var _poke = function(req, res) {
-        //token.get(req.body.uri, req.body.authorize, nconf.get('email')).//, 'read').
         token.get(req.body.email, '', nconf.get('email')).
             then(function(token) {
-                alert(token);
-                res.send(200);
+                console.log('token');
+                console.log(token);
+                res.send(200, token);
               }).
             catch(function(err) {
                 console.log('_poke err');

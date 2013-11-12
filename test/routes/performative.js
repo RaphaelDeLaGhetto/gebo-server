@@ -6,9 +6,9 @@ var config = require('../../config/config'),
     agentSchema = require('../../schemata/agent');
 
 var COL_NAME = 'appCollection',
-    ADMIN_TOKEN = '1234',
-    USER_TOKEN = '5678',
-    ACCESS_TOKEN = '9012',
+//    ADMIN_TOKEN = '1234',
+//    USER_TOKEN = '5678',
+//    ACCESS_TOKEN = '9012',
     HAI = 'A human-agent interface',
     IP = '127.0.0.1';
 

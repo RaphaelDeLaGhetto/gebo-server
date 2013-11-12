@@ -204,18 +204,38 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
         return done('You did not correctly specify the scope of your request');
       }
 
-      // !!! This is obviously wrong. Don't forget...
-      var token = new geboDb.tokenModel({
-          registrantId: friend._id,
-          string: tokenStr,
-        });
+      _verifyFriendship(scope, data.prn).
+            then(function(friend) {
+                if (!friend) {
+                  return done(data.prn + ' breached friendship');
+                }
 
-      token.save(function (err, token) {
-          if (err) {
-            return done(err);
-          }
-          return done(null, token.string);
-        });
+                geboDb.registrantModel.findOne({ email: scope.owner }, function(err, owner) {
+                        if (err) {
+                          return done(err);
+                        }
+
+                        // !!! This is obviously wrong. Don't forget...
+                        var token = new geboDb.tokenModel({
+                            registrantId: owner._id,
+                            friendId: friend._id,
+                            collectionName: scope.resource,
+                            string: tokenStr,
+                          });
+                    
+                        token.save(function (err, token) {
+                            if (err) {
+                              return done(err);
+                            }
+                            return done(null, token.string);
+                          });
+                      });
+              }).
+            catch(function(err) {
+                return done(err);
+              });
+
+
     }
     else {
       return done('Could not verify data with signature', null);
@@ -239,6 +259,7 @@ var _verifyFriendship = function(scope, foreignAgent) {
     var deferred = q.defer();
     var db = new agentSchema(scope.owner);
     db.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
+        db.connection.db.close();
         if (err) {
           deferred.reject(err);
         }
@@ -251,7 +272,7 @@ var _verifyFriendship = function(scope, foreignAgent) {
               friend.hisPermissions[index].read === scope.read &&
               friend.hisPermissions[index].write === scope.write &&
               friend.hisPermissions[index].execute === scope.execute) {
-            deferred.resolve(true);
+            deferred.resolve(friend);
           }
           else {
             deferred.resolve(false);

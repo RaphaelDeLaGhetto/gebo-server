@@ -189,21 +189,13 @@ module.exports = function(email) {
      * other servers, but time will tell.
      */
     var _clientJwtBearerStrategy = function(claimSetIss, done) {
-
-        console.log('ClientJwtBearerStrategy');
-        console.log(claimSetIss);
-    
         db.friendModel.findOne({ email: claimSetIss }, function(err, friend) {
-            console.log('err');
-            console.log(err);
             if (err) {
               return done(err);
             }
             if (!friend) {
               return done(null, false);
             }
-            console.log('friend');
-            console.log(friend);
             return done(null, friend);
           });
       };

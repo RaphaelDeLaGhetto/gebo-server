@@ -42,12 +42,13 @@ exports.jwtBearerExchange = {
                     _id: new mongo.ObjectID('123456789ABC')
                 });
 
-            var friend= new geboDb.friendModel({
+            var friend = new geboDb.friendModel({
                     name: 'Some foreign gebo',
                     email: 'foreign@agent.com',
                     password: 'https://agent.com',
                     _id: new mongo.ObjectID('123456789ABC')
                 });
+            friend.hisPermissions.push({ email: 'some@resource.com' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -76,10 +77,11 @@ exports.jwtBearerExchange = {
 
         var header = { alg: 'RS256', typ: 'JWT' },
             claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
-                      scope: 'https://www.googleapis.com/auth/devstorage.readonly',
+                      scope: 'r some@resource.com ' + nconf.get('testDb'),
                       aud: 'https://accounts.google.com/o/oauth2/token',
                       exp: 1328554385,
-                      iat: 1328550785 };
+                      iat: 1328550785,
+                      prn: 'foreign@agent.com' };
         var jwt = token.makeJwt(header, claim);
         var jwtSplit = jwt.split('.');
         var signature = jwtSplit.pop();
@@ -92,10 +94,13 @@ exports.jwtBearerExchange = {
                                 }, data, signature,
                             function(err, token) {
                                 if (err) {
+                                  console.log('err');
+                                  console.log(err);
                                   test.ok(false, err);
                                 }
                                 else {
-                                  test.equal(token, '1234');
+                                  // This should be tightened up
+                                  test.equal(token.length, 256);
                                 }
                                 test.done();
                             });
@@ -196,12 +201,12 @@ exports.verifyFriendship = {
           });
     },
 
-    'Return true when an agent is a friend with correct scope': function(test) {
+    'Return the friend model when an agent is a friend with correct scope': function(test) {
         test.expect(1);
         var scope = oauth2.processScope('r some@resource.com dan@hg.com');
         oauth2.verifyFriendship(scope, 'yanfen@hg.com').
-            then(function(weAreFriends) {
-                test.ok(weAreFriends);
+            then(function(friend) {
+                test.equal(friend.name, 'Yanfen');
                 test.done();
               }).
             catch(function(err) {

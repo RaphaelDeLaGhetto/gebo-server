@@ -129,7 +129,7 @@ module.exports = function (email) {
         // The resource
         collectionName: { type: String, required: true, unique: false },
         // The authorized IP address
-        ip: { type: String, required: true, unique: false },
+        ip: { type: String, required: false, unique: false },
         // The token itself
         string: { type: String, required: true, unique: true },
         expires: { type: Date, required: false, default: null },
