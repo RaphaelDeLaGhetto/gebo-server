@@ -39,7 +39,7 @@ var JWT_RESPONSE = {
 
 // Start up the test database
 nconf.argv().env().file({ file: 'local.json' });
-var token = require('../../config/token')(TEST_AGENT_EMAIL);
+var token = require('../../config/token')(nconf.get('testDb'));
 
 var geboDb = new geboSchema(nconf.get('testDb'));
 
@@ -55,7 +55,7 @@ exports.getParams = {
              */
             var registrant = new geboDb.registrantModel({
                     name: 'dan',
-                    email: TEST_AGENT_EMAIL,
+                    email: nconf.get('testDb'),
                     password: 'password123',
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -64,11 +64,11 @@ exports.getParams = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new agentDb.friendModel({
+            //var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new geboDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
-                    myToken: ACCESS_TOKEN,
+//                    myToken: ACCESS_TOKEN,
                     uri: BASE_ADDRESS,
                 });
 
@@ -85,7 +85,7 @@ exports.getParams = {
                     if (err) {
                       console.log(err);
                     }
-                    agentDb.connection.db.close();
+//                    agentDb.connection.db.close();
                     callback();
                   });
               });
@@ -101,18 +101,19 @@ exports.getParams = {
             if (err) {
               console.log(err)
             }
+            callback();
           });
 
-        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
-          });
+//        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err)
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
     }, 
 
     'Return null if the friend profile has not been loaded': function(test) {
@@ -128,10 +129,14 @@ exports.getParams = {
         token.loadFriend('john@painter.com').then(function(friend) {
                 var params = token.getParams();
                 test.equals(params.response_type, 'token');
-                test.equals(params.client_id, utils.getMongoDbName(TEST_AGENT_EMAIL));
+                test.equals(params.client_id, utils.getMongoDbName(nconf.get('testDb')));
                 test.equals(params.redirect_uri, redirectUri);
                 test.done();
-        });
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();      
+              });
     },
 
 }
@@ -149,7 +154,7 @@ exports.loadFriend = {
              */
             var registrant = new geboDb.registrantModel({
                     name: 'dan',
-                    email: TEST_AGENT_EMAIL,
+                    email: nconf.get('testDb'),
                     password: 'password123',
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -158,11 +163,11 @@ exports.loadFriend = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new agentDb.friendModel({
+//            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+            var friend = new geboDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
-                    myToken: ACCESS_TOKEN,
+//                    myToken: ACCESS_TOKEN,
                     uri: BASE_ADDRESS,
                 });
 
@@ -194,18 +199,19 @@ exports.loadFriend = {
             if (err) {
               console.log(err)
             }
+            callback();
           });
 
-        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
-          });
+//        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err)
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
     }, 
 
     'Don\'t barf if the requested friend doesn\'t exist': function(test) {
@@ -222,13 +228,12 @@ exports.loadFriend = {
     },
 
     'Return an existing friend object': function(test) {
-        test.expect(7);
+        test.expect(6);
 
         token.loadFriend('john@painter.com').
             then(function(friend) {
                 test.equal(friend.name, 'John');
                 test.equal(friend.email, 'john@painter.com');
-                test.equal(friend.myToken, ACCESS_TOKEN);
                 test.equal(friend.uri, BASE_ADDRESS);
                 test.equal(friend.request, REQUEST_ENDPOINT);
                 test.equal(friend.propose, PROPOSE_ENDPOINT);
@@ -540,41 +545,50 @@ exports.get = {
     setUp: function (callback) {
         try {
             /**
-             * Setup an registrant
+             * Set up the gebo registrant
              */
-            var registrant = new geboDb.registrantModel({
-                    name: 'dan',
-                    email: TEST_AGENT_EMAIL,
+            var geboRegistrant = new geboDb.registrantModel({
+                    name: 'gebo-server',
+                    email: nconf.get('testDb'),
                     password: 'password123',
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
-            
+
             /**
-             * Make a friend for the registrant
+             * Make a friend for the gebo registrant
              */
-            var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-            var friend = new agentDb.friendModel({
+            var friend = new geboDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
-                    myToken: ACCESS_TOKEN,
                     uri: BASE_ADDRESS,
                 });
 
             /**
-             * Create access permissions for imaginary collection
+             * Setup a regular (non-administrative) registrant
              */
-            friend.hisPermissions.push({ email: 'someapp@example.com' });
-
-            registrant.save(function(err) {
+            var registrant = new geboDb.registrantModel({
+                    name: 'dan',
+                    email: 'dan@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+            
+            geboRegistrant.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
-                friend.save(function(err) {
+                registrant.save(function(err) {
                     if (err) {
                       console.log(err);
                     }
-                    callback();
+                    friend.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        callback();
+                      });
                   });
               });
         }
@@ -589,35 +603,31 @@ exports.get = {
             if (err) {
               console.log(err)
             }
-          });
-
-        var agentDb = new agentSchema(TEST_AGENT_EMAIL);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
+            callback();
           });
     },
 
     'Get a token from the server agent': function(test) {
-//        test.expect(3);
-//        var scope = nock('http://' + BASE_ADDRESS).
-//                post(AUTHORIZATION_ENDPOINT).
-//                reply(200, JWT_RESPONSE);  
-//
-//        token.get().
-//                then(function(t) {
-//                    t= JSON.parse(t);
-//                    scope.done();
-//                    test.equal(t.access_token, JWT_RESPONSE.access_token);
-//                    test.equal(t.token_type, JWT_RESPONSE.token_type);
-//                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
+        test.expect(3);
+        var scope = nock('https://' + BASE_ADDRESS).
+                post(AUTHORIZATION_ENDPOINT).
+                reply(200, JWT_RESPONSE);  
+
+        token.get('john@painter.com', 'read write some@resource', 'dan@hg.com').
+                then(function(t) {
+                    t = JSON.parse(t);
+                    scope.done();
+                    test.equal(t.access_token, JWT_RESPONSE.access_token);
+                    test.equal(t.token_type, JWT_RESPONSE.token_type);
+                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
                     test.done();
-//                  });
+                  }).
+                catch(function(err) {
+                    console.log('err');
+                    console.log(err);
+                    test.ok(false, err);      
+                    test.done();
+                  });
     },
 };
 

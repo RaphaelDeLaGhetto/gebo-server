@@ -22,6 +22,7 @@ module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
+    var gebo = new geboSchema(dbName);
 
     /**
      * Data returned upon token verification
@@ -62,11 +63,11 @@ module.exports = function(email) {
      *
      * @return Object
      */
-    exports.loadFriend = function(email) {
+    var _loadFriend = function(email) {
         var agent = new agentSchema(dbName);
         var deferred = q.defer();
 
-        agent.friendModel.findOne({ email: email }, function(err, friend) {
+        gebo.friendModel.findOne({ email: email }, function(err, friend) {
             if (err) {
               deferred.reject(err);
             }
@@ -78,6 +79,7 @@ module.exports = function(email) {
 
         return deferred.promise;
       };
+    exports.loadFriend = _loadFriend;
 
     /**
      * Get the OAuth2-relevant handshake info
@@ -203,70 +205,79 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    exports.get = function(uri, path, scope) {
-      var deferred = q.defer();
+    exports.get = function(friendEmail, scope, agentEmail) {
+        var deferred = q.defer();
 
-        // Make the claim 
-        var claim = {
-                iss: nconf.get('email'),
-                scope: scope,
-                aud: uri + path,
-                exp: new Date()/1000 + 3600*1000,
-                iat: new Date()/1000, 
-            };
+        _loadFriend(friendEmail).
+            then(function(friend) {
 
-        var jwt = _makeJwt(HEADER, claim);
+            if (!friend) {
+              console.log('no friend');
+              deferred.reject(friendEmail + ' is not your friend');
+            }
+            else {
+              console.log(friend);
+  
+              // Make the claim 
+              var claim = {
+                      iss: nconf.get('email'),
+                      scope: scope,
+                      aud: friend.uri + friend.authorize,
+                      exp: new Date()/1000 + 3600*1000,
+                      iat: new Date()/1000, 
+                      prn: agentEmail,
+                  };
+      
+              var jwt = _makeJwt(HEADER, claim);
+      
+              var params = JSON.stringify({
+                      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                      assertion: jwt,
+                  });
+      
+              var uri = friend.uri;
+              var splitUri = uri.split(':'); 
+              var port = '443';
+              if (splitUri.length > 1) {
+                port = splitUri.pop();
+                uri = splitUri.pop();
+              }
 
-        var params = JSON.stringify({
-                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                assertion: jwt,
-            });
-
-    	var splitUri = uri.split('/'); 
-    	uri = splitUri.pop();
-    	splitUri = uri.split(':');
-    	var port = splitUri.pop();
-    	uri = splitUri.join('');
-
-        // Make the request
-        var options = {
-                host: uri,
-                port: port,
-                path: path,
-                method: 'POST',
-                rejectUnauthorized: false,
-                requestCert: true,
-                agent: false,
-                headers: { 'Content-Type': 'application/json',
-	        	   'Content-Length': Buffer.byteLength(params) }
-                           //'Content-Length': Buffer.byteLength(JSON.stringify(params)) }
-              };
-    	console.log('options');
-    	console.log(options);
-
-    	console.log('req');
-        var req = https.request(options, function(res) {
-			console.log('req callback');
-                        res.setEncoding('utf8');
-                        res.on('data', function(token) {
-            			    console.log('on');
-            			    console.log(token);
-                            deferred.resolve(token);
+              // Make the request
+              var options = {
+                      host: uri,
+                      port: port,
+                      path: friend.authorize,
+                      method: 'POST',
+                      rejectUnauthorized: false,
+                      requestCert: true,
+                      agent: false,
+                      headers: { 'Content-Type': 'application/json',
+      	        	   'Content-Length': Buffer.byteLength(params) }
+                    };
+      
+              var req = https.request(options, function(res) {
+                      res.setEncoding('utf8');
+                      res.on('data', function(token) {
+                              deferred.resolve(token);
                           });
-                        res.on('end', function() {
-            			    console.log('end');
+                      res.on('end', function() {
+                              //console.log('end');
                           });
-                      }).
-                    on('error', function(err){
-			console.log('err');
-			console.log(err);
+                  }).
+                on('error', function(err){
+                        console.log('err');
+      			console.log(err);
                         deferred.reject(err);
-                      });
-
-    	console.log('write');
-        req.write(params);
-        req.end();
-	console.log('done');
+                  });
+      
+              req.write(params);
+              req.end();
+            }
+          }).
+        catch(function(err) {
+            deferred.reject(err);       
+          });
 
         return deferred.promise;
       };
