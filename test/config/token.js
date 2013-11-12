@@ -563,6 +563,13 @@ exports.get = {
                     email: 'john@painter.com',
                     uri: BASE_ADDRESS,
                 });
+            
+            var otherFriend = new geboDb.friendModel({
+                    name: 'Richard',
+                    email: 'richard@construction.com',
+                    uri: BASE_ADDRESS + ':3443',
+                });
+
 
             /**
              * Setup a regular (non-administrative) registrant
@@ -583,11 +590,16 @@ exports.get = {
                     if (err) {
                       console.log(err);
                     }
-                    friend.save(function(err) {
+                    otherFriend.save(function(err) {
                         if (err) {
                           console.log(err);
                         }
-                        callback();
+                        friend.save(function(err) {
+                            if (err) {
+                              console.log(err);
+                            }
+                            callback();
+                          });
                       });
                   });
               });
@@ -613,7 +625,30 @@ exports.get = {
                 post(AUTHORIZATION_ENDPOINT).
                 reply(200, JWT_RESPONSE);  
 
-        token.get('john@painter.com', 'read write some@resource', 'dan@hg.com').
+        token.get('john@painter.com', 'read write some@resource.com', 'dan@hg.com').
+                then(function(t) {
+                    t = JSON.parse(t);
+                    scope.done();
+                    test.equal(t.access_token, JWT_RESPONSE.access_token);
+                    test.equal(t.token_type, JWT_RESPONSE.token_type);
+                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
+                    test.done();
+                  }).
+                catch(function(err) {
+                    console.log('err');
+                    console.log(err);
+                    test.ok(false, err);      
+                    test.done();
+                  });
+    },
+
+    'Get a token from the server agent with port specified': function(test) {
+        test.expect(3);
+        var scope = nock('https://' + BASE_ADDRESS + ':3443').
+                post(AUTHORIZATION_ENDPOINT).
+                reply(200, JWT_RESPONSE);  
+
+        token.get('richard@construction.com', 'read write some@resource.com', 'dan@hg.com').
                 then(function(t) {
                     t = JSON.parse(t);
                     scope.done();
