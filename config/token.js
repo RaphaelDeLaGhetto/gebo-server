@@ -215,6 +215,7 @@ module.exports = function(email) {
               deferred.reject(friendEmail + ' is not your friend');
             }
             else {
+              console.log('friend');
               console.log(friend);
   
               // Make the claim 
@@ -234,8 +235,12 @@ module.exports = function(email) {
                       assertion: jwt,
                   });
       
+              // https.request is pretty picky. Collect the
+              // parameters it wants...
               var uri = friend.uri;
-              var splitUri = uri.split(':'); 
+              var splitUri = uri.split('https://'); 
+              uri = splitUri.pop();
+              splitUri = uri.split(':'); 
               var port = '443';
               if (splitUri.length > 1) {
                 port = splitUri.pop();
@@ -255,6 +260,9 @@ module.exports = function(email) {
       	        	         'Content-Length': Buffer.byteLength(params) }
                     };
       
+              console.log('options');
+              console.log(options);
+
               var req = https.request(options, function(res) {
                       res.setEncoding('utf8');
                       res.on('data', function(token) {
