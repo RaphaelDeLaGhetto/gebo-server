@@ -264,12 +264,24 @@ module.exports = function(email) {
               console.log(options);
 
               var req = https.request(options, function(res) {
+                      var token;
                       res.setEncoding('utf8');
-                      res.on('data', function(token) {
-                              deferred.resolve(token);
+                      res.on('data', function(t) {
+                              token = t;
+                              console.log('token.token');
+                              console.log(token);
                           });
                       res.on('end', function() {
-                              //console.log('end');
+                              console.log('end');
+                              token = JSON.parse(token);
+                              if (token.error) {
+                                console.log('token.error_description');
+                                console.log(token.error_description);
+                                deferred.reject(token.error_description);
+                              }
+                              else {
+                                deferred.resolve(token);
+                              }
                           });
                   }).
                 on('error', function(err){

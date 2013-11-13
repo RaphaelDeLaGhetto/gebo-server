@@ -66,7 +66,7 @@ module.exports = function(dbName) {
             catch(function(err) {
                 console.log('_poke err');
                 console.log(err);
-                res.send(500);
+                res.send(401, err);
               });
       };
     exports.poke = [

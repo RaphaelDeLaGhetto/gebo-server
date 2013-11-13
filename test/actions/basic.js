@@ -928,6 +928,9 @@ exports.rm = {
     tearDown: function (callback) {
         // Lose the database for next time
         this.db.dropDatabase(function(err) { 
+            if (err) {
+              console.log(err);
+            }
             callback();
         });
     },
@@ -1044,7 +1047,7 @@ exports.rm = {
                  });
    },
 
-   'Delete from an existing database without permission': function (test) {
+   'Do not delete from an existing database without permission': function (test) {
         test.expect(2);
 
         collection.count(function(err, count) {

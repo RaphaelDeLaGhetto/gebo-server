@@ -208,7 +208,7 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
       _verifyFriendship(scope, data.prn).
             then(function(friend) {
                 if (!friend) {
-                  return done(data.prn + ' breached friendship');
+                  return done(new Error(data.prn + ' breached friendship'));
                 }
 
                 geboDb.registrantModel.findOne({ email: scope.owner }, function(err, owner) {
@@ -216,7 +216,6 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
                           return done(err);
                         }
 
-                        // !!! This is obviously wrong. Don't forget...
                         var token = new geboDb.tokenModel({
                             registrantId: owner._id,
                             friendId: friend._id,
@@ -239,7 +238,7 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
 
     }
     else {
-      return done('Could not verify data with signature', null);
+      return done(new Error('Could not verify data with signature'));
     }
   }
 exports.jwtBearerExchange = _jwtBearerExchange;
