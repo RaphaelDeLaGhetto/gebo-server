@@ -17,6 +17,7 @@ var oauth2orize = require('oauth2orize'),
     fs = require('fs'),
     base64url = require('base64url'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
+    AuthorizationError = require('oauth2orize-jwt-bearer').AuthorizationError,
     mongoose = require('mongoose');
 
 nconf.argv().env().file({ file: 'local.json' });
@@ -201,7 +202,8 @@ var _jwtBearerExchange = function(friend, data, signature, done) {
 
       var scope = _processScope(data.scope);
       if (!scope) {
-        return done('You did not correctly specify the scope of your request');
+        console.log('No scope');
+        return done(new AuthorizationError('You did not correctly specify the scope of your request', 403));
       }
 
       _verifyFriendship(scope, data.prn).
