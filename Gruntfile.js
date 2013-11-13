@@ -169,33 +169,68 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('addfriend', 'add a friend to the agent specified',
         function (name, email, agentEmail, geboUri) {
-            var agentDb = require('./schemata/agent')(agentEmail);
 
-            var friend = agentDb.friendModel({
-                    name: name,
-                    email: email,
-                    uri: geboUri,
-                });
+            // Put grunt into async mode
+            var done = this.async();
+ 
+            utils.getPrivateKeyAndCertificate().
+                then(function(pair) {
+                    var agentDb = require('./schemata/agent')(agentEmail);
+        
+                    var friend = new agentDb.friendModel({
+                            name: name,
+                            email: email,
+                            uri: geboUri,
+                            myPrivateKey: pair.privateKey,
+                            myCertificate: pair.certificate,
+                        });
+        
+                    // Can't modify ID in findOneAndUpdate
+                    friend._id = undefined;
+       
+                    agentDb.friendModel.findOneAndUpdate({ email: friend.email },
+                            friend.toObject(),
+                            { upsert: true },
+                            function (err) {
+                                if (err) {
+                                  console.log('Error: ' + err);
+                                  done(false);
+                                }
+                                else {
+                                  console.log('Saved friend: ' + friend.name);
+                                  done();
+                                }
+                              });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    done();
+                  });
+          });
 
-            // Can't modify ID in findOneAndUpdate
-            friend._id = undefined;
+    /**
+     * renew
+     */
+    grunt.registerTask('renew', 'provide your friend with a new certificate',
+        function (friendEmail, myEmail) {
 
-            // Save call is async. Put grunt into async mode to work
+            // Put grunt into async mode
             var done = this.async();
 
-            agentDb.friendModel.findOneAndUpdate({ email: friend.email },
-                    friend.toObject(),
-                    { upsert: true },
-                    function (err) {
-                        if (err) {
-                          console.log('Error: ' + err);
-                          done(false);
-                        }
-                        else {
-                          console.log('Saved friend: ' + friend.name);
-                          done();
-                        }
-                      });
+            utils.getPrivateKeyAndCertificate().
+                then(function(pair) {
+                    console.log('pair');
+                    console.log(pair);
+
+                    var agentDb = require('./schemata/agent')(myEmail);
+                    agentDb.friendModel({ email: friendEmail },
+                        function(err, friend) {
+                            console.log(friend);
+                            done();
+                          });
+                     
+
+                  });            
           });
 
     /**
