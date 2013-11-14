@@ -404,9 +404,10 @@ exports.createSocialCommitment = {
         var params = {
                 newFriend: friend,
                 dbName: 'yanfen@hg.com',
+                action: 'friend',
               };
 
-        performative.createSocialCommitment(agent, 'request', 'friend', params).
+        performative.createSocialCommitment(agent, 'request', params).
             then(function(socialCommitment) {
                 test.equal(socialCommitment.type, 'request');
                 test.equal(socialCommitment.action, 'friend');
@@ -450,6 +451,7 @@ exports.fulfilSocialCommitment = {
             var params = {
                     newFriend: friend,
                     dbName: 'yanfen@hg.com',
+                    action: 'friend',
                   };
 
             /**
@@ -468,7 +470,7 @@ exports.fulfilSocialCommitment = {
                 if (err) {
                   console.log(err);
                 }
-                performative.createSocialCommitment(agent, 'request', 'friend', params).
+                performative.createSocialCommitment(agent, 'request', params).
                     then(function(socialCommitment) {
                         callback();
                       }).

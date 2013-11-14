@@ -26,33 +26,41 @@ module.exports = function(email) {
             extend(true, params, req.files);
 
             // Form a social commitment
+            _creatSocialCommitment(req.user, 'request', params).
+                then(function(sc) {
 
-            _verify(req.user, params).
-                then(function(verified) {
-                        console.log('request');
-                        console.log(req.user);
-                        console.log(req.authInfo);
-                        console.log('params');
-                        console.log(params);
-                        console.log('verified');
-                        console.log(verified);
-            
-                        action[req.body.action](verified, params).
-                            then(function(data) {
-                                res.send(data);
-                              }).
-                            catch(function(err) {
-                                console.log('action error');
-                                console.log(err);
-                                res.send(404, err);
-                              });
-                      }).
+                _verify(req.user, params).
+                    then(function(verified) {
+                            console.log('request');
+                            console.log(req.user);
+                            console.log(req.authInfo);
+                            console.log('params');
+                            console.log(params);
+                            console.log('verified');
+                            console.log(verified);
+                
+                            action[req.body.action](verified, params).
+                                then(function(data) {
+                                    res.send(data);
+                                  }).
+                                catch(function(err) {
+                                    console.log('action error');
+                                    console.log(err);
+                                    res.send(404, err);
+                                  });
+                          }).
+                    catch(function(err) {
+                        console.log('verification error');
+                        console.log(err);
+                        res.send(401, err);
+                      });
+                  }).
                 catch(function(err) {
-                    console.log('verification error');
+                    console.log('Cannot commit');
                     console.log(err);
                     res.send(401, err);
                   });
-          }
+           }
       ];
 
     /**
@@ -121,18 +129,17 @@ module.exports = function(email) {
      *
      * @param Object
      * @param string
-     * @param string
      * @param Object
      *
      * @return promise
      */
-    var _createSocialCommitment = function(agent, performative, action, params) {
+    var _createSocialCommitment = function(agent, performative, params) {
         var deferred = q.defer();
 
         var agentDb = new agentSchema(params.dbName);
         var sc = new agentDb.socialCommitmentModel({
                         type: performative,
-                        action: action,
+                        action: params.action,
                         data: params,
                         creditor: agent.email,
                         debtor: params.dbName,
