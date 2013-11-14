@@ -491,6 +491,7 @@ module.exports = function(email) {
           db.friendModel.findOneAndUpdate(
                           { email: params.newFriend.email }, params.newFriend, { upsert: true },
                           function(err, friend) {
+                                  db.connection.db.close();
                                   if (err) {
                                     deferred.reject(err);
                                   }
@@ -518,6 +519,7 @@ module.exports = function(email) {
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
           db.friendModel.remove({ email: params.email }, function(err, ack) {
+                  db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
                   }
@@ -533,5 +535,16 @@ module.exports = function(email) {
       };
     exports.defriend = _defriend;
 
+    /**
+     * shakeHands
+     */
+    exports.shakeHands = function(verified, params) {
+        var deferred = q.defer();
+        deferred.resolve();
+        return deferred.promise; 
+      };
+
     return exports;
   };
+
+;
