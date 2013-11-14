@@ -145,7 +145,7 @@ module.exports = function (email) {
         creditor: { type: String, required: true, unique: false },
         debtor: { type: String, required: true, unique: false },
         created: { type: Date, required: true, default: Date.now() },
-        fulfilled: { type: Date, required: true, default: null },
+        fulfilled: { type: Date, default: null },
       });
 
     // Export socialCommitmentSchema 
