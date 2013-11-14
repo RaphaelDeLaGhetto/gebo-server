@@ -80,7 +80,8 @@ module.exports = function (email) {
 //        myToken: { type: String, default: null, unique: false },
 
         // Experimental
-        myPrivateKey: { type: String, default: null, unique: false },
+        myPrivateKey: { type: String, default: null, required: false },
+        myCertificate: { type: String, default: null, required: false },
         hisCertificate: { type: String, default: null, unique: false },
 
         // I don't think I need to store his token. The gebo does that.
@@ -114,6 +115,7 @@ module.exports = function (email) {
       }
     catch (error) {}
 
+
     /**
      * File schema
      */
@@ -132,6 +134,25 @@ module.exports = function (email) {
       }
     catch (error) {}
    
+
+    /**
+     * Social commitment schema
+     */
+    var socialCommitmentSchema = new Schema({
+        type: { type: String, required: true, unique: false },
+        action: { type: String, required: true, unique: false },
+        data: { type: Schema.Types.Mixed, required: false, unique: false },
+        created: { type: Date, required: true, default: Date.now() },
+        fulfilled: { type: Date, required: true, default: null },
+      });
+
+    // Export socialCommitmentSchema 
+    try {
+        var socialCommitmentModel = connection.model('SocialCommitment', socialCommitmentSchema);
+        exports.socialCommitmentModel = socialCommitmentModel;
+      }
+    catch (error) {}
+
     /**
      * API
      */
