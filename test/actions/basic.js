@@ -2212,13 +2212,14 @@ exports.friend = {
                 name: 'yanfen',
                 email: 'yanfen@hg.com',
                 uri: 'http://theirhost.com',
+                myPrivateKey: 'some key',
             };
         action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { newFriend: newFriend }).
             then(function(friend) {  
                 test.equal(friend.name, 'yanfen');
                 test.equal(friend.email, 'yanfen@hg.com');
                 test.equal(friend.uri, 'http://theirhost.com');
-
+ 
                 var agentDb = new agentSchema('dan@hg.com');
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
@@ -2228,9 +2229,9 @@ exports.friend = {
                         test.equal(friends.length, 2); 
                         test.done();
                   });
-
               }).
             catch(function(err) {
+                console.log(err);
                 test.ok(false, err);
                 test.done();
               });
@@ -2410,7 +2411,86 @@ exports.defriend = {
 /**
  * voucher 
  */
-exports.voucher = {
+//exports.voucher = {
+//
+//    setUp: function(callback) {
+//        try {
+//            /**
+//             * Setup a registrant
+//             */
+//            var registrant = new gebo.registrantModel({
+//                    name: 'dan',
+//                    email: 'dan@hg.com',
+//                    password: 'password123',
+//                    admin: false,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//          
+//            /**
+//             * Make a friend for the registrant
+//             */
+//            var agentDb = new agentSchema('dan@hg.com'); 
+////            var friend = new agentDb.friendModel({
+////                    name: 'john',
+////                    email: 'john@painter.com',
+////                    uri: 'http://theirhost.com',
+////                    _id: new mongo.ObjectID('23456789ABCD')
+////                });
+//
+//            registrant.save(function(err) {
+////                    friend.save(function(err) {
+////                        if (err) {
+////                          console.log(err);
+////                        }
+//                        agentDb.connection.db.close();
+//                        callback();
+////                      });
+//                  });
+//     	}
+//        catch(e) {
+//            console.dir(e);
+//            callback();
+//    	}
+//    }, 
+//
+//    tearDown: function(callback) {
+//       
+//        gebo.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        var agentDb = new agentSchema('dan@hg.com'); 
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
+//     }, 
+//
+//    'Add a token if registered': function(test) {
+////        action.voucher({ dbName: TEST_DB, collectionName: 'tokens' },
+////                       { foreignAgent: 'foreign@agent.com' }).
+////            then(function(token) {
+//                test.done();
+////              });
+//    },
+//
+//    'Do not add a token if not registered': function(test) {
+//        test.done();
+//    },
+//};
+//
+
+/**
+ * grantAccess
+ */
+exports.grantAccess = {
 
     setUp: function(callback) {
         try {
@@ -2429,21 +2509,23 @@ exports.voucher = {
              * Make a friend for the registrant
              */
             var agentDb = new agentSchema('dan@hg.com'); 
-//            var friend = new agentDb.friendModel({
-//                    name: 'john',
-//                    email: 'john@painter.com',
-//                    uri: 'http://theirhost.com',
-//                    _id: new mongo.ObjectID('23456789ABCD')
-//                });
+            var friend = new agentDb.friendModel({
+                    name: 'john',
+                    email: 'john@painter.com',
+                    uri: 'http://theirhost.com',
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
+
+            friend.hisPermissions.push({ email: 'some@coolapp.com' });
 
             registrant.save(function(err) {
-//                    friend.save(function(err) {
-//                        if (err) {
-//                          console.log(err);
-//                        }
+                    friend.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
                         agentDb.connection.db.close();
                         callback();
-//                      });
+                      });
                   });
      	}
         catch(e) {
@@ -2472,15 +2554,159 @@ exports.voucher = {
           });
      }, 
 
-    'Add a token if registered': function(test) {
-//        action.voucher({ dbName: TEST_DB, collectionName: 'tokens' },
-//                       { foreignAgent: 'foreign@agent.com' }).
-//            then(function(token) {
+    'Grant a friend access to a resource he didn\'t have access to before': function(test) {
+        test.expect(6);
+        action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
+                        { friend: 'john@painter.com',
+                          resource: 'new@app.com',
+                          read: 'true',
+                          write: 'true',
+                          execute: 'false', }).
+            then(function(friend) {
+                var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'new@app.com');
+                test.equal(index, 1);
+                test.equal(friend.hisPermissions.length, 2);
+                test.equal(friend.hisPermissions[index].email, 'new@app.com');
+                test.equal(friend.hisPermissions[index].read, true);
+                test.equal(friend.hisPermissions[index].write, true);
+                test.equal(friend.hisPermissions[index].execute, false);
                 test.done();
-//              });
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     },
 
-    'Do not add a token if not registered': function(test) {
+    'Change a friend\'s access level to a resource': function(test) {
+        test.expect(6);
+        action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
+                        { friend: 'john@painter.com',
+                          resource: 'some@coolapp.com',
+                          read: 'false',
+                          write: 'false',
+                          execute: 'true', }).
+            then(function(friend) {
+                var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'some@coolapp.com');
+                test.equal(index, 0);
+                test.equal(friend.hisPermissions.length, 1);
+                test.equal(friend.hisPermissions[index].email, 'some@coolapp.com');
+                test.equal(friend.hisPermissions[index].read, false);
+                test.equal(friend.hisPermissions[index].write, false);
+                test.equal(friend.hisPermissions[index].execute, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+};
+
+/**
+ * shakeHands
+ */
+exports.shakeHands = {
+
+    setUp: function(callback) {
+        try {
+            /**
+             * Setup local gebo
+             *
+             * (I'm pretending these registrants are hosted on
+             * different servers)
+             */
+            var registrant = new gebo.registrantModel({
+                    name: nconf.get('name'),
+                    email: nconf.get('email'),
+                    password: 'password123',
+                    admin: true,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+          
+            /**
+             * Make a friend for the registrant
+             */
+            var friend = new gebo.friendModel({
+                    name: 'Foreign gebo',
+                    email: 'friendly@gebo.com',
+                    uri: 'https://friendlyhost.com',
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
+
+            registrant.save(function(err) {
+                    friend.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+ 
+                        /**
+                         * Setup friendly gebo
+                         */
+                        var friendlyGebo = require('../../schemata/gebo')('friendly@gebo.com');
+                        var friendlyRegistrant = new friendlyGebo.registrantModel({
+                                name: 'friendly-gebo',
+                                email: 'friendly@gebo.com',
+                                password: 'password123',
+                                admin: true,
+                                _id: new mongo.ObjectID('0123456789AB')
+                            });
+
+                        /**
+                         * Make friend's with the local gebo 
+                         */
+                        var friend = new friendlyGebo.friendModel({
+                                name: nconf.get('name'),
+                                email: nconf.get('email'),
+                                uri: 'https://myhost.com',
+                                _id: new mongo.ObjectID('23456789ABCD')
+                            });
+
+                        friendlyRegistrant.save(function(err) {
+                                friend.save(function(err) {
+                                    if (err) {
+                                      console.log(err);
+                                    }
+                                    friendlyGebo.connection.db.close();
+                                    callback();
+                                  });
+                              });
+                      });
+                  });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+       
+        gebo.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+          var friendlyGebo = require('../../schemata/gebo')('friendly@gebo.com');
+          friendlyGebo.connection.on('open', function(err) {
+              friendlyGebo.connection.db.dropDatabase(function(err) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  friendlyGebo.connection.db.close();
+                  callback();
+              });
+            });
+     }, 
+
+    'Exchange public certificates between friends': function(test) {
         test.done();
     },
+
 };
+
+

@@ -536,6 +536,77 @@ module.exports = function(email) {
     exports.defriend = _defriend;
 
     /**
+     * Change the access level to the requested
+     * resource
+     *
+     * @param Object
+     * @param Object
+     *
+     * @return promise
+     */
+    exports.grantAccess = function(verified, params) {
+        var deferred = q.defer();
+        if (verified.admin || verified.write) {
+          var db = new agentSchema(verified.dbName);
+          db.friendModel.findOne({ email: params.friend }, function(err, friend) {
+                  if (err) {
+                    deferred.reject(err);
+                  }
+                  else {
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', params.resource);
+                    if (index > -1) {
+                      friend.hisPermissions.splice(index, 1);
+                    }
+                    friend.hisPermissions.push({
+                            email: params.resource,
+                            read: params.read === 'true',
+                            write: params.write === 'true',
+                            execute: params.execute === 'true',
+                        });
+
+                    friend.save(function(err, savedFriend) {
+                            db.connection.db.close();
+                            if (err) {
+                              deferred.reject(err);
+                            }
+                            else {
+                              deferred.resolve(savedFriend);
+                            }
+                      });
+                  }
+            });
+        }
+
+        return deferred.promise;
+
+//            
+//            agentDb.friendModel.findOne({ email: friendAgent },
+//                function(err, friend) {
+//                    if (err) {
+//                      console.log(err);
+//                    }
+//
+//                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', resource);
+//
+//                    if (index > -1) {
+//                      friend.hisPermissions.splice(index, 1);
+//                    }
+//                    friend.hisPermissions.push({ email: resource,
+//                                                 read: read === 'true', 
+//                                                 write: write === 'true', 
+//                                                 execute: execute === 'true', 
+//                                               });
+//
+//                    friend.save(function(err) {
+//                        if (err) {
+//                          console.log(err);
+//                        }
+//                        done();
+//                      });
+//                  });
+      };
+
+    /**
      * shakeHands
      */
     exports.shakeHands = function(verified, params) {
@@ -547,4 +618,3 @@ module.exports = function(email) {
     return exports;
   };
 
-;
