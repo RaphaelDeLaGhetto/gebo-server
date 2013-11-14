@@ -142,6 +142,8 @@ module.exports = function (email) {
         type: { type: String, required: true, unique: false },
         action: { type: String, required: true, unique: false },
         data: { type: Schema.Types.Mixed, required: false, unique: false },
+        creditor: { type: String, required: true, unique: false },
+        debtor: { type: String, required: true, unique: false },
         created: { type: Date, required: true, default: Date.now() },
         fulfilled: { type: Date, required: true, default: null },
       });
