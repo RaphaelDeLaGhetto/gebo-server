@@ -1,11 +1,60 @@
 extends layout
 
 block content
+    h2 You
     p name: #{agent.name}
     p email: #{agent.email}
 
-    p.lead Friends
-    ul
+    .panel-group(id="scAccordion")
+        .panel.panel-default
+            .panel-heading
+                .panel-title
+                    a(data-toggle="collapse", data-parent="#scAccordion", href="#requestsCollapse") Social Commitments (#{socialCommitments.length})
+            .panel-collapse.collapse(id="requestsCollapse")
+                .panel-body
+                    - for (var i = 0; i < socialCommitments.length; i++)
+                        .panel-group(id="#{socialCommitments[i]._id}Accordion")
+                            .panel.panel-default
+                                .panel-heading
+                                    .panel-title
+                                        a(data-toggle="collapse", data-parent="##{socialCommitments[i]._id}Accordion", href="##{socialCommitments[i]._id}")
+                                            Requests
+                                .panel-collapse.collapse.in(id="#{socialCommitments[i]._id}")
+                                    .panel-body
+                                        | Some junk
+    .panel-group(id="friendsAccordion")
+        .panel.panel-default
+            .panel-heading
+                .panel-title
+                    a(data-toggle="collapse", data-parent="#friendsAccordion", href="#friendsCollapse") Friends (#{friends.length})
+            .panel-collapse.collapse(id="friendsCollapse")
+                 .panel-body
+                    - for (var i = 0; i < friends.length; i++)
+                        .panel-group(id="#{friends[i]._id}Accordion}")
+                            .panel.panel-default
+                                .panel-heading
+                                    .panel-title
+                                        a(data-toggle="collapse", data-parent="##{friends[i]._id}Accordion", href="##{friends[i]._id}")
+                                            | #{friends[i].name}: #{friends[i].email}
+                                .panel-collapse.collapse(id="#{friends[i]._id}")
+                                    .panel-body
+                                        - for (var j = 0; j < friends[i].hisPermissions.length; j++)
+                                            div #{friends[i].hisPermissions[j].email}
+                                            form.form-inline(role="form", action="/request", method="post") 
+                                                .form-group
+                                                    input(type="hidden", name="action", value="grantAccess")
+                                                    input(type="hidden", name="friend", value=friends[i].email)
+                                                    input(type="hidden", name="resource", value=friends[i].hisPermissions[j].email)
+                                                    label(for="read") Read
+                                                    input(type="checkbox", id="read", name="read", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].read)
+                                                    label(for="write") Write
+                                                    input(type="checkbox", id="write", name="write", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].write)
+                                                    label(for="execute") Execute
+                                                    input(type="checkbox", id="execute", name="execute", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].execute)
+
+
+
+     ul
         - for (var i = 0; i < friends.length; i++)
             li #{friends[i].name} - #{friends[i].email}
             ul
