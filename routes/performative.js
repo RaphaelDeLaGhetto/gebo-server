@@ -25,6 +25,8 @@ module.exports = function(email) {
             var params = req.body;
             extend(true, params, req.files);
 
+            // Form a social commitment
+
             _verify(req.user, params).
                 then(function(verified) {
                         console.log('request');
@@ -114,6 +116,63 @@ module.exports = function(email) {
       };
     exports.verify = _verify;
     
+    /**
+     * Create a social commitment for an agent to fulfil
+     *
+     * @param Object
+     * @param string
+     * @param string
+     * @param Object
+     *
+     * @return promise
+     */
+    var _createSocialCommitment = function(agent, performative, action, params) {
+        var deferred = q.defer();
+
+        var agentDb = new agentSchema(params.dbName);
+        var sc = new agentDb.socialCommitmentModel({
+                        type: performative,
+                        action: action,
+                        data: params,
+                        creditor: agent.email,
+                        debtor: params.dbName,
+                    });
+        sc.save(function(err, socialCommitment) {
+            if (err) {
+              deferred.reject(err);
+            }
+            else {
+              deferred.resolve(socialCommitment);
+            }
+        });
+        return deferred.promise;
+      };
+    exports.createSocialCommitment = _createSocialCommitment;
+
+    /**
+     * Fulfil a social commitment
+     *
+     * @param string
+     * @param string
+     *
+     * @return promise
+     */
+    var _fulfilSocialCommitment = function(agent, id) {
+        var deferred = q.defer();
+
+        var agentDb = new agentSchema(agent);
+        agentDb.socialCommitmentModel.findOneAndUpdate({ _id: id }, { fulfilled: Date.now() }, function(err, sc) {
+            if (err) {
+              deferred.reject(err);
+            }
+            else {
+              deferred.resolve(sc);
+            }
+          });
+        return deferred.promise;
+      };
+    exports.fulfilSocialCommitment = _fulfilSocialCommitment;
+
     return exports;
   };
 

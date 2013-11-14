@@ -19,7 +19,11 @@ var BASE_ADDRESS = 'http://theirhost.com';
 var performativeRoute = require('../../routes/performative');
 var performative = new performativeRoute(nconf.get('testDb'));
 
-//var performative = require('../../routes/performative')(nconf.get('testDb'));
+var SIGNING_PAIR;
+utils.getPrivateKeyAndCertificate().
+    then(function(pair) {
+        SIGNING_PAIR = pair
+      });
 
 var geboDb = new geboSchema(nconf.get('testDb'));
 
@@ -94,6 +98,7 @@ exports.verify = {
                     if (err) {
                       console.log(err);
                     }
+                    regularAgentDb.connection.db.close();
                     adminRegistrant.save(function(err) {
                         if (err) {
                           console.log(err);
@@ -102,7 +107,6 @@ exports.verify = {
                             if (err) {
                               console.log(err);
                             }
-                            regularAgentDb.connection.db.close();
                             adminAgentDb.connection.db.close();
                             callback();
                           });
@@ -329,3 +333,208 @@ exports.verify = {
               });
     },
 };
+
+
+/**
+ * createSocialCommitment
+ */
+exports.createSocialCommitment = {
+
+    setUp: function(callback) {
+        try {
+            /**
+             * Setup a registrant
+             */
+            var registrant = new geboDb.registrantModel({
+                    name: 'yanfen',
+                    email: 'yanfen@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+
+            // There has got to be a better way to do this...
+            registrant.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
+        }
+        catch(err) {
+            console.log(err);
+            callback();
+        }
+    },
+
+    tearDown: function(callback) {
+
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+        var agentDb = new agentSchema('yanfen@hg.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
+          });
+    },
+
+    'Add a social commitment to the agent\'s database': function(test) {
+        test.expect(10);
+
+        var friend = {
+                name: 'richard',
+                email: 'richard@construction.com',
+                uri: BASE_ADDRESS,
+                hisCertificate: SIGNING_PAIR.certificate,
+              };
+
+        var agent = {
+                email: 'richard@construction.com',
+              };
+
+        var params = {
+                newFriend: friend,
+                dbName: 'yanfen@hg.com',
+              };
+
+        performative.createSocialCommitment(agent, 'request', 'friend', params).
+            then(function(socialCommitment) {
+                test.equal(socialCommitment.type, 'request');
+                test.equal(socialCommitment.action, 'friend');
+                test.equal(socialCommitment.data.newFriend.name, 'richard');
+                test.equal(socialCommitment.data.newFriend.email, 'richard@construction.com');
+                test.equal(socialCommitment.data.newFriend.uri, BASE_ADDRESS);
+                test.equal(socialCommitment.data.newFriend.hisCertificate, SIGNING_PAIR.certificate);
+                test.equal(socialCommitment.debtor, 'yanfen@hg.com');
+                test.equal(socialCommitment.creditor, 'richard@construction.com');
+                test.equal(typeof socialCommitment.created, 'object');
+                test.equal(socialCommitment.fulfilled, null);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+};
+
+/**
+ * fulfilSocialCommitment
+ */
+exports.fulfilSocialCommitment = {
+
+    setUp: function(callback) {
+        try {
+            var friend = {
+                    name: 'richard',
+                    email: 'richard@construction.com',
+                    uri: BASE_ADDRESS,
+                    hisCertificate: SIGNING_PAIR.certificate,
+                  };
+    
+            var agent = {
+                    email: 'richard@construction.com',
+                  };
+    
+            var params = {
+                    newFriend: friend,
+                    dbName: 'yanfen@hg.com',
+                  };
+
+            /**
+             * Setup a registrant
+             */
+            var registrant = new geboDb.registrantModel({
+                    name: 'yanfen',
+                    email: 'yanfen@hg.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+
+            // There has got to be a better way to do this...
+            registrant.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                performative.createSocialCommitment(agent, 'request', 'friend', params).
+                    then(function(socialCommitment) {
+                        callback();
+                      }).
+                    catch(function(err) {
+                        console.log(err);
+                        callback();      
+                      });
+              });
+        }
+        catch(err) {
+            console.log(err);
+            callback();
+        }
+    },
+
+    tearDown: function(callback) {
+
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+          });
+
+        var agentDb = new agentSchema('yanfen@hg.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                agentDb.connection.db.close();
+                callback();
+              });
+          });
+    },
+
+    'Set the fulfillment date on the socialCommitment document': function(test) {
+        test.expect(10);
+        var agentDb = new agentSchema('yanfen@hg.com');
+        agentDb.socialCommitmentModel.findOne({ creditor: 'richard@construction.com' }, function(err, sc) {
+            agentDb.connection.db.close();
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            performative.fulfilSocialCommitment('yanfen@hg.com', sc._id).
+                then(function(socialCommitment) {
+                    test.equal(socialCommitment.type, 'request');
+                    test.equal(socialCommitment.action, 'friend');
+                    test.equal(socialCommitment.data.newFriend.name, 'richard');
+                    test.equal(socialCommitment.data.newFriend.email, 'richard@construction.com');
+                    test.equal(socialCommitment.data.newFriend.uri, BASE_ADDRESS);
+                    test.equal(socialCommitment.data.newFriend.hisCertificate, SIGNING_PAIR.certificate);
+                    test.equal(socialCommitment.debtor, 'yanfen@hg.com');
+                    test.equal(socialCommitment.creditor, 'richard@construction.com');
+                    test.equal(typeof socialCommitment.created, 'object');
+                    test.equal(typeof socialCommitment.fulfilled, 'object');
+                    test.done();
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();
+                  });
+          });
+    },
+};
+
+
+
