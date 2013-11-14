@@ -211,26 +211,31 @@ module.exports = function (grunt) {
     /**
      * renew
      */
-    grunt.registerTask('renew', 'provide your friend with a new certificate',
+    grunt.registerTask('shakehands', 'exchange certificates between friends',
         function (friendEmail, myEmail) {
 
             // Put grunt into async mode
             var done = this.async();
 
-            utils.getPrivateKeyAndCertificate().
-                then(function(pair) {
-                    console.log('pair');
-                    console.log(pair);
+            var agentDb = require('./schemata/agent')(myEmail);
+            agentDb.friendModel.findOne({ email: friendEmail }, function (err, friend) {
+                done();
+              });
 
-                    var agentDb = require('./schemata/agent')(myEmail);
-                    agentDb.friendModel({ email: friendEmail },
-                        function(err, friend) {
-                            console.log(friend);
-                            done();
-                          });
-                     
-
-                  });            
+//l            utils.getPrivateKeyAndCertificate().
+//l                then(function(pair) {
+//l                    console.log('pair');
+//l                    console.log(pair);
+//l
+//l                    var agentDb = require('./schemata/agent')(myEmail);
+//l                    agentDb.friendModel({ email: friendEmail },
+//l                        function(err, friend) {
+//l                            console.log(friend);
+//l                            done();
+//l                          });
+//l                     
+//l
+//l                  });            
           });
 
     /**
@@ -268,5 +273,4 @@ module.exports = function (grunt) {
                       });
                   });
           });
-
   };
