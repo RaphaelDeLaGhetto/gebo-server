@@ -627,7 +627,6 @@ exports.get = {
 
         token.get('john@painter.com', 'read write some@resource.com', 'dan@hg.com').
                 then(function(t) {
-                    t = JSON.parse(t);
                     scope.done();
                     test.equal(t.access_token, JWT_RESPONSE.access_token);
                     test.equal(t.token_type, JWT_RESPONSE.token_type);
@@ -650,7 +649,6 @@ exports.get = {
 
         token.get('richard@construction.com', 'read write some@resource.com', 'dan@hg.com').
                 then(function(t) {
-                    t = JSON.parse(t);
                     scope.done();
                     test.equal(t.access_token, JWT_RESPONSE.access_token);
                     test.equal(t.token_type, JWT_RESPONSE.token_type);

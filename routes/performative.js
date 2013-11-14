@@ -18,7 +18,7 @@ module.exports = function(email) {
      * Receive a request for consideration
      */
     exports.request = [
-        passport.authenticate('bearer', { session: false }),
+        passport.authenticate(['bearer'], { session: false }),
         function(req, res) {
 
             // There might be files attached to the request
@@ -41,7 +41,14 @@ module.exports = function(email) {
                 
                             action[req.body.action](verified, params).
                                 then(function(data) {
-                                    res.send(data);
+                                    _fulfilSocialCommitment(sc._id, params.dbName).
+                                        then(function(sc) {
+                                            res.send(data);
+                                          }).
+                                        catch(function(err) {
+                                            console.log(err);       
+                                            res.send(401, err);
+                                          });
                                   }).
                                 catch(function(err) {
                                     console.log('action error');

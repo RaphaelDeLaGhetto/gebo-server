@@ -557,6 +557,7 @@ module.exports = function(email) {
                     if (index > -1) {
                       friend.hisPermissions.splice(index, 1);
                     }
+
                     friend.hisPermissions.push({
                             email: params.resource,
                             read: params.read === 'true',
@@ -578,32 +579,6 @@ module.exports = function(email) {
         }
 
         return deferred.promise;
-
-//            
-//            agentDb.friendModel.findOne({ email: friendAgent },
-//                function(err, friend) {
-//                    if (err) {
-//                      console.log(err);
-//                    }
-//
-//                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', resource);
-//
-//                    if (index > -1) {
-//                      friend.hisPermissions.splice(index, 1);
-//                    }
-//                    friend.hisPermissions.push({ email: resource,
-//                                                 read: read === 'true', 
-//                                                 write: write === 'true', 
-//                                                 execute: execute === 'true', 
-//                                               });
-//
-//                    friend.save(function(err) {
-//                        if (err) {
-//                          console.log(err);
-//                        }
-//                        done();
-//                      });
-//                  });
       };
 
     /**
