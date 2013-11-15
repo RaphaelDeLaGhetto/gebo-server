@@ -1,4 +1,5 @@
-var utils = require('../lib/utils');
+var utils = require('../lib/utils'),
+    q = require('q');
 
 /**
  * Inspired by Greg Wang, 2013-11-5
@@ -25,6 +26,54 @@ module.exports = function(email) {
           }
         }
       });
+
+    /**
+     * Agree to perform the requested action
+     *
+     * @param Object
+     * @param Object
+     *
+     * @return promise
+     */
+    exports.agree = function(verified, message) {
+        var deferred = q.defer();
+        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
+          console.log('message');
+          console.log(message);
+          exports[message.action](verified, message.data).
+            then(function(data) {
+                deferred.resolve(data);
+              }).
+            catch(function(err) {
+                deferred.reject(err);
+              });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+ 
+        return deferred.promise;
+      };
+
+    /**
+     * Refuse to perform the requested action
+     *
+     * @param Object
+     * @param Object
+     *
+     * @return promise
+     */
+    exports.refuse = function(verified, message) {
+        var deferred = q.defer();
+        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
+          deferred.resolve();
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+ 
+        return deferred.promise;
+      };
 
     return exports;
   };
