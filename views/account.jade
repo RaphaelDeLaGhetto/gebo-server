@@ -18,10 +18,14 @@ block content
                                 .panel-heading
                                     .panel-title
                                         a(data-toggle="collapse", data-parent="##{socialCommitments[i]._id}Accordion", href="##{socialCommitments[i]._id}")
-                                            Requests
-                                .panel-collapse.collapse.in(id="#{socialCommitments[i]._id}")
+                                            | #{socialCommitments[i].type} #{socialCommitments[i].action}
+                                .panel-collapse.collapse(id="#{socialCommitments[i]._id}")
                                     .panel-body
-                                        | Some junk
+                                        div Creditor: #{socialCommitments[i].creditor}
+                                        div Debtor: #{socialCommitments[i].debtor}
+                                        div Created: #{socialCommitments[i].created}
+                                        div Fulfilled: #{socialCommitments[i].fulfilled}
+                                        div Data: #{JSON.stringify(socialCommitments[i].data)}
     .panel-group(id="friendsAccordion")
         .panel.panel-default
             .panel-heading
@@ -42,28 +46,16 @@ block content
                                             div #{friends[i].hisPermissions[j].email}
                                             form.form-inline(role="form", action="/request", method="post") 
                                                 .form-group
+                                                    input(type="hidden", name="recipient", value=agent.email)
                                                     input(type="hidden", name="action", value="grantAccess")
                                                     input(type="hidden", name="friend", value=friends[i].email)
-                                                    input(type="hidden", name="resource", value=friends[i].hisPermissions[j].email)
+                                                    input(type="hidden", name="relevantResource", value=friends[i].hisPermissions[j].email)
                                                     label(for="read") Read
-                                                    input(type="checkbox", id="read", name="read", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].read)
+                                                    input(type="checkbox", id="read", name="read", value="true", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].read)
                                                     label(for="write") Write
-                                                    input(type="checkbox", id="write", name="write", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].write)
+                                                    input(type="checkbox", id="write", name="write", value="true", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].write)
                                                     label(for="execute") Execute
-                                                    input(type="checkbox", id="execute", name="execute", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].execute)
+                                                    input(type="checkbox", id="execute", name="execute", value="true", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].execute)
 
 
 
-     ul
-        - for (var i = 0; i < friends.length; i++)
-            li #{friends[i].name} - #{friends[i].email}
-            ul
-                - for (var j = 0; j < friends[i].hisPermissions.length; j++)
-                    li 
-                        | #{friends[i].hisPermissions[j].email}, 
-                        if friends[i].hisPermissions[j].read
-                            | read  
-                        if friends[i].hisPermissions[j].write 
-                            | write 
-                        if friends[i].hisPermissions[j].execute
-                            | execute
