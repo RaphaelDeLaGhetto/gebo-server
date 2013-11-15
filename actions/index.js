@@ -39,8 +39,12 @@ module.exports = function(email) {
     exports.agree = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || (verified.read && verified.write && verified.execute)) { 
+          console.log('agree message');
+          console.log(message);
           var agentDb = new agentSchema(verified.dbName);
           agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function(err, sc) {
+                  console.log('agree sc');
+                  console.log(sc);
                   if (err) {
                     agentDb.connection.db.close();
                     deferred.reject(err);
