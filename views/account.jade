@@ -24,13 +24,13 @@ block content
                                                 input(type="hidden", name="recipient", value=agent.email)
                                                 input(type="hidden", name="action", value="agree")
                                                 input(type="hidden", name="socialCommitmentId", value=socialCommitments[i]._id)
-                                                button.btn.btn-default(type="submit") Agree 
+                                            button.btn.btn-default(type="submit") Agree 
                                         form.form-inline(role="form", action="/request", method="post")
                                             .form-group
                                                 input(type="hidden", name="recipient", value=agent.email)
                                                 input(type="hidden", name="action", value="refuse")
                                                 input(type="hidden", name="socialCommitmentId", value=socialCommitments[i]._id)
-                                                button.btn.btn-default(type="submit") Refuse
+                                            button.btn.btn-default(type="submit") Refuse
                                             
                                 .panel-collapse.collapse(id="#{socialCommitments[i]._id}")
                                     .panel-body
@@ -46,6 +46,15 @@ block content
                     a(data-toggle="collapse", data-parent="#friendsAccordion", href="#friendsCollapse") Friends (#{friends.length})
             .panel-collapse.collapse(id="friendsCollapse")
                  .panel-body
+                    form.form-inline(role="form", action="/request", method="post")
+                        .form-group
+                            input(type="hidden", name="action", value="friend")
+                        .form-group
+                            input.form-control(type="email", name="recipient", placeholder="Your friend's email")
+                        .form-group
+                            input.form-control(type="url", name="uri", placeholder="Your friend's gebo")
+                        button.btn.btn-default(type="submit") Friend!
+                    br                            
                     - for (var i = 0; i < friends.length; i++)
                         .panel-group(id="#{friends[i]._id}Accordion}")
                             .panel.panel-default
