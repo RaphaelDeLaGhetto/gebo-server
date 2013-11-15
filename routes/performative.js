@@ -203,6 +203,7 @@ module.exports = function(email) {
 
         var agentDb = new agentSchema(agent);
         agentDb.socialCommitmentModel.findOneAndUpdate({ _id: id }, { fulfilled: Date.now() }, function(err, sc) {
+            agentDb.connection.db.close();
             if (err) {
               deferred.reject(err);
             }
