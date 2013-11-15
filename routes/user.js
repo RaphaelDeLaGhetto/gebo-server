@@ -23,7 +23,7 @@ module.exports = function(dbName) {
         function (req, res) {
             var agent = require('../schemata/agent')(req.user.email);
             agent.friendModel.find({}, function(err, friends) {
-                agent.socialCommitmentModel.find({}, function(err, scs) {
+                agent.socialCommitmentModel.find({}).where('fulfilled', null).sort('-created').exec(function(err, scs) {
                     agent.connection.db.close();
                     res.render('account', { agent: req.user,
                                             friends: friends,
