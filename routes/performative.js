@@ -49,7 +49,7 @@ module.exports = function(email) {
                                     then(function(data) {
                                         console.log('data');
                                         console.log(data);
-                                        _fulfilSocialCommitment(sc._id, message.recipient).
+                                        _fulfilSocialCommitment(message.recipient, sc._id).
                                             then(function(sc) {
                                                 res.send(data);
                                               }).
