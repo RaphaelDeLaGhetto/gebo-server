@@ -1,5 +1,5 @@
 extends layout
-
+    
 block content
     h2 You
     p name: #{agent.name}
@@ -18,7 +18,20 @@ block content
                                 .panel-heading
                                     .panel-title
                                         a(data-toggle="collapse", data-parent="##{socialCommitments[i]._id}Accordion", href="##{socialCommitments[i]._id}")
-                                            | #{socialCommitments[i].type} #{socialCommitments[i].action}
+                                            | #{socialCommitments[i].type} #{socialCommitments[i].action} 
+                                        form.form-inline(role="form", action="/request", method="post")
+                                            .form-group
+                                                input(type="hidden", name="recipient", value=agent.email)
+                                                input(type="hidden", name="action", value="agree")
+                                                input(type="hidden", name="socialCommitmentId", value=socialCommitments[i]._id)
+                                                button.btn.btn-default(type="submit") Agree 
+                                        form.form-inline(role="form", action="/request", method="post")
+                                            .form-group
+                                                input(type="hidden", name="recipient", value=agent.email)
+                                                input(type="hidden", name="action", value="refuse")
+                                                input(type="hidden", name="socialCommitmentId", value=socialCommitments[i]._id)
+                                                button.btn.btn-default(type="submit") Refuse
+                                            
                                 .panel-collapse.collapse(id="#{socialCommitments[i]._id}")
                                     .panel-body
                                         div Creditor: #{socialCommitments[i].creditor}
