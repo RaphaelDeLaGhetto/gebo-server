@@ -115,8 +115,6 @@ exports.agree = {
             action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true }, scs[0]).
                 then(function(data) {
                     agentDb.connection.db.close();
-                    console.log('data');
-                    console.log(data);
                     test.equal(data.name, 'Yanfen');
                     test.equal(data.email, 'yanfen@hg.com');
                     test.equal(data.uri, 'https://theirhost.com');
@@ -128,10 +126,8 @@ exports.agree = {
                           console.log(err);
                           test.ok(false, err);
                         }
-                        console.log('scs');
-                        console.log(scs);
                         test.equal(scs.length, 1);
-                        test.equal(typeof scs[0].fulfilled, 'object');
+                        test.equal(scs[0].fulfilled === null, false);
                         test.done();
                       });
                   }).
@@ -217,41 +213,25 @@ exports.refuse = {
      }, 
 
     'Fulfil the social commitment but do not perform the action': function(test) {
-//        test.expect(7);
+        test.expect(3);
 
         // Get the social commitment
-//        var agentDb = new agentSchema('dan@hg.com'); 
-//        agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//            test.equal(scs.length, 1);
-//            action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true }, scs[0]).
-//                then(function(data) {
-//                    agentDb.connection.db.close();
-//                    console.log('data');
-//                    console.log(data);
-//                    test.equal(data.name, 'Yanfen');
-//                    test.equal(data.email, 'yanfen@hg.com');
-//                    test.equal(data.uri, 'https://theirhost.com');
-//                    test.equal(data.hisCertificate, 'some certificate');
-//                    var agentDb = new agentSchema('dan@hg.com'); 
-//                    agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//                        if (err) {
-//                          console.log(err);
-//                          test.ok(false, err);
-//                        }
-//                        console.log('scs');
-//                        console.log(scs);
-//                        agentDb.connection.db.close();
-//                        test.equal(scs.length, 1);
-//                        test.equal(typeof scs[0].fulfilled, 'object');
-                        test.done();
-//                      });
-//                  }).
-//                catch(function(err) {
-//                    console.log(err);
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//          });
+        var agentDb = new agentSchema('dan@hg.com'); 
+        agentDb.socialCommitmentModel.find({}, function(err, scs) {
+            test.equal(scs.length, 1);
+            test.equal(scs[0].fulfilled, null);
+            action.refuse({ dbName: 'dan@hg.com', read: true, write: true, execute: true }, scs[0]).
+                then(function(sc) {
+                    agentDb.connection.db.close();
+                    test.equal(sc.fulfilled === null, false);
+                    test.done();
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();
+                  });
+          });
     },
 };
 

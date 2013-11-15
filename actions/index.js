@@ -1,4 +1,5 @@
 var utils = require('../lib/utils'),
+    agentSchema = require('../schemata/agent'),
     q = require('q');
 
 /**
@@ -38,11 +39,21 @@ module.exports = function(email) {
     exports.agree = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-          console.log('message');
-          console.log(message);
           exports[message.action](verified, message.data).
             then(function(data) {
-                deferred.resolve(data);
+                var agentDb = new agentSchema(verified.dbName);
+                agentDb.socialCommitmentModel.findOneAndUpdate(
+                        { _id: message._id },
+                        { fulfilled: Date.now() },
+                        function(err, sc) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              deferred.reject(err);
+                            }
+                            else {
+                              deferred.resolve(data);
+                            }
+                          });
               }).
             catch(function(err) {
                 deferred.reject(err);
@@ -66,7 +77,19 @@ module.exports = function(email) {
     exports.refuse = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-          deferred.resolve();
+            var agentDb = new agentSchema(verified.dbName);
+            agentDb.socialCommitmentModel.findOneAndUpdate(
+                    { _id: message._id },
+                    { fulfilled: Date.now() },
+                    function(err, sc) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          deferred.reject(err);
+                        }
+                        else {
+                          deferred.resolve(sc);
+                        }
+                      });
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');

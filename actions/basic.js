@@ -16,6 +16,8 @@ module.exports = function(email) {
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
 
+//    var actions = require('./')(dbName);
+
     /**
      * Determine if the database exists. To do this,
      * a database is opened and the number of 
@@ -487,7 +489,6 @@ module.exports = function(email) {
 
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
-
           db.friendModel.findOneAndUpdate(
                           { email: message.newFriend.email }, message.newFriend, { upsert: true },
                           function(err, friend) {
@@ -553,13 +554,13 @@ module.exports = function(email) {
                     deferred.reject(err);
                   }
                   else {
-                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.resource);
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.relevantResource);
                     if (index > -1) {
                       friend.hisPermissions.splice(index, 1);
                     }
 
                     friend.hisPermissions.push({
-                            email: message.resource,
+                            email: message.relevantResource,
                             read: message.read === 'true',
                             write: message.write === 'true',
                             execute: message.execute === 'true',

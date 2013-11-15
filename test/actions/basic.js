@@ -2409,85 +2409,6 @@ exports.defriend = {
 };
 
 /**
- * voucher 
- */
-//exports.voucher = {
-//
-//    setUp: function(callback) {
-//        try {
-//            /**
-//             * Setup a registrant
-//             */
-//            var registrant = new gebo.registrantModel({
-//                    name: 'dan',
-//                    email: 'dan@hg.com',
-//                    password: 'password123',
-//                    admin: false,
-//                    _id: new mongo.ObjectID('0123456789AB')
-//                });
-//          
-//            /**
-//             * Make a friend for the registrant
-//             */
-//            var agentDb = new agentSchema('dan@hg.com'); 
-////            var friend = new agentDb.friendModel({
-////                    name: 'john',
-////                    email: 'john@painter.com',
-////                    uri: 'http://theirhost.com',
-////                    _id: new mongo.ObjectID('23456789ABCD')
-////                });
-//
-//            registrant.save(function(err) {
-////                    friend.save(function(err) {
-////                        if (err) {
-////                          console.log(err);
-////                        }
-//                        agentDb.connection.db.close();
-//                        callback();
-////                      });
-//                  });
-//     	}
-//        catch(e) {
-//            console.dir(e);
-//            callback();
-//    	}
-//    }, 
-//
-//    tearDown: function(callback) {
-//       
-//        gebo.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//          });
-//
-//        var agentDb = new agentSchema('dan@hg.com'); 
-//        agentDb.connection.on('open', function(err) {
-//            agentDb.connection.db.dropDatabase(function(err) {
-//                if (err) {
-//                  console.log(err);
-//                }
-//                agentDb.connection.db.close();
-//                callback();
-//              });
-//          });
-//     }, 
-//
-//    'Add a token if registered': function(test) {
-////        action.voucher({ dbName: TEST_DB, collectionName: 'tokens' },
-////                       { foreignAgent: 'foreign@agent.com' }).
-////            then(function(token) {
-//                test.done();
-////              });
-//    },
-//
-//    'Do not add a token if not registered': function(test) {
-//        test.done();
-//    },
-//};
-//
-
-/**
  * grantAccess
  */
 exports.grantAccess = {
@@ -2519,13 +2440,13 @@ exports.grantAccess = {
             friend.hisPermissions.push({ email: 'some@coolapp.com' });
 
             registrant.save(function(err) {
-                    friend.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
-                        agentDb.connection.db.close();
-                        callback();
-                      });
+                friend.save(function(err) {
+                    if (err) {
+                        console.log(err);
+                      }
+                      agentDb.connection.db.close();
+                      callback();
+                    });
                   });
      	}
         catch(e) {
@@ -2558,7 +2479,7 @@ exports.grantAccess = {
         test.expect(6);
         action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
                         { friend: 'john@painter.com',
-                          resource: 'new@app.com',
+                          relevantResource: 'new@app.com',
                           read: 'true',
                           write: 'true',
                           execute: 'false', }).
@@ -2583,7 +2504,7 @@ exports.grantAccess = {
         test.expect(6);
         action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
                         { friend: 'john@painter.com',
-                          resource: 'some@coolapp.com',
+                          relevantResource: 'some@coolapp.com',
                           read: 'false',
                           write: 'false',
                           execute: 'true', }).
