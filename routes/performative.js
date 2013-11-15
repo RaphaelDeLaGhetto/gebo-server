@@ -47,6 +47,8 @@ module.exports = function(email) {
                     
                                 action[message.action](verified, message).
                                     then(function(data) {
+                                        console.log('data');
+                                        console.log(data);
                                         _fulfilSocialCommitment(sc._id, message.recipient).
                                             then(function(sc) {
                                                 res.send(data);
@@ -102,6 +104,7 @@ module.exports = function(email) {
           var agentDb = new agentSchema(verified.dbName);
   
           agentDb.friendModel.findOne({ email: agent.email}, function(err, friend) {
+                agentDb.connection.db.close();
                 if (err) {
                   deferred.reject(err);
                 }
@@ -122,7 +125,6 @@ module.exports = function(email) {
                     deferred.reject('You don\'t have access to that resource');
                   }
                 }
-                agentDb.connection.db.close();
               });
         }
         // This agent is requesting access to his own resources
