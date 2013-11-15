@@ -134,7 +134,6 @@ module.exports = function (email) {
       }
     catch (error) {}
    
-
     /**
      * Social commitment schema
      */
