@@ -108,20 +108,20 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _save = function(verified, params) {
+    var _save = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) { 
-                    utils.saveFilesToAgentDirectory(params.files, verified).
+                    utils.saveFilesToAgentDirectory(message.files, verified).
                       then(function() {
-                            if (params.data) {
-                              if (params.data._id) {
-                                params.data._id = new mongo.ObjectID(params.data._id + '');
+                            if (message.data) {
+                              if (message.data._id) {
+                                message.data._id = new mongo.ObjectID(message.data._id + '');
                               }
       
-                              collection.save(params.data, { safe: true },
+                              collection.save(message.data, { safe: true },
                                       function(err, ack) {
                                           if (err) {
                                             deferred.reject(err);
@@ -154,13 +154,13 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    var _cp = function(verified, params) {
+    var _cp = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
-                      collection.find({ '_id': new mongo.ObjectID(params.id) }).toArray(
+                      collection.find({ '_id': new mongo.ObjectID(message.id) }).toArray(
                               function(err, docs) {
                                       if (err) {
                                         deferred.reject(err);
@@ -188,7 +188,7 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    var _rm = function(verified, params) {
+    var _rm = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) { 
@@ -202,12 +202,12 @@ module.exports = function(email) {
                                             verified.collectionName + ' does not exist'));
                           }
                           else {
-                            collection.remove({ _id: new mongo.ObjectID(params.id) },
+                            collection.remove({ _id: new mongo.ObjectID(message.id) },
                             function(err, ack) {
                                 if (err || ack === 0) {
                                   deferred.reject(
                                           new Error('Could not delete document: ' +
-                                                  params.id));
+                                                  message.id));
                                 }
                                 else {
                                   deferred.resolve();
@@ -284,14 +284,14 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _ls = function(verified, params) {
+    var _ls = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
                       var fields = ['name', '_id'];
-                      if (params && params.fields) {
-                        fields = params.fields;
+                      if (message && message.fields) {
+                        fields = message.fields;
                       }
                       collection.find({}, fields).
                           sort(fields[0]).
@@ -323,7 +323,7 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _createDatabase = function(verified, params) {
+    var _createDatabase = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
@@ -344,7 +344,7 @@ module.exports = function(email) {
                               }
                               else {
                                 var collection = new mongo.Collection(client, 'profile');
-                                collection.save(params.profile.toObject(), { safe: true },
+                                collection.save(message.profile.toObject(), { safe: true },
                                         function(err, ack) {
                                             if (err) {
                                               deferred.reject(err);
@@ -418,18 +418,18 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    var _registerAgent = function(verified, params) {
+    var _registerAgent = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
 
-          db.registrantModel.findOne({ email: params.newAgent.email }, function(err, registrant) {
+          db.registrantModel.findOne({ email: message.newAgent.email }, function(err, registrant) {
               if (registrant) {
                 deferred.reject('That email address has already been registered');
               }
               else {
-                var agent = new db.registrantModel(params.newAgent);
+                var agent = new db.registrantModel(message.newAgent);
                 agent.save(function(err, agent) {
                     if (err) {
                       deferred.reject(err);
@@ -454,12 +454,12 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    var _deregisterAgent = function(verified, params) {
+    var _deregisterAgent = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
-          db.registrantModel.remove({ email: params.email }, function(err, ack) {
+          db.registrantModel.remove({ email: message.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);
                   }
@@ -482,14 +482,14 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    var _friend = function(verified, params) {
+    var _friend = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
 
           db.friendModel.findOneAndUpdate(
-                          { email: params.newFriend.email }, params.newFriend, { upsert: true },
+                          { email: message.newFriend.email }, message.newFriend, { upsert: true },
                           function(err, friend) {
                                   db.connection.db.close();
                                   if (err) {
@@ -513,12 +513,12 @@ module.exports = function(email) {
      * @param Object
      * @param Object
      */
-    var _defriend = function(verified, params) {
+    var _defriend = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
-          db.friendModel.remove({ email: params.email }, function(err, ack) {
+          db.friendModel.remove({ email: message.email }, function(err, ack) {
                   db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
@@ -544,25 +544,25 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    exports.grantAccess = function(verified, params) {
+    exports.grantAccess = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || verified.write) {
           var db = new agentSchema(verified.dbName);
-          db.friendModel.findOne({ email: params.friend }, function(err, friend) {
+          db.friendModel.findOne({ email: message.friend }, function(err, friend) {
                   if (err) {
                     deferred.reject(err);
                   }
                   else {
-                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', params.resource);
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.resource);
                     if (index > -1) {
                       friend.hisPermissions.splice(index, 1);
                     }
 
                     friend.hisPermissions.push({
-                            email: params.resource,
-                            read: params.read === 'true',
-                            write: params.write === 'true',
-                            execute: params.execute === 'true',
+                            email: message.resource,
+                            read: message.read === 'true',
+                            write: message.write === 'true',
+                            execute: message.execute === 'true',
                         });
 
                     friend.save(function(err, savedFriend) {
@@ -584,7 +584,7 @@ module.exports = function(email) {
     /**
      * shakeHands
      */
-    exports.shakeHands = function(verified, params) {
+    exports.shakeHands = function(verified, message) {
         var deferred = q.defer();
         deferred.resolve();
         return deferred.promise; 

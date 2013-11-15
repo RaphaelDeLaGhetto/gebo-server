@@ -401,13 +401,13 @@ exports.createSocialCommitment = {
                 email: 'richard@construction.com',
               };
 
-        var params = {
+        var message = {
                 newFriend: friend,
-                dbName: 'yanfen@hg.com',
+                recipient: 'yanfen@hg.com',
                 action: 'friend',
               };
 
-        performative.createSocialCommitment(agent, 'request', params).
+        performative.createSocialCommitment(agent, 'request', message).
             then(function(socialCommitment) {
                 test.equal(socialCommitment.type, 'request');
                 test.equal(socialCommitment.action, 'friend');
@@ -448,9 +448,9 @@ exports.fulfilSocialCommitment = {
                     email: 'richard@construction.com',
                   };
     
-            var params = {
+            var message = {
                     newFriend: friend,
-                    dbName: 'yanfen@hg.com',
+                    recipient: 'yanfen@hg.com',
                     action: 'friend',
                   };
 
@@ -470,7 +470,7 @@ exports.fulfilSocialCommitment = {
                 if (err) {
                   console.log(err);
                 }
-                performative.createSocialCommitment(agent, 'request', params).
+                performative.createSocialCommitment(agent, 'request', message).
                     then(function(socialCommitment) {
                         callback();
                       }).

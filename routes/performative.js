@@ -18,30 +18,35 @@ module.exports = function(email) {
      * Receive a request for consideration
      */
     exports.request = [
-        passport.authenticate(['bearer'], { session: false }),
+        function(req, res, next) {
+            if (req.user) {
+              return next();
+            }
+            passport.authenticate(['bearer'], { session: false })(req, res, next);
+        },
         function(req, res) {
 
             // There might be files attached to the request
-            var params = req.body;
-            extend(true, params, req.files);
+            var message = req.body;
+            extend(true, message, req.files);
 
             // Form a social commitment
-            _creatSocialCommitment(req.user, 'request', params).
+            _createSocialCommitment(req.user, 'request', message).
                 then(function(sc) {
 
-                _verify(req.user, params).
+                _verify(req.user, message).
                     then(function(verified) {
                             console.log('request');
                             console.log(req.user);
                             console.log(req.authInfo);
-                            console.log('params');
-                            console.log(params);
+                            console.log('message');
+                            console.log(message);
                             console.log('verified');
                             console.log(verified);
                 
-                            action[req.body.action](verified, params).
+                            action[req.body.action](verified, message).
                                 then(function(data) {
-                                    _fulfilSocialCommitment(sc._id, params.dbName).
+                                    _fulfilSocialCommitment(sc._id, message.dbName).
                                         then(function(sc) {
                                             res.send(data);
                                           }).
@@ -79,13 +84,13 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    function _verify(agent, params) {
+    function _verify(agent, message) {
         var deferred = q.defer();
 
 	var verified = {
-                collectionName: utils.getMongoCollectionName(params.collectionName),
+                collectionName: utils.getMongoCollectionName(message.collectionName),
                 admin: agent.admin,
-                dbName: utils.getMongoDbName(params.dbName)
+                dbName: utils.getMongoDbName(message.dbName)
             };
 
         if (!verified.dbName) {
@@ -140,16 +145,20 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _createSocialCommitment = function(agent, performative, params) {
+    var _createSocialCommitment = function(agent, performative, message) {
         var deferred = q.defer();
 
-        var agentDb = new agentSchema(params.dbName);
+        console.log('message');
+        console.log(message);
+        console.log('agent');
+        console.log(agent);
+        var agentDb = new agentSchema(message.recipient);
         var sc = new agentDb.socialCommitmentModel({
                         type: performative,
-                        action: params.action,
-                        data: params,
+                        action: message.action,
+                        data: message,
                         creditor: agent.email,
-                        debtor: params.dbName,
+                        debtor: message.recipient,
                     });
         sc.save(function(err, socialCommitment) {
             if (err) {
