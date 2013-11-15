@@ -155,22 +155,37 @@ module.exports = function(email) {
         console.log(message);
         console.log('agent');
         console.log(agent);
+ 
         var agentDb = new agentSchema(message.recipient);
-        var sc = new agentDb.socialCommitmentModel({
-                        type: performative,
-                        action: message.action,
-                        data: message,
-                        creditor: agent.email,
-                        debtor: message.recipient,
-                    });
-        sc.save(function(err, socialCommitment) {
-            if (err) {
-              deferred.reject(err);
-            }
-            else {
-              deferred.resolve(socialCommitment);
-            }
-        });
+        if (message.socialCommitmentId) {
+          agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function (err, sc) {
+                agentDb.connection.db.close();
+                if (err) {
+                  deferred.reject(err);
+                }
+                else {
+                  deferred.resolve(sc);
+                }
+            });
+        }
+        else {
+          var sc = new agentDb.socialCommitmentModel({
+                          type: performative,
+                          action: message.action,
+                          data: message,
+                          creditor: agent.email,
+                          debtor: message.recipient,
+                      });
+          sc.save(function(err, socialCommitment) {
+              agentDb.connection.db.close();
+              if (err) {
+                deferred.reject(err);
+              }
+              else {
+                deferred.resolve(socialCommitment);
+              }
+            });
+        }
         return deferred.promise;
       };
     exports.createSocialCommitment = _createSocialCommitment;

@@ -353,12 +353,36 @@ exports.createSocialCommitment = {
                     _id: new mongo.ObjectID('123456789ABC')
                 });
 
-            // There has got to be a better way to do this...
+            /**
+             * Make a social commitment
+             */
+            var newFriend = {
+                    name: 'Dan',
+                    email: 'dan@hg.com',
+                    uri: 'https://theirhost.com',
+                    hisCertificate: 'some certificate',
+                };
+ 
+            var agentDb = new agentSchema('yanfen@hg.com'); 
+            var sc = new agentDb.socialCommitmentModel({
+                    type: 'request',
+                    action: 'friend',
+                    data: { newFriend: newFriend },
+                    creditor: 'dan@hg.com',
+                    debtor: 'yanfen@hg.com',
+                    _id: new mongo.ObjectID('123456789ABC')
+                  });
+
             registrant.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
-                callback();
+                sc.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
+                  });
               });
         }
         catch(err) {
@@ -428,6 +452,47 @@ exports.createSocialCommitment = {
               });
     },
 
+    'Return an existing social commitment if provided an ID': function(test) {
+        test.expect(10);
+
+        var friend = {
+                name: 'Dan',
+                email: 'dan@hg.com',
+                uri: 'https://theirhost.com',
+                hisCertificate: 'some certificate',
+            };
+ 
+        var message = {
+                newFriend: friend,
+                recipient: 'yanfen@hg.com',
+                action: 'friend',
+                socialCommitmentId: new mongo.ObjectID('123456789ABC')
+              };
+
+        var agent = {
+                email: 'dan@hg.com',
+              };
+
+        performative.createSocialCommitment(agent, 'request', message).
+            then(function(socialCommitment) {
+                test.equal(socialCommitment.type, 'request');
+                test.equal(socialCommitment.action, 'friend');
+                test.equal(socialCommitment.data.newFriend.name, 'Dan');
+                test.equal(socialCommitment.data.newFriend.email, 'dan@hg.com');
+                test.equal(socialCommitment.data.newFriend.uri, 'https://theirhost.com');
+                test.equal(socialCommitment.data.newFriend.hisCertificate, 'some certificate');
+                test.equal(socialCommitment.debtor, 'yanfen@hg.com');
+                test.equal(socialCommitment.creditor, 'dan@hg.com');
+                test.equal(typeof socialCommitment.created, 'object');
+                test.equal(socialCommitment.fulfilled, null);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
 };
 
 /**
