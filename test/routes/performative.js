@@ -153,7 +153,7 @@ exports.verify = {
     'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
         test.expect(6);
         performative.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                            { dbName: 'yanfen@hg.com', collectionName: 'app@construction.com' }).
+                            { recipient: 'yanfen@hg.com', resource: 'app@construction.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
@@ -174,7 +174,7 @@ exports.verify = {
     'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
         test.expect(6);
         performative.verify({ name: 'john', email: 'john@painter.com', admin: false },
-                            { dbName: 'dan@hg.com', collectionName: 'app@painter.com' }).
+                            { recipient: 'dan@hg.com', resource: 'app@painter.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
@@ -193,7 +193,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting to a friend\'s resource': function(test) {
         test.expect(6);
         performative.verify({ name: 'richard', email: 'richard@construction.com', admin: true },
-                            { dbName: 'yanfen@hg.com', collectionName: 'someotherapp@example.com' }).
+                            { recipient: 'yanfen@hg.com', resource: 'someotherapp@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -212,7 +212,7 @@ exports.verify = {
     'Return permissions object for a regular agent requesting access to his own resource with dbName param set': function(test) {
         test.expect(6);
         performative.verify({ name: 'yanfen', email: 'yanfen@hg.com', admin: false },
-                            { dbName: 'yanfen@hg.com', collectionName: 'someotherapp@example.com' }).
+                            { recipient: 'yanfen@hg.com', resource: 'someotherapp@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -231,7 +231,7 @@ exports.verify = {
     'Return permissions object for a regular agent requesting access to his own resource without dbName param set': function(test) {
         test.expect(6);
         performative.verify({ name: 'yanfen', email: 'yanfen@hg.com', admin: false },
-                            { collectionName: 'someotherapp@example.com' }).
+                            { resource: 'someotherapp@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -250,7 +250,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting access to his own resource with dbName param set': function(test) {
         test.expect(6);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: true },
-                            { dbName: 'dan@hg.com', collectionName: 'app@painter.com' }).
+                            { recipient: 'dan@hg.com', resource: 'app@painter.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
@@ -269,7 +269,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting access to his own resource with dbName param set': function(test) {
         test.expect(6);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: true },
-                            { collectionName: 'app@painter.com' }).
+                            { resource: 'app@painter.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
@@ -288,7 +288,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting access to non-friend resources': function(test) {
         test.expect(6);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: true },
-                            { dbName: 'yanfen@hg.com', collectionName: 'app@construction.com' }).
+                            { recipient: 'yanfen@hg.com', resource: 'app@construction.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
@@ -308,7 +308,7 @@ exports.verify = {
     'Do not barf if a non-friend (non-admin) requests a resource': function(test) {
         test.expect(1);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: false },
-                            { dbName: 'yanfen@hg.com', collectionName: 'app@construction.com' }).
+                            { recipient: 'yanfen@hg.com', resource: 'app@construction.com' }).
             then(function(verified) {
                 test.ok(false, 'Permission should not have been granted');
                 test.done();      
@@ -322,7 +322,7 @@ exports.verify = {
     'Do not barf if access has not been granted to the requested resource': function(test) {
         test.expect(1);
         performative.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                            { dbName: 'yanfen@hg.com', collectionName: 'someother@inaccessibleapp.com' }).
+                            { recipient: 'yanfen@hg.com', resource: 'someother@inaccessibleapp.com' }).
             then(function(verified) {
                 test.ok(false, 'Permission should not have been granted');
                 test.done();      

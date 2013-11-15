@@ -33,39 +33,40 @@ module.exports = function(email) {
             // Form a social commitment
             _createSocialCommitment(req.user, 'request', message).
                 then(function(sc) {
-
-                _verify(req.user, message).
-                    then(function(verified) {
-                            console.log('request');
-                            console.log(req.user);
-                            console.log(req.authInfo);
-                            console.log('message');
-                            console.log(message);
-                            console.log('verified');
-                            console.log(verified);
-                
-                            action[req.body.action](verified, message).
-                                then(function(data) {
-                                    _fulfilSocialCommitment(sc._id, message.dbName).
-                                        then(function(sc) {
-                                            res.send(data);
-                                          }).
-                                        catch(function(err) {
-                                            console.log(err);       
-                                            res.send(401, err);
-                                          });
-                                  }).
-                                catch(function(err) {
-                                    console.log('action error');
-                                    console.log(err);
-                                    res.send(404, err);
-                                  });
-                          }).
-                    catch(function(err) {
-                        console.log('verification error');
-                        console.log(err);
-                        res.send(401, err);
-                      });
+                    console.log('sc');
+                    console.log(sc);
+                    _verify(req.user, message).
+                        then(function(verified) {
+                                console.log('request');
+                                console.log(req.user);
+                                console.log(req.authInfo);
+                                console.log('message');
+                                console.log(message);
+                                console.log('verified');
+                                console.log(verified);
+                    
+                                action[message.action](verified, message).
+                                    then(function(data) {
+                                        _fulfilSocialCommitment(sc._id, message.recipient).
+                                            then(function(sc) {
+                                                res.send(data);
+                                              }).
+                                            catch(function(err) {
+                                                console.log(err);       
+                                                res.send(401, err);
+                                              });
+                                      }).
+                                    catch(function(err) {
+                                        console.log('action error');
+                                        console.log(err);
+                                        res.send(404, err);
+                                      });
+                              }).
+                        catch(function(err) {
+                            console.log('verification error');
+                            console.log(err);
+                            res.send(401, err);
+                          });
                   }).
                 catch(function(err) {
                     console.log('Cannot commit');
@@ -88,9 +89,9 @@ module.exports = function(email) {
         var deferred = q.defer();
 
 	var verified = {
-                collectionName: utils.getMongoCollectionName(message.collectionName),
+                collectionName: utils.getMongoCollectionName(message.resource),
                 admin: agent.admin,
-                dbName: utils.getMongoDbName(message.dbName)
+                dbName: utils.getMongoDbName(message.recipient)
             };
 
         if (!verified.dbName) {
