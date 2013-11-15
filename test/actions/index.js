@@ -112,7 +112,8 @@ exports.agree = {
         var agentDb = new agentSchema('dan@hg.com'); 
         agentDb.socialCommitmentModel.find({}, function(err, scs) {
             test.equal(scs.length, 1);
-            action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true }, scs[0]).
+            action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
+                         { socialCommitmentId: scs[0]._id }).
                 then(function(data) {
                     agentDb.connection.db.close();
                     test.equal(data.name, 'Yanfen');
@@ -220,7 +221,8 @@ exports.refuse = {
         agentDb.socialCommitmentModel.find({}, function(err, scs) {
             test.equal(scs.length, 1);
             test.equal(scs[0].fulfilled, null);
-            action.refuse({ dbName: 'dan@hg.com', read: true, write: true, execute: true }, scs[0]).
+            action.refuse({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
+                          { socialCommitmentId: scs[0]._id }).
                 then(function(sc) {
                     agentDb.connection.db.close();
                     test.equal(sc.fulfilled === null, false);

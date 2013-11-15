@@ -39,24 +39,30 @@ module.exports = function(email) {
     exports.agree = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-          exports[message.action](verified, message.data).
-            then(function(data) {
-                var agentDb = new agentSchema(verified.dbName);
-                agentDb.socialCommitmentModel.findOneAndUpdate(
-                        { _id: message._id },
-                        { fulfilled: Date.now() },
-                        function(err, sc) {
-                            agentDb.connection.db.close();
-                            if (err) {
-                              deferred.reject(err);
-                            }
-                            else {
-                              deferred.resolve(data);
-                            }
+          var agentDb = new agentSchema(verified.dbName);
+          agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function(err, sc) {
+                  if (err) {
+                    agentDb.connection.db.close();
+                    deferred.reject(err);
+                  }
+                  else {
+                    exports[sc.action](verified, sc.data).
+                        then(function(data) {
+                            sc.fulfilled = Date.now();
+                            sc.save(function(err, sc) {
+                                        agentDb.connection.db.close();
+                                        if (err) {
+                                          deferred.reject(err);
+                                        }
+                                        else {
+                                          deferred.resolve(data);
+                                        }
+                                      });
+                          }).
+                        catch(function(err) {
+                            deferred.reject(err);
                           });
-              }).
-            catch(function(err) {
-                deferred.reject(err);
+                  }
               });
         }
         else {
@@ -79,7 +85,7 @@ module.exports = function(email) {
         if (verified.admin || (verified.read && verified.write && verified.execute)) { 
             var agentDb = new agentSchema(verified.dbName);
             agentDb.socialCommitmentModel.findOneAndUpdate(
-                    { _id: message._id },
+                    { _id: message.socialCommitmentId },
                     { fulfilled: Date.now() },
                     function(err, sc) {
                         agentDb.connection.db.close();
@@ -87,6 +93,8 @@ module.exports = function(email) {
                           deferred.reject(err);
                         }
                         else {
+                          console.log('refused sc');
+                          console.log(sc);
                           deferred.resolve(sc);
                         }
                       });
