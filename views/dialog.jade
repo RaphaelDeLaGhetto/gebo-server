@@ -4,13 +4,13 @@ block content
     p.lead Hello, #{agent.name}
     p
         i #{oauth.req.clientName} 
-        | needs #{oauth.req.scope.join('/')} access to the files it stores in your account
+        | needs #{oauth.req.scope} access to the files it stores in your account
 
     pre
         ul.unstyled
             li Email: #{oauth.req.clientID}
             li Callback: #{oauth.req.redirectURI}
-            li Permissions: #{oauth.req.scope.join('/')}
+            li Permissions: #{oauth.req.scope}
             li Your IP: #{oauth.client.ip}
     p.
         Do you trust this application?
