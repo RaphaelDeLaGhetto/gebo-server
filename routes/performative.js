@@ -172,7 +172,7 @@ module.exports = function(email) {
           var sc = new agentDb.socialCommitmentModel({
                           type: performative,
                           action: message.action,
-                          data: message,
+                          message: message,
                           creditor: agent.email,
                           debtor: message.recipient,
                       });

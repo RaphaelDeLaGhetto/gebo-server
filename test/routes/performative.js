@@ -367,7 +367,7 @@ exports.createSocialCommitment = {
             var sc = new agentDb.socialCommitmentModel({
                     type: 'request',
                     action: 'friend',
-                    data: { newFriend: newFriend },
+                    message: { newFriend: newFriend },
                     creditor: 'dan@hg.com',
                     debtor: 'yanfen@hg.com',
                     _id: new mongo.ObjectID('123456789ABC')
@@ -435,10 +435,10 @@ exports.createSocialCommitment = {
             then(function(socialCommitment) {
                 test.equal(socialCommitment.type, 'request');
                 test.equal(socialCommitment.action, 'friend');
-                test.equal(socialCommitment.data.newFriend.name, 'richard');
-                test.equal(socialCommitment.data.newFriend.email, 'richard@construction.com');
-                test.equal(socialCommitment.data.newFriend.uri, BASE_ADDRESS);
-                test.equal(socialCommitment.data.newFriend.hisCertificate, SIGNING_PAIR.certificate);
+                test.equal(socialCommitment.message.newFriend.name, 'richard');
+                test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
+                test.equal(socialCommitment.message.newFriend.uri, BASE_ADDRESS);
+                test.equal(socialCommitment.message.newFriend.hisCertificate, SIGNING_PAIR.certificate);
                 test.equal(socialCommitment.debtor, 'yanfen@hg.com');
                 test.equal(socialCommitment.creditor, 'richard@construction.com');
                 test.equal(typeof socialCommitment.created, 'object');
@@ -477,10 +477,10 @@ exports.createSocialCommitment = {
             then(function(socialCommitment) {
                 test.equal(socialCommitment.type, 'request');
                 test.equal(socialCommitment.action, 'friend');
-                test.equal(socialCommitment.data.newFriend.name, 'Dan');
-                test.equal(socialCommitment.data.newFriend.email, 'dan@hg.com');
-                test.equal(socialCommitment.data.newFriend.uri, 'https://theirhost.com');
-                test.equal(socialCommitment.data.newFriend.hisCertificate, 'some certificate');
+                test.equal(socialCommitment.message.newFriend.name, 'Dan');
+                test.equal(socialCommitment.message.newFriend.email, 'dan@hg.com');
+                test.equal(socialCommitment.message.newFriend.uri, 'https://theirhost.com');
+                test.equal(socialCommitment.message.newFriend.hisCertificate, 'some certificate');
                 test.equal(socialCommitment.debtor, 'yanfen@hg.com');
                 test.equal(socialCommitment.creditor, 'dan@hg.com');
                 test.equal(typeof socialCommitment.created, 'object');
@@ -584,10 +584,10 @@ exports.fulfilSocialCommitment = {
                 then(function(socialCommitment) {
                     test.equal(socialCommitment.type, 'request');
                     test.equal(socialCommitment.action, 'friend');
-                    test.equal(socialCommitment.data.newFriend.name, 'richard');
-                    test.equal(socialCommitment.data.newFriend.email, 'richard@construction.com');
-                    test.equal(socialCommitment.data.newFriend.uri, BASE_ADDRESS);
-                    test.equal(socialCommitment.data.newFriend.hisCertificate, SIGNING_PAIR.certificate);
+                    test.equal(socialCommitment.message.newFriend.name, 'richard');
+                    test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
+                    test.equal(socialCommitment.message.newFriend.uri, BASE_ADDRESS);
+                    test.equal(socialCommitment.message.newFriend.hisCertificate, SIGNING_PAIR.certificate);
                     test.equal(socialCommitment.debtor, 'yanfen@hg.com');
                     test.equal(socialCommitment.creditor, 'richard@construction.com');
                     test.equal(typeof socialCommitment.created, 'object');

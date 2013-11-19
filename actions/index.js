@@ -50,7 +50,7 @@ module.exports = function(email) {
                     deferred.reject(err);
                   }
                   else {
-                    exports[sc.action](verified, sc.data).
+                    exports[sc.action](verified, sc.message).
                         then(function(data) {
                             sc.fulfilled = Date.now();
                             sc.save(function(err, sc) {
