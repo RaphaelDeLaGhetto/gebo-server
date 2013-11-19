@@ -554,16 +554,16 @@ module.exports = function(email) {
                     deferred.reject(err);
                   }
                   else {
-                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.relevantResource);
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.permission.email);
                     if (index > -1) {
                       friend.hisPermissions.splice(index, 1);
                     }
 
                     friend.hisPermissions.push({
-                            email: message.relevantResource,
-                            read: message.read === 'true',
-                            write: message.write === 'true',
-                            execute: message.execute === 'true',
+                            email: message.permission.email,
+                            read: message.permission.read === 'true',
+                            write: message.permission.write === 'true',
+                            execute: message.permission.execute === 'true',
                         });
 
                     friend.save(function(err, savedFriend) {

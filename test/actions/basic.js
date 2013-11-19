@@ -2478,11 +2478,15 @@ exports.grantAccess = {
     'Grant a friend access to a resource he didn\'t have access to before': function(test) {
         test.expect(6);
         action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
-                        { friend: 'john@painter.com',
-                          relevantResource: 'new@app.com',
-                          read: 'true',
-                          write: 'true',
-                          execute: 'false', }).
+                        { action: 'grantAccess',
+                          recipient: 'dan@hg.com',
+                          friend: 'john@painter.com',
+                          permission: {
+                                  email: 'new@app.com',
+                                  read: 'true',
+                                  write: 'true',
+                                  execute: 'false'},
+                        }).
             then(function(friend) {
                 var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'new@app.com');
                 test.equal(index, 1);
@@ -2503,11 +2507,15 @@ exports.grantAccess = {
     'Change a friend\'s access level to a resource': function(test) {
         test.expect(6);
         action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
-                        { friend: 'john@painter.com',
-                          relevantResource: 'some@coolapp.com',
-                          read: 'false',
-                          write: 'false',
-                          execute: 'true', }).
+                        { action: 'grantAccess',
+                          recipient: 'dan@hg.com',
+                          friend: 'john@painter.com',
+                          permission: {
+                                  email: 'some@coolapp.com',
+                                  read: 'false',
+                                  write: 'false',
+                                  execute: 'true'},
+                        }).
             then(function(friend) {
                 var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'some@coolapp.com');
                 test.equal(index, 0);
