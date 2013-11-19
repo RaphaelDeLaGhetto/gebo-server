@@ -7,13 +7,11 @@ html(lang='en')
     .navbar.navbar-fixed-top.navbar-inverse(role="navigation")
         .container
             .navbar-header
-                button.navbar-toggle(type="button" data-toggle="collapse", data-target=".navbar-collapse")
+                button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-collapse")
                     span.sr-only Toggle navigation
-                    span.glyphicon-bar
-                    span.glyphicon-bar
-                    span.glyphicon-bar
+                    span.glyphicon.glyphicon-list(style="color:white;")
                 a.navbar-brand(href="/") gebo-server
-            .collapse.navbar-collapse.in
+            .collapse.navbar-collapse.collapse
                 if (!agent)
                     ul.nav.navbar-nav
                         li
