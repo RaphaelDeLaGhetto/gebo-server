@@ -561,9 +561,9 @@ module.exports = function(email) {
 
                     friend.hisPermissions.push({
                             email: message.permission.email,
-                            read: message.permission.read === 'true',
-                            write: message.permission.write === 'true',
-                            execute: message.permission.execute === 'true',
+                            read: message.permission.read,
+                            write: message.permission.write,
+                            execute: message.permission.execute,
                         });
 
                     friend.save(function(err, savedFriend) {
