@@ -176,10 +176,12 @@ module.exports = function(email) {
                                         // Should I check for multiple matches?
                                         deferred.resolve(docs[0]);
                                       }
+                                      _db.close();
                                     });
                     }).
                   catch(function(err) {
                           deferred.reject(err);
+                          _db.close();
                         });
         }
         else {
@@ -219,12 +221,14 @@ module.exports = function(email) {
                                 else {
                                   deferred.resolve();
                                 }
+                                _db.close();
                               });
                           }
                         });
                     }).
                   catch(function(err) {
                           deferred.reject(err);
+                          _db.close();
                         }).
                   done();
         }
@@ -343,10 +347,12 @@ module.exports = function(email) {
                               else {
                                 deferred.resolve(docs);
                               }
+                              _db.close();
                             });
                     }).
               catch(function(err) {
                       deferred.reject(err);
+                      _db.close();
                     });
         }
         else {
@@ -371,6 +377,7 @@ module.exports = function(email) {
           _dbExists(verified).
                   then(function() {
                       deferred.reject();
+                      _db.close();
                     }).
                   catch(function() {
                           var server = new mongo.Server(config.mongo.host,
@@ -428,6 +435,7 @@ module.exports = function(email) {
                     db.open(function (err) {
                         if (err) {
                           deferred.reject(err);
+                          _db.close();
                         }
                         else {
                           db.dropDatabase(function(err) {
@@ -438,6 +446,7 @@ module.exports = function(email) {
                               else {
                                 deferred.resolve();
                               }
+                              _db.close();
                             });
                         }
                       });
