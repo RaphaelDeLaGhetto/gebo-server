@@ -26,17 +26,21 @@ module.exports = function(email) {
         },
         function(req, res) {
 
-            // There might be files attached to the request
             var message = req.body;
-            extend(true, message, req.files);
 
             // Form a social commitment
             _createSocialCommitment(req.user, 'request', message).
                 then(function(sc) {
-                    console.log('sc');
+                    console.log('\n---------------------------- SC ---------------------------');
                     console.log(sc);
                     _verify(req.user, message).
                         then(function(verified) {
+
+                                // There might be files attached to the request.
+                                // They are included here, because it seems 
+                                // silly to attach them to the social commitment.
+                                extend(true, message, req.files);
+
                                 console.log('request');
                                 console.log(req.user);
                                 console.log(req.authInfo);
@@ -47,8 +51,8 @@ module.exports = function(email) {
                     
                                 action[message.action](verified, message).
                                     then(function(data) {
-                                        console.log('data');
-                                        console.log(data);
+//                                        console.log('data');
+//                                        console.log(data);
                                         _fulfilSocialCommitment(message.recipient, sc._id).
                                             then(function(sc) {
                                                 res.send(data);
