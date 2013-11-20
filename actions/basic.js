@@ -288,8 +288,7 @@ module.exports = function(email) {
     exports.rmdir = _rmdir;
 
     /**
-     * Return a list of documents contained in the app's collection.
-     * This is essentially a rebranded mongoose query.
+     * Return a list of documents contained in the app's collection
      *
      * @param Object
      * @param Object
