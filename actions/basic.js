@@ -16,7 +16,9 @@ module.exports = function(email) {
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
 
-//    var actions = require('./')(dbName);
+    // Global DB, because at some point I should
+    // close the connection.
+    var _db;
 
     /**
      * Determine if the database exists. To do this,
@@ -37,9 +39,9 @@ module.exports = function(email) {
                           config.mongo.host,
                           config.mongo.port,
                           config.mongo.serverOptions);
-          var db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
+          _db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
 
-          db.open(function (err, client) {
+          _db.open(function (err, client) {
                   if (err) {
                     console.log('ERROR! What is happening here?');
                     console.log('Check ulimit -n??');
@@ -55,7 +57,7 @@ module.exports = function(email) {
                       if (names.length === 0) {
                         deferred.reject(
                                 new Error('Database: ' + verified.dbName + ' does not exist'));
-                        db.dropDatabase(function(err) {
+                        _db.dropDatabase(function(err) {
                           if (err) {
                             deferred.reject(new Error('Database: ' +
                                             verified.dbName + ' was not dropped'));
@@ -131,15 +133,18 @@ module.exports = function(email) {
                                           else {
                                             deferred.resolve(ack);
                                           }
+                                          _db.close();
                                         });
                             }
                             else {
                               deferred.resolve();
+                              _db.close();
                             }
                           });
                     }).
                   catch(function(err) {
                       deferred.reject(err);
+                      _db.close();
                     }).
                   done();
         }
@@ -279,7 +284,8 @@ module.exports = function(email) {
     exports.rmdir = _rmdir;
 
     /**
-     * Return a list of documents contained in the app's collection
+     * Return a list of documents contained in the app's collection.
+     * This is essentially a rebranded mongoose query.
      *
      * @param Object
      * @param Object
@@ -291,13 +297,46 @@ module.exports = function(email) {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
+
+                      /**
+                       * Get search parameters
+                       */
+                      var criteria = {};
+                      if (message && message.criteria) {
+                        criteria = message.criteria;
+                      }
+
                       var fields = ['name', '_id'];
                       if (message && message.fields) {
                         fields = message.fields;
                       }
-                      collection.find({}, fields).
-                          sort(fields[0]).
-                          toArray(function(err, docs) {
+
+                      var cursor = collection.find(criteria, fields);
+
+                      // Were any options set?
+                      if (message && message.options) {
+
+                        if(message.options.skip) {
+                          cursor = cursor.skip(message.options.skip);
+                        }
+
+                        if(message.options.limit) {
+                          cursor = cursor.limit(message.options.limit);
+                        }
+
+                        if(message.options.sort) {
+                          var sortField = message.options.sort;
+                          var ascending = true;
+                          if(sortField[0] === '-') {
+                            ascending = false;
+                            sortField = sortField.slice(1);
+                          }
+                          cursor = cursor.sort(message.options.sort);
+                        }
+                      }
+
+                      cursor.toArray(
+                          function(err, docs) {
                               if (err) {
                                 deferred.reject(err);
                               }

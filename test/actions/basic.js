@@ -1250,7 +1250,13 @@ exports.ls = {
                             _id: new mongo.ObjectID('123456789ABC'),
                             name: 'yanfen',
                             occupation: 'Being cool'
+                        },
+                        {
+                            _id: new mongo.ObjectID('23456789ABCD'),
+                            name: 'john',
+                            occupation: 'Seminarian'
                         }
+
                     ],
                     function() {
                         callback();
@@ -1269,36 +1275,39 @@ exports.ls = {
     },
 
     'Return a list of document names contained in the collection if permitted': function(test) {
-        test.expect(3);
+        test.expect(4);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true }).
             then(function(list) {
-                test.equal(list.length, 2);
+                test.equal(list.length, 3);
                 test.equal(list[0].name, 'dan');
                 test.equal(list[1].name, 'yanfen');
+                test.equal(list[2].name, 'john');
                 test.done();
             }).
             catch(
                 function(err) {
-                    // Shouldn't get here
+                    console.log(err);
                     test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
     },
 
     'Return a list of documents containing the fields specified': function(test) {
-        test.expect(5);
+        test.expect(7);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true }, { fields: ['occupation'] }).
             then(function(list) {
-                test.equal(list.length, 2);
+                test.equal(list.length, 3);
                 test.equal(list[0].name, undefined);
                 test.equal(list[0].occupation, 'Batman');
                 test.equal(list[1].name, undefined);
                 test.equal(list[1].occupation, 'Being cool');
+                test.equal(list[2].name, undefined);
+                test.equal(list[2].occupation, 'Seminarian');
                 test.done();
             }).
             catch(
                 function(err) {
-                    // Shouldn't get here
+                    console.log(err);
                     test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
@@ -1314,7 +1323,7 @@ exports.ls = {
             }).
             catch(
                 function(err) {
-                    // Shouldn't get here
+                    console.log(err);
                     test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
@@ -1334,7 +1343,42 @@ exports.ls = {
               });
     },
 
+    'Return an ls request respecting the given criteria': function(test) {
+        test.expect(2);
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+                  { criteria: { name: 'yanfen' } }).
+            then(function(list) {
+                test.equal(list.length, 1);
+                test.equal(list[0].name, 'yanfen');
+                test.done();
+            }).
+            catch(
+                function(err) {
+                    console.log(err);
+                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+    },
 
+    'Return an ls request respecting the given options': function(test) {
+        test.expect(5);
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+                  { options: { skip: 1, limit: 5, sort: '-name' }, fields: ['name', 'occupation'] }).
+            then(function(list) {
+                test.equal(list.length, 2);
+                test.equal(list[0].name, 'yanfen');
+                test.equal(list[0].occupation, 'Being cool');
+                test.equal(list[1].name, 'john');
+                test.equal(list[1].occupation, 'Seminarian');
+                test.done();
+            }).
+            catch(
+                function(err) {
+                    console.log(err);
+                    test.ok(false, 'Shouldn\'t get here!!!');
+                    test.done();
+                 });
+    },
 };
 
 /**
