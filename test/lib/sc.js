@@ -46,7 +46,7 @@ exports.form = {
  
             var agentDb = new agentSchema('yanfen@hg.com'); 
             var sc = new agentDb.socialCommitmentModel({
-                    type: 'request',
+                    performative: 'request',
                     action: 'friend',
                     message: { newFriend: newFriend },
                     creditor: 'dan@hg.com',
@@ -114,7 +114,7 @@ exports.form = {
 
         sc.form(agent, 'request', message).
             then(function(socialCommitment) {
-                test.equal(socialCommitment.type, 'request');
+                test.equal(socialCommitment.performative, 'request');
                 test.equal(socialCommitment.action, 'friend');
                 test.equal(socialCommitment.message.newFriend.name, 'richard');
                 test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
@@ -156,7 +156,7 @@ exports.form = {
 
         sc.form(agent, 'request', message).
             then(function(socialCommitment) {
-                test.equal(socialCommitment.type, 'request');
+                test.equal(socialCommitment.performative, 'request');
                 test.equal(socialCommitment.action, 'friend');
                 test.equal(socialCommitment.message.newFriend.name, 'Dan');
                 test.equal(socialCommitment.message.newFriend.email, 'dan@hg.com');
@@ -264,7 +264,7 @@ exports.fulfil = {
                 }
                 sc.fulfil('yanfen@hg.com', socialCommitment._id).
                     then(function(socialCommitment) {
-                        test.equal(socialCommitment.type, 'request');
+                        test.equal(socialCommitment.performative, 'request');
                         test.equal(socialCommitment.action, 'friend');
                         test.equal(socialCommitment.message.newFriend.name, 'richard');
                         test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');

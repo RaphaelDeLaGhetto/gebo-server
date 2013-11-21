@@ -138,7 +138,7 @@ module.exports = function (email) {
      * Social commitment schema
      */
     var socialCommitmentSchema = new Schema({
-        type: { type: String, required: true, unique: false },
+        performative: { type: String, required: true, unique: false },
         action: { type: String, required: true, unique: false },
         message: { type: Schema.Types.Mixed, required: false, unique: false },
         creditor: { type: String, required: true, unique: false },

@@ -62,7 +62,7 @@ exports.agree = {
  
             var agentDb = new agentSchema('dan@hg.com'); 
             var sc = new agentDb.socialCommitmentModel({
-                    type: 'request',
+                    performative: 'request',
                     action: 'friend',
                     message: { newFriend: newFriend },
                     creditor: 'yanfen@hg.com',
@@ -170,7 +170,7 @@ exports.refuse = {
  
             var agentDb = new agentSchema('dan@hg.com'); 
             var sc = new agentDb.socialCommitmentModel({
-                    type: 'request',
+                    performative: 'request',
                     action: 'friend',
                     message: { newFriend: newFriend },
                     creditor: 'yanfen@hg.com',
