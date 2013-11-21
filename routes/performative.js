@@ -3,6 +3,7 @@
 var passport = require('passport'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),
+    sc = require('../lib/sc'),
     geboSchema = require('../schemata/gebo'),
     agentSchema = require('../schemata/agent'),
     extend = require('extend'),
@@ -29,7 +30,7 @@ module.exports = function(email) {
             var message = req.body;
 
             // Form a social commitment
-            _createSocialCommitment(req.user, 'request', message).
+            sc.form(req.user, 'request', message).
                 then(function(sc) {
                     console.log('\n---------------------------- SC ---------------------------');
                     console.log(sc);
@@ -53,7 +54,7 @@ module.exports = function(email) {
                                     then(function(data) {
 //                                        console.log('data');
 //                                        console.log(data);
-                                        _fulfilSocialCommitment(message.recipient, sc._id).
+                                        sc.fulfil(message.recipient, sc._id).
                                             then(function(sc) {
                                                 res.send(data);
                                               }).
@@ -143,82 +144,6 @@ module.exports = function(email) {
       };
     exports.verify = _verify;
     
-    /**
-     * Create a social commitment for an agent to fulfil
-     *
-     * @param Object
-     * @param string
-     * @param Object
-     *
-     * @return promise
-     */
-    var _createSocialCommitment = function(agent, performative, message) {
-        var deferred = q.defer();
-
-        console.log('message');
-        console.log(message);
-        console.log('agent');
-        console.log(agent);
- 
-        var agentDb = new agentSchema(message.recipient);
-        if (message.socialCommitmentId) {
-          agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function (err, sc) {
-                agentDb.connection.db.close();
-                if (err) {
-                  deferred.reject(err);
-                }
-                else {
-                  deferred.resolve(sc);
-                }
-            });
-        }
-        else {
-          var sc = new agentDb.socialCommitmentModel({
-                          type: performative,
-                          action: message.action,
-                          message: message,
-                          creditor: agent.email,
-                          debtor: message.recipient,
-                      });
-          sc.save(function(err, socialCommitment) {
-              agentDb.connection.db.close();
-              if (err) {
-                deferred.reject(err);
-              }
-              else {
-                deferred.resolve(socialCommitment);
-              }
-            });
-        }
-        return deferred.promise;
-      };
-    exports.createSocialCommitment = _createSocialCommitment;
-
-    /**
-     * Fulfil a social commitment
-     *
-     * @param string
-     * @param string
-     *
-     * @return promise
-     */
-    var _fulfilSocialCommitment = function(agent, id) {
-        var deferred = q.defer();
-
-        var agentDb = new agentSchema(agent);
-        agentDb.socialCommitmentModel.findOneAndUpdate({ _id: id }, { fulfilled: Date.now() }, function(err, sc) {
-            agentDb.connection.db.close();
-            if (err) {
-              deferred.reject(err);
-            }
-            else {
-              deferred.resolve(sc);
-            }
-          });
-        return deferred.promise;
-      };
-    exports.fulfilSocialCommitment = _fulfilSocialCommitment;
-
     return exports;
   };
 
