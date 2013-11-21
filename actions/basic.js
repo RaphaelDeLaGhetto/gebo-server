@@ -319,14 +319,6 @@ module.exports = function(email) {
                       // Were any options set?
                       if (message && message.options) {
 
-                        if(message.options.skip) {
-                          cursor = cursor.skip(message.options.skip);
-                        }
-
-                        if(message.options.limit) {
-                          cursor = cursor.limit(message.options.limit);
-                        }
-
                         if(message.options.sort) {
                           var sortField = message.options.sort;
                           var ascending = true;
@@ -336,7 +328,15 @@ module.exports = function(email) {
                           }
                           cursor = cursor.sort(message.options.sort);
                         }
-                      }
+ 
+                        if(message.options.skip) {
+                          cursor = cursor.skip(message.options.skip);
+                        }
+
+                        if(message.options.limit) {
+                          cursor = cursor.limit(message.options.limit);
+                        }
+                     }
 
                       cursor.toArray(
                           function(err, docs) {

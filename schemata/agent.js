@@ -155,6 +155,24 @@ module.exports = function (email) {
     catch (error) {}
 
     /**
+     * Conversation schema
+     */
+    var conversationSchema = new Schema({
+        type: { type: String, required: true, unique: false },
+        role: { type: String, required: true, unique: false },
+        conversationId: { type: String, required: true, unique: true },
+        socialCommitments: [socialCommitmentSchema],
+        terminated: { type: Boolean, required: true, default: false },
+      });
+
+    // Export conversationSchema 
+    try {
+        var conversationModel = connection.model('Conversation', conversationSchema);
+        exports.conversationModel = conversationModel;
+      }
+    catch (error) {}
+
+    /**
      * API
      */
     return exports;

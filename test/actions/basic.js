@@ -2517,7 +2517,7 @@ exports.grantAccess = {
                 callback();
               });
           });
-     }, 
+    }, 
 
     'Grant a friend access to a resource he didn\'t have access to before': function(test) {
         test.expect(6);
@@ -2674,7 +2674,7 @@ exports.shakeHands = {
                   callback();
               });
             });
-     }, 
+    }, 
 
     'Exchange public certificates between friends': function(test) {
         test.done();
