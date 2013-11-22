@@ -1,7 +1,7 @@
 'use strict';
 
 var agentSchema = require('../../schemata/agent'),
-    request = require('../../conversations/request')(),
+    request = require('../../conversations/request'),
     utils = require('../../conversations/utils');
 
 /**
