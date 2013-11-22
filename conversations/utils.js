@@ -9,35 +9,30 @@ var agentSchema = require('../schemata/agent'),
  * NOTE: the database connections are not closed.
  * That is left to the caller.
  *
+ * @param Object
+ * @param Object
  * @param string
- * @param role
+ * @param string
+ *
+ * @return conversationModel
  */
-exports.loadConversation = function(message, type, role) {
-	console.log('loadConversation');
-	console.log(message);
+exports.loadConversation = function(message, agent, type, role) {
 
     var deferred = q.defer();
-    var agentDb = new agentSchema(message.receiver);
-
-	agentDb.conversationModel.find({}, function(err, conversations) {
-		console.log('all conversations');
-		console.log(conversations);
-	  });
+    var agentDb = new agentSchema(agent.email);
 
     if (message.conversationId) {
       agentDb.conversationModel.findOne({ conversationId: message.conversationId },
           function(err, conversation) {
-			  console.log('retrieve');
-			  console.log(conversation);
-              if (err) {
-                deferred.reject(err);
-              }
-              else if (!conversation) {
-                deferred.reject('Conversation: ' + message.conversationId + ' does not exist'); 
-              }
-              else {
-                deferred.resolve(conversation);
-              }
+                if (err) {
+                  deferred.reject(err);
+                }
+                else if (!conversation) {
+                  deferred.reject('Conversation: ' + message.conversationId + ' does not exist'); 
+                }
+                else {
+                  deferred.resolve(conversation);
+                }
             });
     }
     else {
@@ -46,19 +41,33 @@ exports.loadConversation = function(message, type, role) {
             role: role,
             conversationId: message.sender + ':' + Date.now().toString(),
         });
-
-	  conversation.save(function(err) {
-			console.log('conversation.save');
-			console.log(conversation);
-			if (err) {
-			  deferred.resolve(err);
-			}
-			else {
-      		  deferred.resolve(conversation);
-			}
-	  	  });
+      
+      conversation.save(function(err) {
+              if (err) {
+                deferred.resolve(err);
+              }
+              else {
+                deferred.resolve(conversation);
+              }
+          });
     }
     return deferred.promise;
 };
 
-
+/**
+ * getFirstUnfulfilledSocialCommitmentIndex
+ *
+ * @param array
+ * @param string
+ *
+ * @return int
+ */
+exports.getFirstUnfulfilledSocialCommitmentIndex = function(socialCommitments, performative) {
+    for (var i = 0; i < socialCommitments.length; i++) {
+      if (socialCommitments[i].performative === performative &&
+          socialCommitments[i].fulfilled === null) {
+        return i;
+      }
+    }
+    return -1;
+  };
