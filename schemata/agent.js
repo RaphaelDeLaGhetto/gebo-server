@@ -162,8 +162,19 @@ module.exports = function (email) {
         role: { type: String, required: true, unique: false },
         conversationId: { type: String, required: true, unique: true },
         socialCommitments: [socialCommitmentSchema],
-        terminated: { type: Boolean, required: true, default: false },
       });
+
+    // A conversation is terminated when all social
+    // commitments are fulfilled
+    conversationSchema.virtual('terminated').
+        get(function() {
+            for (var i = 0; i < this.socialCommitments.length; i++) {
+              if (!!this.socialCommitments[i].fulfilled) {
+                return false;
+              }
+            }
+            return true;      
+          });
 
     // Export conversationSchema 
     try {
