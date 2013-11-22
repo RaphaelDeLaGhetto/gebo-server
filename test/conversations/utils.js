@@ -42,6 +42,7 @@ exports.loadConversation = {
         test.expect(5);
         utils.loadConversation({ receiver: 'dan@example.com', conversationId: 'some conversation ID' }).
             then(function(conversation) {
+				conversation.db.close();
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId, 'some conversation ID');
@@ -73,6 +74,7 @@ exports.loadConversation = {
         test.expect(6);
         utils.loadConversation({ receiver: 'dan@example.com', sender: 'yanfen@example.com' }, 'propose', 'server').
             then(function(conversation) {
+				conversation.db.close();
                 test.equal(conversation.type, 'propose');
                 test.equal(conversation.role, 'server');
                 test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 

@@ -15,9 +15,13 @@ module.exports = function() {
     exports.client = function(message) {
         var deferred = q.defer();
 
+		console.log('exports.client');
+		console.log(message);
+
         utils.loadConversation(message, 'request', 'client').
             then(function(conversation) {
-
+				console.log('conversation loaded');
+				console.log(conversation);
                 switch(message.performative) {
                     case 'request':
                         // Creditor: forms sc to reply request/action
@@ -60,6 +64,7 @@ module.exports = function() {
                 }
 
                 conversation.save(function(err) {
+					conversation.db.close();
                     if (err) {
                       deferred.reject(err);
                     }

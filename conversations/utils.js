@@ -6,6 +6,9 @@ var agentSchema = require('../schemata/agent'),
 /**
  * Retrieve the conversation, if it exists
  *
+ * NOTE: the database connections are not closed.
+ * That is left to the caller.
+ *
  * @param string
  * @param role
  */
@@ -26,7 +29,6 @@ exports.loadConversation = function(message, type, role) {
           function(err, conversation) {
 			  console.log('retrieve');
 			  console.log(conversation);
-              agentDb.connection.db.close();
               if (err) {
                 deferred.reject(err);
               }
@@ -46,7 +48,8 @@ exports.loadConversation = function(message, type, role) {
         });
 
 	  conversation.save(function(err) {
-			agentDb.connection.db.close();
+			console.log('conversation.save');
+			console.log(conversation);
 			if (err) {
 			  deferred.resolve(err);
 			}

@@ -18,6 +18,8 @@ function clientRequestAction() {
   }
 
 function serverReplyNotUnderstood(conversation) {
+		console.log('serverReplyNotUnderstood');
+		console.log(conversation);
     return request.client({ receiver: 'yanfen@example.com',
                             sender: 'dan@example.com',
                             performative: 'not-understood request',
@@ -121,9 +123,11 @@ exports.client = {
     },
 
     'Form \'C: reply request|action\' when sending a \'request action\'': function(test) {
+   				console.log('C: reply request|action');
         test.expect(8);
         clientRequestAction().
             then(function(conversation) {
+				console.log(conversation);
                 test.equal(conversation.socialCommitments.length, 1);
                 test.equal(conversation.socialCommitments[0].performative, 'reply request');
                 test.equal(conversation.socialCommitments[0].action, 'action');
@@ -145,10 +149,14 @@ exports.client = {
         test.expect(9);
         clientRequestAction().
             then(function(conversation) {
+				console.log('C: reply request|action');
+				console.log(conversation);
                 test.equal(conversation.socialCommitments.length, 1);
                 return serverReplyNotUnderstood(conversation);
               }).
             then(function(conversation) {
+   				console.log('then C: reply request|action');
+				console.log(conversation);
                 test.equal(conversation.socialCommitments.length, 1);
                 test.equal(conversation.socialCommitments[0].performative, 'reply request');
                 test.equal(conversation.socialCommitments[0].action, 'action');
