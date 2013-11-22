@@ -10,11 +10,22 @@ var agentSchema = require('../schemata/agent'),
  * @param role
  */
 exports.loadConversation = function(message, type, role) {
+	console.log('loadConversation');
+	console.log(message);
+
     var deferred = q.defer();
     var agentDb = new agentSchema(message.receiver);
+
+	agentDb.conversationModel.find({}, function(err, conversations) {
+		console.log('all conversations');
+		console.log(conversations);
+	  });
+
     if (message.conversationId) {
       agentDb.conversationModel.findOne({ conversationId: message.conversationId },
           function(err, conversation) {
+			  console.log('retrieve');
+			  console.log(conversation);
               agentDb.connection.db.close();
               if (err) {
                 deferred.reject(err);
@@ -33,7 +44,16 @@ exports.loadConversation = function(message, type, role) {
             role: role,
             conversationId: message.sender + ':' + Date.now().toString(),
         });
-      deferred.resolve(conversation);
+
+	  conversation.save(function(err) {
+			agentDb.connection.db.close();
+			if (err) {
+			  deferred.resolve(err);
+			}
+			else {
+      		  deferred.resolve(conversation);
+			}
+	  	  });
     }
     return deferred.promise;
 };

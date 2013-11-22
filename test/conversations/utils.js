@@ -70,7 +70,7 @@ exports.loadConversation = {
     },
 
     'Return a new conversation with conversationId if no ID set': function(test) {
-        test.expect(5);
+        test.expect(6);
         utils.loadConversation({ receiver: 'dan@example.com', sender: 'yanfen@example.com' }, 'propose', 'server').
             then(function(conversation) {
                 test.equal(conversation.type, 'propose');
@@ -78,7 +78,18 @@ exports.loadConversation = {
                 test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 
                 test.equal(conversation.socialCommitments.length, 0);
                 test.equal(conversation.terminated, false);
-                test.done();
+
+				// Make sure it is saved
+        		var agentDb = new agentSchema('dan@example.com');
+				agentDb.conversationModel.find({}, function(err, conversations) {
+					agentDb.connection.db.close();
+					if (err) {
+    	              console.log(err);
+    	              test.ok(false, err);
+					}
+					test.equal(conversations.length, 2);
+	                test.done();
+				  });
             }).
             catch(function(err) {
                 console.log(err);
