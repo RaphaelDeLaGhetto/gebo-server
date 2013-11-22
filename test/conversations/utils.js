@@ -49,7 +49,8 @@ exports.loadConversation = {
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId, 'some conversation ID');
                 test.equal(conversation.socialCommitments.length, 0);
-                test.equal(conversation.terminated, false);
+                // This is true because no social commitments have been formed
+                test.equal(conversation.terminated, true);
                 test.done();
               }).
             catch(function(err) {
@@ -84,7 +85,8 @@ exports.loadConversation = {
                 test.equal(conversation.role, 'server');
                 test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 
                 test.equal(conversation.socialCommitments.length, 0);
-                test.equal(conversation.terminated, false);
+                // This is true because no social commitments have been formed
+                test.equal(conversation.terminated, true);
 
 		// Make sure it is saved
                 var agentDb = new agentSchema('dan@example.com');
