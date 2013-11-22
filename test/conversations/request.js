@@ -11,7 +11,14 @@ var agentSchema = require('../../schemata/agent'),
 var CLIENT = 'yanfen@example.com',
     SERVER = 'dan@example.com';
 
-function clientRequestAction() {
+function clientRequestAction(isServer) {
+    if (isServer) {
+      return request.server({ receiver: SERVER,
+                              sender: CLIENT,
+                              performative: 'request',
+                              action: 'action' },
+                            { email: SERVER });
+    }
     return request.client({ receiver: SERVER,
                             sender: CLIENT,
                             performative: 'request',
@@ -19,7 +26,15 @@ function clientRequestAction() {
                           { email: CLIENT });
   }
 
-function serverReplyNotUnderstood(conversation) {
+function serverReplyNotUnderstood(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'not-understood request',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: CLIENT,
                             sender: SERVER,
                             performative: 'not-understood request',
@@ -28,7 +43,15 @@ function serverReplyNotUnderstood(conversation) {
                           { email: CLIENT });
   }
 
-function serverReplyRefuse(conversation) {
+function serverReplyRefuse(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'refuse request',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: CLIENT,
                             sender: SERVER,
                             performative: 'refuse request',
@@ -37,7 +60,15 @@ function serverReplyRefuse(conversation) {
                           { email: CLIENT });
   }
 
-function serverReplyTimeout(conversation) {
+function serverReplyTimeout(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'timeout request',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: CLIENT,
                             sender: SERVER,
                             performative: 'timeout request',
@@ -46,7 +77,15 @@ function serverReplyTimeout(conversation) {
                           { email: CLIENT });
   }
 
-function serverAgreeRequestAction(conversation) {
+function serverAgreeRequestAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'agree request',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: CLIENT,
                             sender: SERVER,
                             performative: 'agree request',
@@ -55,7 +94,15 @@ function serverAgreeRequestAction(conversation) {
                           { email: CLIENT });
   }
 
-function clientCancelRequestAction(conversation) {
+function clientCancelRequestAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: SERVER,
+                              sender: CLIENT,
+                              performative: 'cancel request',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: SERVER,
                             sender: CLIENT,
                             performative: 'cancel request',
@@ -64,16 +111,32 @@ function clientCancelRequestAction(conversation) {
                           { email: CLIENT });
   }
 
-function serverFailurePerformRequestAction(conversation) {
+function serverFailurePerformRequestAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'failure perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: CLIENT,
                             sender: SERVER,
-                            performative: 'failure perform|request',
+                            performative: 'failure perform',
                             action: 'action',
                             conversationId: conversation.conversationId },
                           { email: CLIENT });
   }
 
-function serverProposeDischargePerformAction(conversation) {
+function serverProposeDischargePerformAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'propose discharge|perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: CLIENT,
                             sender: SERVER,
                             performative: 'propose discharge|perform',
@@ -82,7 +145,33 @@ function serverProposeDischargePerformAction(conversation) {
                           { email: CLIENT });
   }
 
-function clientNotUnderstoodProposeDischargePerformAction(conversation) {
+function serverTimeoutPerformAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: CLIENT,
+                              sender: SERVER,
+                              performative: 'timeout perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
+    return request.client({ receiver: CLIENT,
+                            sender: SERVER,
+                            performative: 'timeout perform',
+                            action: 'action',
+                            conversationId: conversation.conversationId },
+                          { email: CLIENT });
+  }
+
+
+function clientNotUnderstoodProposeDischargePerformAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: SERVER,
+                              sender: CLIENT,
+                              performative: 'not-understood propose|discharge|perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    };
     return request.client({ receiver: SERVER,
                             sender: CLIENT,
                             performative: 'not-understood propose|discharge|perform',
@@ -91,7 +180,15 @@ function clientNotUnderstoodProposeDischargePerformAction(conversation) {
                           { email: CLIENT });
   }
 
-function clientRefuseProposeDischargePerformAction(conversation) {
+function clientRefuseProposeDischargePerformAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: SERVER,
+                              sender: CLIENT,
+                              performative: 'refuse propose|discharge|perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: SERVER,
                             sender: CLIENT,
                             performative: 'refuse propose|discharge|perform',
@@ -100,7 +197,15 @@ function clientRefuseProposeDischargePerformAction(conversation) {
                           { email: CLIENT });
   }
 
-function clientTimeoutProposeDischargePerformAction(conversation) {
+function clientTimeoutProposeDischargePerformAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: SERVER,
+                              sender: CLIENT,
+                              performative: 'refuse propose|discharge|perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: SERVER,
                             sender: CLIENT,
                             performative: 'refuse propose|discharge|perform',
@@ -109,7 +214,15 @@ function clientTimeoutProposeDischargePerformAction(conversation) {
                           { email: CLIENT });
   }
 
-function clientAgreeProposeDischargePerformAction(conversation) {
+function clientAgreeProposeDischargePerformAction(conversation, isServer) {
+    if (isServer) {
+      return request.server({ receiver: SERVER,
+                              sender: CLIENT,
+                              performative: 'agree propose|discharge|perform',
+                              action: 'action',
+                              conversationId: conversation.conversationId },
+                            { email: SERVER });
+    }
     return request.client({ receiver: SERVER,
                             sender: CLIENT,
                             performative: 'agree propose|discharge|perform',
@@ -175,6 +288,24 @@ exports.client = {
     },
 
     'Create a new conversation if no conversationId is provided': function(test) {
+        test.expect(4);
+        request.client({ receiver: SERVER, sender: CLIENT },
+                       { email: SERVER }).
+            then(function(conversation) {
+                test.equal(conversation.type, 'request');
+                test.equal(conversation.role, 'client');
+                test.equal(conversation.conversationId.search(CLIENT), 0);
+                test.equal(conversation.socialCommitments.length, 0);
+                test.done();
+            }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, 'Should not get here');
+                test.done();
+              });
+    },
+
+    'Don\'t barf if a non-existent conversationId is provided': function(test) {
         test.expect(1);
         request.client({ receiver: SERVER,
                          conversationId: 'some non-existent conversation ID' },
@@ -373,7 +504,7 @@ exports.client = {
               });
     }, 
 
-    'Fulfil \'C: propose discharge|perform|action\' when \'failure perform|request|action\' is received': function(test) {
+    'Fulfil \'C: propose discharge|perform|action\' when \'failure perform|action\' is received': function(test) {
         test.expect(18);
         clientRequestAction().
             then(function(conversation) {
@@ -414,6 +545,49 @@ exports.client = {
                 test.done();
               });
     }, 
+
+    'Fulfil \'C: propose discharge|perform|action\' when \'timeout perform|action\' is received': function(test) {
+        test.expect(18);
+        clientRequestAction().
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 2);
+                return serverTimeoutPerformAction(conversation);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 2);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' formed
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    }, 
+
 
     'Fulfil \'C: propose discharge|perform|action\' and form \'D: reply propose|discharge|perform|action\' when \'propose discharge|perform|action\' is received': function(test) {
         test.expect(25);
@@ -712,10 +886,6 @@ exports.client = {
                 test.done();
               });
     }, 
-
-    'Should have no outstanding social commitments once complete': function(test) {
-        test.done();
-    }, 
 };
 
 /**
@@ -724,63 +894,734 @@ exports.client = {
 exports.server = {
 
     setUp: function(callback) {
-        callback();
+        var agentDb = new agentSchema(SERVER);
+        var conversation = new agentDb.conversationModel({
+                type: 'request',
+                role: 'server',
+                conversationId: 'some conversation ID',
+              });
+
+        conversation.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            agentDb.connection.db.close();
+            callback();
+          });
     },
 
     tearDown: function(callback) {
-        callback();
+        var agentDb = new agentSchema(CLIENT);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
     },
 
     'Load a conversation from the database if provided a conversationId': function(test) {
-        test.done();
+        test.expect(5);
+        request.server({ receiver: SERVER, conversationId: 'some conversation ID' },
+                       { email: SERVER }).
+            then(function(conversation) {
+                test.equal(conversation.type, 'request');
+                test.equal(conversation.role, 'server');
+                test.equal(conversation.conversationId, 'some conversation ID');
+                test.equal(conversation.socialCommitments.length, 0);
+                // This is true because no social commmitments have
+                // been formed at this point
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
     },
 
     'Create a new conversation if no conversationId is provided': function(test) {
-        test.done();
+        test.expect(4);
+        request.server({ receiver: SERVER, sender: CLIENT },
+                       { email: SERVER }).
+            then(function(conversation) {
+                test.equal(conversation.type, 'request');
+                test.equal(conversation.role, 'server');
+                test.equal(conversation.conversationId.search(CLIENT), 0);
+                test.equal(conversation.socialCommitments.length, 0);
+                test.done();
+            }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, 'Should not get here');
+                test.done();
+              });
+    },
+
+    'Don\'t barf if non-existent conversationId is provided': function(test) {
+        test.expect(1);
+        request.server({ receiver: SERVER,
+                         conversationId: 'some non-existent conversation ID' },
+                       { email: CLIENT }).
+            then(function(conversation) {
+                test.ok(false, 'Should not get here');
+                test.done();
+            }).
+            catch(function(err) {
+                test.equal(err, 'Conversation: some non-existent conversation ID does not exist');
+                test.done();
+              });
     },
 
     'Form \'D: reply request|action\' having received a \'request action\'': function(test) {
-        test.done();
+        test.expect(9);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(conversation.socialCommitments[0].fulfilled, null);
+
+                test.equal(conversation.terminated, false);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
     'Fulfil \'D: reply request|action\' when \'not-understood request|action\' is sent': function(test) {
-        test.done();
+        test.expect(10);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverReplyNotUnderstood(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
     'Fulfil \'D: reply request|action\' when \'refuse request|action\' is sent': function(test) {
-        test.done();
+        test.expect(10);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverReplyRefuse(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
     'Fulfil \'D: reply request|action\' when \'timeout request|action\' is sent': function(test) {
-        test.done();
+        test.expect(10);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverReplyTimeout(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
-    'Fulfil \'D: reply request|action\' and form \'D: propose discharge|perform|action\' when \'agree request|action\' is sent': function(test) {
-        test.done();
+    'Fulfil \'D: reply request|action\', form \'D: perform action\', and form \'D: propose discharge|perform|action\' when \'agree request|action\' is sent': function(test) {
+        test.expect(24);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' formed
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, false);
+
+                // 'perform action' formed
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, false);
+
+                test.equal(conversation.terminated, false);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    }, 
+
+    'Fulfil \'D: propose discharge|perform|action\' and \'D: perform action\' when \'cancel request|action\' is received': function(test) {
+        test.expect(25);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return clientCancelRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' fulfilled
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    }, 
+
+    'Fulfil \'D: propose discharge|perform|action\' and \'D: perform action\' when \'failure perform|action\' is sent': function(test) {
+        test.expect(25);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverFailurePerformRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' fulfilled
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    }, 
+
+    'Fulfil \'D: propose discharge|perform|action\' and \'D: perform action\' when \'timeout perform|action\' is sent': function(test) {
+        test.expect(25);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverTimeoutPerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
     'Fulfil \'D: propose discharge|perform|action\' and form \'C: reply propose|discharge|perform|action\' when \'propose discharge|perform|action\' is sent': function(test) {
-        test.done();
+        test.expect(32);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 4);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' stays unfulfilled
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, false);
+
+                // 'reply propose|discharge|perform|action' formed
+                test.equal(conversation.socialCommitments[3].performative, 'reply propose|discharge|perform');
+                test.equal(conversation.socialCommitments[3].action, 'action');
+                test.equal(typeof conversation.socialCommitments[3].message, 'object');
+                test.equal(conversation.socialCommitments[3].creditor, SERVER);
+                test.equal(conversation.socialCommitments[3].debtor, CLIENT);
+                test.equal(!!conversation.socialCommitments[3].created, true);
+                test.equal(!!conversation.socialCommitments[3].fulfilled, false);
+
+                test.equal(conversation.terminated, false);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
     'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'not-understood propose discharge|perform|action\' is received': function(test) {
-        test.done();
+        test.expect(40);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 4);
+                return clientNotUnderstoodProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 5);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' remains unfulfilled 
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, false);
+
+                // 'reply propose|discharge|perform|action' fulfilled 
+                test.equal(conversation.socialCommitments[3].performative, 'reply propose|discharge|perform');
+                test.equal(conversation.socialCommitments[3].action, 'action');
+                test.equal(typeof conversation.socialCommitments[3].message, 'object');
+                test.equal(conversation.socialCommitments[3].creditor, SERVER);
+                test.equal(conversation.socialCommitments[3].debtor, CLIENT);
+                test.equal(!!conversation.socialCommitments[3].created, true);
+                test.equal(!!conversation.socialCommitments[3].fulfilled, true);
+
+                // 'propose discharge|perform|action' formed
+                test.equal(conversation.socialCommitments[4].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[4].action, 'action');
+                test.equal(typeof conversation.socialCommitments[4].message, 'object');
+                test.equal(conversation.socialCommitments[4].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[4].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[4].created, true);
+                test.equal(!!conversation.socialCommitments[4].fulfilled, false);
+
+                test.equal(conversation.terminated, false);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+        
     }, 
 
     'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'refuse propose discharge|perform|action\' is received': function(test) {
-        test.done();
+        test.expect(40);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 4);
+                return clientRefuseProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 5);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' remains unfulfilled 
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, false);
+
+                // 'reply propose|discharge|perform|action' fulfilled 
+                test.equal(conversation.socialCommitments[3].performative, 'reply propose|discharge|perform');
+                test.equal(conversation.socialCommitments[3].action, 'action');
+                test.equal(typeof conversation.socialCommitments[3].message, 'object');
+                test.equal(conversation.socialCommitments[3].creditor, SERVER);
+                test.equal(conversation.socialCommitments[3].debtor, CLIENT);
+                test.equal(!!conversation.socialCommitments[3].created, true);
+                test.equal(!!conversation.socialCommitments[3].fulfilled, true);
+
+                // 'propose discharge|perform|action' formed
+                test.equal(conversation.socialCommitments[4].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[4].action, 'action');
+                test.equal(typeof conversation.socialCommitments[4].message, 'object');
+                test.equal(conversation.socialCommitments[4].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[4].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[4].created, true);
+                test.equal(!!conversation.socialCommitments[4].fulfilled, false);
+
+                test.equal(conversation.terminated, false);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
     'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'timeout propose discharge|perform|action\' is received': function(test) {
-        test.done();
+        test.expect(40);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 4);
+                return clientTimeoutProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 5);
+
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' remains unfulfilled 
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, false);
+
+                // 'reply propose|discharge|perform|action' fulfilled 
+                test.equal(conversation.socialCommitments[3].performative, 'reply propose|discharge|perform');
+                test.equal(conversation.socialCommitments[3].action, 'action');
+                test.equal(typeof conversation.socialCommitments[3].message, 'object');
+                test.equal(conversation.socialCommitments[3].creditor, SERVER);
+                test.equal(conversation.socialCommitments[3].debtor, CLIENT);
+                test.equal(!!conversation.socialCommitments[3].created, true);
+                test.equal(!!conversation.socialCommitments[3].fulfilled, true);
+
+                // 'propose discharge|perform|action' formed
+                test.equal(conversation.socialCommitments[4].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[4].action, 'action');
+                test.equal(typeof conversation.socialCommitments[4].message, 'object');
+                test.equal(conversation.socialCommitments[4].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[4].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[4].created, true);
+                test.equal(!!conversation.socialCommitments[4].fulfilled, false);
+
+                test.equal(conversation.terminated, false);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     }, 
 
-    'Fulfil \'C: reply propose|discharge|perform|action\', fulfil \'D: propose discharge|perform|action\' when \'agree propose|discharge|perform|action\' is received': function(test) {
-        test.done();
-    },
+    'Fulfil \'C: reply propose|discharge|perform|action\', fulfil \'D: perform action\' when \'agree propose|discharge|perform|action\' is received': function(test) {
+        test.expect(33);
+        clientRequestAction(true).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 1);
+                return serverAgreeRequestAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 3);
+                return serverProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 4);
+                return clientAgreeProposeDischargePerformAction(conversation, true);
+              }).
+            then(function(conversation) {
+                test.equal(conversation.socialCommitments.length, 4);
 
-    'Should have no outstanding social commitments once complete': function(test) {
-        test.done();
+                // 'reply request:action' fulfilled
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(typeof conversation.socialCommitments[0].message, 'object');
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(!!conversation.socialCommitments[0].fulfilled, true);
+
+                // 'propose discharge|perform|action' fulfilled
+                test.equal(conversation.socialCommitments[1].performative, 'propose discharge|perform');
+                test.equal(conversation.socialCommitments[1].action, 'action');
+                test.equal(typeof conversation.socialCommitments[1].message, 'object');
+                test.equal(conversation.socialCommitments[1].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[1].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[1].created, true);
+                test.equal(!!conversation.socialCommitments[1].fulfilled, true);
+
+                // 'perform action' fulfilled 
+                test.equal(conversation.socialCommitments[2].performative, 'perform');
+                test.equal(conversation.socialCommitments[2].action, 'action');
+                test.equal(typeof conversation.socialCommitments[2].message, 'object');
+                test.equal(conversation.socialCommitments[2].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[2].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[2].created, true);
+                test.equal(!!conversation.socialCommitments[2].fulfilled, true);
+
+                // 'reply propose|discharge|perform|action' fulfilled 
+                test.equal(conversation.socialCommitments[3].performative, 'reply propose|discharge|perform');
+                test.equal(conversation.socialCommitments[3].action, 'action');
+                test.equal(typeof conversation.socialCommitments[3].message, 'object');
+                test.equal(conversation.socialCommitments[3].creditor, SERVER);
+                test.equal(conversation.socialCommitments[3].debtor, CLIENT);
+                test.equal(!!conversation.socialCommitments[3].created, true);
+                test.equal(!!conversation.socialCommitments[3].fulfilled, true);
+
+                test.equal(conversation.terminated, true);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     },
 };
 
