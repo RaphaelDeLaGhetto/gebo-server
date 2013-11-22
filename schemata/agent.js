@@ -169,7 +169,7 @@ module.exports = function (email) {
     conversationSchema.virtual('terminated').
         get(function() {
             for (var i = 0; i < this.socialCommitments.length; i++) {
-              if (!!this.socialCommitments[i].fulfilled) {
+              if (!this.socialCommitments[i].fulfilled) {
                 return false;
               }
             }
