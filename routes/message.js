@@ -9,11 +9,11 @@ var passport = require('passport'),
     conversations = require('../conversations'),
     q = require('q');
 
-module.exports = function(email) {
-
-    // Turn the email into a mongo-friend database name
-    var dbName = utils.ensureDbName(email);
-    var action = require('../actions')(dbName);
+//module.exports = function(email) {
+//
+//    // Turn the email into a mongo-friend database name
+//    var dbName = utils.ensureDbName(email);
+//    var action = require('../actions')(dbName);
 
     /**
      * All communication is carried out using the 
@@ -36,6 +36,7 @@ module.exports = function(email) {
      * Handles an agent's outgoing messages
      */
     var _sendMessageHandler = function(req, res) { 
+
         var message = req.body,
             agent = req.user;
 
@@ -78,6 +79,8 @@ module.exports = function(email) {
  
           conversations[message.performative][role](message, agent).
                 then(function(conversation) {
+                    console.log('conversation');
+                    console.log(conversation);
                     res.send(200, conversation);
                   }).
                 catch(function(err) {
@@ -141,5 +144,5 @@ module.exports = function(email) {
         }
       };
 
-    return exports;
-  };
+//    return exports;
+//  };
