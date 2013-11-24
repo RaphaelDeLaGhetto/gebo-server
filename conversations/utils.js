@@ -41,7 +41,6 @@ exports.loadConversation = function(message, agent, type, role) {
             role: role,
             conversationId: message.sender + ':' + Date.now().toString(),
         });
-      
       conversation.save(function(err) {
               if (err) {
                 deferred.resolve(err);

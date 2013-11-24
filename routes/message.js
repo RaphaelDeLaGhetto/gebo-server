@@ -35,8 +35,7 @@ var passport = require('passport'),
     /**
      * Handles an agent's outgoing messages
      */
-    var _sendMessageHandler = function(req, res) { 
-
+    var _sendMessageHandler = function(req, res, done) { 
         var message = req.body,
             agent = req.user;
 
@@ -45,11 +44,10 @@ var passport = require('passport'),
          * or is it already in progress?
          */
         if (message.conversationId) {
-          var agentDb = new agentSchema(req.user.email);
+          var agentDb = new agentSchema(agent.email);
           agentDb.conversationModel.findOne({ conversationId: message.conversationId }, function(err, conversation) {
-                conversationModel.connection.db.close();
+                agentDb.connection.db.close();
                 if (err) {
-                  console.log('conversationModel error');
                   console.log(err);
                   res.send(500, err);
                 }
@@ -61,9 +59,11 @@ var passport = require('passport'),
                   conversations[conversation.type][conversation.role](message, agent).
                     then(function(conversation) {
                         res.send(200, conversation);
+                        done();
                       }).
                     catch(function(err) {
                         res.send(500, err);
+                        done();
                       });
                 }
             });
@@ -79,12 +79,12 @@ var passport = require('passport'),
  
           conversations[message.performative][role](message, agent).
                 then(function(conversation) {
-                    console.log('conversation');
-                    console.log(conversation);
                     res.send(200, conversation);
+                    done();
                   }).
                 catch(function(err) {
                     res.send(500, err);
+                    done();
                   });
         }
       };

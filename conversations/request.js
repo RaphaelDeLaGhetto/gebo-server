@@ -18,6 +18,7 @@ exports.client = function(message, agent) {
 
     utils.loadConversation(message, agent, 'request', 'client').
         then(function(conversation) {
+
             switch(message.performative) {
                 case 'request':
                     // Form C: reply request|action
@@ -98,7 +99,7 @@ exports.client = function(message, agent) {
                     break;
             }
 
-            conversation.save(function(err) {
+            conversation.save(function(err, conversation) {
                 conversation.db.close();
                 if (err) {
                   deferred.reject(err);
