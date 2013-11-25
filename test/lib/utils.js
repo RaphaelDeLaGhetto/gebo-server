@@ -683,7 +683,7 @@ exports.getOptions = {
 /**
  * makeRequest
  */
-exports.makeRequest =  {
+exports.makeRequest = {
 
     'POST data to the destination specified': function(test) {
         test.expect(1);
@@ -705,4 +705,179 @@ exports.makeRequest =  {
                 test.done();
               });
     },
+};
+
+/**
+ * getRole
+ */
+exports.getRole = {
+
+    setUp: function(callback) {
+
+        var agentDb = new agentSchema('client@example.com');
+        agentDb.connection.on('open', function(err) {
+            if (err) {
+              console.log(err)
+            }
+            agentDb.connection.db.dropDatabase(function(err) {
+                var clientConversation = new agentDb.conversationModel({
+                        type: 'request',
+                        role: 'client',
+                        conversationId: 'Some client conversation ID',
+                  });
+
+                clientConversation.save(function(err) {
+                    agentDb.connection.db.close();
+
+                    agentDb = new agentSchema('server@example.com');
+                    agentDb.connection.on('open', function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+
+                        var serverConversation = new agentDb.conversationModel({
+                                type: 'request',
+                                role: 'server',
+                                conversationId: 'Some client conversation ID',
+                              });
+    
+                        serverConversation.save(function(err) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                            }
+                            callback();
+                          });
+                      });
+                  });
+              });
+          });
+    },
+
+    tearDown: function(callback) {
+        var agentDb = new agentSchema('client@example.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
+
+                agentDb = new agentSchema('server@example.com');
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err)
+                        }
+                        callback();
+                      });
+                  });
+              });
+          });
+    },
+    
+    'Return \'client\' when sending a new request': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'client@example.com',
+                receiver: 'server@example.com',
+                performative: 'request',
+                action: 'friend'}, false).
+            then(function(role) {
+                test.equal(role, 'client');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
+    },
+
+    'Return \'server\' when receiving a new request': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'client@example.com',
+                receiver: 'server@example.com',
+                performative: 'request',
+                action: 'friend'}, true).
+            then(function(role) {
+                test.equal(role, 'server');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
+    },
+    
+    'Return \'server\' when sending a new propose': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'server@example.com',
+                receiver: 'client@example.com',
+                performative: 'propose',
+                action: 'friend'}, false).
+            then(function(role) {
+                test.equal(role, 'server');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
+    },
+
+    'Return \'client\' when receiving a new propose': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'server@example.com',
+                receiver: 'client@example.com',
+                performative: 'propose',
+                action: 'friend'}, true).
+            then(function(role) {
+                test.equal(role, 'client');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
+    },
+
+    'Return \'client\' when receiving an \'agree request\'': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'server@example.com',
+                receiver: 'client@example.com',
+                performative: 'agree request',
+                conversationId: 'Some client conversation ID',
+                action: 'friend'}, true).
+            then(function(role) {
+                test.equal(role, 'client');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Return \'server\' when sending an \'agree request\'': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'server@example.com',
+                receiver: 'client@example.com',
+                performative: 'agree request',
+                conversationId: 'Some client conversation ID',
+                action: 'friend'}, false).
+            then(function(role) {
+                test.equal(role, 'server');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+  
 };
