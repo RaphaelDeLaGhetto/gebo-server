@@ -2,6 +2,7 @@
 var utils = require('../../lib/utils'),
     config = require('../../config/config'),
     fs = require('fs'),
+    nock = require('nock'),
     mkdirp = require('mkdirp'),
 //    nconf = require('nconf'),
     agentSchema = require('../../schemata/agent'),
@@ -676,5 +677,32 @@ exports.getOptions = {
         test.equal(options.agent, false);
  
         test.done();
+    },
+};
+
+/**
+ * makeRequest
+ */
+exports.makeRequest =  {
+
+    'POST data to the destination specified': function(test) {
+        test.expect(1);
+        var content = { data: 'some data' };
+        var scope = nock('https://somegebo.com').
+                post('/receive').
+                reply(200, { data: 'Here\'s what you want' });  
+
+        utils.makeRequest('somegebo.com', '/receive', content).
+            then(function(data) {
+                scope.done();
+                test.equal(data.data, 'Here\'s what you want'); 
+                test.done();
+              }).
+            catch(function(err) {
+                scope.done();
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     },
 };
