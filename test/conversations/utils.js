@@ -76,6 +76,7 @@ exports.loadConversation = {
         test.expect(6);
         utils.loadConversation({ receiver: 'dan@example.com',
                                  sender: 'yanfen@example.com',
+                                 performative: 'request', 
                                  conversationId: 'some non-existent conversation ID' },
                                { email: 'dan@example.com' }, 'request', 'server').
             then(function(conversation) {
@@ -92,6 +93,7 @@ exports.loadConversation = {
                 test.done();
               }).
             catch(function(err) {
+                console.log(err);
                 test.ok(false, 'Should not get here');
                 test.done();
               });
@@ -99,7 +101,9 @@ exports.loadConversation = {
 
     'Return a new conversation with conversationId if no ID set': function(test) {
         test.expect(7);
-        utils.loadConversation({ receiver: 'dan@example.com', sender: 'yanfen@example.com' },
+        utils.loadConversation({ receiver: 'dan@example.com',
+                                 sender: 'yanfen@example.com',
+                                 performative: 'propose' },
                                { email: 'dan@example.com' }, 'propose', 'server').
             then(function(conversation) {
                 // Connection should be open
@@ -420,6 +424,45 @@ exports.startNewConversation = {
                     console.log(err);
                     test.ok(false, err);
                     test.done();      
+                  });
+          });
+    },
+
+    'Do not add a conversation if the performative doesn\'t match a conversation template': function(test) {
+        test.expect(4);
+        var agentDb = new agentSchema('server@example.com');
+        agentDb.conversationModel.find({}, function(err, conversations) {
+            agentDb.connection.db.close();
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            test.equal(conversations.length, 0);
+            utils.startNewConversation({ receiver: 'server@example.com',
+                                         sender: 'client@example.com',
+                                         performative: 'agree propose',
+                                         conversationId: 'some non-existent conversationId',
+                                         action: 'action' },
+                                       { email: 'server@example.com' },
+                                       'propose', 'server').
+                then(function(conversation) {
+                    console.log(conversation);
+                    test.ok(false, 'Shouldn\'t get here');
+                    test.done();      
+                  }).
+                catch(function(err) {
+                    test.equal(err, 'There\'s no propose conversation for this agree propose');
+                    agentDb = new agentSchema('server@example.com');
+                    agentDb.conversationModel.find({}, function(err, conversations) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err);
+                          test.ok(false, err);
+                        }
+                        test.equal(conversations.length, 0);
+                        test.ok(true, err);
+                        test.done();
+                      });
                   });
           });
     },

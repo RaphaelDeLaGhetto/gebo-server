@@ -69,26 +69,31 @@ exports.loadConversation = function(message, agent, type, role) {
 var _startNewConversation = function(message, agent, type, role) {
     var deferred = q.defer();
 
-    var conversationId = message.conversationId;
-    if (!conversationId) {
-      conversationId = message.sender + ':' + Date.now().toString();
-    }
+    if (message.performative === type) {
+      var conversationId = message.conversationId;
+      if (!conversationId) {
+        conversationId = message.sender + ':' + Date.now().toString();
+      }
 
-    var agentDb = new agentSchema(agent.email);
-    var conversation = new agentDb.conversationModel({
-            type: type,
-            role: role,
-            conversationId: conversationId,
-        });
-
-    conversation.save(function(err) {
-            if (err) {
-              deferred.resolve(err);
-            }
-            else {
-              deferred.resolve(conversation);
-            }
+      var agentDb = new agentSchema(agent.email);
+      var conversation = new agentDb.conversationModel({
+              type: type,
+              role: role,
+              conversationId: conversationId,
           });
+
+      conversation.save(function(err) {
+              if (err) {
+                deferred.resolve(err);
+              }
+              else {
+                deferred.resolve(conversation);
+              }
+            });
+    }
+    else {
+      deferred.reject('There\'s no ' + type + ' conversation for this ' + message.performative);
+    }
     return deferred.promise;
   };
 exports.startNewConversation = _startNewConversation;
