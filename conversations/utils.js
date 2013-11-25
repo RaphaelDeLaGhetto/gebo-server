@@ -28,7 +28,14 @@ exports.loadConversation = function(message, agent, type, role) {
                   deferred.reject(err);
                 }
                 else if (!conversation) {
-                  deferred.reject('Conversation: ' + message.conversationId + ' does not exist'); 
+                  agentDb.connection.db.close();
+                  _startNewConversation(message, agent, type, role).
+                    then(function(conversation) {
+                        deferred.resolve(conversation);
+                      }).
+                    catch(function(err) {
+                        deferred.reject(err);
+                      });
                 }
                 else {
                   deferred.resolve(conversation);
@@ -36,22 +43,49 @@ exports.loadConversation = function(message, agent, type, role) {
             });
     }
     else {
-      var conversation = new agentDb.conversationModel({
-            type: type,
-            role: role,
-            conversationId: message.sender + ':' + Date.now().toString(),
-        });
-      conversation.save(function(err) {
-              if (err) {
-                deferred.resolve(err);
-              }
-              else {
-                deferred.resolve(conversation);
-              }
+      _startNewConversation(message, agent, type, role).
+        then(function(conversation) {
+            deferred.resolve(conversation);
+          }).
+        catch(function(err) {
+            deferred.reject(err);
           });
     }
     return deferred.promise;
 };
+
+/**
+ * Start a new conversation
+ *
+ * NOTE: startNewConversation doesn't close the database connection.
+ *
+ * @param Object
+ * @param Object
+ * @param string
+ * @param string
+ *
+ * @return promise
+ */
+var _startNewConversation = function(message, agent, type, role) {
+    var deferred = q.defer();
+
+    var agentDb = new agentSchema(agent.email);
+    var conversation = new agentDb.conversationModel({
+            type: type,
+            role: role,
+            conversationId: message.sender + ':' + Date.now().toString(),
+        });
+    conversation.save(function(err) {
+            if (err) {
+              deferred.resolve(err);
+            }
+            else {
+              deferred.resolve(conversation);
+            }
+          });
+    return deferred.promise;
+  };
+exports.startNewConversation = _startNewConversation;
 
 /**
  * getFirstUnfulfilledSocialCommitmentIndex

@@ -46,12 +46,15 @@ exports.loadConversation = {
     },
 
     'Load an existing conversation': function(test) {
-        test.expect(5);
+        test.expect(6);
         utils.loadConversation({ receiver: 'dan@example.com',
                                  conversationId: 'some conversation ID' },
                                { email: 'dan@example.com' }).
             then(function(conversation) {
+                // Connection should be open
+                test.equal(conversation.db.readyState, 1);
 		conversation.db.close();
+
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId, 'some conversation ID');
@@ -69,26 +72,39 @@ exports.loadConversation = {
               });
     },
 
-    'Return an error if no matching conversation exists': function(test) {
-        test.expect(1);
+    'Return a new conversation if no matching conversationId exists': function(test) {
+        test.expect(6);
         utils.loadConversation({ receiver: 'dan@example.com',
+                                 sender: 'yanfen@example.com',
                                  conversationId: 'some non-existent conversation ID' },
-                               { email: 'dan@example.com' }).
+                               { email: 'dan@example.com' }, 'request', 'server').
             then(function(conversation) {
-                test.ok(false, 'Should not get here');
+                // Connection should be open
+                test.equal(conversation.db.readyState, 1);
+		conversation.db.close();
+
+                test.equal(conversation.type, 'request');
+                test.equal(conversation.role, 'server');
+                test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 
+                test.equal(conversation.socialCommitments.length, 0);
+                // This is true because no social commitments have been formed
+                test.equal(conversation.terminated, true);
                 test.done();
               }).
             catch(function(err) {
-                test.equal(err, 'Conversation: some non-existent conversation ID does not exist');
+                test.ok(false, 'Should not get here');
                 test.done();
               });
     },
 
     'Return a new conversation with conversationId if no ID set': function(test) {
-        test.expect(6);
+        test.expect(7);
         utils.loadConversation({ receiver: 'dan@example.com', sender: 'yanfen@example.com' },
                                { email: 'dan@example.com' }, 'propose', 'server').
             then(function(conversation) {
+                // Connection should be open
+                test.equal(conversation.db.readyState, 1);
+	
 		conversation.db.close();
                 test.equal(conversation.type, 'propose');
                 test.equal(conversation.role, 'server');
@@ -263,6 +279,92 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
             test.equal(conversation.socialCommitments.length, 5);
             test.equal(utils.getFirstUnfulfilledSocialCommitmentIndex(conversation.socialCommitments, 'reply request'), -1);
             test.done();
+          });
+    },
+};
+
+/**
+ * startNewConversation
+ */
+exports.startNewConversation = {
+
+    setUp: function(callback) {
+        var agentDb = new agentSchema('server@example.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
+    },
+
+    tearDown: function(callback) {
+        var agentDb = new agentSchema('server@example.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
+    },
+
+    'Add a new conversation to the database': function(test) {
+        test.expect(13);
+        var agentDb = new agentSchema('server@example.com');
+        agentDb.conversationModel.find({}, function(err, conversations) {
+            agentDb.connection.db.close();
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            test.equal(conversations.length, 0);
+            utils.startNewConversation({ receiver: 'server@example.com',
+                                         sender: 'client@example.com',
+                                         performative: 'request',
+                                         action: 'action' },{ email: 'server@example.com' },
+                                         'request', 'server').
+                then(function(conversation) {
+                    // Connection should be open
+                    test.equal(conversation.db.readyState, 1);
+	            conversation.db.close();
+
+                    test.equal(conversation.type, 'request');
+                    test.equal(conversation.role, 'server');
+                    test.equal(conversation.conversationId.search('client@example.com'), 0);
+                    test.equal(conversation.socialCommitments.length, 0);
+                    // This is true because no social commitments have been formed
+                    test.equal(conversation.terminated, true);
+
+                    // Make sure it is saved
+                    var agentDb = new agentSchema('server@example.com');
+                    agentDb.conversationModel.find({}, function(err, conversations) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                              test.ok(false, err);
+                            }
+                            test.equal(conversations.length, 1);
+                            test.equal(conversations[0].type, 'request');
+                            test.equal(conversations[0].role, 'server');
+                            test.equal(conversations[0].conversationId.search('client@example.com'), 0);
+                            test.equal(conversations[0].socialCommitments.length, 0);
+                            // This is true because no social commitments have been formed
+                            test.equal(conversations[0].terminated, true);
+
+                  	    test.done();
+                      });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();      
+                  });
           });
     },
 };
