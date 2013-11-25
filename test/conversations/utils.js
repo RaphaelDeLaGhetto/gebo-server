@@ -10,18 +10,25 @@ exports.loadConversation = {
 
     setUp: function(callback) {
         var agentDb = new agentSchema('dan@example.com');
-        var conversation = new agentDb.conversationModel({
-                type: 'request',
-                role: 'client',
-                conversationId: 'some conversation ID',
+        // Drop the DB here because test documents have 
+        // tendency to persist when errors are thrown
+        // during testing
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                var conversation = new agentDb.conversationModel({
+                        type: 'request',
+                        role: 'client',
+                        conversationId: 'some conversation ID',
+                      });
+        
+                conversation.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    agentDb.connection.db.close();
+                    callback();
+                  });
               });
-
-        conversation.save(function(err) {
-            if (err) {
-              console.log(err);
-            }
-            agentDb.connection.db.close();
-            callback();
           });
     },
 
@@ -44,10 +51,14 @@ exports.loadConversation = {
                                  conversationId: 'some conversation ID' },
                                { email: 'dan@example.com' }).
             then(function(conversation) {
+                    console.log('conversation');
+                    console.log(conversation);
 		conversation.db.close();
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId, 'some conversation ID');
+                // Did not form social commitment for test conversation. A social commitment
+                // would be formed in real life.
                 test.equal(conversation.socialCommitments.length, 0);
                 // This is true because no social commitments have been formed
                 test.equal(conversation.terminated, true);
