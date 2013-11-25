@@ -85,7 +85,7 @@ exports.loadConversation = {
 
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'server');
-                test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 
+                test.equal(conversation.conversationId, 'some non-existent conversation ID'); 
                 test.equal(conversation.socialCommitments.length, 0);
                 // This is true because no social commitments have been formed
                 test.equal(conversation.terminated, true);
@@ -353,6 +353,62 @@ exports.startNewConversation = {
                             test.equal(conversations[0].type, 'request');
                             test.equal(conversations[0].role, 'server');
                             test.equal(conversations[0].conversationId.search('client@example.com'), 0);
+                            test.equal(conversations[0].socialCommitments.length, 0);
+                            // This is true because no social commitments have been formed
+                            test.equal(conversations[0].terminated, true);
+
+                  	    test.done();
+                      });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();      
+                  });
+          });
+    },
+
+    'Add a new conversation with conversationId specified': function(test) {
+        test.expect(13);
+        var agentDb = new agentSchema('server@example.com');
+        agentDb.conversationModel.find({}, function(err, conversations) {
+            agentDb.connection.db.close();
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            test.equal(conversations.length, 0);
+            utils.startNewConversation({ receiver: 'server@example.com',
+                                         sender: 'client@example.com',
+                                         performative: 'request',
+                                         conversationId: 'some non-existent conversationId',
+                                         action: 'action' },
+                                       { email: 'server@example.com' },
+                                       'request', 'server').
+                then(function(conversation) {
+                    // Connection should be open
+                    test.equal(conversation.db.readyState, 1);
+	            conversation.db.close();
+
+                    test.equal(conversation.type, 'request');
+                    test.equal(conversation.role, 'server');
+                    test.equal(conversation.conversationId, 'some non-existent conversationId');
+                    test.equal(conversation.socialCommitments.length, 0);
+                    // This is true because no social commitments have been formed
+                    test.equal(conversation.terminated, true);
+
+                    // Make sure it is saved
+                    var agentDb = new agentSchema('server@example.com');
+                    agentDb.conversationModel.find({}, function(err, conversations) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                              test.ok(false, err);
+                            }
+                            test.equal(conversations.length, 1);
+                            test.equal(conversations[0].type, 'request');
+                            test.equal(conversations[0].role, 'server');
+                            test.equal(conversations[0].conversationId, 'some non-existent conversationId');
                             test.equal(conversations[0].socialCommitments.length, 0);
                             // This is true because no social commitments have been formed
                             test.equal(conversations[0].terminated, true);
