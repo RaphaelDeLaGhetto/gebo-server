@@ -615,3 +615,66 @@ exports.getPrivateKeyAndCertificate = {
               });
     },
 };
+
+/**
+ * getOptions
+ */
+exports.getOptions = {
+
+    'Return the correct options for a web address': function(test) {
+        test.expect(9);
+
+        var content = { data: 'some data' };
+        var options = utils.getOptions('https://mygebo.com:3443', '/', content);
+
+        test.equal(options.host, 'mygebo.com');
+        test.equal(options.port, '3443');
+        test.equal(options.path, '/');
+        test.equal(options.method, 'POST');
+        test.equal(options.headers['Content-Type'], 'application/json'); 
+        test.equal(options.headers['Content-Length'],  Buffer.byteLength(JSON.stringify(content))); 
+        test.equal(options.rejectUnauthorized, false);
+        test.equal(options.requestCert, true);
+        test.equal(options.agent, false);
+ 
+        test.done();
+    },
+
+    'Return the correct options for web address without a protocol': function(test) {
+        test.expect(9);
+
+        var content = { data: 'some data' };
+        var options = utils.getOptions('mygebo.com:3443', '/', content);
+
+        test.equal(options.host, 'mygebo.com');
+        test.equal(options.port, '3443');
+        test.equal(options.path, '/');
+        test.equal(options.method, 'POST');
+        test.equal(options.headers['Content-Type'], 'application/json'); 
+        test.equal(options.headers['Content-Length'],  Buffer.byteLength(JSON.stringify(content))); 
+        test.equal(options.rejectUnauthorized, false);
+        test.equal(options.requestCert, true);
+        test.equal(options.agent, false);
+ 
+        test.done();
+    },
+
+    'Return the correct options for web address without a port': function(test) {
+        test.expect(9);
+
+        var content = { data: 'some data' };
+        var options = utils.getOptions('mygebo.com', '/', content);
+
+        test.equal(options.host, 'mygebo.com');
+        test.equal(options.port, '443');
+        test.equal(options.path, '/');
+        test.equal(options.method, 'POST');
+        test.equal(options.headers['Content-Type'], 'application/json'); 
+        test.equal(options.headers['Content-Length'],  Buffer.byteLength(JSON.stringify(content))); 
+        test.equal(options.rejectUnauthorized, false);
+        test.equal(options.requestCert, true);
+        test.equal(options.agent, false);
+ 
+        test.done();
+    },
+};
