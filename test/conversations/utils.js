@@ -51,8 +51,6 @@ exports.loadConversation = {
                                  conversationId: 'some conversation ID' },
                                { email: 'dan@example.com' }).
             then(function(conversation) {
-                    console.log('conversation');
-                    console.log(conversation);
 		conversation.db.close();
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
