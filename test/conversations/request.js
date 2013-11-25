@@ -967,7 +967,7 @@ exports.server = {
               });
     },
 
-    'Don\'t barf if non-existent conversationId is provided': function(test) {
+    'Create conversation if non-existent conversationId is provided': function(test) {
         test.expect(4);
         request.server({ receiver: SERVER,
                          conversationId: 'some non-existent conversation ID' },
