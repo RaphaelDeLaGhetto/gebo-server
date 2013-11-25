@@ -52,7 +52,7 @@ exports.loadConversation = function(message, agent, type, role) {
           });
     }
     return deferred.promise;
-};
+  };
 
 /**
  * Start a new conversation
