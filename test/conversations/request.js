@@ -305,17 +305,23 @@ exports.client = {
               });
     },
 
-    'Don\'t barf if a non-existent conversationId is provided': function(test) {
-        test.expect(1);
+    'Create a new conversation if non-existent conversationId is provided': function(test) {
+        test.expect(4);
         request.client({ receiver: SERVER,
+                         sender: CLIENT,
                          conversationId: 'some non-existent conversation ID' },
-                       { email: CLIENT }).
+                       { email: SERVER }).
             then(function(conversation) {
-                test.ok(false, 'Should not get here');
+                test.equal(conversation.type, 'request');
+                test.equal(conversation.role, 'client');
+                test.equal(conversation.conversationId, 'some non-existent conversation ID');
+                test.equal(conversation.socialCommitments.length, 0);
+ 
                 test.done();
             }).
             catch(function(err) {
-                test.equal(err, 'Conversation: some non-existent conversation ID does not exist');
+                console.log(err);
+                test.ok(false, 'Should not get here');
                 test.done();
               });
     },
@@ -911,7 +917,7 @@ exports.server = {
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema(CLIENT);
+        var agentDb = new agentSchema(SERVER);
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 agentDb.connection.db.close();
@@ -962,16 +968,20 @@ exports.server = {
     },
 
     'Don\'t barf if non-existent conversationId is provided': function(test) {
-        test.expect(1);
+        test.expect(4);
         request.server({ receiver: SERVER,
                          conversationId: 'some non-existent conversation ID' },
                        { email: CLIENT }).
             then(function(conversation) {
-                test.ok(false, 'Should not get here');
+                test.equal(conversation.type, 'request');
+                test.equal(conversation.role, 'server');
+                test.equal(conversation.conversationId, 'some non-existent conversation ID');
+                test.equal(conversation.socialCommitments.length, 0);
                 test.done();
             }).
             catch(function(err) {
-                test.equal(err, 'Conversation: some non-existent conversation ID does not exist');
+                console.log(err);
+                test.ok(false, 'Should not get here');
                 test.done();
               });
     },
