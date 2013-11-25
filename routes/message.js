@@ -57,39 +57,34 @@ var _sendMessageHandler = function(req, res, done) {
                     res.send(500, err);
                     done();
                   });
-        });
-  };
+          }).
+        catch(function(err) {
+            res.send(500, err);
+            done();
+          });
+   };
 exports.sendMessageHandler = _sendMessageHandler; 
 
 /**
  * For incoming messages
  */
 exports.receive = function(req, res, done) { 
-    var message = req.body,
-        agent = req.user;
+    var message = req.body;
 
     utils.getRole(message, true).
         then(function(role) {
-            conversations[message.performative][role](message, agent).
+            conversations[message.performative][role](message, { email: message.receiver }).
                 then(function(conversation) {
-                    var gebo = nconf.get('domain');
-                    if (message.gebo) {
-                      gebo = message.gebo;
-                    }
-      
-                    utils.makeRequest(gebo, '/receive', message).
-                        then(function(data) {
-                            res.send(200, conversation);
-                            done();
-                          }).
-                        catch(function(err) {
-                            res.send(500, err);
-                            done();
-                          });
+                    res.send(200, conversation);
+                    done();
                   }).
                 catch(function(err) {
                     res.send(500, err);
                     done();
                   });
-        });
+          }).
+        catch(function(err) {
+            res.send(500, err);
+            done();
+          });
   };
