@@ -282,38 +282,39 @@ exports.receive = {
     },
 
     'Should return an ongoing conversation when a conversationId exists': function(test) {
-//        test.expect(13);
-//
-//        var agentDb = new agentSchema(CLIENT);
-//        agentDb.conversationModel.find({}, function(err, conversations) {
-//            agentDb.connection.db.close();
-//            if (err) {
-//              console.log(err);
-//              test.ok(false, err);
-//            }
-//            test.equal(_code, undefined);
-//            test.equal(_content, undefined);
-//            test.equal(conversations.length, 1);
-//
-//            var req = { body: { conversationId: 'Some conversation ID' } };
-//            extend(true, req, SEND_REQ);
-//            message.receive(req, RES, function(err, result) {
-//                    var agentDb = new agentSchema(CLIENT);
-//                    agentDb.conversationModel.find({}, function(err, conversations) {
-//                            agentDb.connection.db.close();
-//                            test.equal(conversations.length, 1);
-//                            test.equal(_code, 200);
-//                            test.equal(_content.conversationId, 'Some conversation ID');
-//                            test.equal(conversations[0].conversationId, 'Some conversation ID');
-//                            test.equal(_content.type, 'request');
-//                            test.equal(conversations[0].type, 'request');
-//                            test.equal(_content.socialCommitments.length, 1);
-//                            test.equal(conversations[0].socialCommitments.length, 1);
-//                            test.equal(_content.socialCommitments[0].performative, 'reply request');
-//                            test.equal(conversations[0].socialCommitments[0].performative, 'reply request');
+        test.expect(13);
+
+        var agentDb = new agentSchema(SERVER);
+        agentDb.conversationModel.find({}, function(err, conversations) {
+            agentDb.connection.db.close();
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            test.equal(_code, undefined);
+            test.equal(_content, undefined);
+            test.equal(conversations.length, 1);
+
+            var req = { body: { conversationId: 'Some conversation ID' } };
+            extend(true, req, SEND_REQ);
+            message.receive(req, RES, function(err, result) {
+                    var agentDb = new agentSchema(SERVER);
+                    agentDb.conversationModel.find({}, function(err, conversations) {
+                            agentDb.connection.db.close();
+                            test.equal(conversations.length, 1);
+                            test.equal(_code, 200);
+                            test.equal(_content.conversationId, 'Some conversation ID');
+                            test.equal(conversations[0].conversationId, 'Some conversation ID');
+                            test.equal(_content.type, 'request');
+                            test.equal(conversations[0].type, 'request');
+                            test.equal(_content.socialCommitments.length, 1);
+                            test.equal(conversations[0].socialCommitments.length, 1);
+                            test.equal(_content.socialCommitments[0].performative, 'reply request');
+                            test.equal(conversations[0].socialCommitments[0].performative, 'reply request');
                             test.done();
-//                      });
-//              });
-//          });
+                      });
+              });
+          });
     },
 };
+
