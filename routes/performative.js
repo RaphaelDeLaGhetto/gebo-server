@@ -16,6 +16,71 @@ module.exports = function(email) {
     var action = require('../actions')(dbName);
 
     /**
+     * Handle incoming requests from agents and friends
+     */
+    var _requestHandler = function(req, res, done) {
+    
+        var message = req.body,
+            agent = req.user;
+
+        // Form a social commitment
+        sc.form(agent, 'request', message).
+            then(function(socialCommitment) {
+                _verify(agent, message).
+                    then(function(verified) {
+
+                        // There might be files attached to the request.
+                        // They are included here, because it seems 
+                        // silly to attach them to the social commitment.
+                        extend(true, message, req.files);
+
+//                        console.log('request');
+//                        console.log(agent);
+//                        console.log(req.authInfo);
+//                        console.log('message');
+//                        console.log(message);
+//                        console.log('verified');
+//                        console.log(verified);
+
+                        action[message.action](verified, message).
+                            then(function(data) {
+//                                console.log('data');
+//                                console.log(data);
+                                sc.fulfil(message.receiver, socialCommitment._id).
+                                    then(function(sc) {
+                                        res.send(200, data);
+                                        done(null, data);
+                                      }).
+                                    catch(function(err) {
+                                        console.log(err);       
+                                        res.send(401, err);
+                                        done(err);
+                                      });
+                              }).
+                            catch(function(err) {
+                                    console.log('action error');
+                                    console.log(err);
+                                    res.send(404, err);
+                                    done(err);
+                              });
+                      }).
+                    catch(function(err) {
+                        console.log('Verification error');
+                        console.log(err);
+                        res.send(401, err);
+                        done(err);
+                      });
+              }).
+            catch(function(err) {
+                console.log('Cannot commit');
+                console.log(err);
+                res.send(401, err);
+                done(err);
+              });
+       };
+    exports.requestHandler = _requestHandler;
+
+    /**
      * Receive a request for consideration
      */
     exports.request = [
@@ -25,62 +90,7 @@ module.exports = function(email) {
             }
             passport.authenticate(['bearer'], { session: false })(req, res, next);
         },
-        function(req, res) {
-
-            var message = req.body;
-
-            // Form a social commitment
-            sc.form(req.user, 'request', message).
-                then(function(sc) {
-                    console.log('\n---------------------------- SC ---------------------------');
-                    console.log(sc);
-                    _verify(req.user, message).
-                        then(function(verified) {
-
-                                // There might be files attached to the request.
-                                // They are included here, because it seems 
-                                // silly to attach them to the social commitment.
-                                extend(true, message, req.files);
-
-                                console.log('request');
-                                console.log(req.user);
-                                console.log(req.authInfo);
-                                console.log('message');
-                                console.log(message);
-                                console.log('verified');
-                                console.log(verified);
-                    
-                                action[message.action](verified, message).
-                                    then(function(data) {
-//                                        console.log('data');
-//                                        console.log(data);
-                                        sc.fulfil(message.recipient, sc._id).
-                                            then(function(sc) {
-                                                res.send(data);
-                                              }).
-                                            catch(function(err) {
-                                                console.log(err);       
-                                                res.send(401, err);
-                                              });
-                                      }).
-                                    catch(function(err) {
-                                        console.log('action error');
-                                        console.log(err);
-                                        res.send(404, err);
-                                      });
-                              }).
-                        catch(function(err) {
-                            console.log('verification error');
-                            console.log(err);
-                            res.send(401, err);
-                          });
-                  }).
-                catch(function(err) {
-                    console.log('Cannot commit');
-                    console.log(err);
-                    res.send(401, err);
-                  });
-           }
+        _requestHandler
       ];
 
     /**
@@ -98,7 +108,7 @@ module.exports = function(email) {
 	var verified = {
                 collectionName: utils.getMongoCollectionName(message.resource),
                 admin: agent.admin,
-                dbName: utils.getMongoDbName(message.recipient)
+                dbName: utils.getMongoDbName(message.receiver)
             };
 
         if (!verified.dbName) {

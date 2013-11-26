@@ -2,6 +2,7 @@ var config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../../lib/utils'),
+    extend = require('extend'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent');
 
@@ -26,6 +27,32 @@ utils.getPrivateKeyAndCertificate().
       });
 
 var geboDb = new geboSchema(nconf.get('testDb'));
+
+/**
+ * For testing the routes
+ */
+var CLIENT = 'yanfen@example.com',
+    SERVER = 'dan@example.com';
+
+var SEND_REQ = {
+    body: { 
+         sender: CLIENT,
+         receiver: SERVER,
+//         performative: 'request',
+         action: 'ls',
+         resource: 'friends',
+      },
+    user: { email: CLIENT, admin: false },
+  }
+
+var _code, _content;
+var RES = {
+    send: function(code, content) {
+        _code = code;
+        _content = content;
+        return;
+      }
+  }
 
 /**
  * verify
@@ -153,7 +180,7 @@ exports.verify = {
     'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
         test.expect(6);
         performative.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                            { recipient: 'yanfen@hg.com', resource: 'app@construction.com' }).
+                            { receiver: 'yanfen@hg.com', resource: 'app@construction.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
@@ -174,7 +201,7 @@ exports.verify = {
     'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
         test.expect(6);
         performative.verify({ name: 'john', email: 'john@painter.com', admin: false },
-                            { recipient: 'dan@hg.com', resource: 'app@painter.com' }).
+                            { receiver: 'dan@hg.com', resource: 'app@painter.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
@@ -193,7 +220,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting to a friend\'s resource': function(test) {
         test.expect(6);
         performative.verify({ name: 'richard', email: 'richard@construction.com', admin: true },
-                            { recipient: 'yanfen@hg.com', resource: 'someotherapp@example.com' }).
+                            { receiver: 'yanfen@hg.com', resource: 'someotherapp@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -212,7 +239,7 @@ exports.verify = {
     'Return permissions object for a regular agent requesting access to his own resource with dbName param set': function(test) {
         test.expect(6);
         performative.verify({ name: 'yanfen', email: 'yanfen@hg.com', admin: false },
-                            { recipient: 'yanfen@hg.com', resource: 'someotherapp@example.com' }).
+                            { receiver: 'yanfen@hg.com', resource: 'someotherapp@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -250,7 +277,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting access to his own resource with dbName param set': function(test) {
         test.expect(6);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: true },
-                            { recipient: 'dan@hg.com', resource: 'app@painter.com' }).
+                            { receiver: 'dan@hg.com', resource: 'app@painter.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
@@ -288,7 +315,7 @@ exports.verify = {
     'Return permissions object for an admin agent requesting access to non-friend resources': function(test) {
         test.expect(6);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: true },
-                            { recipient: 'yanfen@hg.com', resource: 'app@construction.com' }).
+                            { receiver: 'yanfen@hg.com', resource: 'app@construction.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
@@ -308,7 +335,7 @@ exports.verify = {
     'Do not barf if a non-friend (non-admin) requests a resource': function(test) {
         test.expect(1);
         performative.verify({ name: 'dan', email: 'dan@hg.com', admin: false },
-                            { recipient: 'yanfen@hg.com', resource: 'app@construction.com' }).
+                            { receiver: 'yanfen@hg.com', resource: 'app@construction.com' }).
             then(function(verified) {
                 test.ok(false, 'Permission should not have been granted');
                 test.done();      
@@ -322,7 +349,7 @@ exports.verify = {
     'Do not barf if access has not been granted to the requested resource': function(test) {
         test.expect(1);
         performative.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                            { recipient: 'yanfen@hg.com', resource: 'someother@inaccessibleapp.com' }).
+                            { receiver: 'yanfen@hg.com', resource: 'someother@inaccessibleapp.com' }).
             then(function(verified) {
                 test.ok(false, 'Permission should not have been granted');
                 test.done();      
@@ -334,5 +361,122 @@ exports.verify = {
     },
 };
 
+/**
+ * requestHandler
+ */
+exports.requestHandler = {
 
+    setUp: function(callback) {
+        _code = undefined;
+        _content = undefined;
+
+        var agentDb = new agentSchema(SERVER);
+        var friend = new agentDb.friendModel({
+                            name: 'Yanfen',
+                            email: CLIENT,
+                            uri: BASE_ADDRESS,
+                            _id: new mongo.ObjectID('23456789ABCD')
+                        });
+
+        friend.hisPermissions.push({ email: 'friends' });
+        
+        friend.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    tearDown: function(callback) {
+        var agentDb = new agentSchema(SERVER);
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
+    },
+
+    'Form a social commitment on receipt of a request': function(test) {
+        test.expect(9);
+        var agentDb = new agentSchema(SERVER);
+        agentDb.socialCommitmentModel.find({}, function(err, scs) {
+            agentDb.connection.db.close();
+            test.equal(scs.length, 0);
+
+            performative.requestHandler(SEND_REQ, RES, function(err, results) { 
+                if (err) {
+                  console.log(err);
+                  test.ok(false, err);
+                }
+
+                var agentDb = new agentSchema(SERVER);
+                agentDb.socialCommitmentModel.find({}, function(err, scs) {
+                    agentDb.connection.db.close();
+                    test.equal(scs.length, 1);
+                    test.equal(scs[0].performative, 'request');
+                    test.equal(scs[0].action, 'ls');
+                    test.equal(!!scs[0].message, true);
+                    test.equal(scs[0].creditor, CLIENT);
+                    test.equal(scs[0].debtor, SERVER);
+                    test.equal(!!scs[0].created, true);
+                    // The successful call will immediately
+                    // fulfil this commitment
+                    test.equal(!!scs[0].fulfilled, true);
+                    test.done();
+                  });
+              });
+          });
+    },
+
+    'Respond with 401 unauthorized when an unknown agent makes a request': function(test) {
+        test.expect(3);
+        var req = {};
+        extend(true, req, SEND_REQ);
+        req.user.email = 'some@foreignagent.com';
+
+        performative.requestHandler(req, RES, function(err, results) { 
+            if (err) {
+              test.equal(err, 'I don\'t know you');
+            }
+            test.equal(_code, 401);
+            test.equal(_content, 'I don\'t know you');
+            test.done();
+          });
+
+    },
+
+    'Fulfil social commitment and return data when action is performed': function(test) {
+        test.expect(12);
+        performative.requestHandler(SEND_REQ, RES, function(err, results) { 
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            // Return data
+            test.equal(_code, 200);
+            test.equal(_content.length, 1);
+            test.equal(_content[0].name, 'Yanfen');
+            test.equal(!!_content[0]._id, true);
+            
+            var agentDb = new agentSchema(SERVER);
+            agentDb.socialCommitmentModel.find({}, function(err, scs) {
+                agentDb.connection.db.close();
+                test.equal(scs.length, 1);
+                test.equal(scs[0].performative, 'request');
+                test.equal(scs[0].action, 'ls');
+                test.equal(!!scs[0].message, true);
+                test.equal(scs[0].creditor, CLIENT);
+                test.equal(scs[0].debtor, SERVER);
+                test.equal(!!scs[0].created, true);
+                test.equal(!!scs[0].fulfilled, true);
+                test.done();
+              });
+          });
+    },
+};
 
