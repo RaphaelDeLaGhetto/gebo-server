@@ -9,6 +9,7 @@ var express = require('express'),
     api_routes = require('./routes/api'),
     basic_routes = require('./routes/basic'),
     oauth2_routes = require('./routes/oauth2'),
+    message_routes = require('./routes/message'),
     util = require('util'),
     fs = require('fs');
     
@@ -55,6 +56,10 @@ app.post('/request', performative_routes.request);
 
 // API routes
 app.get('/verify', api_routes.verify);
+
+// Message routes
+app.post('/send', message_routes.send);
+//app.post('/receive', message_routes.receive);
 
 
 // HTTP

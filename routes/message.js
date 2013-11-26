@@ -11,23 +11,6 @@ var passport = require('passport'),
     q = require('q');
 
 /**
- * All communication is carried out using the 
- * gebo as a proxy. This allows agents to carry
- * out conversations. When one agent wants to send
- * a message to another agent (citizen or foreign),
- * that message travels this route first.
- */
-exports.send = [
-    function(req, res, next) {
-        if (req.user) {
-          return next();
-        }
-        passport.authenticate(['bearer'], { session: false })(req, res, next);
-    },
-    _sendMessageHandler,
-  ];
-
-/**
  * Handles an agent's outgoing messages
  */
 var _sendMessageHandler = function(req, res, done) { 
@@ -64,6 +47,30 @@ var _sendMessageHandler = function(req, res, done) {
           });
    };
 exports.sendMessageHandler = _sendMessageHandler; 
+
+/**
+ * All communication is carried out using the 
+ * gebo as a proxy. This allows agents to carry
+ * out conversations. When one agent wants to send
+ * a message to another agent (citizen or foreign),
+ * that message travels this route first.
+ */
+exports.send = [
+    function(req, res, next) {
+        if (req.user) {
+          return next();
+        }
+        passport.authenticate(['bearer'], { session: false })(req, res, next);
+    },
+
+    // _sendMessageHandler takes a callback for unit testing purposes.
+    // passport.authenticate's next() callback screws everything up
+    // when the server runs for real. This step, though goofy looking,
+    // circumvents that issue.
+    function(req, res, next) {
+        _sendMessageHandler(req, res, function(){});
+    },
+  ];
 
 /**
  * For incoming messages
