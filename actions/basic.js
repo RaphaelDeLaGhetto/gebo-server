@@ -299,60 +299,59 @@ module.exports = function(email) {
         var deferred = q.defer();
         if (verified.admin || verified.read) { 
           _getCollection(verified).
-              then(function(collection) {
+              then(function(collection) { 
+                    /**
+                     * Get search parameters
+                     */
+                    var criteria = {};
+                    if (message && message.criteria) {
+                      criteria = message.criteria;
+                    }
 
-                      /**
-                       * Get search parameters
-                       */
-                      var criteria = {};
-                      if (message && message.criteria) {
-                        criteria = message.criteria;
-                      }
+                    var fields = ['name', '_id'];
+                    if (message && message.fields) {
+                      fields = message.fields;
+                    }
 
-                      var fields = ['name', '_id'];
-                      if (message && message.fields) {
-                        fields = message.fields;
-                      }
+                    var cursor = collection.find(criteria, fields);
 
-                      var cursor = collection.find(criteria, fields);
+                    // Were any options set?
+                    if (message && message.options) {
 
-                      // Were any options set?
-                      if (message && message.options) {
-
-                        if(message.options.sort) {
-                          var sortField = message.options.sort;
-                          var ascending = true;
-                          if(sortField[0] === '-') {
-                            ascending = false;
-                            sortField = sortField.slice(1);
-                          }
-                          cursor = cursor.sort(message.options.sort);
+                      if(message.options.sort) {
+                        var sortField = message.options.sort;
+                        var ascending = true;
+                        if(sortField[0] === '-') {
+                          ascending = false;
+                          sortField = sortField.slice(1);
                         }
+                        cursor = cursor.sort(message.options.sort);
+                      }
  
-                        if(message.options.skip) {
-                          cursor = cursor.skip(message.options.skip);
-                        }
+                      if(message.options.skip) {
+                        cursor = cursor.skip(message.options.skip);
+                      }
 
-                        if(message.options.limit) {
-                          cursor = cursor.limit(message.options.limit);
-                        }
-                     }
+                      if(message.options.limit) {
+                        cursor = cursor.limit(message.options.limit);
+                      }
+                    }
 
-                      cursor.toArray(
-                          function(err, docs) {
-                              if (err) {
-                                deferred.reject(err);
-                              }
-                              else {
-                                deferred.resolve(docs);
-                              }
-                              _db.close();
-                            });
-                    }).
+                    cursor.toArray(
+                        function(err, docs) {
+                            if (err) {
+                              deferred.reject(err);
+                            }
+                            else {
+                              deferred.resolve(docs);
+                            }
+                            _db.close();
+                          });
+                }).
               catch(function(err) {
                       deferred.reject(err);
                       _db.close();
-                    });
+                });
         }
         else {
           deferred.reject('You are not allowed access to that resource');
