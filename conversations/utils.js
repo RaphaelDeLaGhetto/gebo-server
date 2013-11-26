@@ -19,9 +19,9 @@ var agentSchema = require('../schemata/agent'),
 exports.loadConversation = function(message, agent, type, role) {
 
     var deferred = q.defer();
-    var agentDb = new agentSchema(agent.email);
 
     if (message.conversationId) {
+      var agentDb = new agentSchema(agent.email);
       agentDb.conversationModel.findOne({ conversationId: message.conversationId },
           function(err, conversation) {
                 if (err) {

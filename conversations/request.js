@@ -18,8 +18,7 @@ exports.client = function(message, agent) {
 
     utils.loadConversation(message, agent, 'request', 'client').
         then(function(conversation) {
-
-            switch(message.performative) {
+           switch(message.performative) {
                 case 'request':
                     // Form C: reply request|action
                     conversation.socialCommitments.push({
@@ -98,7 +97,7 @@ exports.client = function(message, agent) {
                     conversation.socialCommitments[index].fulfilled = Date.now();
                     break;
             }
-
+ 
             conversation.save(function(err, conversation) {
                 conversation.db.close();
                 if (err) {
@@ -110,6 +109,7 @@ exports.client = function(message, agent) {
               });
           }).
         catch(function(err) {
+            console.log(err);
             deferred.reject(err);      
           });
     return deferred.promise;
@@ -128,6 +128,7 @@ exports.server = function(message, agent) {
 
     utils.loadConversation(message, agent, 'request', 'server').
         then(function(conversation) {
+
             switch(message.performative) {
                 case 'request':
                     // Form D: reply request|action
@@ -233,6 +234,7 @@ exports.server = function(message, agent) {
               });
           }).
         catch(function(err) {
+            console.log(err);
             deferred.reject(err);
           });
     return deferred.promise;

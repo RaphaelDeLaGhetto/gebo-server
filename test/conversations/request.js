@@ -288,14 +288,24 @@ exports.client = {
     },
 
     'Create a new conversation if no conversationId is provided': function(test) {
-        test.expect(4);
-        request.client({ receiver: SERVER, sender: CLIENT },
-                       { email: SERVER }).
+        test.expect(11);
+        request.client({ receiver: SERVER,
+                         sender: CLIENT,
+                         performative: 'request',
+                         action: 'action' },
+                       { email: CLIENT }).
             then(function(conversation) {
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId.search(CLIENT), 0);
-                test.equal(conversation.socialCommitments.length, 0);
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(!!conversation.socialCommitments[0].message, true);
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(conversation.socialCommitments[0].fulfilled, null);
                 test.done();
             }).
             catch(function(err) {
@@ -306,16 +316,25 @@ exports.client = {
     },
 
     'Create a new conversation if non-existent conversationId is provided': function(test) {
-        test.expect(4);
+        test.expect(11);
         request.client({ receiver: SERVER,
                          sender: CLIENT,
+                         performative: 'request',
+                         action: 'action',
                          conversationId: 'some non-existent conversation ID' },
-                       { email: SERVER }).
+                       { email: CLIENT }).
             then(function(conversation) {
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId, 'some non-existent conversation ID');
-                test.equal(conversation.socialCommitments.length, 0);
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(!!conversation.socialCommitments[0].message, true);
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(conversation.socialCommitments[0].fulfilled, null);
  
                 test.done();
             }).
@@ -593,7 +612,6 @@ exports.client = {
                 test.done();
               });
     }, 
-
 
     'Fulfil \'C: propose discharge|perform|action\' and form \'D: reply propose|discharge|perform|action\' when \'propose discharge|perform|action\' is received': function(test) {
         test.expect(25);
@@ -946,18 +964,29 @@ exports.server = {
             catch(function(err) {
                 console.log(err);
                 test.ok(false, err);
+                test.done();
               });
     },
 
     'Create a new conversation if no conversationId is provided': function(test) {
-        test.expect(4);
-        request.server({ receiver: SERVER, sender: CLIENT },
+        test.expect(11);
+        request.server({ receiver: SERVER,
+                         sender: CLIENT,
+                         performative: 'request',
+                         action: 'action' },
                        { email: SERVER }).
             then(function(conversation) {
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'server');
                 test.equal(conversation.conversationId.search(CLIENT), 0);
-                test.equal(conversation.socialCommitments.length, 0);
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(!!conversation.socialCommitments[0].message, true);
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(conversation.socialCommitments[0].fulfilled, null);
                 test.done();
             }).
             catch(function(err) {
@@ -968,15 +997,25 @@ exports.server = {
     },
 
     'Create conversation if non-existent conversationId is provided': function(test) {
-        test.expect(4);
+        test.expect(11);
         request.server({ receiver: SERVER,
+                         sender: CLIENT,
+                         performative: 'request',
+                         action: 'action',
                          conversationId: 'some non-existent conversation ID' },
-                       { email: CLIENT }).
+                       { email: SERVER }).
             then(function(conversation) {
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'server');
                 test.equal(conversation.conversationId, 'some non-existent conversation ID');
-                test.equal(conversation.socialCommitments.length, 0);
+                test.equal(conversation.socialCommitments.length, 1);
+                test.equal(conversation.socialCommitments[0].performative, 'reply request');
+                test.equal(conversation.socialCommitments[0].action, 'action');
+                test.equal(!!conversation.socialCommitments[0].message, true);
+                test.equal(conversation.socialCommitments[0].creditor, CLIENT);
+                test.equal(conversation.socialCommitments[0].debtor, SERVER);
+                test.equal(!!conversation.socialCommitments[0].created, true);
+                test.equal(conversation.socialCommitments[0].fulfilled, null);
                 test.done();
             }).
             catch(function(err) {
