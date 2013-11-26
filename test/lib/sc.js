@@ -15,7 +15,6 @@ utils.getPrivateKeyAndCertificate().
         SIGNING_PAIR = pair
       });
 
-
 /**
  * form
  */
@@ -28,7 +27,7 @@ exports.form = {
              */
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
-                    email: 'yanfen@hg.com',
+                    email: 'yanfen@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
@@ -39,18 +38,18 @@ exports.form = {
              */
             var newFriend = {
                     name: 'Dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     uri: 'https://theirhost.com',
                     hisCertificate: 'some certificate',
                 };
  
-            var agentDb = new agentSchema('yanfen@hg.com'); 
+            var agentDb = new agentSchema('yanfen@example.com'); 
             var sc = new agentDb.socialCommitmentModel({
                     performative: 'request',
                     action: 'friend',
                     message: { newFriend: newFriend },
-                    creditor: 'dan@hg.com',
-                    debtor: 'yanfen@hg.com',
+                    creditor: 'dan@example.com',
+                    debtor: 'yanfen@example.com',
                     _id: new mongo.ObjectID('123456789ABC')
                   });
 
@@ -80,7 +79,7 @@ exports.form = {
             }
           });
 
-        var agentDb = new agentSchema('yanfen@hg.com');
+        var agentDb = new agentSchema('yanfen@example.com');
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -108,7 +107,7 @@ exports.form = {
 
         var message = {
                 newFriend: friend,
-                recipient: 'yanfen@hg.com',
+                receiver: 'yanfen@example.com',
                 action: 'friend',
               };
 
@@ -120,7 +119,7 @@ exports.form = {
                 test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
                 test.equal(socialCommitment.message.newFriend.uri, BASE_ADDRESS);
                 test.equal(socialCommitment.message.newFriend.hisCertificate, SIGNING_PAIR.certificate);
-                test.equal(socialCommitment.debtor, 'yanfen@hg.com');
+                test.equal(socialCommitment.debtor, 'yanfen@example.com');
                 test.equal(socialCommitment.creditor, 'richard@construction.com');
                 test.equal(typeof socialCommitment.created, 'object');
                 test.equal(socialCommitment.fulfilled, null);
@@ -138,20 +137,20 @@ exports.form = {
 
         var friend = {
                 name: 'Dan',
-                email: 'dan@hg.com',
+                email: 'dan@example.com',
                 uri: 'https://theirhost.com',
                 hisCertificate: 'some certificate',
             };
  
         var message = {
-                newFriend: friend,
-                recipient: 'yanfen@hg.com',
+                receiver: 'yanfen@example.com',
                 action: 'friend',
+                newFriend: friend,
                 socialCommitmentId: new mongo.ObjectID('123456789ABC')
               };
 
         var agent = {
-                email: 'dan@hg.com',
+                email: 'dan@example.com',
               };
 
         sc.form(agent, 'request', message).
@@ -159,11 +158,11 @@ exports.form = {
                 test.equal(socialCommitment.performative, 'request');
                 test.equal(socialCommitment.action, 'friend');
                 test.equal(socialCommitment.message.newFriend.name, 'Dan');
-                test.equal(socialCommitment.message.newFriend.email, 'dan@hg.com');
+                test.equal(socialCommitment.message.newFriend.email, 'dan@example.com');
                 test.equal(socialCommitment.message.newFriend.uri, 'https://theirhost.com');
                 test.equal(socialCommitment.message.newFriend.hisCertificate, 'some certificate');
-                test.equal(socialCommitment.debtor, 'yanfen@hg.com');
-                test.equal(socialCommitment.creditor, 'dan@hg.com');
+                test.equal(socialCommitment.debtor, 'yanfen@example.com');
+                test.equal(socialCommitment.creditor, 'dan@example.com');
                 test.equal(typeof socialCommitment.created, 'object');
                 test.equal(socialCommitment.fulfilled, null);
                 test.done();
@@ -196,7 +195,7 @@ exports.fulfil = {
     
             var message = {
                     newFriend: friend,
-                    recipient: 'yanfen@hg.com',
+                    receiver: 'yanfen@example.com',
                     action: 'friend',
                   };
 
@@ -205,7 +204,7 @@ exports.fulfil = {
              */
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
-                    email: 'yanfen@hg.com',
+                    email: 'yanfen@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
@@ -240,7 +239,7 @@ exports.fulfil = {
             }
           });
 
-        var agentDb = new agentSchema('yanfen@hg.com');
+        var agentDb = new agentSchema('yanfen@example.com');
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -254,7 +253,7 @@ exports.fulfil = {
 
     'Set the fulfillment date on the socialCommitment document': function(test) {
         test.expect(10);
-        var agentDb = new agentSchema('yanfen@hg.com');
+        var agentDb = new agentSchema('yanfen@example.com');
         agentDb.socialCommitmentModel.findOne({ creditor: 'richard@construction.com' },
             function(err, socialCommitment) {
                 agentDb.connection.db.close();
@@ -262,7 +261,7 @@ exports.fulfil = {
                   console.log(err);
                   test.ok(false, err);
                 }
-                sc.fulfil('yanfen@hg.com', socialCommitment._id).
+                sc.fulfil('yanfen@example.com', socialCommitment._id).
                     then(function(socialCommitment) {
                         test.equal(socialCommitment.performative, 'request');
                         test.equal(socialCommitment.action, 'friend');
@@ -270,7 +269,7 @@ exports.fulfil = {
                         test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
                         test.equal(socialCommitment.message.newFriend.uri, BASE_ADDRESS);
                         test.equal(socialCommitment.message.newFriend.hisCertificate, SIGNING_PAIR.certificate);
-                        test.equal(socialCommitment.debtor, 'yanfen@hg.com');
+                        test.equal(socialCommitment.debtor, 'yanfen@example.com');
                         test.equal(socialCommitment.creditor, 'richard@construction.com');
                         test.equal(typeof socialCommitment.created, 'object');
                         test.equal(typeof socialCommitment.fulfilled, 'object');
