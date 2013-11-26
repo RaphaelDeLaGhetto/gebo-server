@@ -175,6 +175,8 @@ module.exports = function(email) {
                 if (!registrant) {
                   return done(null, false);
                 }
+                console.log('registrant');
+                console.log(registrant);
                 done(null, registrant);  
               });
           });

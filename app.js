@@ -59,8 +59,7 @@ app.get('/verify', api_routes.verify);
 
 // Message routes
 app.post('/send', message_routes.send);
-//app.post('/receive', message_routes.receive);
-
+app.post('/receive', message_routes.receive);
 
 // HTTP
 logger.info('HTTP listening on', nconf.get('port'));

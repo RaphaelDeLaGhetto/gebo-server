@@ -195,9 +195,9 @@ exports.sendMessageHandler = {
 };
 
 /**
- * receive
+ * receiveMessageHandler
  */
-exports.receive = {
+exports.receiveMessageHandler = {
     setUp: function(callback) {
         _code = undefined;
         _content = undefined;
@@ -255,7 +255,7 @@ exports.receive = {
             extend(true, req, SEND_REQ);
             req.user.email = SERVER;
  
-            message.receive(req, RES, function(err, result) {
+            message.receiveMessageHandler(req, RES, function(err, result) {
                     var agentDb = new agentSchema(SERVER);
                     agentDb.conversationModel.find({}, function(err, conversations) {
                             if (err) {
@@ -297,7 +297,7 @@ exports.receive = {
 
             var req = { body: { conversationId: 'Some conversation ID' } };
             extend(true, req, SEND_REQ);
-            message.receive(req, RES, function(err, result) {
+            message.receiveMessageHandler(req, RES, function(err, result) {
                     var agentDb = new agentSchema(SERVER);
                     agentDb.conversationModel.find({}, function(err, conversations) {
                             agentDb.connection.db.close();

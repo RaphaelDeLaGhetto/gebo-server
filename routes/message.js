@@ -17,10 +17,21 @@ var _sendMessageHandler = function(req, res, done) {
     var message = req.body,
         agent = req.user;
 
+    console.log('_sendMessageHandler');
+    console.log('agent');
+    console.log(agent);
+    console.log('message');
+    console.log(message);
+
     utils.getRole(message, false).
         then(function(role) {
+            console.log('role');
+            console.log(role);
             conversations[message.performative][role](message, agent).
                 then(function(conversation) {
+                    console.log('conversation');
+                    console.log(conversation);
+
                     var gebo = nconf.get('domain');
                     if (message.gebo) {
                       gebo = message.gebo;
@@ -73,15 +84,22 @@ exports.send = [
   ];
 
 /**
- * For incoming messages
+ * Handle incoming messages
  */
-exports.receive = function(req, res, done) { 
+var _receiveMessageHandler = function(req, res, done) { 
+    console.log('receive');
     var message = req.body;
 
+    console.log('message');
+    console.log(message);
     utils.getRole(message, true).
         then(function(role) {
+            console.log('role');
+            console.log(role);
             conversations[message.performative][role](message, { email: message.receiver }).
                 then(function(conversation) {
+                    console.log('conversation');
+                    console.log(conversation);
                     res.send(200, conversation);
                     done();
                   }).
@@ -94,4 +112,16 @@ exports.receive = function(req, res, done) {
             res.send(500, err);
             done();
           });
+  }; 
+exports.receiveMessageHandler = _receiveMessageHandler;
+
+/**
+ * _receiveMessageHandler takes a callback for unit testing purposes.
+ * Routing also, apparently, passes a callback, which screws everything up
+ * when the server runs for real. This step, though goofy looking,
+ * circumvents that issue.
+ */
+exports.receive = function(req, res, next) {
+    _receiveMessageHandler(req, res, function(){});
   };
+
