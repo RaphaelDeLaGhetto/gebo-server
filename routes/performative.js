@@ -23,6 +23,9 @@ module.exports = function(email) {
         var message = req.body,
             agent = req.user;
 
+//        console.log('---message');
+//        console.log(message);
+
         // Form a social commitment
         sc.form(agent, 'request', message).
             then(function(socialCommitment) {
@@ -44,12 +47,12 @@ module.exports = function(email) {
 
                         action[message.action](verified, message).
                             then(function(data) {
-//                                console.log('data');
-//                                console.log(data);
-                                sc.fulfil(message.receiver, socialCommitment._id).
+                               sc.fulfil(message.receiver, socialCommitment._id).
                                     then(function(sc) {
+                                        console.log('data');
+                                        console.log(data);
                                         res.send(200, data);
-                                        done(null, data);
+                                        done();
                                       }).
                                     catch(function(err) {
                                         console.log(err);       
@@ -90,7 +93,13 @@ module.exports = function(email) {
             }
             passport.authenticate(['bearer'], { session: false })(req, res, next);
         },
-        _requestHandler
+        // _requestHandler takes a callback for unit testing purposes.
+        // passport.authenticate's next() callback screws everything up
+        // when the server runs for real. This step, though goofy looking,
+        // circumvents that issue.
+        function(req, res, next) {
+            _requestHandler(req, res, function(){});
+        }
       ];
 
     /**
