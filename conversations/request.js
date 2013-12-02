@@ -151,6 +151,7 @@ exports.server = function(message, agent) {
                 case 'agree request':
                     // Fulfils D: reply request/action
                     // Form D: propose discharge|perform|action
+                    // Form D: perform action
                     var index = utils.getFirstUnfulfilledSocialCommitmentIndex(conversation.socialCommitments, 'reply request');
                     conversation.socialCommitments[index].fulfilled = Date.now();
 

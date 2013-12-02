@@ -665,7 +665,7 @@ exports.client = {
               });
     }, 
 
-    'Fulfil, then form new \'C: propose discharge|perform|action\', fulfil \'D: reply propose|discharge|perform|action\' when \'not-understood propose discharge|perform|action\' is sent': function(test) {
+    'Fulfil, then form new \'C: propose discharge|perform|action\', fulfil \'D: reply propose|discharge|perform|action\' when \'not-understood propose|discharge|perform|action\' is sent': function(test) {
         test.expect(33);
         clientRequestAction().
             then(function(conversation) {
@@ -729,7 +729,7 @@ exports.client = {
               });
     }, 
 
-    'Form \'C: propose discharge|perform|action\', fulfil \'D: reply propose|discharge|perform|action\' when \'refuse propose discharge|perform|action\' is sent': function(test) {
+    'Form \'C: propose discharge|perform|action\', fulfil \'D: reply propose|discharge|perform|action\' when \'refuse propose|discharge|perform|action\' is sent': function(test) {
         test.expect(33);
         clientRequestAction().
             then(function(conversation) {
@@ -1390,7 +1390,7 @@ exports.server = {
               });
     }, 
 
-    'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'not-understood propose discharge|perform|action\' is received': function(test) {
+    'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'not-understood propose|discharge|perform|action\' is received': function(test) {
         test.expect(40);
         clientRequestAction(true).
             then(function(conversation) {
@@ -1464,7 +1464,7 @@ exports.server = {
         
     }, 
 
-    'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'refuse propose discharge|perform|action\' is received': function(test) {
+    'Form \'D: propose discharge|perform|action\', fulfil \'C: reply propose|discharge|perform|action\' when \'refuse propose|discharge|perform|action\' is received': function(test) {
         test.expect(40);
         clientRequestAction(true).
             then(function(conversation) {
