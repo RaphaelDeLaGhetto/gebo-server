@@ -237,8 +237,8 @@ exports.getOptions = _getOptions;
  *
  * @return promise
  */
-exports.makeRequest = function(uri, path, content) {
-    console.log('makeRequest');
+exports.postMessage = function(uri, path, content) {
+    console.log('postMessage');
     var deferred = q.defer();
  
     var options = _getOptions(uri, path, content);
