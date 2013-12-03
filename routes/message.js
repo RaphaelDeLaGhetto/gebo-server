@@ -2,7 +2,7 @@
 
 var passport = require('passport'),
     nconf = require('nconf'),
-//    utils = require('../lib/utils'),
+    generalUtils = require('../lib/utils'),
     conversationUtils = require('../conversations/utils'),
     https = require('https'),
     geboSchema = require('../schemata/gebo'),
@@ -36,13 +36,9 @@ var _sendMessageHandler = function(req, res, done) {
 
             conversations[conversation.type][conversation.role](message, agent).
                 then(function(conversation) {
-    
-                    var gebo = nconf.get('domain');
-                    if (message.gebo) {
-                      gebo = message.gebo;
-                    }
-      
-                    conversationUtils.postMessage(gebo, '/receive', message).
+                    console.log('conversation.gebo');
+                    console.log(conversation.gebo);
+                    conversationUtils.postMessage(conversation.gebo, '/receive', message).
                         then(function(data) {
                             console.log('data');
                             console.log(data);

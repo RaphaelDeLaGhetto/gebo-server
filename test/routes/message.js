@@ -5,6 +5,7 @@ var message = require('../../routes/message'),
     q = require('q'),
     extend = require('extend'),
     nconf = require('nconf'),
+    utils = require('../../lib/utils'),
     agentSchema = require('../../schemata/agent');
 
 var CLIENT = 'yanfen@example.com',
@@ -77,7 +78,7 @@ exports.sendMessageHandler = {
     'Should create a new conversation when no conversationId provided': function(test) {
         test.expect(15);
 
-        var scope = nock(nconf.get('domain')).
+        var scope = nock(utils.getDefaultDomain()).
                 post('/receive').
                 reply(200, { data: 'Okay' });  
 
@@ -122,7 +123,7 @@ exports.sendMessageHandler = {
     'Should return an ongoing conversation when a conversationId is provided': function(test) {
         test.expect(13);
 
-        var scope = nock(nconf.get('domain')).
+        var scope = nock('https://mygebo.com').
                 post('/receive').
                 reply(200, { data: 'Okay' });  
 
@@ -163,7 +164,7 @@ exports.sendMessageHandler = {
     'POST message to citizen agent if no gebo URI provided': function(test) {
         test.expect(5);
 
-        var scope = nock(nconf.get('domain')).
+        var scope = nock(utils.getDefaultDomain()).
                 post('/receive').
                 reply(200, { data: 'Okay' });  
 
