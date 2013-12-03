@@ -44,10 +44,14 @@ var _sendMessageHandler = function(req, res, done) {
       
                     conversationUtils.postMessage(gebo, '/receive', message).
                         then(function(data) {
+                            console.log('data');
+                            console.log(data);
                             res.send(200, conversation);
                             done();
                           }).
                         catch(function(err) {
+                            console.log('err');
+                            console.log(err);
                             res.send(500, err);
                             done();
                           });

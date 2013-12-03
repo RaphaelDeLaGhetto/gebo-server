@@ -48,6 +48,7 @@ exports.sendMessageHandler = {
                             type: 'request',
                             role: 'client',
                             conversationId: 'Some conversation ID',
+                            gebo: 'https://mygebo.com',
                           });
                     conversation.save(function(err) {
                             agentDb.connection.db.close();
@@ -215,6 +216,7 @@ exports.receiveMessageHandler = {
                             type: 'request',
                             role: 'server',
                             conversationId: 'Some conversation ID',
+                            gebo: 'https://mygebo.com',
                           });
                     conversation.save(function(err) {
                             agentDb.connection.db.close();
