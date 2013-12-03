@@ -4,7 +4,7 @@ var utils = require('../../lib/utils'),
     fs = require('fs'),
     nock = require('nock'),
     mkdirp = require('mkdirp'),
-//    nconf = require('nconf'),
+    nconf = require('nconf'),
     agentSchema = require('../../schemata/agent'),
     rimraf = require('rimraf');
 
@@ -611,3 +611,19 @@ exports.getPrivateKeyAndCertificate = {
     },
 };
 
+/**
+ * getDefaultDomain
+ */
+exports.getDefaultDomain = {
+    'Return the host with https port': function(test) {
+        test.expect(1);
+
+        // Manually create the default host
+        var manualDomain = nconf.get('domain') + ':' + nconf.get('httpsPort');
+                
+        var host = utils.getDefaultDomain();
+
+        test.equal(host, manualDomain);
+        test.done();
+    },
+};
