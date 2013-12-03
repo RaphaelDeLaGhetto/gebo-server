@@ -17,41 +17,58 @@ var agentSchema = require('../schemata/agent'),
  *
  * @return conversationModel
  */
-exports.loadConversation = function(message, agent, type, role) {
+//exports.loadConversation = function(message, agent, type, role) {
+exports.loadConversation = function(message, agent) {
 
     var deferred = q.defer();
 
-    if (message.conversationId) {
-      var agentDb = new agentSchema(agent.email);
-      agentDb.conversationModel.findOne({ conversationId: message.conversationId },
-          function(err, conversation) {
-                if (err) {
-                  deferred.reject(err);
-                }
-                else if (!conversation) {
-                  agentDb.connection.db.close();
-                  _startNewConversation(message, agent, type, role).
-                    then(function(conversation) {
-                        deferred.resolve(conversation);
-                      }).
-                    catch(function(err) {
-                        deferred.reject(err);
-                      });
-                }
-                else {
-                  deferred.resolve(conversation);
-                }
-            });
+    // Is this an incoming, or outgoing message?
+    var incoming = true;
+    if (message.sender === agent.email) {
+      incoming = false;
     }
-    else {
-      _startNewConversation(message, agent, type, role).
-        then(function(conversation) {
-            deferred.resolve(conversation);
-          }).
-        catch(function(err) {
-            deferred.reject(err);
-          });
-    }
+
+    _getRole(message, incoming).
+        then(function(role) {
+            console.log('role');
+            console.log(role);
+            if (message.conversationId) {
+              var agentDb = new agentSchema(agent.email);
+              agentDb.conversationModel.findOne({ conversationId: message.conversationId },
+                  function(err, conversation) {
+                        if (err) {
+                          deferred.reject(err);
+                        }
+                        else if (!conversation) {
+                          console.log('no conversation');
+                          agentDb.connection.db.close();
+                          _startNewConversation(message, agent, message.performative, role).
+                            then(function(conversation) {
+                                deferred.resolve(conversation);
+                              }).
+                            catch(function(err) {
+                                deferred.reject(err);
+                              });
+                        }
+                        else {
+                          deferred.resolve(conversation);
+                        }
+                    });
+            }
+            else {
+              _startNewConversation(message, agent, message.performative, role).
+                then(function(conversation) {
+                    deferred.resolve(conversation);
+                  }).
+                catch(function(err) {
+                    deferred.reject(err);
+                  });
+            }
+      }).
+    catch(function(err) {
+        deferred.reject(err);
+      });
+
     return deferred.promise;
   };
 
@@ -126,7 +143,7 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = function(socialCommitments, p
  *
  * @promise
  */
-exports.getRole = function(message, incoming) {
+var _getRole = function(message, incoming) {
     var deferred = q.defer();
 
     if (message.conversationId) {
@@ -191,6 +208,7 @@ exports.getRole = function(message, incoming) {
     
     return deferred.promise;
   };
+exports.getRole = _getRole;
 
 /**
  * Take a URI and extract options for making

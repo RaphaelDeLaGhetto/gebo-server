@@ -50,7 +50,7 @@ exports.loadConversation = {
         test.expect(6);
         utils.loadConversation({ receiver: 'dan@example.com',
                                  conversationId: 'some conversation ID' },
-                               { email: 'dan@example.com' }, 'client').
+                               { email: 'dan@example.com' }).
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
@@ -79,7 +79,7 @@ exports.loadConversation = {
                                  sender: 'yanfen@example.com',
                                  performative: 'request', 
                                  conversationId: 'some non-existent conversation ID' },
-                               { email: 'dan@example.com' }, 'request', 'server').
+                               { email: 'dan@example.com' }).
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
@@ -105,20 +105,20 @@ exports.loadConversation = {
         utils.loadConversation({ receiver: 'dan@example.com',
                                  sender: 'yanfen@example.com',
                                  performative: 'propose' },
-                               { email: 'dan@example.com' }, 'propose', 'server').
+                               { email: 'dan@example.com' }).
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
 	
 		conversation.db.close();
                 test.equal(conversation.type, 'propose');
-                test.equal(conversation.role, 'server');
+                test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 
                 test.equal(conversation.socialCommitments.length, 0);
                 // This is true because no social commitments have been formed
                 test.equal(conversation.terminated, true);
 
-		// Make sure it is saved
+        		// Make sure it is saved
                 var agentDb = new agentSchema('dan@example.com');
                 agentDb.conversationModel.find({}, function(err, conversations) {
                         agentDb.connection.db.close();
