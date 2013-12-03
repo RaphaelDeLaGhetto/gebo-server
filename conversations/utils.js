@@ -1,6 +1,7 @@
 'use strict';
 
 var agentSchema = require('../schemata/agent'),
+    https = require('https'),
     q = require('q');
 
 /**
@@ -191,4 +192,85 @@ exports.getRole = function(message, incoming) {
     return deferred.promise;
   };
 
+/**
+ * Take a URI and extract options for making
+ * an HTTPS request
+ *
+ * @param string
+ * @param string
+ * @param Object
+ *
+ * @return Object
+ */
+var _getOptions = function(uri, path, content) {
+    var splitUri = uri.split('https://'); 
+    uri = splitUri.pop();
+    splitUri = uri.split(':'); 
+    var port = '443';
+    if (splitUri.length > 1) {
+      port = splitUri.pop();
+      uri = splitUri.pop();
+    }
+
+    return {
+            host: uri,
+            port: port,
+            path: path,
+            method: 'POST',
+            rejectUnauthorized: false,
+            requestCert: true,
+            agent: false,
+            headers: { 'Content-Type': 'application/json',
+                       'Content-Length': Buffer.byteLength(JSON.stringify(content)) }
+        };
+ 
+  };
+exports.getOptions = _getOptions;
+
+
+/**
+ * POST data to the server specified
+ *
+ * @param string
+ * @param string
+ * @param Object
+ *
+ * @return promise
+ */
+exports.makeRequest = function(uri, path, content) {
+    console.log('makeRequest');
+    var deferred = q.defer();
+ 
+    var options = _getOptions(uri, path, content);
+    content = JSON.stringify(content);
+ 
+    console.log('options');
+    console.log(options);
+
+    var req = https.request(options, function(res) {
+            var data = '';
+            res.setEncoding('utf8');
+            res.on('data', function(chunk) {
+                    data += chunk;
+                });
+            res.on('end', function() {
+                    data = JSON.parse(data);
+                    if (data.error) {
+                      deferred.reject(data.error_description);
+                    }
+                    else {
+                      deferred.resolve(data);
+                    }
+                });
+        }).
+      on('error', function(err){
+              console.log(err);
+              deferred.reject(err);
+        });
+    
+    req.write(content);
+    req.end();
+
+    return deferred.promise;
+  };
 
