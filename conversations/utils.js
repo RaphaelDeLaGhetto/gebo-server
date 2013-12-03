@@ -115,3 +115,80 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = function(socialCommitments, p
     }
     return -1;
   };
+
+/**
+ * Establish the role of the agent sending or
+ * receiving the message
+ *
+ * @param Object
+ * @param bool
+ *
+ * @promise
+ */
+exports.getRole = function(message, incoming) {
+    var deferred = q.defer();
+
+    if (message.conversationId) {
+
+      var email = message.sender;
+      if (incoming) {
+        email = message.receiver;
+      }
+
+      var agentDb = new agentSchema(email);
+      agentDb.conversationModel.findOne({ conversationId: message.conversationId }, function(err, conversation) {
+            agentDb.connection.db.close();
+
+            if (err) {
+              deferred.reject(err);
+            }
+            if (conversation) {
+              deferred.resolve(conversation.role);
+            }
+            else {
+              switch(message.performative) {
+                case 'request':
+                    if (incoming) {
+                      deferred.resolve('server');
+                    }
+                    else {
+                      deferred.resolve('client');
+                    }
+                   break;
+                case 'propose':
+                    if (incoming) {
+                      deferred.resolve('client');
+                    }
+                    else {
+                      deferred.resolve('server');
+                    }
+                    break;
+               }
+            }
+        });
+    }
+    else {
+      switch(message.performative) {
+        case 'request':
+            if (incoming) {
+              deferred.resolve('server');
+            }
+            else {
+              deferred.resolve('client');
+            }
+            break;
+        case 'propose':
+            if (incoming) {
+              deferred.resolve('client');
+            }
+            else {
+              deferred.resolve('server');
+            }
+            break;
+        }
+    }
+    
+    return deferred.promise;
+  };
+
+
