@@ -2,7 +2,8 @@
 
 var passport = require('passport'),
     nconf = require('nconf'),
-    utils = require('../lib/utils'),
+//    utils = require('../lib/utils'),
+    conversationUtils = require('../conversations/utils'),
     https = require('https'),
     geboSchema = require('../schemata/gebo'),
     agentSchema = require('../schemata/agent'),
@@ -23,21 +24,25 @@ var _sendMessageHandler = function(req, res, done) {
     console.log('message');
     console.log(message);
 
-    utils.getRole(message, false).
-        then(function(role) {
-            console.log('role');
-            console.log(role);
-            conversations[message.performative][role](message, agent).
-                then(function(conversation) {
-                    console.log('conversation');
-                    console.log(conversation);
+    conversationUtils.loadConversation(message, agent).
+        then(function(conversation) {
+            conversation.db.close();
 
+            // If this is new conversation, the message will
+            // not have a conversationId
+            if (!message.conversationId) {
+              message.conversationId = conversation.conversationId;
+            }
+
+            conversations[conversation.type][conversation.role](message, agent).
+                then(function(conversation) {
+    
                     var gebo = nconf.get('domain');
                     if (message.gebo) {
                       gebo = message.gebo;
                     }
       
-                    utils.makeRequest(gebo, '/receive', message).
+                    conversationUtils.postMessage(gebo, '/receive', message).
                         then(function(data) {
                             res.send(200, conversation);
                             done();
@@ -92,11 +97,17 @@ var _receiveMessageHandler = function(req, res, done) {
 
     console.log('message');
     console.log(message);
-    utils.getRole(message, true).
-        then(function(role) {
-            console.log('role');
-            console.log(role);
-            conversations[message.performative][role](message, { email: message.receiver }).
+    conversationUtils.loadConversation(message, { email: message.receiver }).
+        then(function(conversation) {
+            conversation.db.close();
+
+            // If this is new conversation, the message will
+            // not have a conversationId
+            if (!message.conversationId) {
+              message.conversationId = conversation.conversationId;
+            }
+
+            conversations[conversation.type][conversation.role](message, { email: message.receiver }).
                 then(function(conversation) {
                     console.log('conversation');
                     console.log(conversation);

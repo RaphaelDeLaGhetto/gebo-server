@@ -269,7 +269,7 @@ exports.client = {
 
     'Load a conversation from the database if provided a conversationId': function(test) {
         test.expect(6);
-        request.client({ receiver: SERVER, conversationId: 'some conversation ID' },
+        request.client({ receiver: SERVER, sender: CLIENT, conversationId: 'some conversation ID' },
                        { email: CLIENT }).
             then(function(conversation) {
                 test.equal(conversation.type, 'request');
@@ -277,7 +277,7 @@ exports.client = {
                 test.equal(conversation.conversationId, 'some conversation ID');
                 test.equal(conversation.socialCommitments.length, 0);
                 test.equal(!!conversation.created, true);
-                // This is true because no social commmitments have
+                // This is true because no social commitments have
                 // been formed at this point
                 test.equal(conversation.terminated, true);
                 test.done();

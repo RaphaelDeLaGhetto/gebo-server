@@ -74,7 +74,7 @@ exports.sendMessageHandler = {
     },
 
     'Should create a new conversation when no conversationId provided': function(test) {
-        test.expect(13);
+        test.expect(15);
 
         var scope = nock(nconf.get('domain')).
                 post('/receive').
@@ -106,6 +106,8 @@ exports.sendMessageHandler = {
                             test.equal(conversations[1].conversationId.search(CLIENT), 0);
                             test.equal(_content.type, 'request');
                             test.equal(conversations[1].type, 'request');
+                            test.equal(_content.role, 'client');
+                            test.equal(conversations[1].role, 'client');
                             test.equal(_content.socialCommitments.length, 1);
                             test.equal(conversations[1].socialCommitments.length, 1);
                             test.equal(_content.socialCommitments[0].performative, 'reply request');
@@ -134,8 +136,9 @@ exports.sendMessageHandler = {
             test.equal(_content, undefined);
             test.equal(conversations.length, 1);
 
-            var req = { body: { conversationId: 'Some conversation ID' } };
+            var req = {};
             extend(true, req, SEND_REQ);
+            req.body.conversationId = 'Some conversation ID';
             message.sendMessageHandler(req, RES, function(err, result) {
                     var agentDb = new agentSchema(CLIENT);
                     agentDb.conversationModel.find({}, function(err, conversations) {
@@ -295,8 +298,10 @@ exports.receiveMessageHandler = {
             test.equal(_content, undefined);
             test.equal(conversations.length, 1);
 
-            var req = { body: { conversationId: 'Some conversation ID' } };
+            var req = {};
             extend(true, req, SEND_REQ);
+            req.body.conversationId = 'Some conversation ID';
+
             message.receiveMessageHandler(req, RES, function(err, result) {
                     var agentDb = new agentSchema(SERVER);
                     agentDb.conversationModel.find({}, function(err, conversations) {

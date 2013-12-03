@@ -16,9 +16,9 @@ var agentSchema = require('../schemata/agent'),
 exports.client = function(message, agent) {
     var deferred = q.defer();
 
-    utils.loadConversation(message, agent, 'request', 'client').
+    utils.loadConversation(message, agent).
         then(function(conversation) {
-           switch(message.performative) {
+          switch(message.performative) {
                 case 'request':
                     // Form C: reply request|action
                     conversation.socialCommitments.push({
@@ -126,7 +126,7 @@ exports.client = function(message, agent) {
 exports.server = function(message, agent) {
     var deferred = q.defer();
 
-    utils.loadConversation(message, agent, 'request', 'server').
+    utils.loadConversation(message, agent).
         then(function(conversation) {
 
             switch(message.performative) {
