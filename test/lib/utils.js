@@ -212,12 +212,6 @@ exports.saveFilesToAgentDirectory = {
     tearDown: function (callback) {
         rimraf.sync('docs/dan_at_hg_dot_com');
 
-//        gebo.connection.db.dropDatabase(function(err) { 
-//            if (err) {
-//              console.log(err);
-//            }
-//          });
-
         var agentDb = new agentSchema('dan@hg.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
