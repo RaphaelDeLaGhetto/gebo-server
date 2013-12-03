@@ -2,6 +2,7 @@
 
 var agentSchema = require('../../schemata/agent'),
     nock = require('nock'),
+    generalUtils = require('../../lib/utils'),
     utils = require('../../conversations/utils');
 
 /**
@@ -20,6 +21,7 @@ exports.loadConversation = {
                         type: 'request',
                         role: 'client',
                         conversationId: 'some conversation ID',
+                        gebo: 'https://mygebo.com',
                       });
         
                 conversation.save(function(err) {
@@ -47,7 +49,7 @@ exports.loadConversation = {
     },
 
     'Load an existing conversation': function(test) {
-        test.expect(6);
+        test.expect(7);
         utils.loadConversation({ receiver: 'dan@example.com',
                                  conversationId: 'some conversation ID' },
                                { email: 'dan@example.com' }).
@@ -64,6 +66,7 @@ exports.loadConversation = {
                 test.equal(conversation.socialCommitments.length, 0);
                 // This is true because no social commitments have been formed
                 test.equal(conversation.terminated, true);
+                test.equal(conversation.gebo, 'https://mygebo.com');
                 test.done();
               }).
             catch(function(err) {
@@ -74,7 +77,7 @@ exports.loadConversation = {
     },
 
     'Return a new conversation if no matching conversationId exists': function(test) {
-        test.expect(6);
+        test.expect(7);
         utils.loadConversation({ receiver: 'dan@example.com',
                                  sender: 'yanfen@example.com',
                                  performative: 'request', 
@@ -89,6 +92,7 @@ exports.loadConversation = {
                 test.equal(conversation.role, 'server');
                 test.equal(conversation.conversationId, 'some non-existent conversation ID'); 
                 test.equal(conversation.socialCommitments.length, 0);
+                test.equal(conversation.gebo, generalUtils.getDefaultDomain());
                 // This is true because no social commitments have been formed
                 test.equal(conversation.terminated, true);
                 test.done();
@@ -101,7 +105,7 @@ exports.loadConversation = {
     },
 
     'Return a new conversation with conversationId if no ID set': function(test) {
-        test.expect(7);
+        test.expect(8);
         utils.loadConversation({ receiver: 'dan@example.com',
                                  sender: 'yanfen@example.com',
                                  performative: 'propose' },
@@ -109,12 +113,13 @@ exports.loadConversation = {
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
-	
-		conversation.db.close();
+        		conversation.db.close();
+
                 test.equal(conversation.type, 'propose');
                 test.equal(conversation.role, 'client');
                 test.equal(conversation.conversationId.search('yanfen@example.com'), 0); 
                 test.equal(conversation.socialCommitments.length, 0);
+                test.equal(conversation.gebo, generalUtils.getDefaultDomain());
                 // This is true because no social commitments have been formed
                 test.equal(conversation.terminated, true);
 
@@ -127,7 +132,7 @@ exports.loadConversation = {
                           test.ok(false, err);
                         }
                         test.equal(conversations.length, 2);
-	                test.done();
+	                    test.done();
                       });
               }).
             catch(function(err) {
@@ -149,6 +154,7 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
                 type: 'request',
                 role: 'client',
                 conversationId: 'some conversation ID',
+                gebo: 'https://mygebo.com',
               });
 
         // Some social commitments
@@ -337,7 +343,7 @@ exports.startNewConversation = {
                 then(function(conversation) {
                     // Connection should be open
                     test.equal(conversation.db.readyState, 1);
-	            conversation.db.close();
+    	            conversation.db.close();
 
                     test.equal(conversation.type, 'request');
                     test.equal(conversation.role, 'server');
@@ -393,7 +399,7 @@ exports.startNewConversation = {
                 then(function(conversation) {
                     // Connection should be open
                     test.equal(conversation.db.readyState, 1);
-	            conversation.db.close();
+    	            conversation.db.close();
 
                     test.equal(conversation.type, 'request');
                     test.equal(conversation.role, 'server');
@@ -467,6 +473,101 @@ exports.startNewConversation = {
                   });
           });
     },
+
+    'Set the conversation gebo to default host if none provided': function(test) {
+        test.expect(14);
+        utils.startNewConversation({ receiver: 'server@example.com',
+                                     sender: 'client@example.com',
+                                     performative: 'request',
+                                     action: 'action' }, { email: 'server@example.com' },
+                                     'request', 'server').
+                then(function(conversation) {
+                    // Connection should be open
+                    test.equal(conversation.db.readyState, 1);
+    	            conversation.db.close();
+
+                    test.equal(conversation.type, 'request');
+                    test.equal(conversation.role, 'server');
+                    test.equal(conversation.conversationId.search('client@example.com'), 0);
+                    test.equal(conversation.socialCommitments.length, 0);
+                    test.equal(conversation.gebo, generalUtils.getDefaultDomain());
+                    // This is true because no social commitments have been formed
+                    test.equal(conversation.terminated, true);
+
+                    // Make sure it is saved
+                    var agentDb = new agentSchema('server@example.com');
+                    agentDb.conversationModel.find({}, function(err, conversations) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                              test.ok(false, err);
+                            }
+                            test.equal(conversations.length, 1);
+                            test.equal(conversations[0].type, 'request');
+                            test.equal(conversations[0].role, 'server');
+                            test.equal(conversations[0].conversationId.search('client@example.com'), 0);
+                            test.equal(conversations[0].socialCommitments.length, 0);
+                            test.equal(conversations[0].gebo, generalUtils.getDefaultDomain());
+                            // This is true because no social commitments have been formed
+                            test.equal(conversations[0].terminated, true);
+
+                  	    test.done();
+                      });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();      
+                  });
+    },
+
+    'Set the conversation gebo to that provided': function(test) {
+        test.expect(14);
+        utils.startNewConversation({ receiver: 'server@example.com',
+                                     sender: 'client@example.com',
+                                     performative: 'request',
+                                     action: 'action',
+                                     gebo: 'somegebo.com' }, { email: 'server@example.com' },
+                                     'request', 'server').
+                then(function(conversation) {
+                    // Connection should be open
+                    test.equal(conversation.db.readyState, 1);
+    	            conversation.db.close();
+
+                    test.equal(conversation.type, 'request');
+                    test.equal(conversation.role, 'server');
+                    test.equal(conversation.conversationId.search('client@example.com'), 0);
+                    test.equal(conversation.socialCommitments.length, 0);
+                    test.equal(conversation.gebo, 'somegebo.com');
+                    // This is true because no social commitments have been formed
+                    test.equal(conversation.terminated, true);
+
+                    // Make sure it is saved
+                    var agentDb = new agentSchema('server@example.com');
+                    agentDb.conversationModel.find({}, function(err, conversations) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                              test.ok(false, err);
+                            }
+                            test.equal(conversations.length, 1);
+                            test.equal(conversations[0].type, 'request');
+                            test.equal(conversations[0].role, 'server');
+                            test.equal(conversations[0].conversationId.search('client@example.com'), 0);
+                            test.equal(conversations[0].socialCommitments.length, 0);
+                            test.equal(conversations[0].gebo, 'somegebo.com');
+                            // This is true because no social commitments have been formed
+                            test.equal(conversations[0].terminated, true);
+
+                  	    test.done();
+                      });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();      
+                  });
+    },
 };
 
 /**
@@ -486,6 +587,7 @@ exports.getRole = {
                         type: 'request',
                         role: 'client',
                         conversationId: 'Some client conversation ID',
+                        gebo: 'https://mygebo.com',
                   });
 
                 clientConversation.save(function(err) {
@@ -498,6 +600,7 @@ exports.getRole = {
                         var serverConversation = new agentDb.conversationModel({
                                 type: 'request',
                                 role: 'server',
+                                gebo: 'https://someothergebo.com',
                                 conversationId: 'Some client conversation ID',
                               });
     
@@ -721,8 +824,7 @@ exports.postMessage = {
         utils.postMessage('somegebo.com', '/receive', content).
             then(function(data) {
                 scope.done();
-                test.equal(data.data, 'Here\'s what you want'); 
-                test.done();
+                test.equal(data.data, 'Here\'s what you want'); test.done();
               }).
             catch(function(err) {
                 scope.done();

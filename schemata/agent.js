@@ -162,6 +162,7 @@ module.exports = function (email) {
         role: { type: String, required: true, unique: false },
         conversationId: { type: String, required: true, unique: true },
         socialCommitments: [socialCommitmentSchema],
+        gebo: { type: String, required: true, unique: false },
         created: { type: Date, required: true, default: Date.now() },
       });
 

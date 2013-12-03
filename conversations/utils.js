@@ -2,6 +2,7 @@
 
 var agentSchema = require('../schemata/agent'),
     https = require('https'),
+    utils = require('../lib/utils'),
     q = require('q');
 
 /**
@@ -87,11 +88,18 @@ var _startNewConversation = function(message, agent, type, role) {
         conversationId = message.sender + ':' + Date.now().toString();
       }
 
+      // Get default gebo if not set
+      var gebo = message.gebo;
+      if (!gebo) {
+        gebo = utils.getDefaultDomain();
+      }
+ 
       var agentDb = new agentSchema(agent.email);
       var conversation = new agentDb.conversationModel({
               type: type,
               role: role,
               conversationId: conversationId,
+              gebo: gebo, 
           });
 
       conversation.save(function(err) {
@@ -251,6 +259,8 @@ exports.getOptions = _getOptions;
  */
 exports.postMessage = function(uri, path, content) {
     console.log('postMessage');
+    console.log('uri', uri);
+    console.log('path', path);
     var deferred = q.defer();
  
     var options = _getOptions(uri, path, content);
