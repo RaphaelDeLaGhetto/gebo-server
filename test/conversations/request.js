@@ -243,6 +243,7 @@ exports.client = {
                 type: 'request',
                 role: 'client',
                 conversationId: 'some conversation ID',
+                gebo: 'https://mygebo.com',
               });
 
         conversation.save(function(err) {
@@ -924,6 +925,7 @@ exports.server = {
                 type: 'request',
                 role: 'server',
                 conversationId: 'some conversation ID',
+                gebo: 'https://someothergebo.com',
               });
 
         conversation.save(function(err) {
