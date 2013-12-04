@@ -64,7 +64,7 @@ exports.agree = {
             var sc = new agentDb.socialCommitmentModel({
                     performative: 'request',
                     action: 'friend',
-                    message: { newFriend: newFriend },
+                    message: { content: newFriend },
                     creditor: 'yanfen@hg.com',
                     debtor: 'dan@hg.com',
                   });
@@ -172,7 +172,7 @@ exports.refuse = {
             var sc = new agentDb.socialCommitmentModel({
                     performative: 'request',
                     action: 'friend',
-                    message: { newFriend: newFriend },
+                    message: { content: newFriend },
                     creditor: 'yanfen@hg.com',
                     debtor: 'dan@hg.com',
                   });

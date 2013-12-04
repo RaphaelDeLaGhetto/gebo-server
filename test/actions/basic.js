@@ -2258,7 +2258,7 @@ exports.friend = {
                 uri: 'http://theirhost.com',
                 myPrivateKey: 'some key',
             };
-        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { newFriend: newFriend }).
+        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { content: newFriend }).
             then(function(friend) {  
                 test.equal(friend.name, 'yanfen');
                 test.equal(friend.email, 'yanfen@hg.com');
@@ -2315,7 +2315,7 @@ exports.friend = {
                     uri: 'http://someotherhost.com',
                 };
 
-        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { newFriend: existingFriend }).
+        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { content: existingFriend }).
                 then(function(friend) {
                     test.equal(friend.name, 'john');
                     test.equal(friend.email, 'john@painter.com');

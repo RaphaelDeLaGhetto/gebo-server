@@ -536,7 +536,7 @@ module.exports = function(email) {
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
           db.friendModel.findOneAndUpdate(
-                          { email: message.newFriend.email }, message.newFriend, { upsert: true },
+                          { email: message.content.email }, message.content, { upsert: true },
                           function(err, friend) {
                                   db.connection.db.close();
                                   if (err) {
