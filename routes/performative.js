@@ -44,7 +44,7 @@ module.exports = function(email) {
 //                        console.log(message);
 //                        console.log('verified');
 //                        console.log(verified);
-
+    
                         action[message.action](verified, message).
                             then(function(data) {
                                sc.fulfil(message.receiver, socialCommitment._id).
