@@ -80,9 +80,9 @@ module.exports = function (email) {
 //        myToken: { type: String, default: null, unique: false },
 
         // Experimental
-        myPrivateKey: { type: String, default: null, required: false },
-        myCertificate: { type: String, default: null, required: false },
-        hisCertificate: { type: String, default: null, unique: false },
+//        myPrivateKey: { type: String, default: null, required: false },
+//        myCertificate: { type: String, default: null, required: false },
+        certificate: { type: String, default: null, unique: false },
 
         // I don't think I need to store his token. The gebo does that.
         // Access can be granted or denied with permissions. Friendship
