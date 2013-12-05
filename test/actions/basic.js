@@ -9,13 +9,13 @@ var config = require('../../config/config'),
 var cname = 'unitTest';
 
 var verifiedAdmin = {
-	dbName: utils.getMongoDbName('dan@hg.com'),
+	dbName: utils.getMongoDbName('dan@example.com'),
         collectionName: cname,
 	admin: true,
     };
 
 var verifiedUser = {
-	dbName: utils.getMongoDbName('yanfen@hg.com'),
+	dbName: utils.getMongoDbName('yanfen@example.com'),
         collectionName: cname,
 	admin: false,
 	read: true,
@@ -193,7 +193,7 @@ exports.saveToDb = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_hg_dot_com',
+            this.db = new mongo.Db('yanfen_at_example_dot_com',
                             server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -241,7 +241,7 @@ exports.saveToDb = {
    'Save JSON to existing database as admin': function (test) {
         test.expect(3);
 
-        action.save({ dbName: 'yanfen_at_hg_dot_com',
+        action.save({ dbName: 'yanfen_at_example_dot_com',
 		      collectionName: cname,
 		      admin: true },
                     { data: { junk: 'I like to move it move it' } }).
@@ -264,7 +264,7 @@ exports.saveToDb = {
         test.expect(8);
 
         // Retrieve the existing document
-        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+        action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
                   { id: '0123456789AB' }).
@@ -274,7 +274,7 @@ exports.saveToDb = {
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
                     return action.save(
-                            { dbName: 'yanfen_at_hg_dot_com',
+                            { dbName: 'yanfen_at_example_dot_com',
           		      collectionName: cname,
 		              admin: true },
                             { data: docs });
@@ -283,7 +283,7 @@ exports.saveToDb = {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
                     return action.cp(
-                            { dbName: 'yanfen_at_hg_dot_com',
+                            { dbName: 'yanfen_at_example_dot_com',
           		      collectionName: cname,
 		              admin: true },
                             { id: '0123456789AB' });
@@ -304,7 +304,7 @@ exports.saveToDb = {
    'Save JSON to existing database with write permission': function (test) {
         test.expect(3);
 
-        action.save({ dbName: 'yanfen_at_hg_dot_com',
+        action.save({ dbName: 'yanfen_at_example_dot_com',
 		      collectionName: cname,
 		      admin: false,
                       write: true },
@@ -327,7 +327,7 @@ exports.saveToDb = {
         test.expect(8);
 
         // Retrieve the existing document
-        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+        action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: false,
                     read: true,
@@ -339,7 +339,7 @@ exports.saveToDb = {
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
                     return action.save(
-                            { dbName: 'yanfen_at_hg_dot_com',
+                            { dbName: 'yanfen_at_example_dot_com',
           		      collectionName: cname,
 		              admin: false,
                               read: true,
@@ -350,7 +350,7 @@ exports.saveToDb = {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
                     return action.cp(
-                            { dbName: 'yanfen_at_hg_dot_com',
+                            { dbName: 'yanfen_at_example_dot_com',
           		      collectionName: cname,
 		              admin: false,
                               read: true,
@@ -373,7 +373,7 @@ exports.saveToDb = {
    'Do not save without permission': function (test) {
         test.expect(1);
         
-        action.save({ dbName: 'yanfen_at_hg_dot_com',
+        action.save({ dbName: 'yanfen_at_example_dot_com',
   		      collectionName: cname,
 		      admin: false,
                       write: false },
@@ -411,7 +411,7 @@ exports.saveToFs = {
              */
             var registrant = new gebo.registrantModel({
                     name: 'dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -421,7 +421,7 @@ exports.saveToFs = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema('dan@hg.com');
+            var agentDb = new agentSchema('dan@example.com');
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -449,7 +449,7 @@ exports.saveToFs = {
     },
     
     tearDown: function (callback) {
-        rimraf.sync('docs/dan_at_hg_dot_com');
+        rimraf.sync('docs/dan_at_example_dot_com');
 
         gebo.connection.db.dropDatabase(function(err) { 
             if (err) {
@@ -457,7 +457,7 @@ exports.saveToFs = {
             }
           });
 
-        var agentDb = new agentSchema('dan@hg.com'); 
+        var agentDb = new agentSchema('dan@example.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -472,18 +472,18 @@ exports.saveToFs = {
     'Create agent and app directories on the file system if they do not exist': function(test) {
         test.expect(2);
 
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
         // Make sure the directory isn't there
         try {
-            fs.readdirSync('docs/' + utils.getMongoDbName('dan@hg.com'));
+            fs.readdirSync('docs/' + utils.getMongoDbName('dan@example.com'));
         }
         catch (err) {
             test.ok(err);
         }
 
-        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
@@ -510,7 +510,7 @@ exports.saveToFs = {
 
     'Write a file object to the agent\'s file collection in the DB': function(test) {
         test.expect(5);
-        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
@@ -523,7 +523,7 @@ exports.saveToFs = {
                       },
                     }).
             then(function() {
-                var db = new agentSchema('dan@hg.com');
+                var db = new agentSchema('dan@example.com');
                 db.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
                                        collectionName: utils.getMongoCollectionName('canwrite@app.com') },
                     function(err, file) {
@@ -549,7 +549,7 @@ exports.saveToFs = {
     },
    
     'Do not allow an agent to save to the file system without permission': function(test) {
-        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: false },
                     { files: {
@@ -574,10 +574,10 @@ exports.saveToFs = {
     'Should not overwrite files with the same name': function(test) {
         test.expect(4);
 
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
-        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
@@ -594,7 +594,7 @@ exports.saveToFs = {
                 test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
 
                 fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
-                action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+                action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                               collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                               write: true },
                             { files: {
@@ -623,10 +623,10 @@ exports.saveToFs = {
     'Write multiple files to disk': function(test) {
         test.expect(2);
 
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
-        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
@@ -659,10 +659,10 @@ exports.saveToFs = {
     'Write a file and data to the database': function(test) {
         test.expect(2);
 
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') +
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
-        action.save({ dbName: utils.getMongoDbName('dan@hg.com'),
+        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
@@ -783,7 +783,7 @@ exports.cp = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_hg_dot_com', server,
+            this.db = new mongo.Db('yanfen_at_example_dot_com', server,
 			    config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -830,7 +830,7 @@ exports.cp = {
 
    'Copy from existing database as admin': function (test) {
         test.expect(3);
-        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+        action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
                   { id: '0123456789AB' }).
@@ -849,7 +849,7 @@ exports.cp = {
 
    'Copy from existing database with read permission': function (test) {
         test.expect(3);
-        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+        action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: false,
                     read: true },
@@ -869,7 +869,7 @@ exports.cp = {
 
    'Do not copy from existing database without permission': function (test) {
         test.expect(1);
-        action.cp({ dbName: 'yanfen_at_hg_dot_com',
+        action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: false,
                     read: false },
@@ -897,7 +897,7 @@ exports.rm = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_hg_dot_com',
+            this.db = new mongo.Db('yanfen_at_example_dot_com',
 			    server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -959,7 +959,7 @@ exports.rm = {
         test.expect(1);
 
         // Retrieve the existing document
-        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+        action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: 'NoSuchCollection',
 		    admin: true },
                   { id: '0123456789AB' }).
@@ -979,7 +979,7 @@ exports.rm = {
    'Do not delete non-existent document': function (test) {
         test.expect(1);
 
-        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+        action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
                   { id: 'NoSuchDocABC' }).
@@ -1003,7 +1003,7 @@ exports.rm = {
             test.equal(count, 2);
         });
 
-        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+        action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
                     { id: '123456789ABC' }).
@@ -1028,7 +1028,7 @@ exports.rm = {
             test.equal(count, 2);
         });
 
-        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+        action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: false,
                     write: true },
@@ -1054,7 +1054,7 @@ exports.rm = {
             test.equal(count, 2);
         });
 
-        action.rm({ dbName: 'yanfen_at_hg_dot_com',
+        action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: false,
                     write: false },
@@ -1079,7 +1079,7 @@ exports.rmdir = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_hg_dot_com',
+            this.db = new mongo.Db('yanfen_at_example_dot_com',
 			    server, config.mongo.clientOptions);
             this.db.open(function (err, client) {
                 if (err) {
@@ -1135,7 +1135,7 @@ exports.rmdir = {
    'Do not delete a non-existent collection': function (test) {
         test.expect(1);
 
-        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
   		       collectionName: 'NoSuchCollection',
 		       admin: true,
                        execute: true }).
@@ -1157,7 +1157,7 @@ exports.rmdir = {
             test.equal(count, 2);
         });
 
-        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
   		       collectionName: cname,
 		       admin: true,
                        execute: true }).
@@ -1182,7 +1182,7 @@ exports.rmdir = {
             test.equal(count, 2);
         });
 
-        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
   		       collectionName: cname,
 		       admin: false,
                        execute: true }).
@@ -1207,7 +1207,7 @@ exports.rmdir = {
             test.equal(count, 2);
         });
 
-        action.rmdir({ dbName: 'yanfen_at_hg_dot_com',
+        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
   		       collectionName: cname,
 		       admin: false,
                        execute: false }).
@@ -1803,7 +1803,7 @@ exports.dropDatabase = {
 //    setUp: function(callback) {
 //    	try{
 //            var agent = new gebo.registrantModel(
-//                            { name: 'dan', email: 'dan@hg.com',
+//                            { name: 'dan', email: 'dan@example.com',
 //                              password: 'password123', admin: true,  
 //                              _id: new mongo.ObjectID('0123456789AB') });
 //            agent.save(function(err) {
@@ -1834,7 +1834,7 @@ exports.dropDatabase = {
 //                then(function(registrants) {
 //                    test.equal(registrants.length, 1);
 //                    test.equal(registrants[0].name, 'dan');
-//                    test.equal(registrants[0].email, 'dan@hg.com');
+//                    test.equal(registrants[0].email, 'dan@example.com');
 //                    test.equal(registrants[0].admin, true);
 //                    test.equal(registrants[0].password, undefined);
 //	            test.done();
@@ -1847,7 +1847,7 @@ exports.dropDatabase = {
 //                then(function(registrants) {
 //                    test.equal(registrants.length, 1);
 //                    test.equal(registrants[0].name, 'dan');
-//                    test.equal(registrants[0].email, 'dan@hg.com');
+//                    test.equal(registrants[0].email, 'dan@example.com');
 //                    test.equal(registrants[0].admin, true);
 //                    test.equal(registrants[0].password, undefined);
 //	            test.done();
@@ -1962,7 +1962,7 @@ exports.registerAgent = {
     setUp: function(callback) {
     	try{
             var agent = new gebo.registrantModel(
-                            { name: 'dan', email: 'dan@hg.com',
+                            { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
             agent.save(function(err) {
@@ -1998,7 +1998,7 @@ exports.registerAgent = {
 
                 var newAgent = {
                         name: 'yanfen',
-                        email: 'yanfen@hg.com',
+                        email: 'yanfen@example.com',
                         password: 'password456',
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
@@ -2006,7 +2006,7 @@ exports.registerAgent = {
                 action.registerAgent({ admin: true }, { newAgent: newAgent }).
                     then(function(agent) {  
                         test.equal(agent.name, 'yanfen');
-                        test.equal(agent.email, 'yanfen@hg.com');
+                        test.equal(agent.email, 'yanfen@example.com');
                         test.equal(agent.admin, false);
                         test.done();
                       });
@@ -2024,7 +2024,7 @@ exports.registerAgent = {
 
                 var newAgent = {
                         name: 'yanfen',
-                        email: 'yanfen@hg.com',
+                        email: 'yanfen@example.com',
                         password: 'password456',
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
@@ -2032,7 +2032,7 @@ exports.registerAgent = {
                 action.registerAgent({ admin: false, execute: true }, { newAgent: newAgent }).
                     then(function(agent) {  
                         test.equal(agent.name, 'yanfen');
-                        test.equal(agent.email, 'yanfen@hg.com');
+                        test.equal(agent.email, 'yanfen@example.com');
                         test.equal(agent.admin, false);
                         test.done();
                       });
@@ -2050,7 +2050,7 @@ exports.registerAgent = {
 
                 var newAgent = {
                         name: 'yanfen',
-                        email: 'yanfen@hg.com',
+                        email: 'yanfen@example.com',
                         password: 'password456',
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
@@ -2071,7 +2071,7 @@ exports.registerAgent = {
         test.expect(1);
         var existingAgent = {
                 name: 'dan',
-                email: 'dan@hg.com',
+                email: 'dan@example.com',
                 password: 'password123',
                 admin: true
             };
@@ -2095,7 +2095,7 @@ exports.deregisterAgent = {
     setUp: function(callback) {
     	try{
             var agent = new gebo.registrantModel(
-                            { name: 'dan', email: 'dan@hg.com',
+                            { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
             agent.save(function(err) {
@@ -2123,7 +2123,7 @@ exports.deregisterAgent = {
     'Remove an agent from the database if an admin': function(test) {
         test.expect(2);
 
-        action.deregisterAgent({ admin: true }, { email: 'dan@hg.com' }).
+        action.deregisterAgent({ admin: true }, { email: 'dan@example.com' }).
             then(function(ack) {
                     test.equal(ack, 1);
                     gebo.registrantModel.find({}, function(err, agents) {
@@ -2140,7 +2140,7 @@ exports.deregisterAgent = {
     'Remove an agent from the database with execute permission': function(test) {
         test.expect(2);
 
-        action.deregisterAgent({ admin: false, execute: true }, { email: 'dan@hg.com' }).
+        action.deregisterAgent({ admin: false, execute: true }, { email: 'dan@example.com' }).
             then(function(ack) {
                     test.equal(ack, 1);
                     gebo.registrantModel.find({}, function(err, agents) {
@@ -2157,7 +2157,7 @@ exports.deregisterAgent = {
     'Do not remove an agent without execute permission or admin status': function(test) {
         test.expect(1);
 
-        action.deregisterAgent({ admin: false, execute: false }, { email: 'dan@hg.com' }).
+        action.deregisterAgent({ admin: false, execute: false }, { email: 'dan@example.com' }).
             then(function(ack) {
                     test.ok(false, 'I should not be allowed to deregister an agent'); 
                     test.done();
@@ -2171,7 +2171,7 @@ exports.deregisterAgent = {
 
     'Should not barf if agent does not exist': function(test) {
         test.expect(1);
-        action.deregisterAgent({ admin: true }, { email: 'nosuchagent@hg.com' }).
+        action.deregisterAgent({ admin: true }, { email: 'nosuchagent@example.com' }).
             then(function(ack) {
                     gebo.registrantModel.find({}, function(err, agents) {
                         if (err) {
@@ -2197,7 +2197,7 @@ exports.friend = {
              */
             var registrant = new gebo.registrantModel({
                     name: 'dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -2206,7 +2206,7 @@ exports.friend = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema('dan@hg.com');
+            var agentDb = new agentSchema('dan@example.com');
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -2238,7 +2238,7 @@ exports.friend = {
             }
           });
 
-        var agentDb = new agentSchema('dan@hg.com'); 
+        var agentDb = new agentSchema('dan@example.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -2254,17 +2254,17 @@ exports.friend = {
         test.expect(4);
         var newFriend = {
                 name: 'yanfen',
-                email: 'yanfen@hg.com',
+                email: 'yanfen@example.com',
                 gebo: 'http://theirhost.com',
                 myPrivateKey: 'some key',
             };
-        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { content: newFriend }).
+        action.friend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: newFriend }).
             then(function(friend) {  
                 test.equal(friend.name, 'yanfen');
-                test.equal(friend.email, 'yanfen@hg.com');
+                test.equal(friend.email, 'yanfen@example.com');
                 test.equal(friend.gebo, 'http://theirhost.com');
  
-                var agentDb = new agentSchema('dan@hg.com');
+                var agentDb = new agentSchema('dan@example.com');
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2285,17 +2285,17 @@ exports.friend = {
         test.expect(2);
         var newFriend = {
                 name: 'yanfen',
-                email: 'yanfen@hg.com',
+                email: 'yanfen@example.com',
                 gebo: 'http://theirhost.com',
             };
-        action.friend({ write: false, dbName: 'dan_at_hg_dot_com' }, { newFriend: newFriend }).
+        action.friend({ write: false, dbName: 'dan_at_example_dot_com' }, { newFriend: newFriend }).
             then(function(friend) {  
                 test.ok(false, 'Should not be allowed to add a new friend');
                 test.done();
               }).
             catch(function(err) {
                 test.equal(err, 'You are not permitted to request or propose that action');
-                var agentDb = new agentSchema('dan@hg.com');
+                var agentDb = new agentSchema('dan@example.com');
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2315,7 +2315,7 @@ exports.friend = {
                     gebo: 'http://someotherhost.com',
                 };
 
-        action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { content: existingFriend }).
+        action.friend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: existingFriend }).
                 then(function(friend) {
                     test.equal(friend.name, 'john');
                     test.equal(friend.email, 'john@painter.com');
@@ -2341,7 +2341,7 @@ exports.defriend = {
              */
             var registrant = new gebo.registrantModel({
                     name: 'dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -2350,7 +2350,7 @@ exports.defriend = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema('dan@hg.com'); 
+            var agentDb = new agentSchema('dan@example.com'); 
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -2382,7 +2382,7 @@ exports.defriend = {
             }
           });
 
-        var agentDb = new agentSchema('dan@hg.com'); 
+        var agentDb = new agentSchema('dan@example.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -2396,11 +2396,11 @@ exports.defriend = {
 
     'Remove a friend from the database if permitted': function(test) {
         test.expect(2);
-        action.defriend({ write: true, dbName: 'dan_at_hg_dot_com' }, { email: 'john@painter.com' }).
+        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { email: 'john@painter.com' }).
             then(function(ack) {  
                 test.equal(ack, 1);
 
-                var agentDb = new agentSchema('dan@hg.com');
+                var agentDb = new agentSchema('dan@example.com');
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2426,7 +2426,7 @@ exports.defriend = {
               }).
             catch(function(err) {
                 test.equal(err, 'You are not permitted to request or propose that action');
-                var agentDb = new agentSchema('dan@hg.com');
+                var agentDb = new agentSchema('dan@example.com');
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2440,7 +2440,7 @@ exports.defriend = {
 
     'Don\'t barf if the email provided matches no friend': function(test) {
         test.expect(1);
-        action.defriend({ write: true, dbName: 'dan_at_hg_dot_com' }, { email: 'yanfen@hg.com' }).
+        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { email: 'yanfen@example.com' }).
                 then(function(ack) {
                     test.equal(ack, 0);
                     test.done();
@@ -2464,7 +2464,7 @@ exports.grantAccess = {
              */
             var registrant = new gebo.registrantModel({
                     name: 'dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -2473,7 +2473,7 @@ exports.grantAccess = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema('dan@hg.com'); 
+            var agentDb = new agentSchema('dan@example.com'); 
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -2507,7 +2507,7 @@ exports.grantAccess = {
             }
           });
 
-        var agentDb = new agentSchema('dan@hg.com'); 
+        var agentDb = new agentSchema('dan@example.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -2521,9 +2521,9 @@ exports.grantAccess = {
 
     'Grant a friend access to a resource he didn\'t have access to before': function(test) {
         test.expect(6);
-        action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
+        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
                         { action: 'grantAccess',
-                          recipient: 'dan@hg.com',
+                          recipient: 'dan@example.com',
                           friend: 'john@painter.com',
                           permission: {
                                   email: 'new@app.com',
@@ -2550,9 +2550,9 @@ exports.grantAccess = {
 
     'Change a friend\'s access level to a resource': function(test) {
         test.expect(6);
-        action.grantAccess({ write: true, dbName: 'dan_at_hg_dot_com', collectionName: 'friends' },
+        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
                         { action: 'grantAccess',
-                          recipient: 'dan@hg.com',
+                          recipient: 'dan@example.com',
                           friend: 'john@painter.com',
                           permission: {
                                   email: 'some@coolapp.com',
@@ -2577,78 +2577,51 @@ exports.grantAccess = {
               });
     },
 
+    'Don\'t allow access without write or admin permission': function(test) {
+        test.expect(1);
+        action.grantAccess({ read: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
+                        { action: 'grantAccess',
+                          recipient: 'dan@example.com',
+                          friend: 'john@painter.com',
+                          permission: {
+                                  email: 'some@coolapp.com',
+                                  read: 'false',
+                                  write: 'false',
+                                  execute: 'true'},
+                        }).
+            then(function(friend) {
+                test.ok(false, 'Shouldn\'t get here');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You are not permitted to request or propose that action');
+                test.done();
+              });
+    },
+
 };
 
 /**
- * shakeHands
+ * certificate 
  */
-exports.shakeHands = {
+exports.certificate = {
 
     setUp: function(callback) {
         try {
-            /**
-             * Setup local gebo
-             *
-             * (I'm pretending these registrants are hosted on
-             * different servers)
-             */
             var registrant = new gebo.registrantModel({
-                    name: nconf.get('name'),
-                    email: nconf.get('email'),
+                    name: 'Dan',
+                    email: 'dan@example.com',
                     password: 'password123',
-                    admin: true,
+                    admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
           
-            /**
-             * Make a friend for the registrant
-             */
-            var friend = new gebo.friendModel({
-                    name: 'Foreign gebo',
-                    email: 'friendly@gebo.com',
-                    gebo: 'https://friendlyhost.com',
-                    _id: new mongo.ObjectID('23456789ABCD')
-                });
-
             registrant.save(function(err) {
-                    friend.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
- 
-                        /**
-                         * Setup friendly gebo
-                         */
-                        var friendlyGebo = require('../../schemata/gebo')('friendly@gebo.com');
-                        var friendlyRegistrant = new friendlyGebo.registrantModel({
-                                name: 'friendly-gebo',
-                                email: 'friendly@gebo.com',
-                                password: 'password123',
-                                admin: true,
-                                _id: new mongo.ObjectID('0123456789AB')
-                            });
-
-                        /**
-                         * Make friend's with the local gebo 
-                         */
-                        var friend = new friendlyGebo.friendModel({
-                                name: nconf.get('name'),
-                                email: nconf.get('email'),
-                                gebo: 'https://myhost.com',
-                                _id: new mongo.ObjectID('23456789ABCD')
-                            });
-
-                        friendlyRegistrant.save(function(err) {
-                                friend.save(function(err) {
-                                    if (err) {
-                                      console.log(err);
-                                    }
-                                    friendlyGebo.connection.db.close();
-                                    callback();
-                                  });
-                              });
-                      });
-                  });
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
      	}
         catch(e) {
             console.dir(e);
@@ -2657,27 +2630,64 @@ exports.shakeHands = {
     }, 
 
     tearDown: function(callback) {
-       
         gebo.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-          });
-
-          var friendlyGebo = require('../../schemata/gebo')('friendly@gebo.com');
-          friendlyGebo.connection.on('open', function(err) {
-              friendlyGebo.connection.db.dropDatabase(function(err) {
-                  if (err) {
-                    console.log(err);
-                  }
-                  friendlyGebo.connection.db.close();
-                  callback();
+            var agentDb = new agentSchema('dan@example.com'); 
+            agentDb.connection.on('open', function(err) {
+                agentDb.connection.db.dropDatabase(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    agentDb.connection.db.close();
+                    callback();
+                  });
               });
-            });
+          });
     }, 
 
-    'Exchange public certificates between friends': function(test) {
-        test.done();
+    'Return a public certificate and add a key to the collection': function(test) {
+        test.expect(5);
+        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+                           { content: { agent: 'yanfen@example.com' } }).
+            then(function(certificate) {
+                test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
+                test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
+
+                // Make sure the certificate was saved to the database
+                var agentDb = new agentSchema('dan@example.com');
+                agentDb.keyModel.findOne({ agent: 'yanfen@example.com' }, function(err, key) {
+                    agentDb.connection.db.close();
+                    if (err) {
+                      console.log(err);
+                      test.ok(false, err);
+                    }
+                    test.equal(key.private.search('-----BEGIN RSA PRIVATE KEY-----'), 0);
+                    test.equal(key.agent, 'yanfen@example.com');
+                    test.equal(key.public, certificate);
+                    test.done();
+                  });
+              }).
+            catch(function(err) {        
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Don\'t allow access without write or admin permission': function(test) {
+        test.expect(1);
+        action.certificate({ read: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+                           { content: { agent: 'yanfen@example.com' } }).
+            then(function(certificate) {
+                test.ok(false, 'Shouldn\'t get here');
+                test.done();
+              }).
+            catch(function(err) {        
+                test.equal(err, 'You are not permitted to request or propose that action');
+                test.done();
+              });
     },
 
 };

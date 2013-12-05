@@ -624,16 +624,46 @@ module.exports = function(email) {
                   }
             });
         }
-
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+ 
         return deferred.promise;
       };
 
     /**
-     * shakeHands
+     * certificate
      */
-    exports.shakeHands = function(verified, message) {
+    exports.certificate = function(verified, message) {
         var deferred = q.defer();
-        deferred.resolve();
+        if (verified.admin || verified.write) {
+          utils.getPrivateKeyAndCertificate().
+            then(function(pair) {
+                var data = {
+                        public: pair.certificate,
+                        private: pair.privateKey,
+                        agent: message.content.agent
+                    };
+
+                var db = new agentSchema(verified.dbName);
+                db.keyModel.findOneAndUpdate({ email: message.content.agent }, data, { upsert: true },
+                    function(err, key) {
+                        db.connection.db.close();
+                        if (err) {
+                          deferred.reject(err);
+                        }
+                        else {
+                          deferred.resolve(key.public);
+                        }
+                      });
+              }).
+            catch(function(err) {
+                deferred.reject(err);
+              });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
         return deferred.promise; 
       };
 
