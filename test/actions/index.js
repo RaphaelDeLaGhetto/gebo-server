@@ -56,7 +56,7 @@ exports.agree = {
             var newFriend = {
                     name: 'Yanfen',
                     email: 'yanfen@hg.com',
-                    uri: 'https://theirhost.com',
+                    gebo: 'https://theirhost.com',
                     hisCertificate: 'some certificate',
                 };
  
@@ -118,7 +118,7 @@ exports.agree = {
                     agentDb.connection.db.close();
                     test.equal(data.name, 'Yanfen');
                     test.equal(data.email, 'yanfen@hg.com');
-                    test.equal(data.uri, 'https://theirhost.com');
+                    test.equal(data.gebo, 'https://theirhost.com');
                     test.equal(data.hisCertificate, 'some certificate');
                     agentDb = new agentSchema('dan@hg.com'); 
                     agentDb.socialCommitmentModel.find({}, function(err, scs) {
@@ -164,7 +164,7 @@ exports.refuse = {
             var newFriend = {
                     name: 'Yanfen',
                     email: 'yanfen@hg.com',
-                    uri: 'https://theirhost.com',
+                    gebo: 'https://theirhost.com',
                     hisCertificate: 'some certificate',
                 };
  

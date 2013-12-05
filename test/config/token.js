@@ -69,7 +69,7 @@ exports.getParams = {
                     name: 'john',
                     email: 'john@painter.com',
 //                    myToken: ACCESS_TOKEN,
-                    uri: BASE_ADDRESS,
+                    gebo: BASE_ADDRESS,
                 });
 
             /**
@@ -168,7 +168,7 @@ exports.loadFriend = {
                     name: 'John',
                     email: 'john@painter.com',
 //                    myToken: ACCESS_TOKEN,
-                    uri: BASE_ADDRESS,
+                    gebo: BASE_ADDRESS,
                 });
 
             /**
@@ -234,7 +234,7 @@ exports.loadFriend = {
             then(function(friend) {
                 test.equal(friend.name, 'John');
                 test.equal(friend.email, 'john@painter.com');
-                test.equal(friend.uri, BASE_ADDRESS);
+                test.equal(friend.gebo, BASE_ADDRESS);
                 test.equal(friend.request, REQUEST_ENDPOINT);
                 test.equal(friend.propose, PROPOSE_ENDPOINT);
                 test.equal(friend.inform, INFORM_ENDPOINT);
@@ -273,7 +273,7 @@ exports.loadFriend = {
 //                    name: 'John',
 //                    email: 'john@painter.com',
 //                    myToken: ACCESS_TOKEN,
-//                    uri: BASE_ADDRESS,
+//                    gebo: BASE_ADDRESS,
 //                });
 //
 //            /**
@@ -371,7 +371,7 @@ exports.loadFriend = {
 //                    name: 'John',
 //                    email: 'john@painter.com',
 //                    myToken: ACCESS_TOKEN,
-//                    uri: BASE_ADDRESS,
+//                    gebo: BASE_ADDRESS,
 //                });
 //
 //            /**
@@ -475,7 +475,7 @@ exports.loadFriend = {
 //                    name: 'John',
 //                    email: 'john@painter.com',
 //                    myToken: ACCESS_TOKEN,
-//                    uri: BASE_ADDRESS,
+//                    gebo: BASE_ADDRESS,
 //                });
 //
 //            /**
@@ -561,13 +561,13 @@ exports.get = {
             var friend = new geboDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
-                    uri: BASE_ADDRESS,
+                    gebo: BASE_ADDRESS,
                 });
             
             var otherFriend = new geboDb.friendModel({
                     name: 'Richard',
                     email: 'richard@construction.com',
-                    uri: BASE_ADDRESS + ':3443',
+                    gebo: BASE_ADDRESS + ':3443',
                 });
 
 

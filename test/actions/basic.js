@@ -425,7 +425,7 @@ exports.saveToFs = {
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
-                    uri: 'http://theirhost.com',
+                    gebo: 'http://theirhost.com',
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
@@ -2210,7 +2210,7 @@ exports.friend = {
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
-                    uri: 'http://theirhost.com',
+                    gebo: 'http://theirhost.com',
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
@@ -2255,14 +2255,14 @@ exports.friend = {
         var newFriend = {
                 name: 'yanfen',
                 email: 'yanfen@hg.com',
-                uri: 'http://theirhost.com',
+                gebo: 'http://theirhost.com',
                 myPrivateKey: 'some key',
             };
         action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { content: newFriend }).
             then(function(friend) {  
                 test.equal(friend.name, 'yanfen');
                 test.equal(friend.email, 'yanfen@hg.com');
-                test.equal(friend.uri, 'http://theirhost.com');
+                test.equal(friend.gebo, 'http://theirhost.com');
  
                 var agentDb = new agentSchema('dan@hg.com');
                 agentDb.friendModel.find({}, function(err, friends) {
@@ -2286,7 +2286,7 @@ exports.friend = {
         var newFriend = {
                 name: 'yanfen',
                 email: 'yanfen@hg.com',
-                uri: 'http://theirhost.com',
+                gebo: 'http://theirhost.com',
             };
         action.friend({ write: false, dbName: 'dan_at_hg_dot_com' }, { newFriend: newFriend }).
             then(function(friend) {  
@@ -2312,14 +2312,14 @@ exports.friend = {
         var existingFriend = {
                     name: 'john',
                     email: 'john@painter.com',
-                    uri: 'http://someotherhost.com',
+                    gebo: 'http://someotherhost.com',
                 };
 
         action.friend({ write: true, dbName: 'dan_at_hg_dot_com' }, { content: existingFriend }).
                 then(function(friend) {
                     test.equal(friend.name, 'john');
                     test.equal(friend.email, 'john@painter.com');
-                    test.equal(friend.uri, 'http://someotherhost.com');
+                    test.equal(friend.gebo, 'http://someotherhost.com');
                     test.done();
                   }).
                 catch(function(err) {
@@ -2354,7 +2354,7 @@ exports.defriend = {
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
-                    uri: 'http://theirhost.com',
+                    gebo: 'http://theirhost.com',
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
@@ -2477,7 +2477,7 @@ exports.grantAccess = {
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
-                    uri: 'http://theirhost.com',
+                    gebo: 'http://theirhost.com',
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
@@ -2606,7 +2606,7 @@ exports.shakeHands = {
             var friend = new gebo.friendModel({
                     name: 'Foreign gebo',
                     email: 'friendly@gebo.com',
-                    uri: 'https://friendlyhost.com',
+                    gebo: 'https://friendlyhost.com',
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
@@ -2634,7 +2634,7 @@ exports.shakeHands = {
                         var friend = new friendlyGebo.friendModel({
                                 name: nconf.get('name'),
                                 email: nconf.get('email'),
-                                uri: 'https://myhost.com',
+                                gebo: 'https://myhost.com',
                                 _id: new mongo.ObjectID('23456789ABCD')
                             });
 

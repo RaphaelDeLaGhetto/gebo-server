@@ -367,7 +367,7 @@ exports.clientJwtBearerStrategy = {
             var friend = new geboDb.friendModel({
                     name: 'Foreign Agent',
                     email: 'foreign@agent.com',
-                    uri: 'https://agent.com',
+                    gebo: 'https://agent.com',
                     _id: new mongo.ObjectID('123456789ABC')
                 });
 
@@ -410,7 +410,7 @@ exports.clientJwtBearerStrategy = {
             else {
               test.equal(friend.name, 'Foreign Agent');
               test.equal(friend.email, 'foreign@agent.com');
-              test.equal(friend.uri, 'https://agent.com');
+              test.equal(friend.gebo, 'https://agent.com');
             }
             test.done();
           });

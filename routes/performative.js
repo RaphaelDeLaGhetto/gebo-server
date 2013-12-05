@@ -40,8 +40,8 @@ module.exports = function(email) {
 //                        console.log('request');
 //                        console.log(agent);
 //                        console.log(req.authInfo);
-//                        console.log('message');
-//                        console.log(message);
+                        console.log('message');
+                        console.log(message);
 //                        console.log('verified');
 //                        console.log(verified);
     

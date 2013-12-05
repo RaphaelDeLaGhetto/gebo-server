@@ -4,7 +4,7 @@ var utils = require('../lib/utils');
 
 module.exports = function (email) {
 
-    // Turn the email into a mongo-friend database name
+    // Turn the email into a mongo-friendly database name
     var dbName = utils.ensureDbName(email);
 
     /** 
@@ -97,7 +97,7 @@ module.exports = function (email) {
         hisPermissions: [permissionSchema],
 
         // Agent communication
-        uri: { type: String, required: false, unique: false },
+        gebo: { type: String, required: false, unique: false },
         request: { type: String, required: false, unique: false, default: '/request' },
         propose: { type: String, required: false, unique: false, default: '/propose' },
         inform: { type: String, required: false, unique: false, default: '/inform' },

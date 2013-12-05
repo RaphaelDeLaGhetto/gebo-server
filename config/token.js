@@ -41,7 +41,7 @@ module.exports = function(email) {
      * grants the token 
      */
     var _friend = {};// {
-//            uri: null,
+//            gebo: null,
 //            clientId: null,
 //            redirectUri: null,
 //            authorization: null,
@@ -178,7 +178,7 @@ module.exports = function(email) {
 //        var deferred = q.defer();
 //
 //        var options = {
-//                host: _friend.uri,
+//                host: _friend.gebo,
 //                path: _friend.verification + '?access_token=' + token,
 //                method: 'GET'
 //              };
@@ -222,7 +222,7 @@ module.exports = function(email) {
               var claim = {
                       iss: nconf.get('email'),
                       scope: scope,
-                      aud: friend.uri + friend.authorize,
+                      aud: friend.gebo + friend.authorize,
                       exp: new Date()/1000 + 3600*1000,
                       iat: new Date()/1000, 
                       prn: agentEmail,
@@ -237,19 +237,19 @@ module.exports = function(email) {
       
               // https.request is pretty picky. Collect the
               // parameters it wants...
-              var uri = friend.uri;
-              var splitUri = uri.split('https://'); 
-              uri = splitUri.pop();
-              splitUri = uri.split(':'); 
+              var gebo = friend.gebo;
+              var splitUri = gebo.split('https://'); 
+              gebo = splitUri.pop();
+              splitUri = gebo.split(':'); 
               var port = '443';
               if (splitUri.length > 1) {
                 port = splitUri.pop();
-                uri = splitUri.pop();
+                gebo = splitUri.pop();
               }
 
               // Make the request
               var options = {
-                      host: uri,
+                      host: gebo,
                       port: port,
                       path: friend.authorize,
                       method: 'POST',
