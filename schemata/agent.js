@@ -186,7 +186,24 @@ module.exports = function (email) {
     catch (error) {}
 
     /**
+     * Key schema
+     */
+    var keySchema = new Schema({
+        public: { type: String, required: true, unique: false },
+        private: { type: String, required: true, unique: false },
+        agent: { type: String, required: true, unique: true },
+      });
+    
+    // Export keySchema
+    try {
+        var keyModel = connection.model('Key', keySchema);
+        exports.keyModel = keyModel;
+    }
+    catch (error) {}
+
+    /**
      * API
      */
     return exports;
   };
+
