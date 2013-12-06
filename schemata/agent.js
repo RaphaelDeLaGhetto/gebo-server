@@ -73,7 +73,7 @@ module.exports = function (email) {
      * Friend schema
      */
     var friendSchema = new Schema({
-        name: { type: String, required: true, unique: false },
+        name: { type: String, required: true, unique: false, default: 'Nameless agent' },
         email: { type: String, required: true, unique: true },
 
         // Current access tokens
