@@ -5,7 +5,7 @@ var q = require('q'),
     base64url = require('base64url'),
     crypto = require('crypto'),
     agentSchema = require('../schemata/agent'),
-    geboSchema = require('../schemata/gebo'),
+//    geboSchema = require('../schemata/gebo'),
     utils = require('../lib/utils'),
     nconf = require('nconf'),
     fs = require('fs');
@@ -22,13 +22,6 @@ module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
-    var gebo = new geboSchema(dbName);
-
-    /**
-     * Data returned upon token verification
-     */
-    var _data = {};
-    exports.data = function() { return _data; };
 
     /**
      *  This response type must be passed to the authorization endpoint using
@@ -36,25 +29,6 @@ module.exports = function(email) {
      */
     var RESPONSE_TYPE = 'token';
     
-    /**
-     * Communication endpoints for the agent who
-     * grants the token 
-     */
-    var _friend = {};// {
-//            gebo: null,
-//            clientId: null,
-//            redirectUri: null,
-//            authorization: null,
-//            request: null,
-//            verification: null,
-//        };
-    
-    /**
-     * set the configuration options
-     */
-//    exports.setParams = function(config) {
-//        _friend = config;
-//      };
     
     /**
      * Load a friend's profile from the database
@@ -63,138 +37,54 @@ module.exports = function(email) {
      *
      * @return Object
      */
-    var _loadFriend = function(email) {
-        var agent = new agentSchema(dbName);
+    var _getFriend = function(email) {
         var deferred = q.defer();
 
-        gebo.friendModel.findOne({ email: email }, function(err, friend) {
+        var agentDb = new agentSchema(dbName);
+        agentDb.friendModel.findOne({ email: email }, function(err, friend) {
+            agentDb.connection.db.close();
             if (err) {
               deferred.reject(err);
             }
+            else if (!friend) {
+              deferred.reject('You are not friends with ' + email);
+            }
             else {
-              _friend = friend;
-              deferred.resolve(_friend);
+              deferred.resolve(friend);
             }
           });
 
         return deferred.promise;
       };
-    exports.loadFriend = _loadFriend;
+    exports.getFriend = _getFriend;
 
     /**
-     * Get the OAuth2-relevant handshake info
+     * Load a private key from the database
      *
      * @param string
      *
      * @return Object
      */
-    exports.getParams = function() {
+    var _getKey = function(email) {
+        var deferred = q.defer();
 
-        if (Object.keys(_friend).length === 0) {
-          return null;
-        }
+        var agentDb = new agentSchema(dbName);
+        agentDb.keyModel.findOne({ email: email }, function(err, key) {
+            agentDb.connection.db.close();
+            if (err) {
+              deferred.reject(err);
+            }
+            else if (!key) {
+              deferred.reject('You have not created a key for ' + email);
+            }
+            else {
+              deferred.resolve(key.private);
+            }
+          });
 
-        var redirect = nconf.get('domain') + ':' + nconf.get('port') + nconf.get('oauth2callback');
-        
-        return {
-            response_type: RESPONSE_TYPE,
-            client_id: utils.getMongoDbName(dbName),
-            redirect_uri: redirect,
-        };
+        return deferred.promise;
       };
-    
-    /**
-     * Get the access token associated with the
-     * given email
-     *
-     * @param string
-     *
-     * @return Promise
-     */
-//    exports.get = function(email) {
-//        var agent = new agentSchema(dbName);
-//        var deferred = q.defer();
-//
-//        agent.friendModel.findOne({ email: email }, function(err, friend) {
-//                if (err) {
-//                  deferred.reject(err);
-//                }
-//                else if (!friend) {
-//                  deferred.resolve(null);
-//                }
-//                else {
-//                  deferred.resolve(friend.myToken);
-//                }
-//            });
-//  
-//        return deferred.promise;
-//      };
-////    exports.get = _get;
-            
-    /**
-     * Store the access token associated with the
-     * endpoint configured above
-     *
-     * @param string
-     * @param string
-     *
-     * @return promise
-     */
-//    exports.set = function(email, accessToken) {
-//        var agent = new agentSchema(dbName);
-//        var deferred = q.defer();
-//
-//        agent.friendModel.findOne({ email: email }, function(err, friend) {
-//                if (err) {
-//                  deferred.reject(err);
-//                }
-//                else if (!friend) {
-//                  deferred.reject('No such friend: ' + email);
-//                }
-//                else {
-//                  friend.myToken = accessToken;
-//                  friend.save(function(err, savedFriend) {
-//                    if (err) {
-//                      deferred.reject(err);
-//                    }
-//                    else {
-//                      deferred.resolve();
-//                    }
-//                  });
-//                }
-//            });
-//        return deferred.promise;
-//      };
-
-    /**
-     * Verify that the token stored by this agent
-     * is still valid
-     *
-     * @param string
-     *
-     * @return promise
-     */
-//    exports.verify = function(token) {
-//        var deferred = q.defer();
-//
-//        var options = {
-//                host: _friend.gebo,
-//                path: _friend.verification + '?access_token=' + token,
-//                method: 'GET'
-//              };
-//        var req = https.get(options, function(res) {
-//                        res.setEncoding('utf8');
-//                        res.on('data', function(data) {
-//                            _data = JSON.parse(data);
-//                            deferred.resolve(_data);
-//                          });
-//                      })
-//                    .on('error', function(err){
-//                        deferred.reject(err);
-//                      });
-//
-//        return deferred.promise;
-//      };
+    exports.getKey = _getKey;
 
     /**
      * Request a token from a gebo with a JWT
@@ -208,7 +98,7 @@ module.exports = function(email) {
     exports.get = function(friendEmail, scope, agentEmail) {
         var deferred = q.defer();
 
-        _loadFriend(friendEmail).
+        _getFriend(friendEmail).
             then(function(friend) {
 
             if (!friend) {
