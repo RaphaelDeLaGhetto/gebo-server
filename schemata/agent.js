@@ -73,7 +73,7 @@ module.exports = function (email) {
      * Friend schema
      */
     var friendSchema = new Schema({
-        name: { type: String, required: true, unique: false, default: 'Nameless agent' },
+        name: { type: String, required: true, unique: false, default: 'Innominate' },
         email: { type: String, required: true, unique: true },
 
         // Current access tokens
@@ -191,7 +191,7 @@ module.exports = function (email) {
     var keySchema = new Schema({
         public: { type: String, required: true, unique: false },
         private: { type: String, required: true, unique: false },
-        agent: { type: String, required: true, unique: true },
+        email: { type: String, required: true, unique: true },
       });
     
     // Export keySchema
