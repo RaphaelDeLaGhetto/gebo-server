@@ -63,7 +63,7 @@ module.exports = function(email) {
      *
      * @param string
      *
-     * @return Object
+     * @return string
      */
     var _getKey = function(email) {
         var deferred = q.defer();
@@ -85,6 +85,34 @@ module.exports = function(email) {
         return deferred.promise;
       };
     exports.getKey = _getKey;
+
+    /**
+     * Load a public certificate from the database
+     *
+     * @param string
+     *
+     * @return string
+     */
+    var _getCertificate = function(email) {
+        var deferred = q.defer();
+
+        var agentDb = new agentSchema(dbName);
+        agentDb.keyModel.findOne({ email: email }, function(err, key) {
+            agentDb.connection.db.close();
+            if (err) {
+              deferred.reject(err);
+            }
+            else if (!key) {
+              deferred.reject('You have not created a certificate for ' + email);
+            }
+            else {
+              deferred.resolve(key.public);
+            }
+          });
+
+        return deferred.promise;
+      };
+    exports.getCertificate = _getCertificate;
 
     /**
      * Request a token from a gebo with a JWT

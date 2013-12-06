@@ -236,6 +236,102 @@ exports.getKey = {
               });
     },
 }
+
+/**
+ * getCertificate
+ */
+exports.getCertificate = {
+    setUp: function (callback) {
+        try {
+            /**
+             * Setup a registrant
+             */
+            var registrant = new geboDb.registrantModel({
+                    name: 'Dan',
+                    email: 'dan@example.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+            
+            /**
+             * Make a key 
+             */
+            var agentDb = new agentSchema('dan@example.com');
+            var key = new agentDb.keyModel({
+                    public: 'some public certificate',
+                    private: 'some private key',
+                    email: 'john@painter.com',
+                });
+
+            registrant.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                key.save(function(err) {
+                    agentDb.connection.db.close();
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
+                  });
+              });
+        }
+        catch(err) {
+            console.log(err);
+            callback();
+        }
+    },
+
+    tearDown: function (callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.on('open', function(err) {
+                agentDb.connection.db.dropDatabase(function(err) {
+                    agentDb.connection.db.close();
+                    if (err) {
+                      console.log(err)
+                    }
+                    callback();
+                  });
+              });
+          });
+    }, 
+
+    'Don\'t barf if the requested key doesn\'t exist': function(test) {
+        test.expect(1);
+
+        var token = new Token('dan@example.com');
+        token.getCertificate('nosuchguy@friend.com').
+            then(function(friend) {
+                test.ok(false, 'Shouldn\'t get here');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You have not created a certificate for nosuchguy@friend.com');
+                test.done();
+              });
+    },
+
+    'Return an existing certificate': function(test) {
+        test.expect(1);
+
+        var token = new Token('dan@example.com');
+        token.getCertificate('john@painter.com').
+            then(function(privateKey) {
+                test.equal(privateKey, 'some public certificate');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);      
+                test.done();
+              });
+    },
+}
+
 /**
  * get
  */
