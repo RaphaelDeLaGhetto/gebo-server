@@ -533,7 +533,7 @@ module.exports = function(email) {
     var _friend = function(verified, message) {
         var deferred = q.defer();
 
-        if (verified.write) {
+        if (verified.admin || verified.write) {
           var db = new agentSchema(verified.dbName);
           db.friendModel.findOneAndUpdate(
                           { email: message.content.email }, message.content, { upsert: true },
@@ -642,7 +642,7 @@ module.exports = function(email) {
                 var data = {
                         public: pair.certificate,
                         private: pair.privateKey,
-                        agent: message.content.agent
+                        email: message.content.email
                     };
 
                 var db = new agentSchema(verified.dbName);
@@ -653,7 +653,13 @@ module.exports = function(email) {
                           deferred.reject(err);
                         }
                         else {
-                          deferred.resolve(key.public);
+                          _friend(verified, message).
+                                then(function(friend) {
+                                    deferred.resolve(key.public);
+                                  }).
+                                catch(function(err) {
+                                    deferred.reject(err);
+                                  });
                         }
                       });
               }).
