@@ -146,7 +146,7 @@ module.exports = function(email) {
                       prn: agentEmail,
                   };
       
-              var jwt = _makeJwt(HEADER, claim);
+              var jwt = _makeJwt(HEADER, claim, friendEmail, agentEmail);
       
               var params = JSON.stringify({
                       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -223,26 +223,35 @@ module.exports = function(email) {
      * makeJwt
      *
      * @param Object
-     * @param Object
+     * @param string
      *
      * @return string
      */
-    var _makeJwt = function(header, claim) {
-        var jwt = base64url(JSON.stringify(header)) + '.';
-        jwt += base64url(JSON.stringify(claim));
+    var _makeJwt = function(claim, email) {
+        var deferred = q.defer();
 
-        // Sign the request
-        var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
-        var key = pem.toString('ascii');
+        _getKey(email).
+            then(function(key) {
+                var jwt = base64url(JSON.stringify(HEADER)) + '.';
+                jwt += base64url(JSON.stringify(claim));
+        
+                // Sign the request
+        //        var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
+        //        var key = pem.toString('ascii');
+        
+                var sign = crypto.createSign('sha256WithRSAEncryption');
+        
+                sign.update(jwt);
+                var signature = sign.sign(key);
+    
+                jwt += '.' + base64url(signature);
+                deferred.resolve(jwt);
+              }).
+            catch(function(err) {
+                deferred.reject(err);
+              });
 
-        var sign = crypto.createSign('sha256WithRSAEncryption');
-
-        sign.update(jwt);
-        var signature = sign.sign(key);
-
-        jwt += '.' + base64url(signature);
-
-        return jwt;
+        return deferred.promise;
       };
     exports.makeJwt = _makeJwt;
 

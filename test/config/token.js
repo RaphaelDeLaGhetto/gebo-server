@@ -335,7 +335,7 @@ exports.getCertificate = {
 /**
  * get
  */
-//exports.get = {
+exports.get = {
 //    setUp: function (callback) {
 //        try {
 //            /**
@@ -456,40 +456,91 @@ exports.getCertificate = {
 //                    test.done();
 //                  });
 //    },
-//};
-//
-//
-///**
-// * makeJwt
-// */
-//exports.makeJwt = {
-//
-//    'Return an encoded claim set': function(test) {
-//        test.expect(1);
-//        var header = { alg: 'RS256', typ: 'JWT' };
-//        var claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
-//                      scope: 'https://www.googleapis.com/auth/devstorage.readonly',
-//                      aud: 'https://accounts.google.com/o/oauth2/token',
-//                      exp: 1328554385,
-//                      iat: 1328550785 };
-//
-//        var headerEncoded = base64url(JSON.stringify(header)),
-//            claimEncoded = base64url(JSON.stringify(claim));
-//
-//        // Sign the request
-//        var pem = fs.readFileSync(__dirname + '/../../cert/key.pem');
-//        var key = pem.toString('ascii');
-//
-//        var sign = crypto.createSign('sha256WithRSAEncryption');
-//        sign.update(headerEncoded + '.' + claimEncoded);
-//        var signature = sign.sign(key);
-//        var signatureEncoded = base64url(signature);
-//
-//        var jwt = token.makeJwt(header, claim);
-//
-//        test.equal(jwt, headerEncoded + '.' + claimEncoded + '.' + signatureEncoded);
-//
-//        test.done();
-//    },
-//
-//};
+};
+
+
+/**
+ * makeJwt
+ */
+var _pair;
+exports.makeJwt = {
+    setUp: function (callback) {
+        try {
+
+            /**
+             * Make a key 
+             */
+            utils.getPrivateKeyAndCertificate().
+                then(function(pair) {
+                    _pair = pair;
+                    var agentDb = new agentSchema('dan@example.com');
+                    var key = new agentDb.keyModel({
+                            public: _pair.certificate,
+                            private: _pair.privateKey,
+                            email: 'john@painter.com',
+                        });
+        
+                    key.save(function(err) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err);
+                        }
+                        callback();
+                      });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    callback();
+                  });
+        }
+        catch(err) {
+            console.log(err);
+            callback();
+        }
+
+    },
+
+    tearDown: function (callback) {
+        var agentDb = new agentSchema('dan@example.com');
+        agentDb.connection.on('open', function(err) {
+            agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
+    },
+
+    'Return an encoded claim set': function(test) {
+        test.expect(1);
+        var header = { alg: 'RS256', typ: 'JWT' };
+        var claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
+                      scope: 'https://www.googleapis.com/auth/devstorage.readonly',
+                      aud: 'https://accounts.google.com/o/oauth2/token',
+                      exp: 1328554385,
+                      iat: 1328550785 };
+
+        var headerEncoded = base64url(JSON.stringify(header)),
+            claimEncoded = base64url(JSON.stringify(claim));
+
+        var sign = crypto.createSign('sha256WithRSAEncryption');
+        sign.update(headerEncoded + '.' + claimEncoded);
+        var signature = sign.sign(_pair.privateKey);
+        var signatureEncoded = base64url(signature);
+
+        var token = new Token('dan@example.com');
+        token.makeJwt(claim, 'john@painter.com').
+            then(function(jwt) {
+                test.equal(jwt, headerEncoded + '.' + claimEncoded + '.' + signatureEncoded);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+};
