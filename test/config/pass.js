@@ -354,19 +354,20 @@ exports.clientJwtBearerStrategy = {
              * Setup a registrant
              */
             var registrant = new geboDb.registrantModel({
-                    name: 'Home gebo',
-                    email: 'this@gebo.com',
+                    name: 'Dan',
+                    email: 'dan@example.com',
                     password: 'password123',
-                    admin: true,
+                    admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
           
             /**
-             * Setup a registrant
+             * Setup a friend
              */
-            var friend = new geboDb.friendModel({
-                    name: 'Foreign Agent',
-                    email: 'foreign@agent.com',
+            var agentDb = new agentSchema('dan@example.com');
+            var friend = new agentDb.friendModel({
+                    name: 'Yanfen',
+                    email: 'yanfen@agent.com',
                     gebo: 'https://agent.com',
                     _id: new mongo.ObjectID('123456789ABC')
                 });
@@ -401,16 +402,15 @@ exports.clientJwtBearerStrategy = {
     },
 
 
-    'Return registrant object for foreign agent with a valid email': function(test) {
-        test.expect(3);
-        pass.clientJwtBearerStrategy('foreign@agent.com', function(err, friend) {
+    'Return registrant object for foreign agent with a valid citizen email': function(test) {
+        test.expect(2);
+        pass.clientJwtBearerStrategy('dan@example.com', function(err, citizen) {
             if (err) {
               test.ok(false, err);
             }
             else {
-              test.equal(friend.name, 'Foreign Agent');
-              test.equal(friend.email, 'foreign@agent.com');
-              test.equal(friend.gebo, 'https://agent.com');
+              test.equal(citizen.name, 'Dan');
+              test.equal(citizen.email, 'dan@example.com');
             }
             test.done();
           });

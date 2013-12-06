@@ -187,18 +187,21 @@ module.exports = function(email) {
     /**
      * Client JWT Bearer Strategy
      *
-     * This should let this server authenticate against
-     * other servers, but time will tell.
+     * A foreign agent will provide the email of
+     * the agent from whom he is trying to obtain
+     * an access token. The claimSetIss is the
+     * email of the citizen agent, not the 
+     * foreign agent seeking access.
      */
     var _clientJwtBearerStrategy = function(claimSetIss, done) {
-        db.friendModel.findOne({ email: claimSetIss }, function(err, friend) {
+        db.registrantModel.findOne({ email: claimSetIss }, function(err, citizen) {
             if (err) {
               return done(err);
             }
-            if (!friend) {
+            if (!citizen) {
               return done(null, false);
             }
-            return done(null, friend);
+            return done(null, citizen);
           });
       };
     exports.clientJwtBearerStrategy = _clientJwtBearerStrategy; 
