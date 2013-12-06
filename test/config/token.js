@@ -481,6 +481,7 @@ exports.get = {
                     test.done();
                   });
     },
+
 };
 
 /**
@@ -565,5 +566,9 @@ exports.makeJwt = {
                 test.ok(false, err);
                 test.done();
               });
+    },
+
+    'Return a verifiable claim set': function(test) {
+        test.done();
     },
 };

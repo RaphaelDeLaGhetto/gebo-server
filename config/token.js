@@ -133,14 +133,14 @@ module.exports = function(email) {
             else {
               // Make the claim 
               var claim = {
-                      iss: email,
+                      iss: friendEmail,
                       scope: '*',
                       aud: friend.gebo + friend.authorize,
                       exp: new Date()/1000 + 3600*1000,
                       iat: new Date()/1000, 
+                      prn: email,
                   };
       
-              //var jwt = _makeJwt(HEADER, claim);
               _makeJwt(claim, friendEmail).
                 then(function(jwt) {
                       var params = JSON.stringify({
@@ -228,6 +228,8 @@ module.exports = function(email) {
 
         _getKey(email).
             then(function(key) {
+                console.log('private key');
+                console.log(key);
                 var jwt = base64url(JSON.stringify(HEADER)) + '.';
                 jwt += base64url(JSON.stringify(claim));
         
@@ -237,6 +239,16 @@ module.exports = function(email) {
                 var signature = sign.sign(key);
     
                 jwt += '.' + base64url(signature);
+                
+
+                //******
+                var verifier = crypto.createVerify('sha256WithRSAEncryption');
+                var data = jwt.split('.');
+                var signature = data.pop();
+                data = data.join('.');
+                verifier.update(data);
+                
+                //*****
                 deferred.resolve(jwt);
               }).
             catch(function(err) {
