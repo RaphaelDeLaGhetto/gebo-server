@@ -21,7 +21,8 @@ var oauth2orize = require('oauth2orize'),
 
 nconf.argv().env().file({ file: 'local.json' });
 var geboDb = require('../schemata/gebo')(nconf.get('email')),
-    agentSchema = require('../schemata/agent');
+    agentSchema = require('../schemata/agent'),
+    Token = require('../config/token');
 
 // create OAuth 2.0 server
 var server = oauth2orize.createServer();
@@ -168,78 +169,109 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
 /**
  * For server login
  */
-var _jwtBearerExchange = function(friend, data, signature, done) {
+var _jwtBearerExchange = function(citizen, data, signature, done) {
     console.log('------ JWT, yeah yeah');
+    console.log(signature);
 
-    var crypto = require('crypto'),
-        pub = fs.readFileSync(__dirname + '/../cert/cert.pem'),
-        verifier = crypto.createVerify('sha256WithRSAEncryption');
+    // The signature hasn't been verified yet, but
+    // I need the user in the prn field to get the
+    // public certificate
+    var decodedData = data.split('.').pop();
+    decodedData = JSON.parse(base64url.decode(decodedData));
 
-    verifier.update(data);
+//    var token = new Token(citizen.email);
+//    token.getCertificate(decodedData.prn).
+//        then(function(key) {
+    var agentDb = new agentSchema(citizen.email);
+    agentDb.friendModel.findOne({ email: decodedData.prn }, function(err, friend) {
+        if (err) {
+          console.log(err);
+          done(err);
+        }
+        console.log('friend.certificate');
+        console.log(friend.certificate);
+    
+        var crypto = require('crypto'),
+            verifier = crypto.createVerify('sha256WithRSAEncryption');
+    
+        verifier.update(data);
+        
+        if (verifier.verify(friend.certificate, signature, 'base64')) {
+          console.log('verified');
+          done(null, 'some junk');
+        }
+        else {
+          console.log('error');
+          return done(new Error('Could not verify data with signature'));
+        }
+      });
 
-    if (verifier.verify(pub, signature, 'base64')) {
-
-      var tokenStr = utils.uid(256);
-
-      console.log('friend');
-      console.log(friend);
-      
-      // Seperate the header from the claim and parse
-      data = data.split('.').pop();
-      data = JSON.parse(base64url.decode(data));
-
-      /**
-       * A vouchee does not need to be specified. If none,
-       * then the requesting agent is vouching for himself
-       */
-      if (!data.prn) {
-        data.prn = data.iss;
-      }
-
-      console.log('decoded data');
-      console.log(data);
-
-      var scope = _processScope(data.scope);
-      if (!scope) {
-        console.log('No scope');
-        return done(new Error('You did not correctly specify the scope of your request'));
-      }
-
-      _verifyFriendship(scope, data.prn).
-            then(function(friend) {
-                if (!friend) {
-                  return done(new Error(data.prn + ' breached friendship'));
-                }
-
-                geboDb.registrantModel.findOne({ email: scope.owner }, function(err, owner) {
-                        if (err) {
-                          return done(err);
-                        }
-
-                        var token = new geboDb.tokenModel({
-                            registrantId: owner._id,
-                            friendId: friend._id,
-                            collectionName: scope.resource,
-                            string: tokenStr,
-                          });
-                    
-                        token.save(function (err, token) {
-                            if (err) {
-                              return done(err);
-                            }
-                            return done(null, token.string);
-                          });
-                      });
-              }).
-            catch(function(err) {
-                return done(err);
-              });
-
-
-    }
-    else {
-      return done(new Error('Could not verify data with signature'));
-    }
+////    var crypto = require('crypto'),
+////        pub = fs.readFileSync(__dirname + '/../cert/cert.pem'),
+//
+//    verifier.update(data);
+//
+//    if (verifier.verify(pub, signature, 'base64')) {
+//
+//      var tokenStr = utils.uid(256);
+//
+//      console.log('citizen');
+//      console.log(citizen);
+//      
+//      // Seperate the header from the claim and parse
+//      data = data.split('.').pop();
+//      data = JSON.parse(base64url.decode(data));
+//
+//      /**
+//       * A vouchee does not need to be specified. If none,
+//       * then the requesting agent is vouching for himself
+//       */
+//      if (!data.prn) {
+//        data.prn = data.iss;
+//      }
+//
+//      console.log('decoded data');
+//      console.log(data);
+//
+//      var scope = _processScope(data.scope);
+//      if (!scope) {
+//        console.log('No scope');
+//        return done(new Error('You did not correctly specify the scope of your request'));
+//      }
+//
+//      _verifyFriendship(scope, data.prn).
+//            then(function(citizen) {
+//                if (!citizen) {
+//                  return done(new Error(data.prn + ' breached friendship'));
+//                }
+//
+//                geboDb.registrantModel.findOne({ email: scope.owner }, function(err, owner) {
+//                        if (err) {
+//                          return done(err);
+//                        }
+//
+//                        var token = new geboDb.tokenModel({
+//                            registrantId: owner._id,
+//                            friendId: friend._id,
+//                            collectionName: scope.resource,
+//                            string: tokenStr,
+//                          });
+//                    
+//                        token.save(function (err, token) {
+//                            if (err) {
+//                              return done(err);
+//                            }
+//                            return done(null, token.string);
+//                          });
+//                      });
+//              }).
+//            catch(function(err) {
+//                return done(err);
+//              });
+//    }
+//    else {
+//      return done(new Error('Could not verify data with signature'));
+//    }
   }
 exports.jwtBearerExchange = _jwtBearerExchange;
 server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(_jwtBearerExchange));

@@ -1,6 +1,7 @@
 var config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
+    utils = require('../../lib/utils'),
     geboSchema = require('../../schemata/gebo');
     agentSchema = require('../../schemata/agent');
 
@@ -17,7 +18,7 @@ var geboDb = new geboSchema(nconf.get('testDb'));
     //agentDb = new agentSchema('yanfen@hg.com');
 
 var oauth2 = require('../../routes/oauth2'),
-    token = require('../../config/token')(nconf.get('testDb'));
+    Token = require('../../config/token');
 
 
 var HAI_PROFILE = { type: 'token',
@@ -35,75 +36,126 @@ exports.jwtBearerExchange = {
     setUp: function(callback) {
             
             var registrant = new geboDb.registrantModel({
-                    name: nconf.get('name'),
-                    email: nconf.get('testDb'),
+                    name: 'Dan',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
-                    _id: new mongo.ObjectID('123456789ABC')
                 });
 
-            var friend = new geboDb.friendModel({
-                    name: 'Some foreign gebo',
-                    email: 'foreign@agent.com',
-                    password: 'https://agent.com',
-                    _id: new mongo.ObjectID('123456789ABC')
-                });
-            friend.hisPermissions.push({ email: 'some@resource.com' });
+            utils.getPrivateKeyAndCertificate().
+                then(function(pair) {
 
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                friend.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                     callback();
+                    var agentDb = new agentSchema('dan@example.com');
+                    var friend = new agentDb.friendModel({
+                            name: 'Yanfen',
+                            email: 'yanfen@agent.com',
+                            gebo: 'https://agent.com',
+                            certificate: pair.certificate,
+                        });
+                    friend.hisPermissions.push({ email: 'some@resource.com' });
+
+                    registrant.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        friend.save(function(err) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                            }
+
+                            agentDb = new agentSchema('yanfen@agent.com');
+                            var key = new agentDb.keyModel({
+                                    public: pair.certificate,
+                                    private: pair.privateKey,
+                                    email: 'dan@example.com',
+                                });
+
+                            key.save(function(err) {
+                                agentDb.connection.db.close();
+                                if (err) {
+                                  console.log(err);
+                                }
+                                callback();
+                              });
+                          });
+                      });
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    callback();
                   });
-              });
     },
 
-    tearDown: function(callback) {
+    tearDown: function (callback) {
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            callback();
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.on('open', function(err) {
+                agentDb.connection.db.dropDatabase(function(err) {
+                    agentDb.connection.db.close();
+                    if (err) {
+                      console.log(err)
+                    }
+ 
+                    agentDb = new agentSchema('yanfen@agent.com');
+                    agentDb.connection.on('open', function(err) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err)
+                        }
+                        callback();
+                      });
+                  });
+              });
           });
     },
 
     'Return a token': function(test) {
         test.expect(1);
 
-        var header = { alg: 'RS256', typ: 'JWT' },
-            claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
-                      scope: 'r some@resource.com ' + nconf.get('testDb'),
+        var claim = { iss: 'dan@example.com',
+                      //scope: 'r some@resource.com ' + nconf.get('testDb'),
+                      scope: '*',
                       aud: 'https://accounts.google.com/o/oauth2/token',
                       exp: 1328554385,
                       iat: 1328550785,
-                      prn: 'foreign@agent.com' };
-        var jwt = token.makeJwt(header, claim);
-        var jwtSplit = jwt.split('.');
-        var signature = jwtSplit.pop();
-        var data = jwtSplit.join('.');
-//        data += '.' + signature;
+                      prn: 'yanfen@agent.com' };
 
-        oauth2.jwtBearerExchange({ name: 'Foreign Agent',
-                                   email: 'foreign@agent.com',
-                                   admin: false,
-                                }, data, signature,
-                            function(err, token) {
-                                if (err) {
-                                  console.log('err');
-                                  console.log(err);
-                                  test.ok(false, err);
-                                }
-                                else {
-                                  // This should be tightened up
-                                  test.equal(token.length, 256);
-                                }
-                                test.done();
-                            });
+        var token = new Token('yanfen@agent.com');
+        token.makeJwt(claim, 'dan@example.com').
+            then(function(jwt) {
+                var jwtSplit = jwt.split('.');
+                var signature = jwtSplit.pop();
+                var data = jwtSplit.join('.');
+        //        data += '.' + signature;
+        
+                console.log('jwt');
+                console.log(jwt);
+                oauth2.jwtBearerExchange({ name: 'Dan',
+                                           email: 'dan@example.com',
+                                           admin: false,
+                                        }, data, signature,
+                                    function(err, token) {
+                                        if (err) {
+                                          console.log('err');
+                                          console.log(err);
+                                          test.ok(false, err);
+                                        }
+                                        else {
+                                          // This should be tightened up
+                                          test.equal(token.length, 256);
+                                        }
+                                        test.done();
+                                    });
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     },
 
 };
