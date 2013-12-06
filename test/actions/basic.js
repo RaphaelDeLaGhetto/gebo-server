@@ -2721,4 +2721,95 @@ exports.certificate = {
 
 };
 
+/**
+ * jwt 
+ */
+exports.jwt = {
+
+    setUp: function(callback) {
+        try {
+            var registrant = new gebo.registrantModel({
+                    name: 'Dan',
+                    email: 'dan@example.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+          
+            registrant.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
+     	}
+        catch(e) {
+            console.dir(e);
+            callback();
+    	}
+    }, 
+
+    tearDown: function(callback) {
+        gebo.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com'); 
+            agentDb.connection.on('open', function(err) {
+                agentDb.connection.db.dropDatabase(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    agentDb.connection.db.close();
+                    callback();
+                  });
+              });
+          });
+    }, 
+
+//    'Return a JSON web token': function(test) {
+//        test.expect(5);
+//        action.json({ read: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+//                           { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
+//            then(function(certificate) {
+//                test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
+//                test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
+//
+//                // Make sure the certificate was saved to the database
+//                var agentDb = new agentSchema('dan@example.com');
+//                agentDb.keyModel.findOne({ email: 'yanfen@example.com' }, function(err, key) {
+//                    agentDb.connection.db.close();
+//                    if (err) {
+//                      console.log(err);
+//                      test.ok(false, err);
+//                    }
+//                    test.equal(key.private.search('-----BEGIN RSA PRIVATE KEY-----'), 0);
+//                    test.equal(key.email, 'yanfen@example.com');
+//                    test.equal(key.public, certificate);
+//                    test.done();
+//                  });
+//              }).
+//            catch(function(err) {
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Don\'t allow access without read or admin permission': function(test) {
+//        test.expect(1);
+//        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+//                           { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
+//            then(function(certificate) {
+//                test.ok(false, 'Shouldn\'t get here');
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.equal(err, 'You are not permitted to request or propose that action');
+//                test.done();
+//              });
+//    },
+
+};
+
 
