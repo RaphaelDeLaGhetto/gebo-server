@@ -336,128 +336,152 @@ exports.getCertificate = {
  * get
  */
 exports.get = {
-//    setUp: function (callback) {
-//        try {
-//            /**
-//             * Set up the gebo registrant
-//             */
-//            var geboRegistrant = new geboDb.registrantModel({
-//                    name: 'gebo-server',
-//                    email: nconf.get('testDb'),
-//                    password: 'password123',
-//                    admin: true,
-//                    _id: new mongo.ObjectID('0123456789AB')
-//                });
-//
-//            /**
-//             * Make a friend for the gebo registrant
-//             */
-//            var friend = new geboDb.friendModel({
-//                    name: 'John',
-//                    email: 'john@painter.com',
-//                    gebo: BASE_ADDRESS,
-//                });
-//            
-//            var otherFriend = new geboDb.friendModel({
-//                    name: 'Richard',
-//                    email: 'richard@construction.com',
-//                    gebo: BASE_ADDRESS + ':3443',
-//                });
-//
-//
-//            /**
-//             * Setup a regular (non-administrative) registrant
-//             */
-//            var registrant = new geboDb.registrantModel({
-//                    name: 'dan',
-//                    email: 'dan@hg.com',
-//                    password: 'password123',
-//                    admin: false,
-//                    _id: new mongo.ObjectID('123456789ABC')
-//                });
-//            
-//            geboRegistrant.save(function(err) {
-//                if (err) {
-//                  console.log(err);
-//                }
-//                registrant.save(function(err) {
-//                    if (err) {
-//                      console.log(err);
-//                    }
-//                    otherFriend.save(function(err) {
-//                        if (err) {
-//                          console.log(err);
-//                        }
-//                        friend.save(function(err) {
-//                            if (err) {
-//                              console.log(err);
-//                            }
-//                            callback();
-//                          });
-//                      });
-//                  });
-//              });
-//        }
-//        catch(err) {
-//            console.log(err);
-//            callback();
-//        }
-//    },
-//
-//    tearDown: function (callback) {
-//        geboDb.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//            callback();
-//          });
-//    },
-//
-//    'Get a token from the server agent': function(test) {
-//        test.expect(3);
-//        var scope = nock('https://' + BASE_ADDRESS).
-//                post(AUTHORIZATION_ENDPOINT).
-//                reply(200, JWT_RESPONSE);  
-//
-//        token.get('john@painter.com', 'read write some@resource.com', 'dan@hg.com').
-//                then(function(t) {
-//                    scope.done();
-//                    test.equal(t.access_token, JWT_RESPONSE.access_token);
-//                    test.equal(t.token_type, JWT_RESPONSE.token_type);
-//                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
-//                    test.done();
-//                  }).
-//                catch(function(err) {
-//                    console.log('err');
-//                    console.log(err);
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//    },
-//
-//    'Get a token from the server agent with port specified': function(test) {
-//        test.expect(3);
-//        var scope = nock('https://' + BASE_ADDRESS + ':3443').
-//                post(AUTHORIZATION_ENDPOINT).
-//                reply(200, JWT_RESPONSE);  
-//
-//        token.get('richard@construction.com', 'read write some@resource.com', 'dan@hg.com').
-//                then(function(t) {
-//                    scope.done();
-//                    test.equal(t.access_token, JWT_RESPONSE.access_token);
-//                    test.equal(t.token_type, JWT_RESPONSE.token_type);
-//                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
-//                    test.done();
-//                  }).
-//                catch(function(err) {
-//                    console.log('err');
-//                    console.log(err);
-//                    test.ok(false, err);      
-//                    test.done();
-//                  });
-//    },
-};
 
+    setUp: function (callback) {
+        try {
+
+            /**
+             * Set up the gebo registrant
+             */
+            var registrant = new geboDb.registrantModel({
+                    name: 'Dan',
+                    email: 'dan@example.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+
+            /**
+             * Make a friend for the gebo registrant
+             */
+            var agentDb = new agentSchema('dan@example.com');
+            var friend = new agentDb.friendModel({
+                    name: 'John',
+                    email: 'john@painter.com',
+                    gebo: BASE_ADDRESS,
+                });
+            
+            var otherFriend = new agentDb.friendModel({
+                    name: 'Richard',
+                    email: 'richard@construction.com',
+                    gebo: BASE_ADDRESS + ':3443',
+                });
+
+            /**
+             * Make a key 
+             */
+            utils.getPrivateKeyAndCertificate().
+                then(function(pair) {
+                    var friendKey = new agentDb.keyModel({
+                            public: pair.certificate,
+                            private: pair.privateKey,
+                            email: 'john@painter.com',
+                        });
+
+                    var otherFriendKey = new agentDb.keyModel({
+                            public: pair.certificate,
+                            private: pair.privateKey,
+                            email: 'richard@construction.com',
+                        });
+
+          
+                    registrant.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        friendKey.save(function(err) {
+                            if (err) {
+                              console.log(err);
+                            }
+                            otherFriend.save(function(err) {
+                                if (err) {
+                                  console.log(err);
+                                }
+                                friend.save(function(err) {
+                                    if (err) {
+                                      console.log(err);
+                                    }
+                                    otherFriendKey.save(function(err) {
+                                        agentDb.connection.db.close();
+                                        if (err) {
+                                          console.log(err);
+                                        }
+                                        callback();
+                                      });
+                                  });
+                              });
+                          });
+                      });
+                  });
+        }
+        catch(err) {
+            console.log(err);
+            callback();
+        }
+    },
+
+    tearDown: function (callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.on('open', function(err) {
+                agentDb.connection.db.dropDatabase(function(err) {
+                    agentDb.connection.db.close();
+                    if (err) {
+                      console.log(err)
+                    }
+                    callback();
+                  });
+              });
+          });
+    },
+
+    'Get a token from the server agent': function(test) {
+        test.expect(3);
+        var scope = nock('https://' + BASE_ADDRESS).
+                post(AUTHORIZATION_ENDPOINT).
+                reply(200, JWT_RESPONSE);  
+
+        var token = new Token('dan@example.com');
+        token.get('john@painter.com').
+                then(function(t) {
+                    scope.done();
+                    test.equal(t.access_token, JWT_RESPONSE.access_token);
+                    test.equal(t.token_type, JWT_RESPONSE.token_type);
+                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
+                    test.done();
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);
+                    test.done();
+                  });
+    },
+
+    'Get a token from the server agent with port specified': function(test) {
+        test.expect(3);
+        var scope = nock('https://' + BASE_ADDRESS + ':3443').
+                post(AUTHORIZATION_ENDPOINT).
+                reply(200, JWT_RESPONSE);  
+
+        var token = new Token('dan@example.com');
+        token.get('richard@construction.com').
+                then(function(t) {
+                    scope.done();
+                    test.equal(t.access_token, JWT_RESPONSE.access_token);
+                    test.equal(t.token_type, JWT_RESPONSE.token_type);
+                    test.equal(t.expires_in, JWT_RESPONSE.expires_in);
+                    test.done();
+                  }).
+                catch(function(err) {
+                    console.log(err);
+                    test.ok(false, err);      
+                    test.done();
+                  });
+    },
+};
 
 /**
  * makeJwt
@@ -542,5 +566,4 @@ exports.makeJwt = {
                 test.done();
               });
     },
-
 };

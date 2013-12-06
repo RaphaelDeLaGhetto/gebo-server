@@ -118,98 +118,94 @@ module.exports = function(email) {
      * Request a token from a gebo with a JWT
      *
      * @param string
-     * @param string
-     * @param string
      *
      * @return promise
      */
-    exports.get = function(friendEmail, scope, agentEmail) {
+    exports.get = function(friendEmail) {
         var deferred = q.defer();
 
         _getFriend(friendEmail).
             then(function(friend) {
 
             if (!friend) {
-              deferred.reject(friendEmail + ' is not your friend');
+              deferred.reject(friendEmail + ' is not your friendo');
             }
             else {
-              console.log('friend');
-              console.log(friend);
-  
               // Make the claim 
               var claim = {
-                      iss: nconf.get('email'),
-                      scope: scope,
+                      iss: email,
+                      scope: '*',
                       aud: friend.gebo + friend.authorize,
                       exp: new Date()/1000 + 3600*1000,
                       iat: new Date()/1000, 
-                      prn: agentEmail,
                   };
       
-              var jwt = _makeJwt(HEADER, claim, friendEmail, agentEmail);
-      
-              var params = JSON.stringify({
-                      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                      assertion: jwt,
-                  });
-      
-              // https.request is pretty picky. Collect the
-              // parameters it wants...
-              var gebo = friend.gebo;
-              var splitUri = gebo.split('https://'); 
-              gebo = splitUri.pop();
-              splitUri = gebo.split(':'); 
-              var port = '443';
-              if (splitUri.length > 1) {
-                port = splitUri.pop();
-                gebo = splitUri.pop();
-              }
-
-              // Make the request
-              var options = {
-                      host: gebo,
-                      port: port,
-                      path: friend.authorize,
-                      method: 'POST',
-                      rejectUnauthorized: false,
-                      requestCert: true,
-                      agent: false,
-                      headers: { 'Content-Type': 'application/json',
-      	        	         'Content-Length': Buffer.byteLength(params) }
-                    };
-      
-              console.log('options');
-              console.log(options);
-
-              var req = https.request(options, function(res) {
-                      var token;
-                      res.setEncoding('utf8');
-                      res.on('data', function(t) {
-                              token = t;
-                              console.log('token.token');
-                              console.log(token);
+              //var jwt = _makeJwt(HEADER, claim);
+              _makeJwt(claim, friendEmail).
+                then(function(jwt) {
+                      var params = JSON.stringify({
+                              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                              assertion: jwt,
                           });
-                      res.on('end', function() {
-                              console.log('end');
-                              token = JSON.parse(token);
-                              if (token.error) {
-                                console.log('token.error_description');
-                                console.log(token.error_description);
-                                deferred.reject(token.error_description);
-                              }
-                              else {
-                                deferred.resolve(token);
-                              }
+
+                      // https.request is pretty picky. Collect the
+                      // parameters it wants...
+                      var gebo = friend.gebo;
+                      var splitUri = gebo.split('https://'); 
+                      gebo = splitUri.pop();
+                      splitUri = gebo.split(':'); 
+                      var port = '443';
+                      if (splitUri.length > 1) {
+                        port = splitUri.pop();
+                        gebo = splitUri.pop();
+                      }
+
+                      // Make the request
+                      var options = {
+                              host: gebo,
+                              port: port,
+                              path: friend.authorize,
+                              method: 'POST',
+                              rejectUnauthorized: false,
+                              requestCert: true,
+                              agent: false,
+                              headers: { 'Content-Type': 'application/json',
+              	        	         'Content-Length': Buffer.byteLength(params) }
+                            };
+              
+                      var req = https.request(options, function(res) {
+                              var token;
+                              res.setEncoding('utf8');
+                              res.on('data', function(t) {
+                                      token = t;
+                                      console.log('token.token');
+                                      console.log(token);
+                                  });
+                              res.on('end', function() {
+                                      console.log('end');
+                                      token = JSON.parse(token);
+                                      if (token.error) {
+                                        console.log('token.error_description');
+                                        console.log(token.error_description);
+                                        deferred.reject(token.error_description);
+                                      }
+                                      else {
+                                        deferred.resolve(token);
+                                      }
+                                  });
+                          }).
+                        on('error', function(err){
+                                console.log('err');
+              			console.log(err);
+                                deferred.reject(err);
                           });
-                  }).
-                on('error', function(err){
-                        console.log('err');
-      			console.log(err);
-                        deferred.reject(err);
+              
+                      req.write(params);
+                      req.end();
+                   }).
+                catch(function(err) {
+                    deferred.reject(err);
                   });
-      
-              req.write(params);
-              req.end();
             }
           }).
         catch(function(err) {
@@ -234,10 +230,6 @@ module.exports = function(email) {
             then(function(key) {
                 var jwt = base64url(JSON.stringify(HEADER)) + '.';
                 jwt += base64url(JSON.stringify(claim));
-        
-                // Sign the request
-        //        var pem = fs.readFileSync(__dirname + '/../cert/key.pem');
-        //        var key = pem.toString('ascii');
         
                 var sign = crypto.createSign('sha256WithRSAEncryption');
         
