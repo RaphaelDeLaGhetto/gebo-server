@@ -240,15 +240,6 @@ module.exports = function(email) {
     
                 jwt += '.' + base64url(signature);
                 
-
-                //******
-                var verifier = crypto.createVerify('sha256WithRSAEncryption');
-                var data = jwt.split('.');
-                var signature = data.pop();
-                data = data.join('.');
-                verifier.update(data);
-                
-                //*****
                 deferred.resolve(jwt);
               }).
             catch(function(err) {

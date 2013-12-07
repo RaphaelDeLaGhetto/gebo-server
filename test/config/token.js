@@ -504,13 +504,27 @@ exports.makeJwt = {
                             private: _pair.privateKey,
                             email: 'john@painter.com',
                         });
-        
+
                     key.save(function(err) {
                         agentDb.connection.db.close();
                         if (err) {
                           console.log(err);
                         }
-                        callback();
+
+                        agentDb = new agentSchema('john@painter.com');
+                        var friend = new agentDb.friendModel({
+                                        name: 'Dan',
+                                        email: 'dan@example.com',
+                                        certificate: _pair.certificate,
+                                    });
+
+                        friend.save(function(err) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err);
+                            }
+                            callback();
+                          });
                       });
                   }).
                 catch(function(err) {
@@ -533,7 +547,17 @@ exports.makeJwt = {
                 if (err) {
                   console.log(err)
                 }
-                callback();
+
+                agentDb = new agentSchema('john@painter.com');
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err)
+                        }
+                        callback();
+                      });
+                  });
               });
           });
     },
@@ -569,6 +593,34 @@ exports.makeJwt = {
     },
 
     'Return a verifiable claim set': function(test) {
-        test.done();
+        test.expect(1);
+        var header = { alg: 'RS256', typ: 'JWT' };
+        var claim = { iss: '761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com',
+                      scope: 'https://www.googleapis.com/auth/devstorage.readonly',
+                      aud: 'https://accounts.google.com/o/oauth2/token',
+                      exp: 1328554385,
+                      iat: 1328550785 };
+
+        var token = new Token('dan@example.com');
+        token.makeJwt(claim, 'john@painter.com').
+            then(function(jwt) {
+
+                var agentDb = new agentSchema('john@painter.com');
+                agentDb.friendModel.findOne({ email: 'dan@example.com' }, function(err, friend) {
+                        var verifier = crypto.createVerify('sha256WithRSAEncryption');
+                        var data = jwt.split('.');
+                        var signature = data.pop();
+                        data = data.join('.');
+                        verifier.update(data);
+    
+                        test.ok(verifier.verify(friend.certificate, signature, 'base64'));
+                        test.done();
+                  });
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
     },
 };
