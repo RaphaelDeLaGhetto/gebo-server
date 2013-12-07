@@ -172,6 +172,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
 var _jwtBearerExchange = function(citizen, data, signature, done) {
     console.log('------ JWT, yeah yeah');
     console.log(signature);
+    console.log(data);
 
     // The signature hasn't been verified yet, but
     // I need the user in the prn field to get the
@@ -184,6 +185,8 @@ var _jwtBearerExchange = function(citizen, data, signature, done) {
 //        then(function(key) {
     var agentDb = new agentSchema(citizen.email);
     agentDb.friendModel.findOne({ email: decodedData.prn }, function(err, friend) {
+        console.log('friend');
+        console.log(friend);
         if (err) {
           console.log(err);
           done(err);

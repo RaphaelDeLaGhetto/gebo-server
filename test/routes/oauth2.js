@@ -127,11 +127,11 @@ exports.jwtBearerExchange = {
         var token = new Token('yanfen@agent.com');
         token.makeJwt(claim, 'dan@example.com').
             then(function(jwt) {
-                var jwtSplit = jwt.split('.');
-                var signature = jwtSplit.pop();
-                var data = jwtSplit.join('.');
-        //        data += '.' + signature;
         
+                var data = jwt.split('.');
+                var signature = data.pop();
+                data = data.join('.');
+
                 console.log('jwt');
                 console.log(jwt);
                 oauth2.jwtBearerExchange({ name: 'Dan',
