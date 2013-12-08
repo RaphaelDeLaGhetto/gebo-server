@@ -15,6 +15,7 @@ var oauth2orize = require('oauth2orize'),
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
+    crypto = require('crypto'),
     base64url = require('base64url'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
     mongoose = require('mongoose');
@@ -171,8 +172,6 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, d
  */
 var _jwtBearerExchange = function(citizen, data, signature, done) {
     console.log('------ JWT, yeah yeah');
-    console.log(signature);
-    console.log(data);
 
     // The signature hasn't been verified yet, but
     // I need the user in the prn field to get the
@@ -180,13 +179,17 @@ var _jwtBearerExchange = function(citizen, data, signature, done) {
     var decodedData = data.split('.').pop();
     decodedData = JSON.parse(base64url.decode(decodedData));
 
-//    var token = new Token(citizen.email);
-//    token.getCertificate(decodedData.prn).
-//        then(function(key) {
+    /**
+     * A vouchee does not need to be specified. If none,
+     * then the requesting agent is vouching for himself
+     */
+    if (!decodedData.prn) {
+      decodedData.prn = decodedData.iss;
+    }
+
     var agentDb = new agentSchema(citizen.email);
     agentDb.friendModel.findOne({ email: decodedData.prn }, function(err, friend) {
-        console.log('friend');
-        console.log(friend);
+        agentDb.connection.db.close();
         if (err) {
           console.log(err);
           done(err);
@@ -194,14 +197,26 @@ var _jwtBearerExchange = function(citizen, data, signature, done) {
         console.log('friend.certificate');
         console.log(friend.certificate);
     
-        var crypto = require('crypto'),
-            verifier = crypto.createVerify('sha256WithRSAEncryption');
+        var verifier = crypto.createVerify('sha256WithRSAEncryption');
     
         verifier.update(data);
         
         if (verifier.verify(friend.certificate, signature, 'base64')) {
           console.log('verified');
-          done(null, 'some junk');
+
+//          var token = new geboDb.tokenModel({
+//              registrantId: owner._id,
+//              friendId: friend._id,
+//              collectionName: scope.resource,
+//              string: tokenStr,
+//            });
+          
+//          token.save(function (err, token) {
+//              if (err) {
+//                return done(err);
+//              }
+              return done(null, '1234');//token.string);
+//            });
         }
         else {
           console.log('error');
