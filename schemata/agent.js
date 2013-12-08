@@ -189,9 +189,9 @@ module.exports = function (email) {
      * Key schema
      */
     var keySchema = new Schema({
+        email: { type: String, required: true, unique: true },
         public: { type: String, required: true, unique: false },
         private: { type: String, required: true, unique: false },
-        email: { type: String, required: true, unique: true },
       });
     
     // Export keySchema
