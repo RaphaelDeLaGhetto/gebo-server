@@ -228,8 +228,6 @@ module.exports = function(email) {
 
         _getKey(email).
             then(function(key) {
-                console.log('private key');
-                console.log(key);
                 var jwt = base64url(JSON.stringify(HEADER)) + '.';
                 jwt += base64url(JSON.stringify(claim));
         
