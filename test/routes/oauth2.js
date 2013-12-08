@@ -102,11 +102,13 @@ exports.jwtBearerExchange = {
  
                     agentDb = new agentSchema('yanfen@agent.com');
                     agentDb.connection.on('open', function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-                        callback();
+                        agentDb.connection.db.dropDatabase(function(err) {
+                            agentDb.connection.db.close();
+                            if (err) {
+                              console.log(err)
+                            }
+                            callback();
+                          });
                       });
                   });
               });
@@ -117,7 +119,6 @@ exports.jwtBearerExchange = {
         test.expect(1);
 
         var claim = { iss: 'dan@example.com',
-                      //scope: 'r some@resource.com ' + nconf.get('testDb'),
                       scope: '*',
                       aud: 'https://accounts.google.com/o/oauth2/token',
                       exp: 1328554385,
@@ -132,15 +133,12 @@ exports.jwtBearerExchange = {
                 var signature = data.pop();
                 data = data.join('.');
 
-                console.log('jwt');
-                console.log(jwt);
                 oauth2.jwtBearerExchange({ name: 'Dan',
                                            email: 'dan@example.com',
                                            admin: false,
                                         }, data, signature,
                                     function(err, token) {
                                         if (err) {
-                                          console.log('err');
                                           console.log(err);
                                           test.ok(false, err);
                                         }
