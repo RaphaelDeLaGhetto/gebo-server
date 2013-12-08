@@ -1073,155 +1073,155 @@ exports.rm = {
 /**
  * Delete a collection from the profile 
  */
-exports.rmdir = {
-     setUp: function (callback) {
-    	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_example_dot_com',
-			    server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
-                if (err) {
-                  throw err;
-                }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
-                        {
-                            _id: new mongo.ObjectID('0123456789AB'),
-                            name: 'dan',
-                            occupation: 'Batman'
-                        },
-                        {
-                            _id: new mongo.ObjectID('123456789ABC'),
-                            name: 'yanfen',
-                            occupation: 'Being cool'
-                        }
-                    ],
-                    function() {
-                        callback();
-                    });
-            });
-    	} catch(e) {
-            console.dir(e);
-    	}
-    },
-    
-    tearDown: function (callback) {
-        // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
-            callback();
-        });
-    },
-
-   'Do not delete from a non-existent database': function (test) {
-        test.expect(1);
-
-        action.rmdir({ dbName: 'no_one_at_not_here_dot_com',
-  		       collectionName: cname,
-		       admin: true,
-                       execute: true }).
-            then(function() {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
-                    test.done();
-                }).
-            catch(function(err) {
-                    test.ok(err, 'This should throw an error');        
-                    test.done();
-                });
-   }, 
-
-   'Do not delete a non-existent collection': function (test) {
-        test.expect(1);
-
-        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
-  		       collectionName: 'NoSuchCollection',
-		       admin: true,
-                       execute: true }).
-            then(function() {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
-                    test.done();
-                }).
-            catch(function(err) {
-                    test.ok(err, 'This should throw an error');        
-                    test.done();
-                });
-   }, 
-
-   'Delete collection from an existing database as admin': function (test) {
-        test.expect(3);
-
-        collection.count(function(err, count) {
-            test.equal(count, 2);
-        });
-
-        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
-  		       collectionName: cname,
-		       admin: true,
-                       execute: true }).
-            then(function() {
-                    test.ok(true, 'The doc has been deleted, I think');
-                    collection.count(function(err, count) {
-                        test.equal(count, 0);
-                        test.done();
-                    });
-                }).
-            catch(function(err) {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
-                    test.done();
-                 });
-   }, 
-
-   'Delete collection from an existing database with execute permission': function (test) {
-        test.expect(3);
-
-        collection.count(function(err, count) {
-            test.equal(count, 2);
-        });
-
-        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
-  		       collectionName: cname,
-		       admin: false,
-                       execute: true }).
-            then(function() {
-                    test.ok(true, 'The doc has been deleted, I think');
-                    collection.count(function(err, count) {
-                        test.equal(count, 0);
-                        test.done();
-                    });
-                }).
-            catch(function(err) {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
-                    test.done();
-                 });
-   },
-
-   'Do not delete collection without permission': function (test) {
-        test.expect(2);
-
-        collection.count(function(err, count) {
-            test.equal(count, 2);
-        });
-
-        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
-  		       collectionName: cname,
-		       admin: false,
-                       execute: false }).
-            then(function() {
-                    test.ok(false, 'I should not be able to rmdir');
-                    test.done();
-                }).
-            catch(function(err) {
-                    // Shouldn't get here
-                    test.equal(err, 'You are not permitted to request or propose that action');
-                    test.done();
-                 });
-   },
-};
+//exports.rmdir = {
+//     setUp: function (callback) {
+//    	try{
+//            var server = new mongo.Server(config.mongo.host,
+//                                          config.mongo.port,
+//                                          config.mongo.serverOptions);
+//            this.db = new mongo.Db('yanfen_at_example_dot_com',
+//			    server, config.mongo.clientOptions);
+//            this.db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//        	this.collection = new mongo.Collection(client, cname);
+//                this.collection.insert([
+//                        {
+//                            _id: new mongo.ObjectID('0123456789AB'),
+//                            name: 'dan',
+//                            occupation: 'Batman'
+//                        },
+//                        {
+//                            _id: new mongo.ObjectID('123456789ABC'),
+//                            name: 'yanfen',
+//                            occupation: 'Being cool'
+//                        }
+//                    ],
+//                    function() {
+//                        callback();
+//                    });
+//            });
+//    	} catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//    
+//    tearDown: function (callback) {
+//        // Lose the database for next time
+//        this.db.dropDatabase(function(err) { 
+//            callback();
+//        });
+//    },
+//
+//   'Do not delete from a non-existent database': function (test) {
+//        test.expect(1);
+//
+//        action.rmdir({ dbName: 'no_one_at_not_here_dot_com',
+//  		       collectionName: cname,
+//		       admin: true,
+//                       execute: true }).
+//            then(function() {
+//                    // Shouldn't get here
+//                    test.ok(false, 'Shouldn\'t get here!!!');
+//                    test.done();
+//                }).
+//            catch(function(err) {
+//                    test.ok(err, 'This should throw an error');        
+//                    test.done();
+//                });
+//   }, 
+//
+//   'Do not delete a non-existent collection': function (test) {
+//        test.expect(1);
+//
+//        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
+//  		       collectionName: 'NoSuchCollection',
+//		       admin: true,
+//                       execute: true }).
+//            then(function() {
+//                    // Shouldn't get here
+//                    test.ok(false, 'Shouldn\'t get here!!!');
+//                    test.done();
+//                }).
+//            catch(function(err) {
+//                    test.ok(err, 'This should throw an error');        
+//                    test.done();
+//                });
+//   }, 
+//
+//   'Delete collection from an existing database as admin': function (test) {
+//        test.expect(3);
+//
+//        collection.count(function(err, count) {
+//            test.equal(count, 2);
+//        });
+//
+//        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
+//  		       collectionName: cname,
+//		       admin: true,
+//                       execute: true }).
+//            then(function() {
+//                    test.ok(true, 'The doc has been deleted, I think');
+//                    collection.count(function(err, count) {
+//                        test.equal(count, 0);
+//                        test.done();
+//                    });
+//                }).
+//            catch(function(err) {
+//                    // Shouldn't get here
+//                    test.ok(false, 'Shouldn\'t get here!!!');
+//                    test.done();
+//                 });
+//   }, 
+//
+//   'Delete collection from an existing database with execute permission': function (test) {
+//        test.expect(3);
+//
+//        collection.count(function(err, count) {
+//            test.equal(count, 2);
+//        });
+//
+//        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
+//  		       collectionName: cname,
+//		       admin: false,
+//                       execute: true }).
+//            then(function() {
+//                    test.ok(true, 'The doc has been deleted, I think');
+//                    collection.count(function(err, count) {
+//                        test.equal(count, 0);
+//                        test.done();
+//                    });
+//                }).
+//            catch(function(err) {
+//                    // Shouldn't get here
+//                    test.ok(false, 'Shouldn\'t get here!!!');
+//                    test.done();
+//                 });
+//   },
+//
+//   'Do not delete collection without permission': function (test) {
+//        test.expect(2);
+//
+//        collection.count(function(err, count) {
+//            test.equal(count, 2);
+//        });
+//
+//        action.rmdir({ dbName: 'yanfen_at_example_dot_com',
+//  		       collectionName: cname,
+//		       admin: false,
+//                       execute: false }).
+//            then(function() {
+//                    test.ok(false, 'I should not be able to rmdir');
+//                    test.done();
+//                }).
+//            catch(function(err) {
+//                    // Shouldn't get here
+//                    test.equal(err, 'You are not permitted to request or propose that action');
+//                    test.done();
+//                 });
+//   },
+//};
 
 /**
  * ls
@@ -1312,7 +1312,6 @@ exports.ls = {
                     test.done();
                  });
     },
-
 
     'Return an empty list from an empty collection if permitted': function(test) {
         test.expect(1);
@@ -2703,6 +2702,106 @@ exports.certificate = {
                 test.ok(false, err);
                 test.done();
               });
+    },
+    
+    'Overwrite an existing agent and key': function(test) {
+        var agentDb = new agentSchema('dan@example.com');
+        agentDb.friendModel.find(function(err, friends) {
+            if (err) {
+              console.log(err);
+            }
+
+            test.equal(friends.length, 0);
+            agentDb.keyModel.find(function(err, keys) {
+                agentDb.connection.db.close();
+                if (err) {
+                  console.log(err);
+                }
+
+                test.equal(keys.length, 0);
+                action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+                                   { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
+                    then(function(certificate) {
+                        test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
+                        test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
+
+                        var agentDb = new agentSchema('dan@example.com');
+                        agentDb.friendModel.find(function(err, friends) {
+                            if (err) {
+                              console.log(err);
+                            }
+
+                            test.equal(friends.length, 1);
+                            agentDb.keyModel.find(function(err, keys) {
+                                agentDb.connection.db.close();
+                                if (err) {
+                                  console.log(err);
+                                }
+
+                                test.equal(keys.length, 1);
+                                action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+                                                   { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
+                                    then(function(certificate) {
+                                        test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
+                                        test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
+                                      }).
+                                    catch(function(err) {
+                                        console.log(err);
+                                        test.ok(false, err);
+
+                                        var agentDb = new agentSchema('dan@example.com');
+                                        agentDb.friendModel.find(function(err, friends) {
+                                            if (err) {
+                                              console.log(err);
+                                            }
+                    
+                                            test.equal(friends.length, 1);
+                                            agentDb.keyModel.find(function(err, keys) {
+                                                agentDb.connection.db.close();
+                                                if (err) {
+                                                  console.log(err);
+                                                }
+                    
+                                                test.equal(keys.length, 1);
+                                                test.done();
+                                            });
+                                          });
+                                      });
+                              });
+                          });
+                      }).
+                    catch(function(err) {
+                        console.log(err);
+                        test.ok(false, err);
+                        test.done();
+                      });
+              });
+          });
+//        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+//                           { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
+//            then(function(certificate) {
+//                test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
+//                test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
+//
+//                // Make sure one certificate was saved to the database
+//                var agentDb = new agentSchema('dan@example.com');
+//                agentDb.friendModel.find({ email: 'yanfen@example.com' }, function(err, friend) {
+//                    agentDb.connection.db.close();
+//                    if (err) {
+//                      console.log(err);
+//                      test.ok(false, err);
+//                    }
+//                    test.equal(friend.name, 'Innominate');
+//                    test.equal(friend.email, 'yanfen@example.com');
+//                    test.equal(friend.gebo, 'https://foreigngebo.com');
+//                    test.done();
+//                  });
+//              }).
+//            catch(function(err) {
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
     },
 
     'Don\'t allow access without write or admin permission': function(test) {
