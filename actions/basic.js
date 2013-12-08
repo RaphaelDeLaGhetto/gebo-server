@@ -646,7 +646,7 @@ module.exports = function(email) {
                     };
 
                 var db = new agentSchema(verified.dbName);
-                db.keyModel.findOneAndUpdate({ email: message.content.agent }, data, { upsert: true },
+                db.keyModel.findOneAndUpdate({ email: message.content.email }, data, { upsert: true },
                     function(err, key) {
                         db.connection.db.close();
                         if (err) {
