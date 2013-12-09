@@ -8,7 +8,6 @@ var express = require('express'),
     passport = require('passport'),
     api_routes = require('./routes/api'),
     basic_routes = require('./routes/basic'),
-    oauth2_routes = require('./routes/oauth2'),
     message_routes = require('./routes/message'),
     util = require('util'),
     fs = require('fs');
@@ -28,6 +27,7 @@ nconf.argv().env().file({ file: 'local.json' });
 
 // Requirements
 var perform_route = require('./routes/perform')(nconf.get('email')),
+    oauth2_routes = require('./routes/oauth2')(nconf.get('email')),
     user_routes = require('./routes/user')(nconf.get('email'));
 
 // Basic routes

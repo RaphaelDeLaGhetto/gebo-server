@@ -17,7 +17,7 @@ nconf.argv().env().file({ file: 'local.json' });
 var geboDb = new geboSchema(nconf.get('testDb'));
     //agentDb = new agentSchema('yanfen@hg.com');
 
-var oauth2 = require('../../routes/oauth2'),
+var oauth2 = require('../../routes/oauth2')(nconf.get('testDb')),
     Token = require('../../config/token');
 
 
