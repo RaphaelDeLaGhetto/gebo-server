@@ -27,7 +27,7 @@ require('./settings')(app, express, passport, logger);
 nconf.argv().env().file({ file: 'local.json' });
 
 // Requirements
-var performative_routes = require('./routes/performative')(nconf.get('email')),
+var perform_route = require('./routes/perform')(nconf.get('email')),
     user_routes = require('./routes/user')(nconf.get('email'));
 
 // Basic routes
@@ -52,7 +52,7 @@ app.post('/authorize', oauth2_routes.testtoken);
 
 
 // Performative route
-app.post('/request', performative_routes.request);
+app.post('/request', perform_route.request);
 
 // API routes
 app.get('/verify', api_routes.verify);
