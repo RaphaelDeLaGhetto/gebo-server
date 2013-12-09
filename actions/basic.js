@@ -117,15 +117,15 @@ module.exports = function(email) {
 
         if (verified.admin || verified.write) { 
           _getCollection(verified).
-              then(function(collection) { 
+              then(function(collection) {
                     utils.saveFilesToAgentDirectory(message.files, verified).
-                      then(function() {
-                            if (message.data) {
-                              if (message.data._id) {
-                                message.data._id = new mongo.ObjectID(message.data._id + '');
+                        then(function() {
+                            if (message.content && message.content.data) {
+                              if (message.content.data._id) {
+                                message.content.data._id = new mongo.ObjectID(message.content.data._id + '');
                               }
       
-                              collection.save(message.data, { safe: true },
+                              collection.save(message.content.data, { safe: true },
                                       function(err, ack) {
                                           if (err) {
                                             deferred.reject(err);
@@ -140,6 +140,10 @@ module.exports = function(email) {
                               deferred.resolve();
                               _db.close();
                             }
+                          }).
+                        catch(function(err) {
+                            deferred.reject(err);
+                            _db.close();
                           });
                     }).
                   catch(function(err) {
@@ -167,7 +171,7 @@ module.exports = function(email) {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
-                      collection.find({ '_id': new mongo.ObjectID(message.id) }).toArray(
+                      collection.find({ '_id': new mongo.ObjectID(message.content.id) }).toArray(
                               function(err, docs) {
                                       if (err) {
                                         deferred.reject(err);

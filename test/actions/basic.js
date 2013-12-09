@@ -226,7 +226,7 @@ exports.saveToDb = {
         action.save({ dbName: 'no_one_at_not_here_dot_com',
   		      collectionName: cname,
 		      admin: true },
-                    { data: 'junk' }).
+                    { content: { data: 'junk' } }).
                 then(function(docs) {
                         console.log(docs);       
                         test.ok(false, 'This database shouldn\'t exist. Delete manually');
@@ -244,7 +244,7 @@ exports.saveToDb = {
         action.save({ dbName: 'yanfen_at_example_dot_com',
 		      collectionName: cname,
 		      admin: true },
-                    { data: { junk: 'I like to move it move it' } }).
+                    { content: { data: { junk: 'I like to move it move it' } } }).
                 then(function(docs) {
                         test.ok(docs);
 			// If it's already saved, it doesn't return
@@ -267,7 +267,7 @@ exports.saveToDb = {
         action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
             then(function(docs) {
                     test.ok(docs, 'Docs successfully copied');
                     test.equal(docs.name, 'dan');
@@ -277,7 +277,7 @@ exports.saveToDb = {
                             { dbName: 'yanfen_at_example_dot_com',
           		      collectionName: cname,
 		              admin: true },
-                            { data: docs });
+                            { content: { data: docs } });
                 }).
             then(function(ack) {
                     test.ok(ack, 'Doc successfully saved');
@@ -286,7 +286,7 @@ exports.saveToDb = {
                             { dbName: 'yanfen_at_example_dot_com',
           		      collectionName: cname,
 		              admin: true },
-                            { id: '0123456789AB' });
+                            { content: { id: '0123456789AB' } });
                 }).
             then(function(docs) {
                     test.ok(docs, 'Retrieved the saved doc again');
@@ -296,7 +296,7 @@ exports.saveToDb = {
                 }).
             catch(function(err) {
                     console.log(err);
-                    test.ifError(err);        
+                    test.ifError(err);
                     test.done();
                 });
     },
@@ -308,7 +308,7 @@ exports.saveToDb = {
 		      collectionName: cname,
 		      admin: false,
                       write: true },
-                    { data: { junk: 'I like to move it move it' } }).
+                    { content: { data: { junk: 'I like to move it move it' } } }).
                 then(function(docs) {
                         test.ok(docs);
 			// If it's already saved, it doesn't return
@@ -332,7 +332,7 @@ exports.saveToDb = {
 		    admin: false,
                     read: true,
                     write: true },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
             then(function(docs) {
                     test.ok(docs, 'Docs successfully copied');
                     test.equal(docs.name, 'dan');
@@ -344,7 +344,7 @@ exports.saveToDb = {
 		              admin: false,
                               read: true,
                               write: true },
-                            { data: docs });
+                            { content: { data: docs } });
                 }).
             then(function(ack) {
                     test.ok(ack, 'Doc successfully saved');
@@ -355,7 +355,7 @@ exports.saveToDb = {
 		              admin: false,
                               read: true,
                               write: true },
-                            { id: '0123456789AB' });
+                            { content: { id: '0123456789AB' } });
                 }).
             then(function(docs) {
                     test.ok(docs, 'Retrieved the saved doc again');
@@ -365,7 +365,7 @@ exports.saveToDb = {
                 }).
             catch(function(err) {
                     console.log(err);
-                    test.ifError(err);        
+                    test.ifError(err);
                     test.done();
                 });
     },
@@ -377,7 +377,7 @@ exports.saveToDb = {
   		      collectionName: cname,
 		      admin: false,
                       write: false },
-                    { data: 'junk' }).
+                    { content: { data: 'junk' } }).
                 then(function(docs) {
                         test.ok(false, 'I shouldn\'t be able to save');
                         test.done();
@@ -673,9 +673,11 @@ exports.saveToFs = {
                             size: 21,
                         },
                       },
-                      data: {
-                        test: 'Some test data'
-                      },
+                      content: {
+                          data: {
+                            test: 'Some test data'
+                          },
+                      }
                     }).
             then(function(doc) {
                 var files = fs.readdirSync(dir);
@@ -816,7 +818,7 @@ exports.cp = {
         action.cp({ dbName: 'no_one_at_not_here_dot_com',
 		    collectionName: cname,
 		    admin: true },
-		  { id: '0123456789AB' }).
+		  { content: { id: '0123456789AB' } }).
              then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
@@ -833,7 +835,7 @@ exports.cp = {
         action.cp({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
              then(function(docs) {
                     test.ok(docs, 'Document copied');
                     test.equal(docs.name, 'dan');
@@ -853,7 +855,7 @@ exports.cp = {
 		    collectionName: cname,
 		    admin: false,
                     read: true },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
              then(function(docs) {
                     test.ok(docs, 'Document copied');
                     test.equal(docs.name, 'dan');
