@@ -40,6 +40,7 @@ exports.jwtBearerExchange = {
                     email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
                 });
 
             utils.getPrivateKeyAndCertificate().
@@ -51,6 +52,7 @@ exports.jwtBearerExchange = {
                             email: 'yanfen@agent.com',
                             gebo: 'https://agent.com',
                             certificate: pair.certificate,
+                            _id: new mongo.ObjectID('123456789ABC')
                         });
                     friend.hisPermissions.push({ email: 'some@resource.com' });
 
@@ -116,7 +118,7 @@ exports.jwtBearerExchange = {
     },
 
     'Return a token': function(test) {
-        test.expect(1);
+        test.expect(5);
 
         var claim = { iss: 'dan@example.com',
                       scope: 'r some@resource.com',
@@ -137,14 +139,96 @@ exports.jwtBearerExchange = {
                                            email: 'dan@example.com',
                                            admin: false,
                                         }, data, signature,
-                                    function(err, token) {
+                                    function(err, tokenString) {
                                         if (err) {
                                           console.log(err);
                                           test.ok(false, err);
                                         }
                                         else {
-                                          // This should be tightened up
-                                          test.equal(token.length, 256);
+                                          test.equal(tokenString.length, 256);
+
+                                          geboDb.tokenModel.findOne({ string: tokenString }, function(err, token) {
+                                                test.equal(token.registrantId, new mongo.ObjectID('0123456789AB').toString());
+                                                test.equal(token.friendId, new mongo.ObjectID('123456789ABC').toString());
+                                                test.equal(token.collectionName, 'some@resource.com');
+                                                test.equal(token.string, tokenString);
+                                                test.done();
+                                            });
+                                        }
+                                    });
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Do not return token when provided ill-formed scope': function(test) {
+        test.expect(1);
+
+        var claim = { iss: 'dan@example.com',
+                      scope: 'this could be empty or mangled...',
+                      aud: 'https://accounts.google.com/o/oauth2/token',
+                      exp: 1328554385,
+                      iat: 1328550785,
+                      prn: 'yanfen@agent.com' };
+
+        var token = new Token('yanfen@agent.com');
+        token.makeJwt(claim, 'dan@example.com').
+            then(function(jwt) {
+                var data = jwt.split('.');
+                var signature = data.pop();
+                data = data.join('.');
+
+                oauth2.jwtBearerExchange({ name: 'Dan',
+                                           email: 'dan@example.com',
+                                           admin: false,
+                                        }, data, signature,
+                                    function(err, token) {
+                                        if (err) {
+                                          test.equal(err, 'You did not correctly specify the scope of your request');
+                                        }
+                                        else {
+                                          test.ok(false, 'Shouldn\'t get here');
+                                        }
+                                        test.done();
+                                    });
+             }).
+            catch(function(err) {
+                test.ok(false, 'makeJwt failed for some reason');
+                test.done(); 
+              });
+    },
+
+    'Do not return a token when an agent\'s scope doesn\'t match his assigned permissions': function(test) {
+        test.expect(1);
+
+        var claim = { iss: 'dan@example.com',
+                      scope: 'rw some@resource.com',
+                      aud: 'https://accounts.google.com/o/oauth2/token',
+                      exp: 1328554385,
+                      iat: 1328550785,
+                      prn: 'yanfen@agent.com' };
+
+        var token = new Token('yanfen@agent.com');
+        token.makeJwt(claim, 'dan@example.com').
+            then(function(jwt) {
+        
+                var data = jwt.split('.');
+                var signature = data.pop();
+                data = data.join('.');
+
+                oauth2.jwtBearerExchange({ name: 'Dan',
+                                           email: 'dan@example.com',
+                                           admin: false,
+                                        }, data, signature,
+                                    function(err, token) {
+                                        if (err) {
+                                          test.equal(err, 'yanfen@agent.com breached friendship');
+                                        }
+                                        else {
+                                          test.ok(false, 'Shouldn\'t get here');
                                         }
                                         test.done();
                                     });
@@ -155,7 +239,6 @@ exports.jwtBearerExchange = {
                 test.done();
               });
     },
-
 };
 
 /**
