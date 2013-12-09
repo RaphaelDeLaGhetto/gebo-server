@@ -27,6 +27,7 @@ module.exports = function(email) {
 //        console.log('---message');
 //        console.log(message);
 
+        console.log('here');
         // Form a social commitment
         sc.form(agent, 'perform', message).
             then(function(socialCommitment) {
@@ -116,7 +117,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
 	var verified = {
-                collectionName: utils.getMongoCollectionName(message.resource),
+                collectionName: utils.getMongoCollectionName(message.content.resource),
                 admin: agent.admin,
                 dbName: utils.getMongoDbName(message.receiver)
             };
