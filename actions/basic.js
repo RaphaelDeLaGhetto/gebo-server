@@ -304,36 +304,36 @@ module.exports = function(email) {
                      * Get search parameters
                      */
                     var criteria = {};
-                    if (message && message.criteria) {
-                      criteria = message.criteria;
+                    if (message && message.content.criteria) {
+                      criteria = message.content.criteria;
                     }
 
                     var fields = ['name', '_id'];
-                    if (message && message.fields) {
-                      fields = message.fields;
+                    if (message && message.content.fields) {
+                      fields = message.content.fields;
                     }
 
                     var cursor = collection.find(criteria, fields);
 
                     // Were any options set?
-                    if (message && message.options) {
+                    if (message && message.content.options) {
 
-                      if(message.options.sort) {
-                        var sortField = message.options.sort;
+                      if (message.content.options.sort) {
+                        var sortField = message.content.options.sort;
                         var ascending = true;
                         if(sortField[0] === '-') {
                           ascending = false;
                           sortField = sortField.slice(1);
                         }
-                        cursor = cursor.sort(message.options.sort);
+                        cursor = cursor.sort(message.content.options.sort);
                       }
  
-                      if(message.options.skip) {
-                        cursor = cursor.skip(message.options.skip);
+                      if(message.content.options.skip) {
+                        cursor = cursor.skip(message.content.options.skip);
                       }
 
-                      if(message.options.limit) {
-                        cursor = cursor.limit(message.options.limit);
+                      if(message.content.options.limit) {
+                        cursor = cursor.limit(message.content.options.limit);
                       }
                     }
 

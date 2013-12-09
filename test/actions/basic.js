@@ -1294,7 +1294,8 @@ exports.ls = {
 
     'Return a list of documents containing the fields specified': function(test) {
         test.expect(7);
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: true }, { fields: ['occupation'] }).
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+                  { content: { fields: ['occupation'] } }).
             then(function(list) {
                 test.equal(list.length, 3);
                 test.equal(list[0].name, undefined);
@@ -1345,7 +1346,7 @@ exports.ls = {
     'Return an ls request respecting the given criteria': function(test) {
         test.expect(2);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
-                  { criteria: { name: 'yanfen' } }).
+                  { content: { criteria: { name: 'yanfen' } } }).
             then(function(list) {
                 test.equal(list.length, 1);
                 test.equal(list[0].name, 'yanfen');
@@ -1362,7 +1363,7 @@ exports.ls = {
     'Return an ls request respecting the given options': function(test) {
         test.expect(5);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
-                  { options: { skip: 1, limit: 5, sort: '-name' }, fields: ['name', 'occupation'] }).
+                  { content: { options: { skip: 1, limit: 5, sort: '-name' }, fields: ['name', 'occupation'] } }).
             then(function(list) {
                 test.equal(list.length, 2);
                 test.equal(list[0].name, 'yanfen');
