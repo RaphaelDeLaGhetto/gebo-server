@@ -194,8 +194,6 @@ var _jwtBearerExchange = function(citizen, data, signature, done) {
           console.log(err);
           done(err);
         }
-        console.log('friend.certificate');
-        console.log(friend.certificate);
     
         var verifier = crypto.createVerify('sha256WithRSAEncryption');
     
@@ -204,6 +202,46 @@ var _jwtBearerExchange = function(citizen, data, signature, done) {
         if (verifier.verify(friend.certificate, signature, 'base64')) {
           console.log('verified');
 
+          var tokenStr = utils.uid(256);
+
+          console.log('decodedData');
+          console.log(decodedData.scope);
+          var scope = _processScope(decodedData.scope);
+
+          if (!scope) {
+            console.log('No scope');
+            return done(new Error('You did not correctly specify the scope of your request'));
+          }
+
+//      _verifyFriendship(scope, decodedData.prn).
+//            then(function(citizen) {
+//                if (!citizen) {
+//                  return done(new Error(data.prn + ' breached friendship'));
+//                }
+//
+//                geboDb.registrantModel.findOne({ email: scope.owner }, function(err, owner) {
+//                        if (err) {
+//                          return done(err);
+//                        }
+//
+//                        var token = new geboDb.tokenModel({
+//                            registrantId: owner._id,
+//                            friendId: friend._id,
+//                            collectionName: scope.resource,
+//                            string: tokenStr,
+//                          });
+//                    
+//                        token.save(function (err, token) {
+//                            if (err) {
+//                              return done(err);
+//                            }
+//                            return done(null, token.string);
+//                          });
+//                      });
+//              }).
+//            catch(function(err) {
+//                return done(err);
+//              });
 //          var token = new geboDb.tokenModel({
 //              registrantId: owner._id,
 //              friendId: friend._id,
@@ -296,18 +334,19 @@ server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(_jwtBea
 
 
 /**
- * Given a foreign agent, a native agent, and a
+ * Given a foreign agent, a citizen agent, and a
  * set of permissions, verify that the two agents are 
  * friends.
  *
  * @param Object
  * @param string
+ * @param string
  *
  * @return promise
  */
-var _verifyFriendship = function(scope, foreignAgent) {
+var _verifyFriendship = function(scope, citizen, foreignAgent) {
     var deferred = q.defer();
-    var db = new agentSchema(scope.owner);
+    var db = new agentSchema(citizen);
     db.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
         db.connection.db.close();
         if (err) {
@@ -338,7 +377,7 @@ exports.verifyFriendship = _verifyFriendship;
  * break it into something a little more sensible
  *
  * @param string: the scope is a space-seperated list:
- *      '<[r][w][x]> <resource> <owner>'
+ *      '<[r][w][x]> <resource>'
  *
  * @return Object
  */
@@ -348,12 +387,11 @@ var _processScope = function(scope) {
     }
 
     var splitScope = scope.split(' ');
-    if (splitScope.length !== 3) {
+    if (splitScope.length !== 2) {
       return null
     }
 
     return {
-            owner: splitScope.pop(),
             resource: splitScope.pop(),
             read: splitScope[0].indexOf('r') > -1 ? true: false,
             write: splitScope[0].indexOf('w') > -1 ? true: false,

@@ -119,7 +119,7 @@ exports.jwtBearerExchange = {
         test.expect(1);
 
         var claim = { iss: 'dan@example.com',
-                      scope: '*',
+                      scope: 'r some@resource.com',
                       aud: 'https://accounts.google.com/o/oauth2/token',
                       exp: 1328554385,
                       iat: 1328550785,
@@ -165,30 +165,28 @@ exports.processScope = {
 
     'Return null if ill-formatted': function(test) {
         test.expect(3);
-        var scope = oauth2.processScope('some@resource.com some@owner.com');
+        var scope = oauth2.processScope('some@resource.com');
         test.equal(scope, null);
 
         scope = oauth2.processScope();
         test.equal(scope, null);
 
-        scope = oauth2.processScope('r some@resource.com');
+        scope = oauth2.processScope('r');
         test.equal(scope, null);
 
         test.done();
     },
 
     'Return object with correct resource, owner, and permissions': function(test) {
-        test.expect(10);
-        var scope = oauth2.processScope('rwx some@resource.com some@owner.com');
+        test.expect(8);
+        var scope = oauth2.processScope('rwx some@resource.com');
         test.equal(scope.resource, 'some@resource.com');
-        test.equal(scope.owner, 'some@owner.com');
         test.equal(scope.read, true);
         test.equal(scope.write, true);
         test.equal(scope.execute, true);
 
-        var scope = oauth2.processScope('x some@resource.com some@owner.com');
+        var scope = oauth2.processScope('x some@resource.com');
         test.equal(scope.resource, 'some@resource.com');
-        test.equal(scope.owner, 'some@owner.com');
         test.equal(scope.read, false);
         test.equal(scope.write, false);
         test.equal(scope.execute, true);
@@ -253,8 +251,8 @@ exports.verifyFriendship = {
 
     'Return the friend model when an agent is a friend with correct scope': function(test) {
         test.expect(1);
-        var scope = oauth2.processScope('r some@resource.com dan@hg.com');
-        oauth2.verifyFriendship(scope, 'yanfen@hg.com').
+        var scope = oauth2.processScope('r some@resource.com');
+        oauth2.verifyFriendship(scope, 'dan@hg.com', 'yanfen@hg.com').
             then(function(friend) {
                 test.equal(friend.name, 'Yanfen');
                 test.done();
@@ -267,8 +265,8 @@ exports.verifyFriendship = {
     
     'Return false when an agent is a friend with incorrect scope': function(test) {
         test.expect(1);
-        var scope = oauth2.processScope('rwx some@resource.com dan@hg.com');
-        oauth2.verifyFriendship(scope, 'yanfen@hg.com').
+        var scope = oauth2.processScope('rwx some@resource.com');
+        oauth2.verifyFriendship(scope, 'dan@hg.com', 'yanfen@hg.com').
             then(function(weAreFriends) {
                 test.equal(weAreFriends, false);
                 test.done();
@@ -281,8 +279,8 @@ exports.verifyFriendship = {
 
     'Return false when an agent is not a friend': function(test) {
         test.expect(1);
-        var scope = oauth2.processScope('rw some@resource.com dan@hg.com');
-        oauth2.verifyFriendship(scope, 'foreign@agent.com').
+        var scope = oauth2.processScope('rw some@resource.com');
+        oauth2.verifyFriendship(scope, 'dan@hg.com', 'foreign@agent.com').
             then(function(weAreFriends) {
                 test.equal(weAreFriends, false);
                 test.done();
