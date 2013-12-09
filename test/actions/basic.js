@@ -875,7 +875,7 @@ exports.cp = {
 		    collectionName: cname,
 		    admin: false,
                     read: false },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
              then(function(docs) {
                     test.ok(false, 'I should not be able to copy from the database');
                     test.done();
