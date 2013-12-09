@@ -51,8 +51,8 @@ app.post('/oauth/token', oauth2_routes.token);
 app.post('/authorize', oauth2_routes.testtoken);
 
 
-// Performative route
-app.post('/request', perform_route.request);
+// Perform route
+app.post('/perform', perform_route.perform);
 
 // API routes
 app.get('/verify', api_routes.verify);
