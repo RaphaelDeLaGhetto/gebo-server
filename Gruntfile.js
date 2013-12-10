@@ -27,62 +27,84 @@ module.exports = function (grunt) {
             options: {
                 banner: '<%= banner %>',
                 stripBanners: true
-              },
-              dist: {
-                src: ['lib/<%= pkg.name %>.js'],
-                dest: 'dist/<%= pkg.name %>.js'
-              },
             },
-            uglify: {
-                options: {
-                    banner: '<%= banner %>'
-                  },
-                  dist: {
-                    src: '<%= concat.dist.dest %>',
-                    dest: 'dist/<%= pkg.name %>.min.js'
-                  },
-                },
-                nodeunit: {
-                    files: ['test/**/*.js']
-                  },
-                  jshint: {
-                    options: {
-                        jshintrc: '.jshintrc'
-                      },
-                      gruntfile: {
-                        src: 'Gruntfile.js'
-                      },
-                      apps: {
-                        src: ['app/**/*.js']
-                      },
-                      config: {
-                        src: ['config/**/*.js']
-                      },
-                      lib: {
-                        src: ['lib/**/*.js']
-                      },
-                      routes: {
-                        src: ['routes/**/*.js']
-                      },
+            dist: {
+                //src: ['lib/<%= pkg.name %>.js'],
+                src: [
+                    'actions/**/*.js',
+                    'config/**/*.js',
+                    'conversations/**/*.js',
+                    'lib/**/*.js',
+                    'routes/**/*.js',
+                    'schemata/**/*.js',
+                ],
+                dest: 'dist/<%= pkg.name %>.js'
+            },
+        },
+        uglify: {
+            options: {
+                banner: '<%= banner %>'
+            },
+            dist: {
+                src: '<%= concat.dist.dest %>',
+                dest: 'dist/<%= pkg.name %>.min.js'
+            },
+        },
+        nodeunit: {
+            files: ['test/**/*.js']
+        },
+        jshint: {
+            options: {
+                jshintrc: '.jshintrc'
+            },
+            gruntfile: {
+                src: 'Gruntfile.js'
+            },
+            apps: {
+                src: ['app/**/*.js']
+            },
+            config: {
+                src: ['config/**/*.js']
+            },
+            lib: {
+                src: ['lib/**/*.js']
+            },
+            routes: {
+                src: ['routes/**/*.js']
+            },
 //            test: {
 //                src: ['test/**/*.js']
 //            },
-                    },
-                    watch: {
-                        gruntfile: {
-                            files: '<%= jshint.gruntfile.src %>',
-                            tasks: ['jshint:gruntfile']
-                          },
-                          lib: {
-                            files: '<%= jshint.lib.src %>',
-                            tasks: ['jshint:lib', 'nodeunit']
-                          },
-                          test: {
-                            files: '<%= jshint.test.src %>',
-                            tasks: ['jshint:test', 'nodeunit']
-                          },
-                        },
-                      });
+        },
+        watch: {
+            gruntfile: {
+                files: '<%= jshint.gruntfile.src %>',
+                tasks: ['jshint:gruntfile']
+            },
+            lib: {
+                files: '<%= jshint.lib.src %>',
+                tasks: ['jshint:lib', 'nodeunit']
+            },
+            test: {
+                files: '<%= jshint.test.src %>',
+                tasks: ['jshint:test', 'nodeunit']
+            },
+        },
+        clean: {
+            build: {
+                src: ['dist']
+            },
+        },
+        copy: {
+            build: {
+                cwd: 'src',
+                src: ['*.html'],
+                dest: 'dist',
+                expand: true
+            },
+        },
+
+    });
 
     // These plugins provide necessary tasks.
     grunt.loadNpmTasks('grunt-contrib-concat');
@@ -90,9 +112,19 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-nodeunit');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Default task.
     grunt.registerTask('default', ['jshint', 'nodeunit', 'concat', 'uglify']);
+
+    // Build
+    grunt.registerTask('build', [
+        'clean',
+        'copy',
+        'concat',
+        'uglify',
+      ]);
 
     /** 
      * Thank you to jaredhanson/passport-local
@@ -223,20 +255,20 @@ module.exports = function (grunt) {
                 done();
               });
 
-//l            utils.getPrivateKeyAndCertificate().
-//l                then(function(pair) {
-//l                    console.log('pair');
-//l                    console.log(pair);
-//l
-//l                    var agentDb = require('./schemata/agent')(myEmail);
-//l                    agentDb.friendModel({ email: friendEmail },
-//l                        function(err, friend) {
-//l                            console.log(friend);
-//l                            done();
-//l                          });
-//l                     
-//l
-//l                  });            
+//            utils.getPrivateKeyAndCertificate().
+//                then(function(pair) {
+//                    console.log('pair');
+//                    console.log(pair);
+//
+//                    var agentDb = require('./schemata/agent')(myEmail);
+//                    agentDb.friendModel({ email: friendEmail },
+//                        function(err, friend) {
+//                            console.log(friend);
+//                            done();
+//                          });
+//                     
+//
+//                  });            
           });
 
     /**
