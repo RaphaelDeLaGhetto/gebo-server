@@ -129,7 +129,22 @@ exports.add = {
 
 exports.remove = {
     'Remove a single action': function(test) {
+        test.expect(6);
+
         var actions = require('../../actions')(TEST_DB);
+        test.equal(actions.testAction1, undefined);
+        test.equal(actions.testAction2, undefined);
+
+        var mod = require('./mocks/testActions')('some@email.com');
+        actions.add(mod);
+
+        test.equal(typeof actions.testAction1, 'function');
+        test.equal(typeof actions.testAction2, 'function');
+
+        actions.remove('testAction1');
+        test.equal(actions.testAction1, undefined);
+        test.equal(typeof actions.testAction2, 'function');
+
         test.done();
     },
 };

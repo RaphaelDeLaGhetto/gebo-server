@@ -66,5 +66,14 @@ module.exports = function(email) {
         }
      }; 
 
+   /**
+    * Remove an action by name
+    *
+    * @param string
+    */
+   exports.remove = function(name) {
+        delete exports[name];
+     };
+
     return exports;
   };
