@@ -64,7 +64,9 @@
     "grunt": "~0.4.1",
     "database-cleaner": "~0.7.0",
     "nock": "~0.22.1",
-    "base64url": "0.0.4"
+    "base64url": "0.0.4",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-copy": "~0.4.1"
   },
   "keywords": []
 }
