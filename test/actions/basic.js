@@ -1477,9 +1477,9 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase({ admin: true, dbName: dbName }, { profile: this.agent }).
+        action.createDatabase({ admin: true, dbName: dbName }, { content: { profile: this.agent } }).
                 then(function() {
-                    test.ok(true, 'Looks like ' + dbName + ' was created'); //
+                    test.ok(true, 'Looks like ' + dbName + ' was created');
                     action.getCollection({ admin: true, dbName: dbName, collectionName: 'profile' }).
                             then(function(collection) {
                                 collection.findOne({ email: 'jjjj@shabadoo.com' },
@@ -1525,7 +1525,7 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase({ admin: false, execute: true, dbName: dbName }, { profile: this.agent }).
+        action.createDatabase({ admin: false, execute: true, dbName: dbName }, { content: { profile: this.agent } }).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created');
                     action.getCollection({ admin: false, execute: true, dbName: dbName, collectionName: 'profile' }).
@@ -1549,9 +1549,6 @@ exports.createDatabase = {
                                 test.ok(false, err);
                                 test.done();
                               });
- 
-
-
                   }).
                 catch(function(err) {
                     test.ok(false, err);
@@ -1573,7 +1570,7 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase({ admin: false, execute: false, dbName: dbName }, { profile: this.agent }).
+        action.createDatabase({ admin: false, execute: false, dbName: dbName }, { content: { profile: this.agent } }).
                 then(function() {
                     test.ok(false, 'Should not be able to add a new datase');
                     test.done();
@@ -1598,7 +1595,7 @@ exports.createDatabase = {
                     test.done();
                   });
 
-        action.createDatabase({ admin: true, execute: true, dbName: dbName }, { profile: this.agent }).
+        action.createDatabase({ admin: true, execute: true, dbName: dbName }, { content: { profile: this.agent } }).
                 then(function() {
                     test.ok(false, dbName + ' should not have been created');
                     test.done();
@@ -1625,7 +1622,7 @@ exports.createDatabase = {
                           }).
                         catch(function(err) {
                             test.ok(false, err);
-                            test.done();      
+                            test.done();
                           });
                   });
     },
