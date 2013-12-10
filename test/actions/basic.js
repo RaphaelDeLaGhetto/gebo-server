@@ -2353,12 +2353,14 @@ exports.grantAccess = {
         action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
-                          friend: 'john@painter.com',
-                          permission: {
-                                  email: 'new@app.com',
-                                  read: 'true',
-                                  write: 'true',
-                                  execute: 'false'},
+                          content: {
+                              friend: 'john@painter.com',
+                              permission: {
+                                      email: 'new@app.com',
+                                      read: 'true',
+                                      write: 'true',
+                                      execute: 'false'},
+                            },
                         }).
             then(function(friend) {
                 var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'new@app.com');
@@ -2382,12 +2384,14 @@ exports.grantAccess = {
         action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
-                          friend: 'john@painter.com',
-                          permission: {
-                                  email: 'some@coolapp.com',
-                                  read: 'false',
-                                  write: 'false',
-                                  execute: 'true'},
+                          content: {
+                              friend: 'john@painter.com',
+                              permission: {
+                                      email: 'some@coolapp.com',
+                                      read: 'false',
+                                      write: 'false',
+                                      execute: 'true'},
+                            }
                         }).
             then(function(friend) {
                 var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'some@coolapp.com');
@@ -2411,12 +2415,14 @@ exports.grantAccess = {
         action.grantAccess({ read: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
-                          friend: 'john@painter.com',
-                          permission: {
-                                  email: 'some@coolapp.com',
-                                  read: 'false',
-                                  write: 'false',
-                                  execute: 'true'},
+                          content: {
+                              friend: 'john@painter.com',
+                              permission: {
+                                      email: 'some@coolapp.com',
+                                      read: 'false',
+                                      write: 'false',
+                                      execute: 'true'},
+                            },
                         }).
             then(function(friend) {
                 test.ok(false, 'Shouldn\'t get here');

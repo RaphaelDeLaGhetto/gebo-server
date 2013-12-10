@@ -599,21 +599,21 @@ module.exports = function(email) {
         var deferred = q.defer();
         if (verified.admin || verified.write) {
           var db = new agentSchema(verified.dbName);
-          db.friendModel.findOne({ email: message.friend }, function(err, friend) {
+          db.friendModel.findOne({ email: message.content.friend }, function(err, friend) {
                   if (err) {
                     deferred.reject(err);
                   }
                   else {
-                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.permission.email);
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.content.permission.email);
                     if (index > -1) {
                       friend.hisPermissions.splice(index, 1);
                     }
 
                     friend.hisPermissions.push({
-                            email: message.permission.email,
-                            read: message.permission.read,
-                            write: message.permission.write,
-                            execute: message.permission.execute,
+                            email: message.content.permission.email,
+                            read: message.content.permission.read,
+                            write: message.content.permission.write,
+                            execute: message.content.permission.execute,
                         });
 
                     friend.save(function(err, savedFriend) {
