@@ -36,205 +36,205 @@ exports.onLoad = {
 /**
  * agree
  */
-exports.agree = {
-   setUp: function(callback) {
-        try {
-            /**
-             * Setup a registrant
-             */
-            var registrant = new gebo.registrantModel({
-                    name: 'dan',
-                    email: 'dan@hg.com',
-                    password: 'password123',
-                    admin: false,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-          
-            /**
-             * Make a social commitment
-             */
-            var newFriend = {
-                    name: 'Yanfen',
-                    email: 'yanfen@hg.com',
-                    gebo: 'https://theirhost.com',
-                    certificate: 'some certificate',
-                };
- 
-            var agentDb = new agentSchema('dan@hg.com'); 
-            var sc = new agentDb.socialCommitmentModel({
-                    performative: 'request',
-                    action: 'friend',
-                    message: { content: newFriend },
-                    creditor: 'yanfen@hg.com',
-                    debtor: 'dan@hg.com',
-                  });
-
-            registrant.save(function(err) {
-                sc.save(function(err) {
-                    if (err) {
-                        console.log(err);
-                      }
-                      agentDb.connection.db.close();
-                      callback();
-                    });
-                  });
-     	}
-        catch(e) {
-            console.dir(e);
-            callback();
-    	}
-    }, 
-
-    tearDown: function(callback) {
-       
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('dan@hg.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
-          });
-     }, 
-
-    'Perform the action and fulfil the social commitment': function(test) {
-        test.expect(7);
-
-        // Get the social commitment
-        var agentDb = new agentSchema('dan@hg.com'); 
-        agentDb.socialCommitmentModel.find({}, function(err, scs) {
-            test.equal(scs.length, 1);
-            action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
-                         { socialCommitmentId: scs[0]._id }).
-                then(function(data) {
-                    agentDb.connection.db.close();
-                    test.equal(data.name, 'Yanfen');
-                    test.equal(data.email, 'yanfen@hg.com');
-                    test.equal(data.gebo, 'https://theirhost.com');
-                    test.equal(data.certificate, 'some certificate');
-                    agentDb = new agentSchema('dan@hg.com'); 
-                    agentDb.socialCommitmentModel.find({}, function(err, scs) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err);
-                          test.ok(false, err);
-                        }
-                        test.equal(scs.length, 1);
-                        test.equal(scs[0].fulfilled === null, false);
-                        test.done();
-                      });
-                  }).
-                catch(function(err) {
-                    console.log(err);
-                    test.ok(false, err);
-                    test.done();
-                  });
-          });
-    },
-};
-
-/**
- * refuse
- */
-exports.refuse = {
-   setUp: function(callback) {
-        try {
-            /**
-             * Setup a registrant
-             */
-            var registrant = new gebo.registrantModel({
-                    name: 'dan',
-                    email: 'dan@hg.com',
-                    password: 'password123',
-                    admin: false,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-          
-            /**
-             * Make a social commitment
-             */
-            var newFriend = {
-                    name: 'Yanfen',
-                    email: 'yanfen@hg.com',
-                    gebo: 'https://theirhost.com',
-                    certificate: 'some certificate',
-                };
- 
-            var agentDb = new agentSchema('dan@hg.com'); 
-            var sc = new agentDb.socialCommitmentModel({
-                    performative: 'request',
-                    action: 'friend',
-                    message: { content: newFriend },
-                    creditor: 'yanfen@hg.com',
-                    debtor: 'dan@hg.com',
-                  });
-
-            registrant.save(function(err) {
-                sc.save(function(err) {
-                    if (err) {
-                        console.log(err);
-                      }
-                      agentDb.connection.db.close();
-                      callback();
-                    });
-                  });
-     	}
-        catch(e) {
-            console.dir(e);
-            callback();
-    	}
-    }, 
-
-    tearDown: function(callback) {
-       
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('dan@hg.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                agentDb.connection.db.close();
-                callback();
-              });
-          });
-     }, 
-
-    'Fulfil the social commitment but do not perform the action': function(test) {
-        test.expect(3);
-
-        // Get the social commitment
-        var agentDb = new agentSchema('dan@hg.com'); 
-        agentDb.socialCommitmentModel.find({}, function(err, scs) {
-            test.equal(scs.length, 1);
-            test.equal(scs[0].fulfilled, null);
-            action.refuse({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
-                          { socialCommitmentId: scs[0]._id }).
-                then(function(sc) {
-                    agentDb.connection.db.close();
-                    test.equal(sc.fulfilled === null, false);
-                    test.done();
-                  }).
-                catch(function(err) {
-                    console.log(err);
-                    test.ok(false, err);
-                    test.done();
-                  });
-          });
-    },
-};
+//exports.agree = {
+//   setUp: function(callback) {
+//        try {
+//            /**
+//             * Setup a registrant
+//             */
+//            var registrant = new gebo.registrantModel({
+//                    name: 'dan',
+//                    email: 'dan@hg.com',
+//                    password: 'password123',
+//                    admin: false,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//          
+//            /**
+//             * Make a social commitment
+//             */
+//            var newFriend = {
+//                    name: 'Yanfen',
+//                    email: 'yanfen@hg.com',
+//                    gebo: 'https://theirhost.com',
+//                    certificate: 'some certificate',
+//                };
+// 
+//            var agentDb = new agentSchema('dan@hg.com'); 
+//            var sc = new agentDb.socialCommitmentModel({
+//                    performative: 'request',
+//                    action: 'friend',
+//                    message: { content: newFriend },
+//                    creditor: 'yanfen@hg.com',
+//                    debtor: 'dan@hg.com',
+//                  });
+//
+//            registrant.save(function(err) {
+//                sc.save(function(err) {
+//                    if (err) {
+//                        console.log(err);
+//                      }
+//                      agentDb.connection.db.close();
+//                      callback();
+//                    });
+//                  });
+//     	}
+//        catch(e) {
+//            console.dir(e);
+//            callback();
+//    	}
+//    }, 
+//
+//    tearDown: function(callback) {
+//       
+//        gebo.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        var agentDb = new agentSchema('dan@hg.com'); 
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
+//     }, 
+//
+//    'Perform the action and fulfil the social commitment': function(test) {
+//        test.expect(7);
+//
+//        // Get the social commitment
+//        var agentDb = new agentSchema('dan@hg.com'); 
+//        agentDb.socialCommitmentModel.find({}, function(err, scs) {
+//            test.equal(scs.length, 1);
+//            action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
+//                         { socialCommitmentId: scs[0]._id }).
+//                then(function(data) {
+//                    agentDb.connection.db.close();
+//                    test.equal(data.name, 'Yanfen');
+//                    test.equal(data.email, 'yanfen@hg.com');
+//                    test.equal(data.gebo, 'https://theirhost.com');
+//                    test.equal(data.certificate, 'some certificate');
+//                    agentDb = new agentSchema('dan@hg.com'); 
+//                    agentDb.socialCommitmentModel.find({}, function(err, scs) {
+//                        agentDb.connection.db.close();
+//                        if (err) {
+//                          console.log(err);
+//                          test.ok(false, err);
+//                        }
+//                        test.equal(scs.length, 1);
+//                        test.equal(scs[0].fulfilled === null, false);
+//                        test.done();
+//                      });
+//                  }).
+//                catch(function(err) {
+//                    console.log(err);
+//                    test.ok(false, err);
+//                    test.done();
+//                  });
+//          });
+//    },
+//};
+//
+///**
+// * refuse
+// */
+//exports.refuse = {
+//   setUp: function(callback) {
+//        try {
+//            /**
+//             * Setup a registrant
+//             */
+//            var registrant = new gebo.registrantModel({
+//                    name: 'dan',
+//                    email: 'dan@hg.com',
+//                    password: 'password123',
+//                    admin: false,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//          
+//            /**
+//             * Make a social commitment
+//             */
+//            var newFriend = {
+//                    name: 'Yanfen',
+//                    email: 'yanfen@hg.com',
+//                    gebo: 'https://theirhost.com',
+//                    certificate: 'some certificate',
+//                };
+// 
+//            var agentDb = new agentSchema('dan@hg.com'); 
+//            var sc = new agentDb.socialCommitmentModel({
+//                    performative: 'request',
+//                    action: 'friend',
+//                    message: { content: newFriend },
+//                    creditor: 'yanfen@hg.com',
+//                    debtor: 'dan@hg.com',
+//                  });
+//
+//            registrant.save(function(err) {
+//                sc.save(function(err) {
+//                    if (err) {
+//                        console.log(err);
+//                      }
+//                      agentDb.connection.db.close();
+//                      callback();
+//                    });
+//                  });
+//     	}
+//        catch(e) {
+//            console.dir(e);
+//            callback();
+//    	}
+//    }, 
+//
+//    tearDown: function(callback) {
+//       
+//        gebo.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//          });
+//
+//        var agentDb = new agentSchema('dan@hg.com'); 
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
+//     }, 
+//
+//    'Fulfil the social commitment but do not perform the action': function(test) {
+//        test.expect(3);
+//
+//        // Get the social commitment
+//        var agentDb = new agentSchema('dan@hg.com'); 
+//        agentDb.socialCommitmentModel.find({}, function(err, scs) {
+//            test.equal(scs.length, 1);
+//            test.equal(scs[0].fulfilled, null);
+//            action.refuse({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
+//                          { socialCommitmentId: scs[0]._id }).
+//                then(function(sc) {
+//                    agentDb.connection.db.close();
+//                    test.equal(sc.fulfilled === null, false);
+//                    test.done();
+//                  }).
+//                catch(function(err) {
+//                    console.log(err);
+//                    test.ok(false, err);
+//                    test.done();
+//                  });
+//          });
+//    },
+//};
 
 

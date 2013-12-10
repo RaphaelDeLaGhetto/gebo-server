@@ -36,79 +36,79 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    exports.agree = function(verified, message) {
-        var deferred = q.defer();
-        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-          console.log('agree message');
-          console.log(message);
-          var agentDb = new agentSchema(verified.dbName);
-          agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function(err, sc) {
-                  console.log('agree sc');
-                  console.log(sc);
-                  if (err) {
-                    agentDb.connection.db.close();
-                    deferred.reject(err);
-                  }
-                  else {
-                    exports[sc.action](verified, sc.message).
-                        then(function(data) {
-                            sc.fulfilled = Date.now();
-                            sc.save(function(err, sc) {
-                                        agentDb.connection.db.close();
-                                        if (err) {
-                                          deferred.reject(err);
-                                        }
-                                        else {
-                                          deferred.resolve(data);
-                                        }
-                                      });
-                          }).
-                        catch(function(err) {
-                            deferred.reject(err);
-                          });
-                  }
-              });
-        }
-        else {
-          deferred.reject('You are not permitted to request or propose that action');
-        }
- 
-        return deferred.promise;
-      };
-
-    /**
-     * Refuse to perform the requested action
-     *
-     * @param Object
-     * @param Object
-     *
-     * @return promise
-     */
-    exports.refuse = function(verified, message) {
-        var deferred = q.defer();
-        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-            var agentDb = new agentSchema(verified.dbName);
-            agentDb.socialCommitmentModel.findOneAndUpdate(
-                    { _id: message.socialCommitmentId },
-                    { fulfilled: Date.now() },
-                    function(err, sc) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          deferred.reject(err);
-                        }
-                        else {
-                          console.log('refused sc');
-                          console.log(sc);
-                          deferred.resolve(sc);
-                        }
-                      });
-        }
-        else {
-          deferred.reject('You are not permitted to request or propose that action');
-        }
- 
-        return deferred.promise;
-      };
+//    exports.agree = function(verified, message) {
+//        var deferred = q.defer();
+//        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
+//          console.log('agree message');
+//          console.log(message);
+//          var agentDb = new agentSchema(verified.dbName);
+//          agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function(err, sc) {
+//                  console.log('agree sc');
+//                  console.log(sc);
+//                  if (err) {
+//                    agentDb.connection.db.close();
+//                    deferred.reject(err);
+//                  }
+//                  else {
+//                    exports[sc.action](verified, sc.message).
+//                        then(function(data) {
+//                            sc.fulfilled = Date.now();
+//                            sc.save(function(err, sc) {
+//                                        agentDb.connection.db.close();
+//                                        if (err) {
+//                                          deferred.reject(err);
+//                                        }
+//                                        else {
+//                                          deferred.resolve(data);
+//                                        }
+//                                      });
+//                          }).
+//                        catch(function(err) {
+//                            deferred.reject(err);
+//                          });
+//                  }
+//              });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+// 
+//        return deferred.promise;
+//      };
+//
+//    /**
+//     * Refuse to perform the requested action
+//     *
+//     * @param Object
+//     * @param Object
+//     *
+//     * @return promise
+//     */
+//    exports.refuse = function(verified, message) {
+//        var deferred = q.defer();
+//        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
+//            var agentDb = new agentSchema(verified.dbName);
+//            agentDb.socialCommitmentModel.findOneAndUpdate(
+//                    { _id: message.socialCommitmentId },
+//                    { fulfilled: Date.now() },
+//                    function(err, sc) {
+//                        agentDb.connection.db.close();
+//                        if (err) {
+//                          deferred.reject(err);
+//                        }
+//                        else {
+//                          console.log('refused sc');
+//                          console.log(sc);
+//                          deferred.resolve(sc);
+//                        }
+//                      });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+// 
+//        return deferred.promise;
+//      };
 
     return exports;
   };
