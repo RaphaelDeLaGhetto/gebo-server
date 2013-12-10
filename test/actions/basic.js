@@ -1673,7 +1673,6 @@ exports.dropDatabase = {
         });
     },
 
-
     'Should delete the database specified if admin': function(test) {
         test.expect(3);
 
@@ -1770,188 +1769,19 @@ exports.dropDatabase = {
     'Do not delete the database specified without permission': function(test) {
        test.expect(1);
 
-        // Make sure the DB exists
-        var dbName = utils.getMongoDbName('existing_db');
-//        action.dbExists(dbName).
-//                then(function(client) {
-//                    test.ok(true);
-//                  }).
-//                catch(function(err) {
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//
-        action.dropDatabase({ admin: false, execute: false, dbName: dbName }).
-                then(function() {
-                    test.ok(false, 'Should not be able to drop database');
-                    test.done();
-                  }).
-                catch(function(err) {
-                    test.equal(err, 'You are not permitted to request or propose that action');
-                    test.done();
-                  });
+       var dbName = utils.getMongoDbName('existing_db');
+       action.dropDatabase({ admin: false, execute: false, dbName: dbName }).
+               then(function() {
+                   test.ok(false, 'Should not be able to drop database');
+                   test.done();
+                 }).
+               catch(function(err) {
+                   test.equal(err, 'You are not permitted to request or propose that action');
+                   test.done();
+                 });
     },
 
 };
-
-/**
- * getRegistrants 
- */
-//exports.getRegistrants = {
-//
-//    setUp: function(callback) {
-//    	try{
-//            var agent = new gebo.registrantModel(
-//                            { name: 'dan', email: 'dan@example.com',
-//                              password: 'password123', admin: true,  
-//                              _id: new mongo.ObjectID('0123456789AB') });
-//            agent.save(function(err) {
-//                    if (err) {
-//                      console.log(err);
-//                    }
-//                    callback();
-//                  });
-//     	}
-//        catch(e) {
-//            console.dir(e);
-//            callback();
-//    	}
-//    },
-//
-//    tearDown: function (callback) {
-//        gebo.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//            callback();
-//          });
-//    },
-//
-//    'Return a list of registered agents if admin': function(test) {
-//        test.expect(5);
-//        action.getRegistrants({ admin: true }).
-//                then(function(registrants) {
-//                    test.equal(registrants.length, 1);
-//                    test.equal(registrants[0].name, 'dan');
-//                    test.equal(registrants[0].email, 'dan@example.com');
-//                    test.equal(registrants[0].admin, true);
-//                    test.equal(registrants[0].password, undefined);
-//	            test.done();
-//                  });
-//    },
-//
-//    'Return a list of registered agents with read access': function(test) {
-//        test.expect(5);
-//        action.getRegistrants({ admin: false, read: true }).
-//                then(function(registrants) {
-//                    test.equal(registrants.length, 1);
-//                    test.equal(registrants[0].name, 'dan');
-//                    test.equal(registrants[0].email, 'dan@example.com');
-//                    test.equal(registrants[0].admin, true);
-//                    test.equal(registrants[0].password, undefined);
-//	            test.done();
-//                  });
-//
-//    },
-//
-//    'Do not return a list of registered agents without permission': function(test) {
-//        test.expect(1);
-//        action.getRegistrants({ admin: false, read: false }).
-//                then(function(registrants) {
-//                    test.ok(false, 'Should not be able to get a list of registrants');
-//	            test.done();
-//                  }).
-//                catch(function(err) {
-//                    test.equal(err, 'You are not permitted to request or propose that action');
-//	            test.done();
-//                  });
-//
-//
-//    },
-//};
-
-/**
- * getUserDocuments 
- */
-//exports.getUserDocuments = {
-//
-//    setUp: function(callback) {
-//        agent = new gebo.registrantModel({
-//                name: 'Joey Joe Joe Jr. Shabadoo',
-//                email: 'jjjj@shabadoo.com',
-//                password: 'abc123',
-//                admin: 'true'
-//              });
-//
-//        var dbName = utils.getMongoDbName(agent.email);
-//
-//    	try {
-//            var server = new mongo.Server(config.mongo.host,
-//                                          config.mongo.port,
-//                                          config.mongo.serverOptions);
-//            this.db = new mongo.Db(dbName, server, config.mongo.clientOptions);
-//            this.db.open(function (err, client) {
-//                if (err) {
-//                  throw err;
-//                }
-//                this.collection = new mongo.Collection(client, cname);
-//                this.collection.insert([
-//                        {
-//                            _id: new mongo.ObjectID('0123456789AB'),
-//                            name: 'doc 1',
-//                        },
-//                        {
-//                            _id: new mongo.ObjectID('123456789ABC'),
-//                            name: 'doc 2',
-//                        }
-//                    ],
-//                    function() {
-//                        callback();
-//                    });
-//            });
-//    	} catch(e) {
-//            console.dir(e);
-//    	}
-//    },
-//
-//    tearDown: function (callback) {
-//        // Lose the database for next time
-//        this.db.dropDatabase(function(err) {
-//            if(err) {
-//              console.log(err);
-//            }
-//            callback();
-//        });
-//    },
-//
-//    'Should return a list of an agent\'s documents': function(test) {
-//        test.expect(1);
-//	action.getUserDocuments(
-//			{ dbName: 'don\'t matter', collectionName: cname, admin: true },
-//			{ email: agent.email }).
-//		then(function(data) {
-//		    test.ok(data);
-//		    test.done();
-//		  }).
-//		catch(function(err) {
-//		    test.ok(false, err);
-//		    test.done();
-//		  });
-//    },
-//
-//    'Should throw an error when accessed by non-admin': function(test) {
-//	test.expect(1);
-//	action.getUserDocuments({ email: agent.email, admin: false }).
-//		then(function(data) {
-//		    test.ok(false, 'This should not be accessible');
-//		    test.done();
-//		  }).
-//		catch(function(err) {
-//		    test.ok(err);
-//		    test.done();
-//		  });
-//    },
-//};
 
 /**
  * registerAgent
@@ -2002,7 +1832,7 @@ exports.registerAgent = {
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
                     };
-                action.registerAgent({ admin: true }, { newAgent: newAgent }).
+                action.registerAgent({ admin: true }, { content: { newAgent: newAgent } }).
                     then(function(agent) {  
                         test.equal(agent.name, 'yanfen');
                         test.equal(agent.email, 'yanfen@example.com');
@@ -2028,7 +1858,7 @@ exports.registerAgent = {
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
                     };
-                action.registerAgent({ admin: false, execute: true }, { newAgent: newAgent }).
+                action.registerAgent({ admin: false, execute: true }, { content: { newAgent: newAgent } }).
                     then(function(agent) {  
                         test.equal(agent.name, 'yanfen');
                         test.equal(agent.email, 'yanfen@example.com');
@@ -2054,7 +1884,7 @@ exports.registerAgent = {
                         admin: false,
                         _id: new mongo.ObjectID('123456789ABC')
                     };
-                action.registerAgent({ admin: false, execute: false }, { newAgent: newAgent }).
+                action.registerAgent({ admin: false, execute: false }, { content: { newAgent: newAgent } }).
                     then(function(agent) {  
                         test.ok(false, 'I should not be able to add a new agent');
                         test.done();
@@ -2074,7 +1904,7 @@ exports.registerAgent = {
                 password: 'password123',
                 admin: true
             };
-        action.registerAgent({ admin: false, execute: true }, { newAgent: existingAgent }).
+        action.registerAgent({ admin: false, execute: true }, { content: { newAgent: existingAgent } }).
            then(function(agent) {
                 test.ok(false, 'Must not overwrite an existing agent');
                 test.done();

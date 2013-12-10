@@ -476,12 +476,12 @@ module.exports = function(email) {
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
 
-          db.registrantModel.findOne({ email: message.newAgent.email }, function(err, registrant) {
+          db.registrantModel.findOne({ email: message.content.newAgent.email }, function(err, registrant) {
               if (registrant) {
                 deferred.reject('That email address has already been registered');
               }
               else {
-                var agent = new db.registrantModel(message.newAgent);
+                var agent = new db.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
                     if (err) {
                       deferred.reject(err);
