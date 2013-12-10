@@ -13,7 +13,7 @@ var action = require('../../actions')(TEST_DB);
 exports.onLoad = {
 
     'Load and initialize every file in the actions folder': function(test) {
-        test.expect(13);
+        test.expect(15);
         // Note: actions, not action, as above
         var actions = require('../../actions')(TEST_DB);
         test.equal(typeof actions.dbExists, 'function');
@@ -29,6 +29,8 @@ exports.onLoad = {
         test.equal(typeof actions.deregisterAgent, 'function');
         test.equal(typeof actions.friend, 'function');
         test.equal(typeof actions.defriend, 'function');
+        test.equal(typeof actions.grantAccess, 'function');
+        test.equal(typeof actions.certificate, 'function');
         test.done();
     },
 };
