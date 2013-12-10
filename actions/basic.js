@@ -394,7 +394,7 @@ module.exports = function(email) {
                               }
                               else {
                                 var collection = new mongo.Collection(client, 'profile');
-                                collection.save(message.profile.toObject(), { safe: true },
+                                collection.save(message.content.profile.toObject(), { safe: true },
                                         function(err, ack) {
                                             if (err) {
                                               deferred.reject(err);
