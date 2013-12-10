@@ -30,7 +30,7 @@ exports.localStrategy = {
     setUp: function(callback) {
     	try{
             var agent = new geboDb.registrantModel(
-                            { name: 'dan', email: 'dan@hg.com',
+                            { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
 
@@ -58,13 +58,13 @@ exports.localStrategy = {
 
     'Return an agent object when provided correct email and password': function(test) {
         test.expect(3);
-        pass.localStrategy('dan@hg.com', 'password123', function(err, agent) {
+        pass.localStrategy('dan@example.com', 'password123', function(err, agent) {
             if (err) {
               test.ok(false, err);
             } 
             else {
               test.equal(agent.name, 'dan');
-              test.equal(agent.email, 'dan@hg.com');
+              test.equal(agent.email, 'dan@example.com');
               test.equal(agent.admin, true);
             }
             test.done();
@@ -73,7 +73,7 @@ exports.localStrategy = {
 
     'Return false agent if an invalid email is provided': function(test) {
         test.expect(2);
-        pass.localStrategy('wrongemail@hg.com', 'password123', function(err, agent, message) {
+        pass.localStrategy('wrongemail@example.com', 'password123', function(err, agent, message) {
             if (err) {
               test.ok(false, err);
             } 
@@ -87,7 +87,7 @@ exports.localStrategy = {
 
     'Return false agent if a valid email and invalid password are provided': function(test) {
         test.expect(2);
-        pass.localStrategy('dan@hg.com', 'wrongpassword123', function(err, agent, message) {
+        pass.localStrategy('dan@example.com', 'wrongpassword123', function(err, agent, message) {
             if (err) {
               test.ok(false, err);
             } 
@@ -112,7 +112,7 @@ exports.bearerStrategy = {
              */
             var adminRegistrant = new geboDb.registrantModel({
                     name: 'dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
@@ -133,7 +133,7 @@ exports.bearerStrategy = {
              */
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
-                    email: 'yanfen@hg.com',
+                    email: 'yanfen@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('123456789ABC')
@@ -213,7 +213,7 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(registrant.name, 'dan');
-              test.equal(registrant.email, 'dan@hg.com');
+              test.equal(registrant.email, 'dan@example.com');
               test.equal(registrant.admin, true);
               test.equal(registrant.password, undefined);
             }
@@ -229,7 +229,7 @@ exports.bearerStrategy = {
             }
             else {
               test.equal(registrant.name, 'yanfen');
-              test.equal(registrant.email, 'yanfen@hg.com');
+              test.equal(registrant.email, 'yanfen@example.com');
               test.equal(registrant.admin, false);
               test.equal(registrant.password, undefined);
             }
@@ -247,7 +247,7 @@ exports.bearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
@@ -268,7 +268,7 @@ exports.bearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
@@ -287,7 +287,7 @@ exports.bearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
@@ -306,7 +306,7 @@ exports.bearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
@@ -425,7 +425,7 @@ exports.clientJwtBearerStrategy = {
 //            }
 //            else {
 //              test.equal(registrant.name, 'yanfen');
-//              test.equal(registrant.email, 'yanfen@hg.com');
+//              test.equal(registrant.email, 'yanfen@example.com');
 //              test.equal(registrant.admin, false);
 //              test.equal(registrant.password, undefined);
 //            }
@@ -443,7 +443,7 @@ exports.clientJwtBearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
@@ -464,7 +464,7 @@ exports.clientJwtBearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
@@ -483,7 +483,7 @@ exports.clientJwtBearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('dan@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
@@ -502,7 +502,7 @@ exports.clientJwtBearerStrategy = {
 //            }
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@hg.com')); 
+//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
 //              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 

@@ -30,7 +30,7 @@ exports.poke = {
 //            // Theoretically, the DB won't exist until
 //            // we write something to it
 //            var agent = new this.db.agentModel(
-//                            { name: 'dan', email: 'dan@hg.com',
+//                            { name: 'dan', email: 'dan@example.com',
 //                              password: 'password123', admin: true,  
 //                              _id: new mongo.ObjectID('0123456789AB') });
 //            agent.save(function(err) {
@@ -68,7 +68,7 @@ exports.poke = {
 //
 //                var newAgent = {
 //                        name: 'yanfen',
-//                        email: 'yanfen@hg.com',
+//                        email: 'yanfen@example.com',
 //                        password: 'password456',
 //                        admin: false,
 //                        _id: new mongo.ObjectID('123456789ABC')

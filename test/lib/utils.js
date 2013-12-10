@@ -181,10 +181,10 @@ exports.ensureDbName = {
 
     'Return a mongo-friendly database name': function(test) {
         test.expect(2);
-        var dbName = utils.ensureDbName('dan@hg.com');
-        test.equal(dbName, 'dan_at_hg_dot_com');
-        var dbName = utils.ensureDbName('dan_at_hg_dot_com');
-        test.equal(dbName, 'dan_at_hg_dot_com');
+        var dbName = utils.ensureDbName('dan@example.com');
+        test.equal(dbName, 'dan_at_example_dot_com');
+        var dbName = utils.ensureDbName('dan_at_example_dot_com');
+        test.equal(dbName, 'dan_at_example_dot_com');
         test.done();
     },
 
@@ -212,9 +212,9 @@ exports.saveFilesToAgentDirectory = {
     },
     
     tearDown: function (callback) {
-        rimraf.sync('docs/dan_at_hg_dot_com');
+        rimraf.sync('docs/dan_at_example_dot_com');
 
-        var agentDb = new agentSchema('dan@hg.com'); 
+        var agentDb = new agentSchema('dan@example.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -228,11 +228,11 @@ exports.saveFilesToAgentDirectory = {
 
     'Move one file from /tmp to destination': function(test) {
         test.expect(2);
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com');
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') + '/' + utils.getMongoCollectionName('test@example.com');
 
         // Make sure the directory isn't there
         try {
-            fs.readdirSync('docs/' + utils.getMongoDbName('dan@hg.com'));
+            fs.readdirSync('docs/' + utils.getMongoDbName('dan@example.com'));
         }
         catch (err) {
             test.ok(err);
@@ -245,10 +245,10 @@ exports.saveFilesToAgentDirectory = {
                                 type: 'text/plain',
                                 size: 16,
                             },
-                        //}, 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com')).
+                        //}, 'docs/' + utils.getMongoDbName('dan@example.com') + '/' + utils.getMongoCollectionName('test@example.com')).
                         },
-                        { dbName: utils.getMongoDbName('dan@hg.com'),
-                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        { dbName: utils.getMongoDbName('dan@example.com'),
+                          collectionName: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
                 var files = fs.readdirSync(dir);
@@ -264,11 +264,11 @@ exports.saveFilesToAgentDirectory = {
 
     'Move multiple files from /tmp to destination': function(test) {
         test.expect(5);
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com');
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') + '/' + utils.getMongoCollectionName('test@example.com');
 
         // Make sure the directory isn't there
         try {
-            fs.readdirSync('docs/' + utils.getMongoDbName('dan@hg.com'));
+            fs.readdirSync('docs/' + utils.getMongoDbName('dan@example.com'));
         }
         catch (err) {
             test.ok(err);
@@ -301,8 +301,8 @@ exports.saveFilesToAgentDirectory = {
                                 size: 11,
                             },
                         },
-                        { dbName: utils.getMongoDbName('dan@hg.com'),
-                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        { dbName: utils.getMongoDbName('dan@example.com'),
+                          collectionName: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
                 var files = fs.readdirSync(dir);
@@ -323,7 +323,7 @@ exports.saveFilesToAgentDirectory = {
     'Don\'t barf if the files object is empty, null, or undefined': function(test) {
         test.expect(3);
 
-        var dir = 'docs/' + utils.getMongoDbName('dan@hg.com') + '/' + utils.getMongoCollectionName('test@hg.com');
+        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') + '/' + utils.getMongoCollectionName('test@example.com');
         utils.saveFilesToAgentDirectory({}, dir).
             then(function() {
                 test.ok(true);
@@ -354,20 +354,20 @@ exports.saveFilesToAgentDirectory = {
                                 size: 16,
                             },
                         },
-                        { dbName: utils.getMongoDbName('dan@hg.com'),
-                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        { dbName: utils.getMongoDbName('dan@example.com'),
+                          collectionName: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
-                var db = new agentSchema('dan@hg.com');
+                var db = new agentSchema('dan@example.com');
                 db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
-                                       collectionName: utils.getMongoCollectionName('test@hg.com') },
+                                       collectionName: utils.getMongoCollectionName('test@example.com') },
                     function(err, file) {
                         if (err || !file) {
                           test.ok(false, err);
                         }
                         else {
                           test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
-                          test.equal(file.collectionName, utils.getMongoCollectionName('test@hg.com')); 
+                          test.equal(file.collectionName, utils.getMongoCollectionName('test@example.com')); 
                           test.equal(file.type, 'text/plain'); 
                           test.equal(file.size, 16); 
                           test.equal(file.lastModified === null, false); 
@@ -413,11 +413,11 @@ exports.saveFilesToAgentDirectory = {
                                 size: 11,
                             },
                         },
-                        { dbName: utils.getMongoDbName('dan@hg.com'),
-                          collectionName: utils.getMongoCollectionName('test@hg.com')
+                        { dbName: utils.getMongoDbName('dan@example.com'),
+                          collectionName: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
-                var db = new agentSchema('dan@hg.com');
+                var db = new agentSchema('dan@example.com');
                 db.fileModel.find({},
                     function(err, files) {
                         if (err) {

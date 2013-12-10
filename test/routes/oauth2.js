@@ -17,7 +17,7 @@ var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 nconf.file({ file: 'gebo.json' });
 
 var geboDb = new geboSchema(nconf.get('testDb'));
-    //agentDb = new agentSchema('yanfen@hg.com');
+    //agentDb = new agentSchema('yanfen@example.com');
 
 var oauth2 = require('../../routes/oauth2')(nconf.get('testDb')),
     Token = require('../../config/token');
@@ -288,16 +288,16 @@ exports.verifyFriendship = {
    setUp: function(callback) {
            var registrant = new geboDb.registrantModel({
                     name: 'Dan',
-                    email: 'dan@hg.com',
+                    email: 'dan@example.com',
                     password: 'password123',
                     admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
 
-            var agentDb = new agentSchema('dan@hg.com');
+            var agentDb = new agentSchema('dan@example.com');
             var friend = new agentDb.friendModel({
                     name: 'Yanfen',
-                    email: 'yanfen@hg.com',
+                    email: 'yanfen@example.com',
                     _id: new mongo.ObjectID('123456789ABC')
                 });
             friend.hisPermissions.push({ email: 'some@resource.com' });
@@ -323,7 +323,7 @@ exports.verifyFriendship = {
             }
           });
 
-        var agentDb = new agentSchema('dan@hg.com');
+        var agentDb = new agentSchema('dan@example.com');
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
@@ -337,7 +337,7 @@ exports.verifyFriendship = {
     'Return the friend model when an agent is a friend with correct scope': function(test) {
         test.expect(1);
         var scope = oauth2.processScope('r some@resource.com');
-        oauth2.verifyFriendship(scope, 'dan@hg.com', 'yanfen@hg.com').
+        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
             then(function(friend) {
                 test.equal(friend.name, 'Yanfen');
                 test.done();
@@ -351,7 +351,7 @@ exports.verifyFriendship = {
     'Return false when an agent is a friend with incorrect scope': function(test) {
         test.expect(1);
         var scope = oauth2.processScope('rwx some@resource.com');
-        oauth2.verifyFriendship(scope, 'dan@hg.com', 'yanfen@hg.com').
+        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
             then(function(weAreFriends) {
                 test.equal(weAreFriends, false);
                 test.done();
@@ -365,7 +365,7 @@ exports.verifyFriendship = {
     'Return false when an agent is not a friend': function(test) {
         test.expect(1);
         var scope = oauth2.processScope('rw some@resource.com');
-        oauth2.verifyFriendship(scope, 'dan@hg.com', 'foreign@agent.com').
+        oauth2.verifyFriendship(scope, 'dan@example.com', 'foreign@agent.com').
             then(function(weAreFriends) {
                 test.equal(weAreFriends, false);
                 test.done();
