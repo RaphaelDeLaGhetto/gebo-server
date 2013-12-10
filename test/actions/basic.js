@@ -2601,7 +2601,7 @@ exports.certificate = {
                                     catch(function(err) {
                                         console.log(err);
                                         test.ok(false, err);
-										test.done();
+                                        test.done();
                                       });
                               });
                           });
