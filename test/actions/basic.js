@@ -944,7 +944,7 @@ exports.rm = {
         action.rm({ dbName: 'no_one_at_not_here_dot_com',
 		    collectionName: cname,
 		    admin: true },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
              then(function() {
                     // Shouldn't get here
                     test.ok(false, 'Shouldn\'t get here!!!');
@@ -964,7 +964,7 @@ exports.rm = {
         action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: 'NoSuchCollection',
 		    admin: true },
-                  { id: '0123456789AB' }).
+                  { content: { id: '0123456789AB' } }).
             then(
                 function() {
                     // Shouldn't get here
@@ -984,7 +984,7 @@ exports.rm = {
         action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
-                  { id: 'NoSuchDocABC' }).
+                  { content: { id: 'NoSuchDocABC' } }).
             then(
                 function() {
                     // Shouldn't get here
@@ -1008,7 +1008,7 @@ exports.rm = {
         action.rm({ dbName: 'yanfen_at_example_dot_com',
 		    collectionName: cname,
 		    admin: true },
-                    { id: '123456789ABC' }).
+                    { content: { id: '123456789ABC' } }).
             then(function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {
@@ -1034,7 +1034,7 @@ exports.rm = {
 		    collectionName: cname,
 		    admin: false,
                     write: true },
-                    { id: '123456789ABC' }).
+                    { content: { id: '123456789ABC' } }).
             then(function() {
                     test.ok(true, 'The doc has been deleted, I think');
                     collection.count(function(err, count) {
@@ -1060,7 +1060,7 @@ exports.rm = {
 		    collectionName: cname,
 		    admin: false,
                     write: false },
-                    { id: '123456789ABC' }).
+                    { content: { id: '123456789ABC' } }).
             then(function() {
                     test.ok(false, 'I should not be able to delete from this database');
                     test.done();

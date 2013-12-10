@@ -215,12 +215,12 @@ module.exports = function(email) {
                                             verified.collectionName + ' does not exist'));
                           }
                           else {
-                            collection.remove({ _id: new mongo.ObjectID(message.id) },
+                            collection.remove({ _id: new mongo.ObjectID(message.content.id) },
                             function(err, ack) {
                                 if (err || ack === 0) {
                                   deferred.reject(
                                           new Error('Could not delete document: ' +
-                                                  message.id));
+                                                  message.content.id));
                                 }
                                 else {
                                   deferred.resolve();
