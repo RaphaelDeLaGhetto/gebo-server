@@ -2117,7 +2117,7 @@ exports.friend = {
                 email: 'yanfen@example.com',
                 gebo: 'http://theirhost.com',
             };
-        action.friend({ write: false, dbName: 'dan_at_example_dot_com' }, { newFriend: newFriend }).
+        action.friend({ write: false, dbName: 'dan_at_example_dot_com' }, { content: newFriend }).
             then(function(friend) {  
                 test.ok(false, 'Should not be allowed to add a new friend');
                 test.done();
@@ -2225,7 +2225,7 @@ exports.defriend = {
 
     'Remove a friend from the database if permitted': function(test) {
         test.expect(2);
-        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { email: 'john@painter.com' }).
+        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: { email: 'john@painter.com' } }).
             then(function(ack) {  
                 test.equal(ack, 1);
 
@@ -2248,7 +2248,7 @@ exports.defriend = {
 
     'Do not remove a friend from the database if not permitted': function(test) {
         test.expect(2);
-        action.defriend({ write: false }, { email: 'john@painter.com' }).
+        action.defriend({ write: false }, { content: { email: 'john@painter.com' } }).
             then(function(friend) {  
                 test.ok(false, 'Should not be allowed to delete a friend');
                 test.done();
@@ -2269,7 +2269,7 @@ exports.defriend = {
 
     'Don\'t barf if the email provided matches no friend': function(test) {
         test.expect(1);
-        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { email: 'yanfen@example.com' }).
+        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: { email: 'yanfen@example.com' } }).
                 then(function(ack) {
                     test.equal(ack, 0);
                     test.done();

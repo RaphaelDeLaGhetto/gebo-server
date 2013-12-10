@@ -569,7 +569,7 @@ module.exports = function(email) {
 
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
-          db.friendModel.remove({ email: message.email }, function(err, ack) {
+          db.friendModel.remove({ email: message.content.email }, function(err, ack) {
                   db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
