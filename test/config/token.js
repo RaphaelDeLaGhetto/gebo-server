@@ -31,8 +31,9 @@ var JWT_RESPONSE = {
     };
 
 // Start up the test database
-nconf.argv().env().file({ file: 'local.json' });
-var Token = require('../../config/token');//(nconf.get('testDb'));
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
+var Token = require('../../config/token');
 
 var geboDb = new geboSchema(nconf.get('testDb'));
 

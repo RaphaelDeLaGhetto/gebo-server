@@ -11,7 +11,8 @@ module.exports = function(dbName) {
      * Set the database name, if not set already 
      */
     if (!dbName) {
-      nconf.argv().env().file({ file: 'local.json' });
+      //nconf.argv().env().file({ file: 'local.json' });
+      nconf.file({ file: 'gebo.json' });
       dbName = nconf.get('email');
     }
     var pass = require('../config/pass')(dbName);

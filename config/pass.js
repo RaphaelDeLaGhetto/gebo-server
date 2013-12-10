@@ -10,7 +10,6 @@
 
 var passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
-    nconf = require('nconf'),
     utils = require('../lib/utils'),
     // jaredhanson/oauth2orize
     BasicStrategy = require('passport-http').BasicStrategy,

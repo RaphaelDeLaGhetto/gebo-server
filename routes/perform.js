@@ -1,7 +1,6 @@
 'use strict';
 
 var passport = require('passport'),
-    nconf = require('nconf'),
     utils = require('../lib/utils'),
     sc = require('../lib/sc'),
     geboSchema = require('../schemata/gebo'),
@@ -27,10 +26,10 @@ module.exports = function(email) {
 //        console.log('---message');
 //        console.log(message);
 
-        console.log('here');
         // Form a social commitment
         sc.form(agent, 'perform', message).
             then(function(socialCommitment) {
+                console.log('HERE');
                 _verify(agent, message).
                     then(function(verified) {
 

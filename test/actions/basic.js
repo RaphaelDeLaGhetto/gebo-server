@@ -22,7 +22,8 @@ var verifiedUser = {
     };
 
 // Start up the test database
-nconf.argv().env().file({ file: 'local.json' });
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 var gebo = require('../../schemata/gebo')(TEST_DB),

@@ -1,7 +1,6 @@
 'use strict';
 
 var passport = require('passport'),
-    nconf = require('nconf'),
     generalUtils = require('../lib/utils'),
     conversationUtils = require('../conversations/utils'),
     https = require('https'),

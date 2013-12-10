@@ -6,6 +6,8 @@ var config = require('../../config/config'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent');
 
+nconf.file({ file: 'gebo.json' });
+
 var COL_NAME = 'appCollection',
 //    ADMIN_TOKEN = '1234',
 //    USER_TOKEN = '5678',

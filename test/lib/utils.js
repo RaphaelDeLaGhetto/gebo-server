@@ -12,6 +12,8 @@ var utils = require('../../lib/utils'),
 //nconf.argv().env().file({ file: 'local.json' });
 //var gebo = require('../../schemata/gebo')(nconf.get('testDb'));
 
+nconf.file({ file: 'gebo.json' });
+
 /**
  * getMongoDbName
  */

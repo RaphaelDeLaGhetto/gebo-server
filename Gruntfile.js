@@ -3,7 +3,8 @@
 var utils = require('./lib/utils'),
     nconf = require('nconf');
 
-nconf.argv().env().file({ file: 'local.json' });
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
 var db = require('./schemata/gebo')(nconf.get('email')),
     action = require('./actions/basic')(nconf.get('email'));
 

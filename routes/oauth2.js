@@ -20,7 +20,8 @@ var oauth2orize = require('oauth2orize'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
     mongoose = require('mongoose');
 
-nconf.argv().env().file({ file: 'local.json' });
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
 
 module.exports = function(email) {
 

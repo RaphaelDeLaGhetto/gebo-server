@@ -5,7 +5,8 @@ module.exports = function (app, express, passport, logger) {
         winston = require('winston'),
         requestLogger = require('winston-request-logger');
 
-    nconf.argv().env().file({ file: 'local.json' });
+    //nconf.argv().env().file({ file: 'local.json' });
+    nconf.file({ file: 'gebo.json' });
 
     // load assets node from configuration file.
     var assets = nconf.get('assets') || {};

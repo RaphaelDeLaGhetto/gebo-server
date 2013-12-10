@@ -1,7 +1,6 @@
 'use strict';
 
 var config = require('../config/config'),
-    nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q'),
@@ -323,12 +322,6 @@ module.exports = function(email) {
                     if (message && message.content.options) {
 
                       if (message.content.options.sort) {
-                        var sortField = message.content.options.sort;
-                        var ascending = true;
-                        if(sortField[0] === '-') {
-                          ascending = false;
-                          sortField = sortField.slice(1);
-                        }
                         cursor = cursor.sort(message.content.options.sort);
                       }
  

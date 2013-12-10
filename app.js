@@ -23,7 +23,8 @@ var logger = new (winston.Logger)({ transports: [ new (winston.transports.Consol
 require('./settings')(app, express, passport, logger);
 
 // Merge nconf overrides with the configuration file.
-nconf.argv().env().file({ file: 'local.json' });
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
 
 // Requirements
 var perform_route = require('./routes/perform')(nconf.get('email')),
@@ -49,7 +50,6 @@ app.post('/oauth/token', oauth2_routes.token);
 
 // Experimental JWT
 app.post('/authorize', oauth2_routes.testtoken);
-
 
 // Perform route
 app.post('/perform', perform_route.perform);

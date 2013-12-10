@@ -7,6 +7,7 @@ var mongo = require('mongodb'),
 
 var BASE_ADDRESS = 'http://theirhost.com';
 
+nconf.file({ file: 'gebo.json' });
 var geboDb = new geboSchema(nconf.get('testDb'));
 
 var SIGNING_PAIR;

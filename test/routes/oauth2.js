@@ -13,7 +13,9 @@ var COL_NAME = 'appCollection',
 // Agent configs
 var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 
-nconf.argv().env().file({ file: 'local.json' });
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
+
 var geboDb = new geboSchema(nconf.get('testDb'));
     //agentDb = new agentSchema('yanfen@hg.com');
 

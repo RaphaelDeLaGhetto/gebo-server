@@ -4,7 +4,6 @@ var message = require('../../routes/message'),
     nock = require('nock'),
     q = require('q'),
     extend = require('extend'),
-    nconf = require('nconf'),
     utils = require('../../lib/utils'),
     agentSchema = require('../../schemata/agent');
 

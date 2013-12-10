@@ -7,7 +7,8 @@ var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '1234',
     USER_TOKEN = '5678';
 
-var TEST_DB = nconf.argv().env().file({ file: 'local.json' }).get('testDb');
+nconf.file({ file: 'gebo.json' });
+var TEST_DB = nconf.get('testDb');
 var user = require('../../routes/user')(TEST_DB);
 
 /**

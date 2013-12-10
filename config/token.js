@@ -12,7 +12,8 @@ var q = require('q'),
 
 module.exports = function(email) {
 
-    nconf.argv().env().file({ file: 'local.json' });
+    //nconf.argv().env().file({ file: 'local.json' });
+    nconf.file({ file: 'gebo.json' });
 
     // JWT header
     var HEADER = {

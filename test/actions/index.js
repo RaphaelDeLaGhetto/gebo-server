@@ -2,7 +2,8 @@ var nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../../lib/utils');
 
-nconf.argv().env().file({ file: 'local.json' });
+//nconf.argv().env().file({ file: 'local.json' });
+nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 var gebo = require('../../schemata/gebo')(TEST_DB),
