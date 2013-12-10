@@ -17,7 +17,7 @@ var express = require('express'),
 exports.app = app;
 
 // Logging
-var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({colorize:true}) ] });
+var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
 // Load the settings
 require('./settings')(app, express, passport, logger);

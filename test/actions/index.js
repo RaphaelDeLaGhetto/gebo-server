@@ -1,15 +1,14 @@
 var nconf = require('nconf'),
     mongo = require('mongodb'),
+    path = require('path'),
+    fs = require('fs'),
     utils = require('../../lib/utils');
 
-//nconf.argv().env().file({ file: 'local.json' });
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
-var gebo = require('../../schemata/gebo')(TEST_DB),
-    agentSchema = require('../../schemata/agent');
-
-var action = require('../../actions')(TEST_DB);
+//var gebo = require('../../schemata/gebo')(TEST_DB),
+//    agentSchema = require('../../schemata/agent');
 
 exports.onLoad = {
 
@@ -36,208 +35,102 @@ exports.onLoad = {
     },
 };
 
-/**
- * agree
- */
-//exports.agree = {
-//   setUp: function(callback) {
-//        try {
-//            /**
-//             * Setup a registrant
-//             */
-//            var registrant = new gebo.registrantModel({
-//                    name: 'dan',
-//                    email: 'dan@hg.com',
-//                    password: 'password123',
-//                    admin: false,
-//                    _id: new mongo.ObjectID('0123456789AB')
-//                });
-//          
-//            /**
-//             * Make a social commitment
-//             */
-//            var newFriend = {
-//                    name: 'Yanfen',
-//                    email: 'yanfen@hg.com',
-//                    gebo: 'https://theirhost.com',
-//                    certificate: 'some certificate',
-//                };
-// 
-//            var agentDb = new agentSchema('dan@hg.com'); 
-//            var sc = new agentDb.socialCommitmentModel({
-//                    performative: 'request',
-//                    action: 'friend',
-//                    message: { content: newFriend },
-//                    creditor: 'yanfen@hg.com',
-//                    debtor: 'dan@hg.com',
-//                  });
-//
-//            registrant.save(function(err) {
-//                sc.save(function(err) {
-//                    if (err) {
-//                        console.log(err);
-//                      }
-//                      agentDb.connection.db.close();
-//                      callback();
-//                    });
-//                  });
-//     	}
-//        catch(e) {
-//            console.dir(e);
-//            callback();
-//    	}
-//    }, 
-//
-//    tearDown: function(callback) {
-//       
-//        gebo.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//          });
-//
-//        var agentDb = new agentSchema('dan@hg.com'); 
-//        agentDb.connection.on('open', function(err) {
-//            agentDb.connection.db.dropDatabase(function(err) {
-//                if (err) {
-//                  console.log(err);
-//                }
-//                agentDb.connection.db.close();
-//                callback();
-//              });
-//          });
-//     }, 
-//
-//    'Perform the action and fulfil the social commitment': function(test) {
-//        test.expect(7);
-//
-//        // Get the social commitment
-//        var agentDb = new agentSchema('dan@hg.com'); 
-//        agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//            test.equal(scs.length, 1);
-//            action.agree({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
-//                         { socialCommitmentId: scs[0]._id }).
-//                then(function(data) {
-//                    agentDb.connection.db.close();
-//                    test.equal(data.name, 'Yanfen');
-//                    test.equal(data.email, 'yanfen@hg.com');
-//                    test.equal(data.gebo, 'https://theirhost.com');
-//                    test.equal(data.certificate, 'some certificate');
-//                    agentDb = new agentSchema('dan@hg.com'); 
-//                    agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//                        agentDb.connection.db.close();
-//                        if (err) {
-//                          console.log(err);
-//                          test.ok(false, err);
-//                        }
-//                        test.equal(scs.length, 1);
-//                        test.equal(scs[0].fulfilled === null, false);
-//                        test.done();
-//                      });
-//                  }).
-//                catch(function(err) {
-//                    console.log(err);
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//          });
-//    },
-//};
-//
-///**
-// * refuse
-// */
-//exports.refuse = {
-//   setUp: function(callback) {
-//        try {
-//            /**
-//             * Setup a registrant
-//             */
-//            var registrant = new gebo.registrantModel({
-//                    name: 'dan',
-//                    email: 'dan@hg.com',
-//                    password: 'password123',
-//                    admin: false,
-//                    _id: new mongo.ObjectID('0123456789AB')
-//                });
-//          
-//            /**
-//             * Make a social commitment
-//             */
-//            var newFriend = {
-//                    name: 'Yanfen',
-//                    email: 'yanfen@hg.com',
-//                    gebo: 'https://theirhost.com',
-//                    certificate: 'some certificate',
-//                };
-// 
-//            var agentDb = new agentSchema('dan@hg.com'); 
-//            var sc = new agentDb.socialCommitmentModel({
-//                    performative: 'request',
-//                    action: 'friend',
-//                    message: { content: newFriend },
-//                    creditor: 'yanfen@hg.com',
-//                    debtor: 'dan@hg.com',
-//                  });
-//
-//            registrant.save(function(err) {
-//                sc.save(function(err) {
-//                    if (err) {
-//                        console.log(err);
-//                      }
-//                      agentDb.connection.db.close();
-//                      callback();
-//                    });
-//                  });
-//     	}
-//        catch(e) {
-//            console.dir(e);
-//            callback();
-//    	}
-//    }, 
-//
-//    tearDown: function(callback) {
-//       
-//        gebo.connection.db.dropDatabase(function(err) {
-//            if (err) {
-//              console.log(err)
-//            }
-//          });
-//
-//        var agentDb = new agentSchema('dan@hg.com'); 
-//        agentDb.connection.on('open', function(err) {
-//            agentDb.connection.db.dropDatabase(function(err) {
-//                if (err) {
-//                  console.log(err);
-//                }
-//                agentDb.connection.db.close();
-//                callback();
-//              });
-//          });
-//     }, 
-//
-//    'Fulfil the social commitment but do not perform the action': function(test) {
-//        test.expect(3);
-//
-//        // Get the social commitment
-//        var agentDb = new agentSchema('dan@hg.com'); 
-//        agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//            test.equal(scs.length, 1);
-//            test.equal(scs[0].fulfilled, null);
-//            action.refuse({ dbName: 'dan@hg.com', read: true, write: true, execute: true },
-//                          { socialCommitmentId: scs[0]._id }).
-//                then(function(sc) {
-//                    agentDb.connection.db.close();
-//                    test.equal(sc.fulfilled === null, false);
-//                    test.done();
-//                  }).
-//                catch(function(err) {
-//                    console.log(err);
-//                    test.ok(false, err);
-//                    test.done();
-//                  });
-//          });
-//    },
-//};
+exports.add = {
 
+    tearDown: function(callback) {
+        var files = fs.readdirSync(__dirname + '/../../actions');
+
+        files.forEach(function(file) {
+            if (require.cache[path.resolve(__dirname + '/../../actions/' + file)]) {
+              delete require.cache[path.resolve(__dirname + '/../../actions/' + file)]
+            }
+        });
+        callback();
+    },
+
+    'Add a single action function': function(test) {
+        test.expect(3);
+
+        var actions = require('../../actions')(TEST_DB);
+        test.equal(actions.testAction, undefined);
+
+        // Create a new action
+        function testAction() {
+                return 'testAction, yeah yeah!';
+              };
+
+        actions.add(testAction);
+
+        test.equal(typeof actions.testAction, 'function');
+        test.equal(actions.testAction(), 'testAction, yeah yeah!');
+
+        test.done();
+    },
+
+    'Add a single action from function assigned to variable': function(test) {
+        test.expect(3);
+
+        var actions = require('../../actions')(TEST_DB);
+        test.equal(actions.testAction, undefined);
+
+        // Create a new action
+        var testAction = function() {
+                return 'testAction, yeah yeah!';
+              };
+
+        actions.add('testAction', testAction);
+
+        test.equal(typeof actions.testAction, 'function');
+        test.equal(actions.testAction(), 'testAction, yeah yeah!');
+
+        test.done();
+    },
+
+    'Throw an error if function provided has no name': function(test) {
+        test.expect(2);
+
+        var actions = require('../../actions')(TEST_DB);
+        test.equal(actions.testAction, undefined);
+
+        // Create a new action
+        var testAction = function() {
+                return 'testAction, yeah yeah!';
+              };
+
+        try {
+            actions.add(testAction);
+            test.ok(false, 'This should throw an error');
+        }
+        catch(err) {
+            test.equal(err.message, 'This action needs a name');
+        }
+
+        test.done();
+    },
+
+    'Add a module with actions': function(test) {
+        test.expect(6);
+
+        var actions = require('../../actions')(TEST_DB);
+        test.equal(actions.testAction1, undefined);
+        test.equal(actions.testAction2, undefined);
+
+        var mod = require('./mocks/testActions')('some@email.com');
+        actions.add(mod);
+
+        test.equal(typeof actions.testAction1, 'function');
+        test.equal(actions.testAction1(), 'testAction1, yeah yeah!');
+        test.equal(typeof actions.testAction2, 'function');
+        test.equal(actions.testAction2(), 'testAction2, yeah yeah!');
+
+        test.done();
+    },
+};
+
+exports.remove = {
+    'Remove a single action': function(test) {
+        var actions = require('../../actions')(TEST_DB);
+        test.done();
+    },
+};
 

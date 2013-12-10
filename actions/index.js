@@ -29,86 +29,42 @@ module.exports = function(email) {
       });
 
     /**
-     * Agree to perform the requested action
+     * Add a new action to the actions module.
      *
-     * @param Object
-     * @param Object
+     * This function does not check to see if a function
+     * name will overwrite another. That task is left to 
+     * the developer, for now.
      *
-     * @return promise
+     * @param string - optional name
+     * @param function or module.exports object
      */
-//    exports.agree = function(verified, message) {
-//        var deferred = q.defer();
-//        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-//          console.log('agree message');
-//          console.log(message);
-//          var agentDb = new agentSchema(verified.dbName);
-//          agentDb.socialCommitmentModel.findById(message.socialCommitmentId, function(err, sc) {
-//                  console.log('agree sc');
-//                  console.log(sc);
-//                  if (err) {
-//                    agentDb.connection.db.close();
-//                    deferred.reject(err);
-//                  }
-//                  else {
-//                    exports[sc.action](verified, sc.message).
-//                        then(function(data) {
-//                            sc.fulfilled = Date.now();
-//                            sc.save(function(err, sc) {
-//                                        agentDb.connection.db.close();
-//                                        if (err) {
-//                                          deferred.reject(err);
-//                                        }
-//                                        else {
-//                                          deferred.resolve(data);
-//                                        }
-//                                      });
-//                          }).
-//                        catch(function(err) {
-//                            deferred.reject(err);
-//                          });
-//                  }
-//              });
-//        }
-//        else {
-//          deferred.reject('You are not permitted to request or propose that action');
-//        }
-// 
-//        return deferred.promise;
-//      };
-//
-//    /**
-//     * Refuse to perform the requested action
-//     *
-//     * @param Object
-//     * @param Object
-//     *
-//     * @return promise
-//     */
-//    exports.refuse = function(verified, message) {
-//        var deferred = q.defer();
-//        if (verified.admin || (verified.read && verified.write && verified.execute)) { 
-//            var agentDb = new agentSchema(verified.dbName);
-//            agentDb.socialCommitmentModel.findOneAndUpdate(
-//                    { _id: message.socialCommitmentId },
-//                    { fulfilled: Date.now() },
-//                    function(err, sc) {
-//                        agentDb.connection.db.close();
-//                        if (err) {
-//                          deferred.reject(err);
-//                        }
-//                        else {
-//                          console.log('refused sc');
-//                          console.log(sc);
-//                          deferred.resolve(sc);
-//                        }
-//                      });
-//        }
-//        else {
-//          deferred.reject('You are not permitted to request or propose that action');
-//        }
-// 
-//        return deferred.promise;
-//      };
+   exports.add = function(name, actions) {
+
+        if (typeof name === 'function') {
+          actions = name;
+
+          if (actions.name) {
+            name = actions.name;
+          }
+          else {
+            throw new Error('This action needs a name');
+          }
+          exports[name] = actions; 
+        }
+        else if (typeof name === 'string' && typeof actions === 'function') {
+          exports[name] = actions; 
+        }
+        else if (typeof name === 'object' && !actions) {
+          actions = name;
+          var keys = Object.keys(actions);
+          for (var i = 0; i < keys.length; i++) {
+            if (!exports[keys[i]]) {
+              exports[keys[i]] = actions[keys[i]];
+             // throw 'Two actions cannot have the same name';
+            }
+          }
+        }
+     }; 
 
     return exports;
   };
