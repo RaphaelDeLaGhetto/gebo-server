@@ -501,7 +501,7 @@ module.exports = function(email) {
     exports.registerAgent = _registerAgent;
 
     /**
-     * Remove an agent from this agent's database
+     * Remove an agent from the gebo agent's database
      *
      * @param Object
      * @param Object
@@ -511,7 +511,7 @@ module.exports = function(email) {
 
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
-          db.registrantModel.remove({ email: message.email }, function(err, ack) {
+          db.registrantModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);
                   }

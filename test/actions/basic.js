@@ -1952,7 +1952,7 @@ exports.deregisterAgent = {
     'Remove an agent from the database if an admin': function(test) {
         test.expect(2);
 
-        action.deregisterAgent({ admin: true }, { email: 'dan@example.com' }).
+        action.deregisterAgent({ admin: true }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.equal(ack, 1);
                     gebo.registrantModel.find({}, function(err, agents) {
@@ -1969,7 +1969,7 @@ exports.deregisterAgent = {
     'Remove an agent from the database with execute permission': function(test) {
         test.expect(2);
 
-        action.deregisterAgent({ admin: false, execute: true }, { email: 'dan@example.com' }).
+        action.deregisterAgent({ admin: false, execute: true }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.equal(ack, 1);
                     gebo.registrantModel.find({}, function(err, agents) {
@@ -1986,7 +1986,7 @@ exports.deregisterAgent = {
     'Do not remove an agent without execute permission or admin status': function(test) {
         test.expect(1);
 
-        action.deregisterAgent({ admin: false, execute: false }, { email: 'dan@example.com' }).
+        action.deregisterAgent({ admin: false, execute: false }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.ok(false, 'I should not be allowed to deregister an agent'); 
                     test.done();
@@ -2000,7 +2000,7 @@ exports.deregisterAgent = {
 
     'Should not barf if agent does not exist': function(test) {
         test.expect(1);
-        action.deregisterAgent({ admin: true }, { email: 'nosuchagent@example.com' }).
+        action.deregisterAgent({ admin: true }, { content: { email: 'nosuchagent@example.com' } }).
             then(function(ack) {
                     gebo.registrantModel.find({}, function(err, agents) {
                         if (err) {
