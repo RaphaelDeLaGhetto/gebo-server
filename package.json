@@ -1,7 +1,7 @@
 {
   "name": "gebo-server",
-  "description": "This is an OAuth2 server built with Express",
-  "version": "0.0.1",
+  "description": "Grunt, Express, Bootstrap, OAuth2 agent",
+  "version": "0.0.0",
   "homepage": "https://github.com/RaphaelDeLaGhetto/gebo-server",
   "author": {
     "name": "Daniel Bidulock",
@@ -12,7 +12,7 @@
     "url": "https://github.com/RaphaelDeLaGhetto/gebo-server"
   },
   "bugs": {
-    "url": "https://github.com/dan/test/issues"
+    "url": "https://github.com/RaphaelDeLaGhetto/gebo-server/issues"
   },
   "licenses": [
     {
@@ -20,7 +20,7 @@
       "url": "https://github.com/RaphaelDeLaGhetto/gebo-server/blob/master/LICENSE"
     }
   ],
-  "main": "lib/test",
+  "main": "app",
   "engines": {
     "node": ">= 0.6.0"
   },
@@ -68,5 +68,5 @@
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-copy": "~0.4.1"
   },
-  "keywords": []
+  "keywords": ["grunt", "express", "bootstrap", "oauth2", "gebo", "agent"]
 }
