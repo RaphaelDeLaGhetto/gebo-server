@@ -1,12 +1,14 @@
-module.exports = function (app, express, passport, logger) {
+module.exports = function (app, express, passport, logger, root) {
 
     var nconf = require('nconf'),
         cachify = require('connect-cachify'),
         winston = require('winston'),
         requestLogger = require('winston-request-logger');
 
-    //nconf.argv().env().file({ file: 'local.json' });
-    nconf.file({ file: 'gebo.json' });
+    if (!root) {
+      root = __dirname;
+    }
+    nconf.file({ file: root + '/../gebo.json' });
 
     // load assets node from configuration file.
     var assets = nconf.get('assets') || {};
@@ -84,5 +86,5 @@ module.exports = function (app, express, passport, logger) {
         app.use(app.router);
     });
 
-    return app;
+//    return app;
 };
