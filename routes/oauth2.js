@@ -404,16 +404,5 @@ module.exports = function(email) {
         server.errorHandler()
       ];
     
-    exports.testtoken = [
-    //    function(req, res) {
-    //        console.log('testtoken');
-    //        res.send(200);
-    //    },
-        passport.authenticate(['oauth2-jwt-bearer'], { session: false }),
-        //passport.authenticate(['oauth2-client-password'], { session: false }),
-        server.token(),
-        server.errorHandler()
-      ];
-    
     return exports;
   };
