@@ -55,31 +55,6 @@ module.exports = function(dbName) {
       ];
     
     /**
-     * _poke
-     *
-     * This simply verifies friendship by returning a valid
-     * token with no real privileges attached.
-     */
-    var _poke = function(req, res) {
-        token.get(req.body.email, '', nconf.get('email')).
-            then(function(token) {
-                console.log('token');
-                console.log(token);
-                res.send(200, token);
-              }).
-            catch(function(err) {
-                console.log('_poke err');
-                console.log(err);
-                res.send(401, err);
-              });
-      };
-    exports.poke = [
-        pass.ensureAuthenticated,
-        pass.ensureAdmin,
-        _poke,
-      ];
-
-    /**
      *  POST /login
      */
     exports.postLogin = passport.authenticate('local', {

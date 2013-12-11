@@ -11,12 +11,6 @@ nconf.file({ file: 'gebo.json' });
 var TEST_DB = nconf.get('testDb');
 var user = require('../../routes/user')(TEST_DB);
 
-/**
- * poke
- */
-exports.poke = {
-
-};
 
 /**
  * register
