@@ -12,7 +12,7 @@ module.exports = function (app, express, passport, logger, root) {
     nconf.file({ file: root + '/gebo.json' });
 
     // load assets node from configuration file.
-    var assets = nconf.get('assets') || {};
+//    var assets = nconf.get('assets') || {};
 
     // Development Configuration
     app.configure('development', 'test', function(){
@@ -61,23 +61,23 @@ module.exports = function (app, express, passport, logger, root) {
 
 
     // Cachify Asset Configuration
-    app.use(cachify.setup(assets, {
-        root: path + '/public',
-        production: nconf.get('cachify')
-    }));
+//    app.use(cachify.setup(assets, {
+//        root: root + '/public',
+//        production: nconf.get('cachify')
+//    }));
 
     // Global Configuration
     app.configure(function(){
 
         app.use(allowCrossDomain);
-        app.set('views', path + '/views');
+        app.set('views', root + '/views');
         app.set('view engine', 'jade');
         app.set('view options', { layout: false });
         app.use(express.cookieParser());
         app.use(express.bodyParser());
         app.use(express.methodOverride());
-        app.use(express.static(path + '/public'));
-        app.use(express.favicon(path + '/favicon.ico'));
+        app.use(express.static(root + '/public'));
+        app.use(express.favicon(root + '/favicon.ico'));
         app.use(express.session({secret: 'keyboard cat'}));
         app.use(requireHttps);
         // Initialize Passport!  Also use passport.session() middleware, to support
