@@ -3,12 +3,13 @@ module.exports = function (app, express, passport, logger, root) {
     var nconf = require('nconf'),
         cachify = require('connect-cachify'),
         winston = require('winston'),
+        path = require('path'),
         requestLogger = require('winston-request-logger');
 
     if (!root) {
-      root = __dirname;
+      root = path.normalize(__dirname + '/..');
     }
-    nconf.file({ file: root + '/../gebo.json' });
+    nconf.file({ file: root + '/gebo.json' });
 
     // load assets node from configuration file.
     var assets = nconf.get('assets') || {};
@@ -61,7 +62,7 @@ module.exports = function (app, express, passport, logger, root) {
 
     // Cachify Asset Configuration
     app.use(cachify.setup(assets, {
-        root: __dirname + '/../public',
+        root: path + '/public',
         production: nconf.get('cachify')
     }));
 
@@ -69,14 +70,14 @@ module.exports = function (app, express, passport, logger, root) {
     app.configure(function(){
 
         app.use(allowCrossDomain);
-        app.set('views', __dirname + '/../views');
+        app.set('views', path + '/views');
         app.set('view engine', 'jade');
         app.set('view options', { layout: false });
         app.use(express.cookieParser());
         app.use(express.bodyParser());
         app.use(express.methodOverride());
-        app.use(express.static(__dirname + '/../public'));
-        app.use(express.favicon(__dirname + '/../favicon.ico'));
+        app.use(express.static(path + '/public'));
+        app.use(express.favicon(path + '/favicon.ico'));
         app.use(express.session({secret: 'keyboard cat'}));
         app.use(requireHttps);
         // Initialize Passport!  Also use passport.session() middleware, to support
