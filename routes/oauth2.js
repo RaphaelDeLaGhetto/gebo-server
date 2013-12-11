@@ -403,6 +403,20 @@ module.exports = function(email) {
         server.token(),
         server.errorHandler()
       ];
-    
+
+    /**
+     * Exchange a token for a user's profile information.
+     *
+     * This route verifies that the token is valid.
+     */
+    exports.verify = [
+        passport.authenticate('bearer', { session: false }),
+        function (req, res) {
+            console.log('api ---------------------------------');
+            console.log(req.user);
+            res.json(req.user);
+          },
+     ];
+   
     return exports;
   };

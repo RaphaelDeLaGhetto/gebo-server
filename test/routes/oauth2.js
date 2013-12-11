@@ -375,6 +375,5 @@ exports.verifyFriendship = {
                 test.done();
               });
     },
-
-
 };
+

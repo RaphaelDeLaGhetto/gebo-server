@@ -50,12 +50,10 @@ server.post('/signup', user_routes.signUp);
 server.get('/dialog/authorize', oauth2_routes.authorization); 
 server.post('/dialog/authorize/decision', oauth2_routes.decision); 
 server.post('/oauth/token', oauth2_routes.token);
+server.get('/verify', oauth2_routes.verify);
 
 // Perform route
 server.post('/perform', perform_route.perform);
-
-// API routes
-server.get('/verify', api_routes.verify);
 
 /**
  * Message routes
