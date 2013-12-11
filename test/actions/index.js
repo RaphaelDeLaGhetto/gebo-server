@@ -7,9 +7,6 @@ var nconf = require('nconf'),
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
-//var gebo = require('../../schemata/gebo')(TEST_DB),
-//    agentSchema = require('../../schemata/agent');
-
 exports.onLoad = {
 
     'Load and initialize every file in the actions folder': function(test) {
