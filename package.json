@@ -1,7 +1,7 @@
 {
   "name": "gebo-server",
   "description": "Grunt, Express, Bootstrap, OAuth2 agent",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/RaphaelDeLaGhetto/gebo-server",
   "author": {
     "name": "Daniel Bidulock",
@@ -68,5 +68,12 @@
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-copy": "~0.4.1"
   },
-  "keywords": ["grunt", "express", "bootstrap", "oauth2", "gebo", "agent"]
+  "keywords": [
+    "grunt",
+    "express",
+    "bootstrap",
+    "oauth2",
+    "gebo",
+    "agent"
+  ]
 }
