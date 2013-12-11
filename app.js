@@ -20,7 +20,7 @@ exports.app = app;
 var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
 // Load the settings
-require('./settings')(app, express, passport, logger);
+require('./config/settings')(app, express, passport, logger);
 
 // Merge nconf overrides with the configuration file.
 //nconf.argv().env().file({ file: 'local.json' });

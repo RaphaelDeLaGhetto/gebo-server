@@ -59,7 +59,7 @@ module.exports = function (app, express, passport, logger) {
 
     // Cachify Asset Configuration
     app.use(cachify.setup(assets, {
-        root: __dirname + '/public',
+        root: __dirname + '/../public',
         production: nconf.get('cachify')
     }));
 
@@ -67,14 +67,14 @@ module.exports = function (app, express, passport, logger) {
     app.configure(function(){
 
         app.use(allowCrossDomain);
-        app.set('views', __dirname + '/views');
+        app.set('views', __dirname + '/../views');
         app.set('view engine', 'jade');
         app.set('view options', { layout: false });
         app.use(express.cookieParser());
         app.use(express.bodyParser());
         app.use(express.methodOverride());
-        app.use(express.static(__dirname + '/public'));
-        app.use(express.favicon(__dirname + '/favicon.ico'));
+        app.use(express.static(__dirname + '/../public'));
+        app.use(express.favicon(__dirname + '/../favicon.ico'));
         app.use(express.session({secret: 'keyboard cat'}));
         app.use(requireHttps);
         // Initialize Passport!  Also use passport.session() middleware, to support
