@@ -22,7 +22,6 @@ exports.server = server;
  * gebo requirements
  */
 var pass = require('./config/pass'),
-    api_routes = require('./routes/api'),
     basic_routes = require('./routes/basic'),
     message_routes = require('./routes/message'),
     perform_route = require('./routes/perform')(nconf.get('email')),
