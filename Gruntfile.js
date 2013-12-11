@@ -37,6 +37,7 @@ module.exports = function (grunt) {
                     'lib/**/*.js',
                     'routes/**/*.js',
                     'schemata/**/*.js',
+                    'app.js',
                 ],
                 dest: 'dist/<%= pkg.name %>.js'
             },
