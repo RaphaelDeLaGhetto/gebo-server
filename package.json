@@ -25,7 +25,8 @@
     "node": ">= 0.6.0"
   },
   "scripts": {
-    "test": "grunt nodeunit"
+    "test": "grunt nodeunit",
+    "postinstall": "bower install"
   },
   "dependencies": {
     "connect-cachify": "*",
