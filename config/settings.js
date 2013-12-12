@@ -12,7 +12,7 @@ module.exports = function (app, express, passport, logger, root) {
     nconf.file({ file: root + '/gebo.json' });
 
     // load assets node from configuration file.
-//    var assets = nconf.get('assets') || {};
+    var assets = nconf.get('assets') || {};
 
     // Development Configuration
     app.configure('development', 'test', function(){
@@ -61,10 +61,10 @@ module.exports = function (app, express, passport, logger, root) {
 
 
     // Cachify Asset Configuration
-//    app.use(cachify.setup(assets, {
-//        root: root + '/public',
-//        production: nconf.get('cachify')
-//    }));
+    app.use(cachify.setup(assets, {
+        root: root + '/public',
+        production: nconf.get('cachify')
+    }));
 
     // Global Configuration
     app.configure(function(){
