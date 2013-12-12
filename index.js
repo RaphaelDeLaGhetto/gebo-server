@@ -1,12 +1,14 @@
-var express = require('express'),
+var agentSchema = require('./schemata/agent'),
+    geboSchema = require('./schemata/gebo'),
+    express = require('express'),
+    fs = require('fs'),
     http = require('http'),
     https = require('https'),
-    server = express(),
     nconf = require('nconf'),
-    winston = require('winston'),
     passport = require('passport'),
+    server = express(),
     utils = require('./lib/utils'),
-    fs = require('fs');
+    winston = require('winston');
 
 module.exports = function(root) {
 
@@ -41,6 +43,8 @@ module.exports = function(root) {
      * Expose the necessary modules 
      */   
     exports.actions = require('./actions')(nconf.get('email')); 
+    exports.agentSchema = agentSchema,
+    exports.geboSchema = geboSchema,
     exports.server = server;
     exports.utils = utils;
     
