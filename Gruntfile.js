@@ -23,34 +23,34 @@ module.exports = function (grunt) {
                    ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
 
         // Task configuration.
-        concat: {
-            options: {
-                banner: '<%= banner %>',
-                stripBanners: true
-            },
-            dist: {
-                //src: ['lib/<%= pkg.name %>.js'],
-                src: [
-                    'actions/**/*.js',
-                    'config/**/*.js',
-                    'conversations/**/*.js',
-                    'lib/**/*.js',
-                    'routes/**/*.js',
-                    'schemata/**/*.js',
-                    'app.js',
-                ],
-                dest: 'dist/<%= pkg.name %>.js'
-            },
-        },
-        uglify: {
-            options: {
-                banner: '<%= banner %>'
-            },
-            dist: {
-                src: '<%= concat.dist.dest %>',
-                dest: 'dist/<%= pkg.name %>.min.js'
-            },
-        },
+//        concat: {
+//            options: {
+//                banner: '<%= banner %>',
+//                stripBanners: true
+//            },
+//            dist: {
+//                //src: ['lib/<%= pkg.name %>.js'],
+//                src: [
+//                    'actions/**/*.js',
+//                    'config/**/*.js',
+//                    'conversations/**/*.js',
+//                    'lib/**/*.js',
+//                    'routes/**/*.js',
+//                    'schemata/**/*.js',
+//                    'app.js',
+//                ],
+//                dest: 'dist/<%= pkg.name %>.js'
+//            },
+//        },
+//        uglify: {
+//            options: {
+//                banner: '<%= banner %>'
+//            },
+//            dist: {
+//                src: '<%= concat.dist.dest %>',
+//                dest: 'dist/<%= pkg.name %>.min.js'
+//            },
+//        },
         nodeunit: {
             files: ['test/**/*.js']
         },
@@ -91,41 +91,42 @@ module.exports = function (grunt) {
                 tasks: ['jshint:test', 'nodeunit']
             },
         },
-        clean: {
-            build: {
-                src: ['dist']
-            },
-        },
-        copy: {
-            build: {
-                cwd: 'src',
-                src: ['*.html'],
-                dest: 'dist',
-                expand: true
-            },
-        },
+//        clean: {
+//            build: {
+//                src: ['dist']
+//            },
+//        },
+//        copy: {
+//            build: {
+//                cwd: 'src',
+//                src: ['*.html'],
+//                dest: 'dist',
+//                expand: true
+//            },
+//        },
 
     });
 
     // These plugins provide necessary tasks.
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+//    grunt.loadNpmTasks('grunt-contrib-concat');
+//    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-nodeunit');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-copy');
+//    grunt.loadNpmTasks('grunt-contrib-clean');
+//    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Default task.
-    grunt.registerTask('default', ['jshint', 'nodeunit', 'concat', 'uglify']);
+    //grunt.registerTask('default', ['jshint', 'nodeunit', 'concat', 'uglify']);
+    grunt.registerTask('default', ['jshint', 'nodeunit']);
 
     // Build
-    grunt.registerTask('build', [
-        'clean',
-        'copy',
-        'concat',
-        'uglify',
-      ]);
+//    grunt.registerTask('build', [
+//        'clean',
+//        'copy',
+//        'concat',
+//        'uglify',
+//      ]);
 
     /** 
      * Thank you to jaredhanson/passport-local
@@ -240,36 +241,6 @@ module.exports = function (grunt) {
                     console.log(err);
                     done();
                   });
-          });
-
-    /**
-     * renew
-     */
-    grunt.registerTask('shakehands', 'exchange certificates between friends',
-        function (friendEmail, myEmail) {
-
-            // Put grunt into async mode
-            var done = this.async();
-
-            var agentDb = require('./schemata/agent')(myEmail);
-            agentDb.friendModel.findOne({ email: friendEmail }, function (err, friend) {
-                done();
-              });
-
-//            utils.getPrivateKeyAndCertificate().
-//                then(function(pair) {
-//                    console.log('pair');
-//                    console.log(pair);
-//
-//                    var agentDb = require('./schemata/agent')(myEmail);
-//                    agentDb.friendModel({ email: friendEmail },
-//                        function(err, friend) {
-//                            console.log(friend);
-//                            done();
-//                          });
-//                     
-//
-//                  });            
           });
 
     /**
