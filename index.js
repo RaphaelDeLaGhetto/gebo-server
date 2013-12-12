@@ -5,7 +5,7 @@ var express = require('express'),
     nconf = require('nconf'),
     winston = require('winston'),
     passport = require('passport'),
-    util = require('util'),
+    utils = require('./lib/utils'),
     fs = require('fs');
 
 module.exports = function(root) {
@@ -40,8 +40,9 @@ module.exports = function(root) {
     /**
      * Expose the necessary modules 
      */   
-    exports.server = server;
     exports.actions = require('./actions')(nconf.get('email')); 
+    exports.server = server;
+    exports.utils = utils;
     
     /**
      * Winston Logger
