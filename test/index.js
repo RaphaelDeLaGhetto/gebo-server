@@ -41,3 +41,36 @@ exports.utils = {
         test.done();
     },
 };
+
+/**
+ * schemata
+ */
+exports.schemata = {
+    'Return schemata objects with which to instantiate mongoose models': function(test) {
+        test.expect(5);
+        var gebo = require('../index')();
+
+        var dbName = new gebo.agentSchema('dan@example.com');
+        var friend = new dbName.friendModel({
+                name: 'Some guy',
+                email: 'some@guy.com',
+                gebo: 'https://somegebo.com',
+            });
+
+        test.equal(friend.name, 'Some guy');
+        test.equal(friend.email, 'some@guy.com');
+        test.equal(friend.gebo, 'https://somegebo.com');
+
+        dbName = new gebo.geboSchema('dan@example.com');
+        var registrant = new dbName.registrantModel({
+                name: 'Some guy',
+                email: 'some@guy.com',
+            });
+        test.equal(friend.name, 'Some guy');
+        test.equal(friend.email, 'some@guy.com');
+
+        test.done();
+    },
+};
+
+
