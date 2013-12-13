@@ -22,7 +22,7 @@ module.exports = function(email) {
           for (var i = 0; i < keys.length; i++) {
             if (!exports[keys[i]]) {
               exports[keys[i]] = actions[keys[i]];
-             // throw 'Two actions cannot have the same name';
+              // throw 'Two actions cannot have the same name';
             }
           }
         }
