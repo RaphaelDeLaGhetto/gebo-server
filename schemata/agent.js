@@ -7,16 +7,7 @@ module.exports = function (email) {
     // Turn the email into a mongo-friendly database name
     var dbName = utils.ensureDbName(email);
 
-    /** 
-     * Thank you to jaredhanson/passport-local
-     * https://github.com/jaredhanson/passport-local
-     *
-     * and jaredhanson/oauth2orize
-     * https://github.com/jaredhanson/oauth2orize
-     */
-    var mongoose = require('mongoose'),
-        bcrypt = require('bcrypt'),
-        SALT_WORK_FACTOR = 10;
+    var mongoose = require('mongoose');
 
     /**
      *  Database config
@@ -26,7 +17,7 @@ module.exports = function (email) {
         process.env.MONGOHQ_URL ||
         'mongodb://localhost/' + dbName;
 
-    var mongoOptions = { db: { safe: true }};
+    var mongoOptions = { db: { safe: true } };
 
     /**
      * Connect to mongo
