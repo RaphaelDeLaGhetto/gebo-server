@@ -6,7 +6,7 @@ nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 /**
- * add
+ * Add an action
  */
 exports.actionAdd = {
 
@@ -24,6 +24,26 @@ exports.actionAdd = {
 
         test.equal(typeof gebo.actions.testAction, 'function');
         test.equal(gebo.actions.testAction(), 'testAction, yeah yeah!');
+
+        test.done();
+    },
+};
+
+/**
+ * Add a schema
+ */
+exports.schemaAdd = {
+
+    'Should be able to add a schema': function(test) {
+        test.expect(3);
+        var gebo = require('../index')();
+        test.equal(gebo.schemata.test, undefined);
+
+        var testSchema = require('./schemata/mocks/test');
+        gebo.actions.add('test', testSchema);
+
+        test.equal(typeof gebo.actions.test, 'function');
+        test.equal(typeof new gebo.actions.test(TEST_DB), 'object');
 
         test.done();
     },
