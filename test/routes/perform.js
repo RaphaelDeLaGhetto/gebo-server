@@ -204,7 +204,7 @@ exports.verify = {
     'Return permissions object for a friend attempting to perform an action on a resource owned by an admin agent': function(test) {
         test.expect(6);
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
-                            { receiver: 'dan@example.com', content: { resource: 'app@painter.com' } }).
+                       { receiver: 'dan@example.com', content: { resource: 'app@painter.com' } }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
@@ -223,7 +223,7 @@ exports.verify = {
     'Return permissions object for an admin agent attempting to perform an action on a friend\'s resource': function(test) {
         test.expect(6);
         perform.verify({ name: 'richard', email: 'richard@construction.com', admin: true },
-                            { receiver: 'yanfen@example.com', content: { resource: 'someotherapp@example.com' } }).
+                       { receiver: 'yanfen@example.com', content: { resource: 'someotherapp@example.com' } }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -242,7 +242,7 @@ exports.verify = {
     'Return permissions object for a regular agent attempting to perform an action on his own resource with dbName param set': function(test) {
         test.expect(6);
         perform.verify({ name: 'yanfen', email: 'yanfen@example.com', admin: false },
-                            { receiver: 'yanfen@example.com', content: { resource: 'someotherapp@example.com' } }).
+                       { receiver: 'yanfen@example.com', content: { resource: 'someotherapp@example.com' } }).
             then(function(verified) {
                 test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
                 test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
@@ -334,32 +334,75 @@ exports.verify = {
               });
     },
 
-
-    'Do not barf if a non-friend (non-admin) attempts to perform an action on a resource': function(test) {
-        test.expect(1);
+    'Return a permissions object for a non-friend (non-admin) attempting to perform an action on a resource': function(test) {
+        test.expect(5);
         perform.verify({ name: 'dan', email: 'dan@example.com', admin: false },
-                            { receiver: 'yanfen@example.com', content: { resource: 'app@construction.com' } }).
+                       { receiver: 'yanfen@example.com', content: { resource: 'app@construction.com' } }).
             then(function(verified) {
-                test.ok(false, 'Permission should not have been granted');
+                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
+                test.equal(verified.collectionName, 'app@construction.com');
+                test.equal(verified.read, false);
+                test.equal(verified.write, false);
+                test.equal(verified.execute, false);
                 test.done();      
               }).
             catch(function(err) {
-                test.equal(err, 'I don\'t know you');       
+                test.ok(false, 'rwx permission should have been denied in each case');
                 test.done();      
               });
     },
 
-    'Do not barf if access has not been granted to the resource in question': function(test) {
-        test.expect(1);
+    'Return a permissions object for a friend who has not been granted to the resource in question': function(test) {
+        test.expect(5);
         perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                            { receiver: 'yanfen@example.com', content: { resource: 'someother@inaccessibleapp.com' } }).
+                       { receiver: 'yanfen@example.com', content: { resource: 'someother@inaccessibleapp.com' } }).
             then(function(verified) {
-                test.ok(false, 'Permission should not have been granted');
+                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
+                test.equal(verified.collectionName, 'someother@inaccessibleapp.com');
+                test.equal(verified.read, false);
+                test.equal(verified.write, false);
+                test.equal(verified.execute, false);
                 test.done();      
               }).
             catch(function(err) {
-                test.equal(err, 'You don\'t have access to that resource'); 
+                test.ok(false, 'rwx permission should have been denied in each case');
+                test.done();
+              });
+    },
+
+    'Return a permissions object for a friend when no resource is specified': function(test) {
+        test.expect(5);
+        perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
+                       { receiver: 'yanfen@example.com' }).
+            then(function(verified) {
+                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
+                test.equal(verified.collectionName, undefined);
+                test.equal(verified.read, false);
+                test.equal(verified.write, false);
+                test.equal(verified.execute, false);
                 test.done();      
+              }).
+            catch(function(err) {
+                test.ok(false, 'rwx permission have been denied in each case');
+                test.done();
+              });
+    },
+
+    'Return a permissions object for a non-friend when no resource is specified': function(test) {
+        test.expect(5);
+        perform.verify({ name: 'dan', email: 'dan@example.com', admin: false },
+                       { receiver: 'yanfen@example.com' }).
+            then(function(verified) {
+                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
+                test.equal(verified.collectionName, undefined);
+                test.equal(verified.read, false);
+                test.equal(verified.write, false);
+                test.equal(verified.execute, false);
+                test.done();      
+              }).
+            catch(function(err) {
+                test.ok(false, 'rwx permission have been denied in each case');
+                test.done();
               });
     },
 };
@@ -444,10 +487,10 @@ exports.handler = {
 
         perform.handler(req, RES, function(err, results) { 
             if (err) {
-              test.equal(err, 'I don\'t know you');
+              test.equal(err, 'You are not allowed access to that resource');
             }
             test.equal(_code, 401);
-            test.equal(_content, 'I don\'t know you');
+            test.equal(_content, 'You are not allowed access to that resource');
             test.done();
           });
 

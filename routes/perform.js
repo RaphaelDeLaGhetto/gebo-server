@@ -23,8 +23,10 @@ module.exports = function(email) {
         var message = req.body,
             agent = req.user;
 
-//        console.log('---message');
-//        console.log(message);
+        console.log('---message');
+        console.log(message);
+        console.log('req.files');
+        console.log(req.files);
 
         // Form a social commitment
         sc.form(agent, 'perform', message).
@@ -64,7 +66,7 @@ module.exports = function(email) {
                             catch(function(err) {
                                     console.log('action error');
                                     console.log(err);
-                                    res.send(404, err);
+                                    res.send(401, err);
                                     done(err);
                               });
                       }).
@@ -115,10 +117,20 @@ module.exports = function(email) {
     function _verify(agent, message) {
         var deferred = q.defer();
 
+        // A resoure does not necessarily need to be specified
+        // in every circumstance. The following is experimental
+        var resource;
+        if (message.content && message.content.resource) {
+          resource = utils.getMongoCollectionName(message.content.resource);
+        }
+
 	var verified = {
-                collectionName: utils.getMongoCollectionName(message.content.resource),
+                collectionName: resource,
                 admin: agent.admin,
-                dbName: utils.getMongoDbName(message.receiver)
+                dbName: utils.getMongoDbName(message.receiver),
+                read: false,
+                write: false,
+                execute: false,
             };
 
         if (!verified.dbName) {
@@ -128,13 +140,14 @@ module.exports = function(email) {
         if (utils.getMongoDbName(agent.email) !== verified.dbName && !verified.admin) {
           var agentDb = new agentSchema(verified.dbName);
   
-          agentDb.friendModel.findOne({ email: agent.email}, function(err, friend) {
+          agentDb.friendModel.findOne({ email: agent.email }, function(err, friend) {
                 agentDb.connection.db.close();
                 if (err) {
                   deferred.reject(err);
                 }
                 if (!friend) {
-                  deferred.reject('I don\'t know you');
+                  deferred.resolve(verified);
+                  //deferred.reject('I don\'t know you');
                 }
                 else { 
                   // Search the array for relevant resource
@@ -144,11 +157,9 @@ module.exports = function(email) {
                     verified.read = friend.hisPermissions[index].read;
                     verified.write = friend.hisPermissions[index].write;
                     verified.execute = friend.hisPermissions[index].execute;
-                    deferred.resolve(verified);
                   }
-                  else {
-                    deferred.reject('You don\'t have access to that resource');
-                  }
+
+                  deferred.resolve(verified);
                 }
               });
         }
