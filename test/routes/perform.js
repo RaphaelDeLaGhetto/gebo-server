@@ -524,5 +524,23 @@ exports.handler = {
               });
           });
     },
+
+    'Return a 501 error if the agent does not know how to perform the requested action': function(test) {
+        test.expect(2);
+
+        var req = {};
+        extend(true, req, SEND_REQ);
+        req.body.action = 'bakeACake';
+
+        perform.handler(req, RES, function(err, results) { 
+            if (err) {
+              console.log(err);
+              test.ok(false, err);
+            }
+            test.equal(_code, 501);
+            test.equal(_content, 'I don\'t know how to bakeACake');
+            test.done();
+        }); 
+    },
 };
 

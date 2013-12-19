@@ -48,27 +48,38 @@ module.exports = function(email) {
 //                        console.log('verified');
 //                        console.log(verified);
     
-                        action[message.action](verified, message).
-                            then(function(data) {
-                               sc.fulfil(message.receiver, socialCommitment._id).
-                                    then(function(sc) {
-                                        console.log('data');
-                                        console.log(data);
-                                        res.send(200, data);
-                                        done();
-                                      }).
-                                    catch(function(err) {
-                                        console.log(err);       
-                                        res.send(401, err);
-                                        done(err);
-                                      });
-                              }).
-                            catch(function(err) {
-                                    console.log('action error');
-                                    console.log(err);
-                                    res.send(401, err);
-                                    done(err);
-                              });
+                        /**
+                         * Make sure this agent knows how to
+                         * perform the requested action
+                         */
+                        if(!action[message.action]) {
+                          console.log('I should be getting here, at least');
+                          res.send(501, 'I don\'t know how to ' + message.action);
+                          done();
+                        }
+                        else {
+                          action[message.action](verified, message).
+                              then(function(data) {
+                                 sc.fulfil(message.receiver, socialCommitment._id).
+                                      then(function(sc) {
+                                          console.log('data');
+                                          console.log(data);
+                                          res.send(200, data);
+                                          done();
+                                        }).
+                                      catch(function(err) {
+                                          console.log(err);       
+                                          res.send(401, err);
+                                          done(err);
+                                        });
+                                }).
+                              catch(function(err) {
+                                      console.log('action error');
+                                      console.log(err);
+                                      res.send(401, err);
+                                      done(err);
+                                });
+                        }
                       }).
                     catch(function(err) {
                         console.log('Verification error');
