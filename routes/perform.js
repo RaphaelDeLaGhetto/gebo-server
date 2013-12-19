@@ -53,7 +53,6 @@ module.exports = function(email) {
                          * perform the requested action
                          */
                         if(!action[message.action]) {
-                          console.log('I should be getting here, at least');
                           res.send(501, 'I don\'t know how to ' + message.action);
                           done();
                         }
