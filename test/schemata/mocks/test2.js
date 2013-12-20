@@ -42,16 +42,30 @@ module.exports = function (email) {
         ObjectId = Schema.Types.ObjectId;
 
     /**
-     * Test schema
+     * Test2 schema
      */
-    var testSchema = new Schema({
+    var test2Schema = new Schema({
         data: { type: String, required: true, unique: false },
       });
 
-    // Export permission model
+    // Export test2Model
     try {
-        var testModel = connection.model('Test', testSchema);
-        exports.testModel = testModel;
+        var test2Model = connection.model('Test2', test2Schema);
+        exports.test2Model = test2Model;
+      }
+    catch (error) {}
+
+    /**
+     * Test3 schema
+     */
+    var test3Schema = new Schema({
+        data: { type: String, required: true, unique: false },
+      });
+
+    // Export test3Model
+    try {
+        var test3Model = connection.model('Test2', test3Schema);
+        exports.test3Model = test3Model;
       }
     catch (error) {}
 };

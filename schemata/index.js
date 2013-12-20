@@ -24,12 +24,19 @@ require('fs').readdirSync(__dirname + '/').forEach(function(file) {
   * @param function or module.exports object
   */
 exports.add = function(name, schema) {
-
-    if (typeof name !== 'string') {
+    if (typeof name === 'function') {
       throw new Error('This schema needs a name');
     }
-    else {
+    else if (typeof name === 'string' && typeof schema === 'function') {
       exports[name] = schema; 
+    }
+    else if (typeof name === 'object') {
+      var keys = Object.keys(name);
+      for (var i = 0; i < keys.length; i++) {
+        if (!exports[keys[i]]) {
+          exports[keys[i]] = name[keys[i]];
+        }
+      }
     }
   }; 
 

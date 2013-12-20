@@ -39,13 +39,31 @@ exports.add = {
         test.expect(3);
 
         var schemata = require('../../schemata');
-        test.equal(schemata.test, undefined);
+        test.equal(schemata.test1, undefined);
 
-        var testSchema = require('./mocks/test');
-        schemata.add('test', testSchema);
+        var testSchema = require('./mocks/test1');
+        schemata.add('test1', testSchema);
 
-        test.equal(typeof schemata.test, 'function');
-        test.equal(typeof new schemata.test(TEST_DB), 'object');
+        test.equal(typeof schemata.test1, 'function');
+        test.equal(typeof new schemata.test1(TEST_DB), 'object');
+
+        test.done();
+    },
+
+    'Add a collection of gebo schemata': function(test) {
+        test.expect(6);
+
+        var schemata = require('../../schemata');
+        test.equal(schemata.test1, undefined);
+        test.equal(schemata.test2, undefined);
+
+        var testSchemata = require('./mocks');
+        schemata.add(testSchemata);
+
+        test.equal(typeof schemata.test1, 'function');
+        test.equal(typeof new schemata.test1(TEST_DB), 'object');
+        test.equal(typeof schemata.test2, 'function');
+        test.equal(typeof new schemata.test2(TEST_DB), 'object');
 
         test.done();
     },
@@ -54,9 +72,9 @@ exports.add = {
         test.expect(2);
 
         var schemata = require('../../schemata');
-        test.equal(schemata.test, undefined);
+        test.equal(schemata.test1, undefined);
 
-        var testSchema = require('./mocks/test');
+        var testSchema = require('./mocks/test1');
 
         try {
             schemata.add(testSchema);
@@ -68,6 +86,7 @@ exports.add = {
 
         test.done();
     },
+
 };
 
 /**
@@ -80,7 +99,7 @@ exports.remove = {
         var schemata = require('../../schemata');
         test.equal(schemata.test, undefined);
 
-        var testSchema = require('./mocks/test');
+        var testSchema = require('./mocks/test1');
         schemata.add('test1', testSchema);
         schemata.add('test2', testSchema);
 
