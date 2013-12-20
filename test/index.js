@@ -39,11 +39,36 @@ exports.schemaAdd = {
         var gebo = require('../index')();
         test.equal(gebo.schemata.test, undefined);
 
-        var testSchema = require('./schemata/mocks/test');
-        gebo.actions.add('test', testSchema);
+        var testSchema = require('./schemata/mocks/test1');
+        gebo.schemata.add('test', testSchema);
 
-        test.equal(typeof gebo.actions.test, 'function');
-        test.equal(typeof new gebo.actions.test(TEST_DB), 'object');
+        test.equal(typeof gebo.schemata.test, 'function');
+        var db = new gebo.schemata.test(TEST_DB);
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
+    
+        test.done();
+    },
+
+    'Should be able to add a schemata object': function(test) {
+        test.expect(6);
+
+        var gebo = require('../index')();
+        test.equal(gebo.schemata.test1, undefined);
+        test.equal(gebo.schemata.test2, undefined);
+
+        var testSchemata = require('./schemata/mocks');
+        gebo.schemata.add(testSchemata);
+
+        test.equal(typeof gebo.schemata.test1, 'function');
+        var db = new gebo.schemata.test1(TEST_DB);
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
+
+        test.equal(typeof gebo.schemata.test2, 'function');
+        db = new gebo.schemata.test2(TEST_DB)
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
 
         test.done();
     },
@@ -70,24 +95,27 @@ exports.schemata = {
         test.expect(5);
         var gebo = require('../index')();
 
-        var dbName = new gebo.agentSchema('dan@example.com');
+        var dbName = new gebo.schemata.agent('dan@example.com');
         var friend = new dbName.friendModel({
                 name: 'Some guy',
                 email: 'some@guy.com',
                 gebo: 'https://somegebo.com',
             });
+        dbName.connection.db.close();
 
         test.equal(friend.name, 'Some guy');
         test.equal(friend.email, 'some@guy.com');
         test.equal(friend.gebo, 'https://somegebo.com');
 
-        dbName = new gebo.geboSchema('dan@example.com');
+        dbName = new gebo.schemata.gebo('dan@example.com');
         var registrant = new dbName.registrantModel({
                 name: 'Some guy',
                 email: 'some@guy.com',
             });
-        test.equal(friend.name, 'Some guy');
-        test.equal(friend.email, 'some@guy.com');
+        dbName.connection.db.close();
+
+        test.equal(registrant.name, 'Some guy');
+        test.equal(registrant.email, 'some@guy.com');
 
         test.done();
     },
