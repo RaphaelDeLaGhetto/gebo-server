@@ -22,36 +22,8 @@ module.exports = function (grunt) {
                    ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
 
         // Task configuration.
-//        concat: {
-//            options: {
-//                banner: '<%= banner %>',
-//                stripBanners: true
-//            },
-//            dist: {
-//                //src: ['lib/<%= pkg.name %>.js'],
-//                src: [
-//                    'actions/**/*.js',
-//                    'config/**/*.js',
-//                    'conversations/**/*.js',
-//                    'lib/**/*.js',
-//                    'routes/**/*.js',
-//                    'schemata/**/*.js',
-//                    'app.js',
-//                ],
-//                dest: 'dist/<%= pkg.name %>.js'
-//            },
-//        },
-//        uglify: {
-//            options: {
-//                banner: '<%= banner %>'
-//            },
-//            dist: {
-//                src: '<%= concat.dist.dest %>',
-//                dest: 'dist/<%= pkg.name %>.min.js'
-//            },
-//        },
         nodeunit: {
-            files: ['test/**/*.js']
+            files: ['test/**/*.js', '!test/**/mocks/*.js']
         },
         jshint: {
             options: {
@@ -90,42 +62,15 @@ module.exports = function (grunt) {
                 tasks: ['jshint:test', 'nodeunit']
             },
         },
-//        clean: {
-//            build: {
-//                src: ['dist']
-//            },
-//        },
-//        copy: {
-//            build: {
-//                cwd: 'src',
-//                src: ['*.html'],
-//                dest: 'dist',
-//                expand: true
-//            },
-//        },
-
     });
 
     // These plugins provide necessary tasks.
-//    grunt.loadNpmTasks('grunt-contrib-concat');
-//    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-nodeunit');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
-//    grunt.loadNpmTasks('grunt-contrib-clean');
-//    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Default task.
-    //grunt.registerTask('default', ['jshint', 'nodeunit', 'concat', 'uglify']);
     grunt.registerTask('default', ['jshint', 'nodeunit']);
-
-    // Build
-//    grunt.registerTask('build', [
-//        'clean',
-//        'copy',
-//        'concat',
-//        'uglify',
-//      ]);
 
     /** 
      * Thank you to jaredhanson/passport-local
