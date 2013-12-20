@@ -68,5 +68,7 @@ module.exports = function (email) {
         exports.test3Model = test3Model;
       }
     catch (error) {}
-};
+    
+    return exports;
+  };
 

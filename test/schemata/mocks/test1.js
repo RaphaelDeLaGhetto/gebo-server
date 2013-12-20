@@ -31,10 +31,6 @@ module.exports = function (email) {
         console.log ('ERROR connecting to: ' + uristring + '. ' + err);
       });
 
-    /**
-     * This is handy for when I need to drop a database
-     * during testing
-     */
     exports.connection = connection;
 
     //******* Database schema TODO add more validation
@@ -54,5 +50,7 @@ module.exports = function (email) {
         exports.test1Model = test1Model;
       }
     catch (error) {}
-};
+
+    return exports;
+  };
 
