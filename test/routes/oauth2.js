@@ -13,15 +13,12 @@ var COL_NAME = 'appCollection',
 // Agent configs
 var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 
-//nconf.argv().env().file({ file: 'local.json' });
 nconf.file({ file: 'gebo.json' });
 
 var geboDb = new geboSchema(nconf.get('testDb'));
-    //agentDb = new agentSchema('yanfen@example.com');
 
 var oauth2 = require('../../routes/oauth2')(nconf.get('testDb')),
     Token = require('../../config/token');
-
 
 var HAI_PROFILE = { type: 'token',
                     clientID: 'app@awesome.com',
@@ -326,6 +323,7 @@ exports.verifyFriendship = {
         var agentDb = new agentSchema('dan@example.com');
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
                 if (err) {
                   console.log(err)
                  }
