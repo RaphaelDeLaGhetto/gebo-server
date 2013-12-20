@@ -1,7 +1,4 @@
-var fs = require('fs'),
-    nconf = require('nconf'),
-    path = require('path'),
-    Schema = require('mongoose').Schema,
+var fs = require('fs'), nconf = require('nconf'), path = require('path'), //Schema = require('mongoose').Schema,
     utils = require('../../lib/utils');
 
 
@@ -9,6 +6,16 @@ nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 exports.onLoad = {
+    tearDown: function(callback) {
+        var files = fs.readdirSync(__dirname + '/../../schemata');
+
+        files.forEach(function(file) {
+            if (require.cache[path.resolve(__dirname + '/../../schemata/' + file)]) {
+              delete require.cache[path.resolve(__dirname + '/../../schemata/' + file)]
+            }
+        });
+        callback();
+    },
 
     'Load every file in the schemata folder': function(test) {
         test.expect(2);
@@ -45,7 +52,9 @@ exports.add = {
         schemata.add('test1', testSchema);
 
         test.equal(typeof schemata.test1, 'function');
-        test.equal(typeof new schemata.test1(TEST_DB), 'object');
+        var db = new schemata.test1(TEST_DB);
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
 
         test.done();
     },
@@ -61,9 +70,13 @@ exports.add = {
         schemata.add(testSchemata);
 
         test.equal(typeof schemata.test1, 'function');
-        test.equal(typeof new schemata.test1(TEST_DB), 'object');
+        var db = new schemata.test1(TEST_DB);
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
         test.equal(typeof schemata.test2, 'function');
-        test.equal(typeof new schemata.test2(TEST_DB), 'object');
+        db = new schemata.test2(TEST_DB);
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
 
         test.done();
     },
@@ -86,13 +99,24 @@ exports.add = {
 
         test.done();
     },
-
 };
 
 /**
  * remove
  */
 exports.remove = {
+
+    tearDown: function(callback) {
+        var files = fs.readdirSync(__dirname + '/../../schemata');
+
+        files.forEach(function(file) {
+            if (require.cache[path.resolve(__dirname + '/../../schemata/' + file)]) {
+              delete require.cache[path.resolve(__dirname + '/../../schemata/' + file)]
+            }
+        });
+        callback();
+    },
+
     'Remove a single action': function(test) {
         test.expect(7);
 
@@ -104,9 +128,13 @@ exports.remove = {
         schemata.add('test2', testSchema);
 
         test.equal(typeof schemata.test1, 'function');
+        var db = new schemata.test1(TEST_DB);
         test.equal(typeof new schemata.test1(TEST_DB), 'object');
+        db.connection.db.close();
         test.equal(typeof schemata.test2, 'function');
-        test.equal(typeof new schemata.test2(TEST_DB), 'object');
+        db = new schemata.test2(TEST_DB);
+        test.equal(typeof db, 'object');
+        db.connection.db.close();
 
         schemata.remove('test1');
         test.equal(schemata.test1, undefined);
