@@ -44,9 +44,6 @@ module.exports = function(root) {
      */   
     exports.actions = require('./actions')(nconf.get('email')); 
     exports.schemata = require('./schemata');
-    // These should be removed (test Monday)
-    exports.agentSchema = agentSchema;
-    exports.geboSchema = geboSchema;
     exports.server = server;
     exports.utils = utils;
     
