@@ -18,6 +18,7 @@ var oauth2orize = require('oauth2orize'),
     crypto = require('crypto'),
     base64url = require('base64url'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
+    geboSchema = require('../schemata/gebo'),
     mongoose = require('mongoose');
 
 //nconf.argv().env().file({ file: 'local.json' });
@@ -27,7 +28,6 @@ module.exports = function(email) {
 
     // Turn the email into a mongo-friendly database name
     var dbName = utils.ensureDbName(email);
-    var geboDb = require('../schemata/gebo')(dbName);
 
     var agentSchema = require('../schemata/agent'),
         Token = require('../config/token');
@@ -93,6 +93,7 @@ module.exports = function(email) {
     server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, done) {
         var code = utils.uid(16);
       
+        var geboDb = new geboSchema(dbName);
         var authorization = new geboDb.authorizationModel({
             userId: user.id,
             clientId: client.id,
@@ -101,6 +102,7 @@ module.exports = function(email) {
           });
     
         authorization.save(function (err, code) {
+            geboDb.connection.db.close();
             if (err) {
               return done(err);
             }
@@ -120,6 +122,7 @@ module.exports = function(email) {
     
         var tokenStr = utils.uid(256);
       
+        var geboDb = new geboSchema(dbName);
         var token = new geboDb.tokenModel({
             registrantId: user._id,
             friendId: requestDetails.friend,
@@ -129,6 +132,7 @@ module.exports = function(email) {
           });
       
         token.save(function (err, token) {
+            geboDb.connection.db.close();
             if (err) {
               return done(err);
             }
@@ -146,6 +150,7 @@ module.exports = function(email) {
     
     server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
         console.log('------ regular exchange, no no');
+        var geboDb = new geboSchema(dbName);
         geboDb.authorizationModel.findOne({ code: code }, function (err, authCode) {
             if (err) {
               return done(err);
@@ -166,6 +171,7 @@ module.exports = function(email) {
               });
     
             token.save(function (err, token) {
+                geboDb.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -221,6 +227,7 @@ module.exports = function(email) {
                               return done(decodedData.prn + ' breached friendship');
                             }
     
+                            var geboDb = new geboSchema(dbName);
                             geboDb.registrantModel.findOne({ email: citizen.email }, function(err, owner) {
                                     if (err) {
                                       return done(err);
@@ -235,6 +242,7 @@ module.exports = function(email) {
                                       });
                         
                                     token.save(function (err, token) {
+                                        geboDb.connection.db.close();
                                         if (err) {
                                           return done(err);
                                         }

@@ -15,8 +15,6 @@ var CALLBACK_ADDRESS = 'http://theirhost.com/oauth2callback.html';
 
 nconf.file({ file: 'gebo.json' });
 
-var geboDb = new geboSchema(nconf.get('testDb'));
-
 var oauth2 = require('../../routes/oauth2')(nconf.get('testDb')),
     Token = require('../../config/token');
 
@@ -34,6 +32,7 @@ exports.jwtBearerExchange = {
 
     setUp: function(callback) {
             
+            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -56,6 +55,7 @@ exports.jwtBearerExchange = {
                     friend.hisPermissions.push({ email: 'some@resource.com' });
 
                     registrant.save(function(err) {
+                        geboDb.connection.db.close();
                         if (err) {
                           console.log(err);
                         }
@@ -89,26 +89,30 @@ exports.jwtBearerExchange = {
     },
 
     tearDown: function (callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            var agentDb = new agentSchema('dan@example.com');
-            agentDb.connection.on('open', function(err) {
-                agentDb.connection.db.dropDatabase(function(err) {
-                    agentDb.connection.db.close();
-                    if (err) {
-                      console.log(err)
-                    }
- 
-                    agentDb = new agentSchema('yanfen@agent.com');
-                    agentDb.connection.on('open', function(err) {
-                        agentDb.connection.db.dropDatabase(function(err) {
-                            agentDb.connection.db.close();
-                            if (err) {
-                              console.log(err)
-                            }
-                            callback();
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                var agentDb = new agentSchema('dan@example.com');
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err)
+                        }
+     
+                        agentDb = new agentSchema('yanfen@agent.com');
+                        agentDb.connection.on('open', function(err) {
+                            agentDb.connection.db.dropDatabase(function(err) {
+                                agentDb.connection.db.close();
+                                if (err) {
+                                  console.log(err)
+                                }
+                                callback();
+                              });
                           });
                       });
                   });
@@ -146,7 +150,9 @@ exports.jwtBearerExchange = {
                                         else {
                                           test.equal(tokenString.length, 256);
 
+                                          var geboDb = new geboSchema(nconf.get('testDb'));
                                           geboDb.tokenModel.findOne({ string: tokenString }, function(err, token) {
+                                                geboDb.connection.db.close();
                                                 test.equal(token.registrantId, new mongo.ObjectID('0123456789AB').toString());
                                                 test.equal(token.friendId, new mongo.ObjectID('123456789ABC').toString());
                                                 test.equal(token.collectionName, 'some@resource.com');
@@ -283,6 +289,7 @@ exports.processScope = {
 exports.verifyFriendship = {
 
    setUp: function(callback) {
+           var geboDb = new geboSchema(nconf.get('testDb'));
            var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -300,6 +307,7 @@ exports.verifyFriendship = {
             friend.hisPermissions.push({ email: 'some@resource.com' });
 
             registrant.save(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
@@ -314,11 +322,15 @@ exports.verifyFriendship = {
     },
 
     tearDown: function(callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+              });
+        });
 
         var agentDb = new agentSchema('dan@example.com');
         agentDb.connection.on('open', function(err) {
