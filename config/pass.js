@@ -16,14 +16,15 @@ var passport = require('passport'),
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
     ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy,
-    agentSchema = require('../schemata/agent');
+    geboSchema = require('../schemata/gebo');
+    //agentSchema = require('../schemata/agent');
 
 module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
 
-    var db = require('../schemata/gebo')(dbName);
+//    var db = require('../schemata/gebo')(dbName);
 
     /**
      * LocalStrategy
@@ -38,6 +39,7 @@ module.exports = function(email) {
      */
     var _localStrategy = function(email, password, done) {
         console.log('_localStrategy');
+        var db = new geboSchema(dbName);
         db.registrantModel.findOne({ email: email }, function(err, agent) {
             if (err) {
               return done(err);
@@ -46,6 +48,7 @@ module.exports = function(email) {
               return done(null, false, { message: 'Invalid email or password' });
             }
             agent.comparePassword(password, function(err, isMatch) {
+                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -66,7 +69,9 @@ module.exports = function(email) {
       });
     
     passport.deserializeUser(function(id, done) {
+        var db = new geboSchema(dbName);
         db.registrantModel.findById(id, function (err, agent) {
+            db.connection.db.close();
             done(err, agent);
           });
       });
@@ -106,7 +111,10 @@ module.exports = function(email) {
     passport.use(new BasicStrategy(
         function(clientName, password, done) {
             console.log('BasicStrategy');
+
+            var db = new geboSchema(dbName);
             db.clientModel.findOne({ name: clientName }, function(err, client) {
+                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -124,7 +132,9 @@ module.exports = function(email) {
     passport.use(new ClientPasswordStrategy(
         function(clientId, secret, done) {
             console.log('ClientPasswordStrategy');
+            var db = new geboSchema(dbName);
             db.clientModel.findOne({ clientId: clientId, secret: secret }, function(err, client) {
+                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -152,6 +162,8 @@ module.exports = function(email) {
      */
     var _bearerStrategy = function(accessToken, done) {
         console.log('_bearerStrategy');
+        
+        var db = new geboSchema(dbName);
         db.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
               return done(err);
@@ -167,6 +179,7 @@ module.exports = function(email) {
             
             // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, { password: 0 }, function(err, registrant) {
+                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -193,7 +206,9 @@ module.exports = function(email) {
      * foreign agent seeking access.
      */
     var _clientJwtBearerStrategy = function(claimSetIss, done) {
+        var db = new geboSchema(dbName);
         db.registrantModel.findOne({ email: claimSetIss }, function(err, citizen) {
+            db.connection.db.close();
             if (err) {
               return done(err);
             }

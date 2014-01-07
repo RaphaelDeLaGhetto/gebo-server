@@ -1,7 +1,7 @@
 var config = require('../../config/config'),
     nconf = require('nconf'),
     agentSchema = require('../../schemata/agent'),
-    regularSchema = require('../../schemata/agent'),
+    geboSchema = require('../../schemata/gebo');
     utils = require('../../lib/utils'),
     mongo = require('mongodb');
 
@@ -19,7 +19,7 @@ var FRIEND_GEBO_URI = 'http://theirhost.com';
 
 //nconf.argv().env().file({ file: 'local.json' });
 nconf.file({ file: 'gebo.json' });
-var geboDb = require('../../schemata/gebo')(nconf.get('testDb')),
+var //geboDb = require('../../schemata/gebo')(nconf.get('testDb')),
     pass = require('../../config/pass')(nconf.get('testDb'));
 
 /**
@@ -29,12 +29,14 @@ exports.localStrategy = {
 
     setUp: function(callback) {
     	try{
+            var geboDb = new geboSchema(nconf.get('testDb'));
             var agent = new geboDb.registrantModel(
                             { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
 
             agent.save(function(err){
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
@@ -48,12 +50,16 @@ exports.localStrategy = {
     },
 
     tearDown: function(callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
-          });
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+        });
     },
 
     'Return an agent object when provided correct email and password': function(test) {
@@ -110,6 +116,7 @@ exports.bearerStrategy = {
             /**
              * Setup a registrant
              */
+            var geboDb = new geboSchema(nconf.get('testDb'));
             var adminRegistrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
@@ -179,6 +186,7 @@ exports.bearerStrategy = {
                               console.log(err);
                             }
                             adminRegistrant.save(function(err) {
+                                geboDb.connection.db.close();
                                 if (err) {
                                   console.log(err);
                                 }
@@ -196,13 +204,16 @@ exports.bearerStrategy = {
     },
 
     tearDown: function(callback) {
-
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
-          });
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+        });
     },
 
     'Return registrant object for an admin with a valid token': function(test) {
@@ -354,6 +365,7 @@ exports.clientJwtBearerStrategy = {
             /**
              * Setup a registrant
              */
+            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -375,10 +387,12 @@ exports.clientJwtBearerStrategy = {
 
             // There has got to be a better way to do this.
             friend.save(function(err) {
+                agentDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
                 registrant.save(function(err) {
+                    geboDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -393,12 +407,15 @@ exports.clientJwtBearerStrategy = {
     },
 
     tearDown: function(callback) {
-
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
           });
     },
 
