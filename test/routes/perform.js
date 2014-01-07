@@ -427,6 +427,7 @@ exports.handler = {
         friend.hisPermissions.push({ email: 'friends' });
         
         friend.save(function(err) {
+            agentDb.connection.db.close();
             if (err) {
               console.log(err);
             }
