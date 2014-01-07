@@ -34,8 +34,7 @@ module.exports = function(root) {
         message_routes = require('./routes/message'),
         perform_route = require('./routes/perform')(nconf.get('email')),
         oauth2_routes = require('./routes/oauth2')(nconf.get('email')),
-        user_routes = require('./routes/user')(nconf.get('email')),
-        action = require('./actions');
+        user_routes = require('./routes/user')(nconf.get('email'));
     
     /**
      * Expose the necessary modules 
