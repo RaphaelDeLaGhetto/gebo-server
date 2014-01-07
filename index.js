@@ -1,6 +1,4 @@
-var agentSchema = require('./schemata/agent'),
-    geboSchema = require('./schemata/gebo'),
-    express = require('express'),
+var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     https = require('https'),
