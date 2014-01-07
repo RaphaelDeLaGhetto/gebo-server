@@ -11,13 +11,10 @@ module.exports = function(dbName) {
      * Set the database name, if not set already 
      */
     if (!dbName) {
-      //nconf.argv().env().file({ file: 'local.json' });
       nconf.file({ file: 'gebo.json' });
       dbName = nconf.get('email');
     }
     var pass = require('../config/pass')(dbName);
-    var gebo = require('../schemata/gebo')(dbName);
-    var token = require('../config/token')(dbName);
 
     exports.account = [
         login.ensureLoggedIn(),
@@ -43,8 +40,10 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
+            var gebo = require('../schemata/gebo')(dbName);
             gebo.registrantModel.find({}, function(err, registrants) {
                 gebo.friendModel.find({}, function(err, friends) {
+                    gebo.connection.db.close();
                     res.render('admin', { agent: req.user,
                                           registrants: registrants,
                                           friends: friends,
@@ -78,6 +77,7 @@ module.exports = function(dbName) {
         var registrant = new gebo.registrantModel(req.body);
 
         registrant.save(function(err, registrant) {
+            gebo.connection.db.close();
             if (err) {
               res.redirect('/');
             }
