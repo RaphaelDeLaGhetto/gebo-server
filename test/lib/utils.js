@@ -262,6 +262,34 @@ exports.saveFilesToAgentDirectory = {
 
     },
 
+    'Return an array with a single file object when saving a single file': function(test) {
+        test.expect(6);
+        utils.saveFilesToAgentDirectory(
+                        { test: {
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            },
+                        },
+                        { dbName: utils.getMongoDbName('dan@example.com'),
+                          collectionName: utils.getMongoCollectionName('test@example.com')
+                        }).
+            then(function(files) {
+                test.equal(files.length, 1);
+                test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
+                test.equal(files[0].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[0].type, 'text/plain');
+                test.equal(files[0].size, 16);
+                test.ok(files[0].lastModified);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
     'Move multiple files from /tmp to destination': function(test) {
         test.expect(5);
         var dir = 'docs/' + utils.getMongoDbName('dan@example.com') + '/' + utils.getMongoCollectionName('test@example.com');
@@ -320,6 +348,70 @@ exports.saveFilesToAgentDirectory = {
               });
     },
 
+    'Return an array of multiple file objects': function(test) {
+        test.expect(21);
+
+        utils.saveFilesToAgentDirectory(
+                        {
+                            test1: {
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            },
+                            test2: {
+                                path: '/tmp/gebo-server-utils-test-2.txt',
+                                name: 'gebo-server-utils-test-2.txt',
+                                type: 'text/plain',
+                                size: 37,
+                            },
+                            test3: {
+                                path: '/tmp/gebo-server-utils-test-3.txt',
+                                name: 'gebo-server-utils-test-3.txt',
+                                type: 'text/plain',
+                                size: 29,
+                            },
+                            test4: {
+                                path: '/tmp/gebo-server-utils-test-4.txt',
+                                name: 'gebo-server-utils-test-4.txt',
+                                type: 'text/plain',
+                                size: 11,
+                            },
+                        },
+                        { dbName: utils.getMongoDbName('dan@example.com'),
+                          collectionName: utils.getMongoCollectionName('test@example.com')
+                        }).
+            then(function(files) {
+                test.equal(files.length, 4);
+                test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
+                test.equal(files[0].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[0].type, 'text/plain');
+                test.equal(files[0].size, 16);
+                test.ok(files[0].lastModified);
+                test.equal(files[1].name, 'gebo-server-utils-test-2.txt');
+                test.equal(files[1].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[1].type, 'text/plain');
+                test.equal(files[1].size, 37);
+                test.ok(files[1].lastModified);
+                test.equal(files[2].name, 'gebo-server-utils-test-3.txt');
+                test.equal(files[2].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[2].type, 'text/plain');
+                test.equal(files[2].size, 29);
+                test.ok(files[2].lastModified);
+                test.equal(files[3].name, 'gebo-server-utils-test-4.txt');
+                test.equal(files[3].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[3].type, 'text/plain');
+                test.equal(files[3].size, 11);
+                test.ok(files[3].lastModified);
+                test.done();
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);
+                test.done();
+              });
+    },
     'Don\'t barf if the files object is empty, null, or undefined': function(test) {
         test.expect(3);
 
