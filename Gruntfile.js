@@ -1,5 +1,4 @@
 'use strict';
-
 var utils = require('./lib/utils'),
     nconf = require('nconf');
 
@@ -109,7 +108,7 @@ module.exports = function (grunt) {
                   console.log('Registered ' + agent.name);
                   action.createDatabase({ admin: true,
                                           dbName: utils.getMongoDbName(emailaddress) },
-                                        { profile: agent }).
+                                        { content: { profile: agent } }).
                     then(function() {
                         done();
                       }).
