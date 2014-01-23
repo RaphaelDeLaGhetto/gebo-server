@@ -201,6 +201,28 @@ exports.verify = {
               });
     },
 
+    'Return permissions object (as above) when content field is a string': function(test) {
+        test.expect(6);
+        perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
+                       { receiver: 'yanfen@example.com',
+						 content: JSON.stringify({ resource: 'app@construction.com' }) }).
+            then(function(verified) {
+                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
+                test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
+                test.equal(verified.read, true); 
+                test.equal(verified.write, false); 
+                test.equal(verified.execute, false); 
+                test.equal(verified.admin, false); 
+                test.done();
+              }).
+            catch(function(err) {
+                console.log('err');
+                console.log(err);
+                test.ok(false, err);
+                test.done();      
+              });
+    },
+
     'Return permissions object for a friend attempting to perform an action on a resource owned by an admin agent': function(test) {
         test.expect(6);
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },

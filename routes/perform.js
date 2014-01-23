@@ -127,21 +127,27 @@ module.exports = function(email) {
     function _verify(agent, message) {
         var deferred = q.defer();
 
-        // A resoure does not necessarily need to be specified
+		// A message's contents may be received as a string.
+		// This is experimental
+		if (typeof message.content === 'string') {
+		  message.content = JSON.parse(message.content);
+		}
+
+        // A resource does not necessarily need to be specified
         // in every circumstance. The following is experimental
         var resource;
         if (message.content && message.content.resource) {
           resource = utils.getMongoCollectionName(message.content.resource);
         }
 
-	var verified = {
-                collectionName: resource,
-                admin: agent.admin,
-                dbName: utils.getMongoDbName(message.receiver),
-                read: false,
-                write: false,
-                execute: false,
-            };
+		var verified = {
+				collectionName: resource,
+				admin: agent.admin,
+				dbName: utils.getMongoDbName(message.receiver),
+				read: false,
+				write: false,
+				execute: false,
+			};
 
         if (!verified.dbName) {
           verified.dbName = utils.getMongoDbName(agent.email);
