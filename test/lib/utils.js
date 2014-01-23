@@ -551,6 +551,8 @@ exports.getSafeFileName = {
             fs.writeFileSync('docs/safeFileNameTests/anotherTestFile(5).txt', 'I like to move it move it!');
             fs.writeFileSync('docs/safeFileNameTests/noExtension', 'Bass! How low can you go?');
             fs.writeFileSync('docs/safeFileNameTests/.invisible', 'I live for the applause');
+            fs.writeFileSync('docs/safeFileNameTests/alreadySaved.txt', 'Genesis 9:6');
+            fs.writeFileSync('docs/safeFileNameTests/alreadySaved(1).txt', 'Genesis 9:6');
             callback();
     	}
         catch(e) {
@@ -642,6 +644,18 @@ exports.getSafeFileName = {
                 test.done();
               });
     },
+
+	'Detect existing duplicates and increment copy number appropriately': function(test) {
+        utils.getSafeFileName('alreadySaved.txt', 'docs/safeFileNameTests').
+            then(function(filename) {
+                test.equal(filename, 'alreadySaved(2).txt');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);    
+                test.done();
+              });
+	},
 }; 
 
 /**
