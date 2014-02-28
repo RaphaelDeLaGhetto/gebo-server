@@ -18,5 +18,6 @@ block content
     form(action="/dialog/authorize/decision", method="post")
         input(name="transaction_id", type="hidden", value="#{transactionID}")
         div
-            input(type="submit", value="Yes", id="allow")
-            input(type="submit", value="No", name="cancel", id="deny")
+            button.btn-lg.btn-warning(type="submit", value="Yes", id="allow") Yes 
+            &nbsp;
+            button.btn-lg.btn-warning(type="submit", value="No", name="cancel", id="deny") No 
