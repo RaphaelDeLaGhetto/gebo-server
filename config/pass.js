@@ -167,6 +167,7 @@ module.exports = function(email) {
 
         var db = new geboSchema(dbName);
         db.tokenModel.findOne({ string: accessToken }, function(err, token) {
+            logger.info('token:', token.string);
             if (err) {
               return done(err);
             }
@@ -176,6 +177,7 @@ module.exports = function(email) {
             }
 
             if (token.expires && new Date(token.expires) < new Date()) {
+              logger.info('token: expired', token.expires);
               return done('The token provided is invalid', null);
             }
             
@@ -189,8 +191,7 @@ module.exports = function(email) {
                 if (!registrant) {
                   return done(null, false);
                 }
-                console.log('registrant');
-                console.log(registrant);
+                logger.info('registrant.email',registrant.email);
                 done(null, registrant);  
               });
           });
