@@ -16,10 +16,12 @@ var passport = require('passport'),
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
     ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy,
-    geboSchema = require('../schemata/gebo');
-    //agentSchema = require('../schemata/agent');
+    geboSchema = require('../schemata/gebo'),
+    winston = require('winston');
 
 module.exports = function(email) {
+
+    var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
@@ -161,8 +163,8 @@ module.exports = function(email) {
      * @param function
      */
     var _bearerStrategy = function(accessToken, done) {
-        console.log('_bearerStrategy');
-        
+        logger.info('_bearerStrategy', accessToken);
+
         var db = new geboSchema(dbName);
         db.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
