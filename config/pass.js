@@ -167,7 +167,6 @@ module.exports = function(email) {
 
         var db = new geboSchema(dbName);
         db.tokenModel.findOne({ string: accessToken }, function(err, token) {
-            logger.info('token:', token.string);
             if (err) {
               return done(err);
             }
@@ -175,6 +174,7 @@ module.exports = function(email) {
             if (!token) {
               return done('The token provided is invalid', null);
             }
+            logger.info('token found:', token.string);
 
             if (token.expires && new Date(token.expires) < new Date()) {
               logger.info('token: expired', token.expires);
