@@ -1568,16 +1568,15 @@ exports.createDatabase = {
                   }).
                 catch(function(err) {
                     test.ok(true, 'This database does not exist, which is good');
-                  });
-
-        action.createDatabase({ admin: false, execute: false, dbName: dbName }, { content: { profile: this.agent } }).
-                then(function() {
-                    test.ok(false, 'Should not be able to add a new datase');
-                    test.done();
-                  }).
-                catch(function(err) {
-                    test.equal(err, 'You are not permitted to request or propose that action');
-                    test.done();
+                    action.createDatabase({ admin: false, execute: false, dbName: dbName }, { content: { profile: this.agent } }).
+                            then(function() {
+                                test.ok(false, 'Should not be able to add a new datase');
+                                test.done();
+                              }).
+                            catch(function(err) {
+                                test.equal(err, 'You are not permitted to request or propose that action');
+                                test.done();
+                              });
                   });
     },
 
