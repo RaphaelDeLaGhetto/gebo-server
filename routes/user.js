@@ -37,7 +37,7 @@ module.exports = function(dbName) {
       ];
     
     exports.getLogin = function (req, res) {
-        if (cluser.worker) {
+        if (cluster.worker) {
           logger.info('Worker', cluster.worker.id, 'received login request');
         }
         res.render('login');
