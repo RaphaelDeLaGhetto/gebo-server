@@ -17,6 +17,7 @@ var passport = require('passport'),
     BearerStrategy = require('passport-http-bearer').Strategy,
     ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy,
     geboSchema = require('../schemata/gebo'),
+    cluster = require('cluster'),
     winston = require('winston');
 
 module.exports = function(email) {
@@ -25,8 +26,6 @@ module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
-
-//    var db = require('../schemata/gebo')(dbName);
 
     /**
      * LocalStrategy
@@ -40,7 +39,10 @@ module.exports = function(email) {
      * @param function
      */
     var _localStrategy = function(email, password, done) {
-        console.log('_localStrategy');
+        if (cluster.worker) {
+          logger.info('_localStrategy. Worker', cluster.worker.id, 'attempting authentication');
+        }
+
         var db = new geboSchema(dbName);
         db.registrantModel.findOne({ email: email }, function(err, agent) {
             if (err) {
