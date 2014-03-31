@@ -3,11 +3,15 @@ var passport = require('passport'),
     nconf = require('nconf'),
     q = require('q'),
     utils = require('../lib/utils'),
-    login = require('connect-ensure-login');
+    login = require('connect-ensure-login'),
+    cluster = require('cluster'),
+    winston = require('winston');
 
 module.exports = function(dbName) {
 
+    var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
     /**
+
      * Set the database name, if not set already 
      */
     if (!dbName) {
@@ -33,6 +37,9 @@ module.exports = function(dbName) {
       ];
     
     exports.getLogin = function (req, res) {
+        if (cluser.worker) {
+          logger.info('Worker', cluster.worker.id, 'received login request');
+        }
         res.render('login');
       };
     
@@ -57,9 +64,9 @@ module.exports = function(dbName) {
      *  POST /login
      */
     exports.postLogin = passport.authenticate('local', {
-        successReturnToOrRedirect: '/',
-        failureRedirect: '/login'
-      });
+            successReturnToOrRedirect: '/',
+            failureRedirect: '/login'
+          });
     
     exports.logout = function(req, res) {
         req.logout();
