@@ -44,11 +44,11 @@ exports.testConnection = {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-    	    	this.collection.remove({}, function(err) {
-    		    callback();
-    		});
-             });
+        	    this.collection = new mongo.Collection(client, cname);
+    	    	    this.collection.remove({}, function(err) {
+    		        callback();
+    		      });
+            });
     	} catch(e) {
             console.dir(e);
     	}
@@ -1386,18 +1386,11 @@ exports.ls = {
 /**
  * createDatabase
  */
+var TEST_AGENT;
 exports.createDatabase = {
 
     setUp: function(callback) {
     	try{
-            this.agent = new gebo.registrantModel({
-                    name: 'Joey Joe Joe Jr. Shabadoo',
-                    email: 'jjjj@shabadoo.com',
-                    password: 'abc123',
-                    admin: 'true'
-                  });
-            this.agent.save();
-
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
@@ -1421,7 +1414,15 @@ exports.createDatabase = {
                         }
                     ],
                     function() {
-                        callback();
+                        TEST_AGENT = new gebo.registrantModel({
+                                name: 'Joey Joe Joe Jr. Shabadoo',
+                                email: 'jjjj@shabadoo.com',
+                                password: 'abc123',
+                                admin: 'true'
+                              });
+                        TEST_AGENT.save(function(err) {
+                            callback();
+                          });
                     });
             });
     	} catch(e) {
@@ -1431,7 +1432,7 @@ exports.createDatabase = {
     },
 
     tearDown: function (callback) {
-        var email = this.agent.email;
+        var email = TEST_AGENT.email;
 
         // Drop the existing database defined in setup
         this.db.dropDatabase(function(err) {
@@ -1456,7 +1457,7 @@ exports.createDatabase = {
                             if (err) {
                               console.log(err)
                             }
-                            callback();
+                                callback();
                           });
                     });
                });
@@ -1467,7 +1468,7 @@ exports.createDatabase = {
         test.expect(5);
 
         // Make sure the DB doesn't exist already
-        var dbName = utils.getMongoDbName(this.agent.email);
+        var dbName = utils.getMongoDbName(TEST_AGENT.email);
         action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
@@ -1477,7 +1478,7 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase({ admin: true, dbName: dbName }, { content: { profile: this.agent } }).
+        action.createDatabase({ admin: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created');
                     action.getCollection({ admin: true, dbName: dbName, collectionName: 'profile' }).
@@ -1515,7 +1516,7 @@ exports.createDatabase = {
         test.expect(5);
 
         // Make sure the DB doesn't exist already
-        var dbName = utils.getMongoDbName(this.agent.email);
+        var dbName = utils.getMongoDbName(TEST_AGENT.email);
         action.dbExists({ admin: false, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
@@ -1525,7 +1526,7 @@ exports.createDatabase = {
                     test.ok(true, 'This database does not exist, which is good');
                   });
 
-        action.createDatabase({ admin: false, execute: true, dbName: dbName }, { content: { profile: this.agent } }).
+        action.createDatabase({ admin: false, execute: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
                 then(function() {
                     test.ok(true, 'Looks like ' + dbName + ' was created');
                     action.getCollection({ admin: false, execute: true, dbName: dbName, collectionName: 'profile' }).
@@ -1560,7 +1561,7 @@ exports.createDatabase = {
         test.expect(2);
 
         // Make sure the DB doesn't exist already
-        var dbName = utils.getMongoDbName(this.agent.email);
+        var dbName = utils.getMongoDbName(TEST_AGENT.email);
         action.dbExists({ admin: true, dbName: dbName }).
                 then(function(client) {
                     test.ok(false, 'This database shouldn\'t exist. Delete manually???');
@@ -1568,7 +1569,7 @@ exports.createDatabase = {
                   }).
                 catch(function(err) {
                     test.ok(true, 'This database does not exist, which is good');
-                    action.createDatabase({ admin: false, execute: false, dbName: dbName }, { content: { profile: this.agent } }).
+                    action.createDatabase({ admin: false, execute: false, dbName: dbName }, { content: { profile: TEST_AGENT } }).
                             then(function() {
                                 test.ok(false, 'Should not be able to add a new datase');
                                 test.done();
@@ -1594,7 +1595,7 @@ exports.createDatabase = {
                     test.done();
                   });
 
-        action.createDatabase({ admin: true, execute: true, dbName: dbName }, { content: { profile: this.agent } }).
+        action.createDatabase({ admin: true, execute: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
                 then(function() {
                     test.ok(false, dbName + ' should not have been created');
                     test.done();
