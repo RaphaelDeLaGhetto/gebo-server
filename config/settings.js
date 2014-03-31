@@ -4,7 +4,8 @@ module.exports = function (app, express, passport, logger, root) {
         cachify = require('connect-cachify'),
         winston = require('winston'),
         path = require('path'),
-        requestLogger = require('winston-request-logger');
+        requestLogger = require('winston-request-logger'),
+        ClusterStore = require('strong-cluster-connect-store')(express);
 
     if (!root) {
       root = path.normalize(__dirname + '/..');
@@ -78,7 +79,10 @@ module.exports = function (app, express, passport, logger, root) {
         app.use(express.methodOverride());
         app.use(express.static(root + '/public'));
         app.use(express.favicon(root + '/favicon.ico'));
-        app.use(express.session({secret: 'keyboard cat'}));
+        //app.use(express.session({secret: 'keyboard cat'}));
+        app.use(express.session({
+                    store: new ClusterStore(),
+                    secret: 'keyboard cat'}));
         app.use(requireHttps);
         // Initialize Passport!  Also use passport.session() middleware, to support
         // persistent login sessions (recommended).
