@@ -11,7 +11,6 @@ module.exports = function (app, express, passport, logger, root) {
         session = require('express-session'),
         favicon = require('static-favicon'),
         errorHandler = require('errorhandler'),
-        //ClusterStore = require('strong-cluster-connect-store')(express);
         ClusterStore = require('strong-cluster-express-store');
 
     if (!root) {
@@ -26,22 +25,18 @@ module.exports = function (app, express, passport, logger, root) {
     var env = process.env.NODE_ENV || 'development';
 
     // Development Configuration
-    //app.configure('development', 'test', function(){
     if ('development' === env) {
       // register the request logger
       app.use(requestLogger.create(logger))
       app.set('DEBUG', true)
       app.use(errorHandler({ dumpExceptions: true, showStack: true }))
     }
-    //});
 
     // Production Configuration
-    //app.configure('production', function(){
     if ('production' === env) {
       app.set('DEBUG', false)
       app.use(errorHandler())
     }
-    //});
 
     /**
      * allowCrossDomain
@@ -82,33 +77,22 @@ module.exports = function (app, express, passport, logger, root) {
     }));
 
     // Global Configuration
-//    app.configure(function(){
+    app.use(allowCrossDomain);
+    app.set('views', root + '/views');
+    app.set('view engine', 'jade');
+    app.set('view options', { layout: false });
+    app.use(cookieParser());
+    app.use(bodyParser());
+    app.use(methodOverride());
+    app.use(express.static(root + '/public'));
+    app.use(favicon(root + '/favicon.ico'));
+    app.use(session({
+                store: new ClusterStore(),
+                secret: 'What the halo!?'}));
+    app.use(requireHttps);
+    // Initialize Passport!  Also use passport.session() middleware, to support
+    // persistent login sessions (recommended).
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-        app.use(allowCrossDomain);
-        app.set('views', root + '/views');
-        app.set('view engine', 'jade');
-        app.set('view options', { layout: false });
-        app.use(cookieParser());
-        //app.use(express.cookieParser());
-        app.use(bodyParser());
-        //app.use(express.bodyParser());
-        //app.use(express.methodOverride());
-        app.use(methodOverride());
-        app.use(express.static(root + '/public'));
-        //app.use(express.favicon(root + '/favicon.ico'));
-        app.use(favicon(root + '/favicon.ico'));
-        //app.use(express.session({secret: 'keyboard cat'}));
-        app.use(session({
-                    store: new ClusterStore(),
-                    secret: 'What the halo!?'}));
-                    //secret: 'keyboard cat'}));
-        app.use(requireHttps);
-        // Initialize Passport!  Also use passport.session() middleware, to support
-        // persistent login sessions (recommended).
-        app.use(passport.initialize());
-        app.use(passport.session());
-        app.use(app.router);
- //   });
-
-//    return app;
 };
