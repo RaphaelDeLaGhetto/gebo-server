@@ -1,7 +1,7 @@
 {
   "name": "gebo-server",
   "description": "Grunt, Express, Bootstrap, OAuth2 agent",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "homepage": "https://github.com/RaphaelDeLaGhetto/gebo-server",
   "author": {
     "name": "Daniel Bidulock",
