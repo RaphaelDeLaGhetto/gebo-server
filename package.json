@@ -63,7 +63,8 @@
     "method-override": "^1.0.0",
     "static-favicon": "^1.0.2",
     "body-parser": "^1.0.1",
-    "strong-cluster-express-store": "0.0.0"
+    "strong-cluster-express-store": "0.0.0",
+    "errorhandler": "^1.0.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
