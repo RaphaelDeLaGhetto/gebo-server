@@ -37,7 +37,10 @@ html(lang='en')
                 p &copy; Company 2014
 
 
-    | !{cachify_js('/components/jquery/jquery.min.js')}
-    | !{cachify_js('/components/bootstrap/dist/js/bootstrap.min.js')}
-    | !{cachify_js('/js/site.js')}
+    script(src='/components/jquery/jquery.min.js')
+    script(src='/components/bootstrap/dist/js/bootstrap.min.js')
+    script(src='/js/site.js')
+    //| !{cachify_js('/components/jquery/jquery.min.js')}
+    //| !{cachify_js('/components/bootstrap/dist/js/bootstrap.min.js')}
+    //| !{cachify_js('/js/site.js')}
     block scripts

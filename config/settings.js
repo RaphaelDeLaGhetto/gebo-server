@@ -1,7 +1,7 @@
 module.exports = function (app, express, passport, logger, root) {
 
     var nconf = require('nconf'),
-        cachify = require('connect-cachify'),
+//        cachify = require('connect-cachify'),
         winston = require('winston'),
         path = require('path'),
         requestLogger = require('winston-request-logger'),
@@ -71,10 +71,10 @@ module.exports = function (app, express, passport, logger, root) {
 
 
     // Cachify Asset Configuration
-    app.use(cachify.setup(assets, {
-        root: root + '/public',
-        production: nconf.get('cachify')
-    }));
+//    app.use(cachify.setup(assets, {
+//        root: root + '/public',
+//        production: nconf.get('cachify')
+//    }));
 
     // Global Configuration
     app.use(allowCrossDomain);
