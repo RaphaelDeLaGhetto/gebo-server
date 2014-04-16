@@ -8,7 +8,7 @@ var cluster = require('cluster');
  */
 if (cluster.isMaster) {
 
-  require('strong-cluster-connect-store').setup();
+  require('strong-cluster-express-store').setup();
 
   // Count the machine's CPUs
   var cpuCount = require('os').cpus().length;
