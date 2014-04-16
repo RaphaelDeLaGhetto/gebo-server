@@ -11,7 +11,7 @@ module.exports = function (app, express, passport, logger, root) {
         session = require('express-session'),
         favicon = require('static-favicon'),
         errorHandler = require('errorhandler'),
-        ClusterStore = require('strong-cluster-express-store');
+        ClusterStore = require('strong-cluster-express-store')(session);
 
     if (!root) {
       root = path.normalize(__dirname + '/..');
