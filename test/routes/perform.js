@@ -1,10 +1,12 @@
+
 var config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../../lib/utils'),
     extend = require('extend'),
     geboSchema = require('../../schemata/gebo'),
-    agentSchema = require('../../schemata/agent');
+    agentSchema = require('../../schemata/agent'),
+    sinon = require('sinon');
 
 nconf.file({ file: 'gebo.json' });
 
@@ -567,3 +569,29 @@ exports.handler = {
     },
 };
 
+// I can't figure out how to use sinon's mocks, stubs, etc.
+// As such, I can't tell if passport.authenticate is being called
+// TODO: figure out sinon
+/**
+ * authenticate
+ */
+exports.authenticate = {
+
+    setUp: function(callback) {
+        callback();
+    },
+
+    tearDown: function(callback) {
+        callback();
+    },
+
+    'call passort.authenticate if no user in request': function(test) {
+        test.done();
+    },
+
+    'do not call passort.authenticate if user in request': function(test) {
+        test.done();
+    },
+
+
+};

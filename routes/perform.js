@@ -6,9 +6,13 @@ var passport = require('passport'),
     geboSchema = require('../schemata/gebo'),
     agentSchema = require('../schemata/agent'),
     extend = require('extend'),
-    q = require('q');
+    multiparty = require('connect-multiparty'),
+    q = require('q'),
+    winston = require('winston');
 
 module.exports = function(email) {
+
+    var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
     // Turn the email into a mongo-friendly database name
     var dbName = utils.ensureDbName(email);
@@ -23,15 +27,12 @@ module.exports = function(email) {
         var message = req.body,
             agent = req.user;
 
-        console.log('---message');
-        console.log(message);
-        console.log('req.files');
-        console.log(req.files);
+        logger.info('message', message);
+        logger.info('req.files', req.files);
 
         // Form a social commitment
         sc.form(agent, 'perform', message).
             then(function(socialCommitment) {
-                console.log('HERE');
                 _verify(agent, message).
                     then(function(verified) {
 
@@ -40,14 +41,6 @@ module.exports = function(email) {
                         // silly to attach them to the social commitment.
                         extend(true, message, req.files);
 
-//                        console.log('perform');
-//                        console.log(agent);
-//                        console.log(req.authInfo);
-                        console.log('message');
-                        console.log(message);
-//                        console.log('verified');
-//                        console.log(verified);
-    
                         /**
                          * Make sure this agent knows how to
                          * perform the requested action
@@ -61,35 +54,31 @@ module.exports = function(email) {
                               then(function(data) {
                                  sc.fulfil(message.receiver, socialCommitment._id).
                                       then(function(sc) {
-                                          console.log('data');
-                                          console.log(data);
+                                          logger.info('data', data);
                                           res.send(200, data);
                                           done();
                                         }).
                                       catch(function(err) {
-                                          console.log(err);       
+                                          logger.error('Social commitment fulfil', err);
                                           res.send(401, err);
                                           done(err);
                                         });
                                 }).
                               catch(function(err) {
-                                      console.log('action error');
-                                      console.log(err);
+                                      logger.error('Action', err);
                                       res.send(401, err);
                                       done(err);
                                 });
                         }
                       }).
                     catch(function(err) {
-                        console.log('Verification error');
-                        console.log(err);
+                        logger.error('Verification', err);
                         res.send(401, err);
                         done(err);
                       });
               }).
             catch(function(err) {
-                console.log('Cannot commit');
-                console.log(err);
+                logger.error('Cannot commit', err);
                 res.send(401, err);
                 done(err);
               });
@@ -97,15 +86,24 @@ module.exports = function(email) {
     exports.handler = _handler;
 
     /**
+     * Authenticate, if necessary
+     */
+    function _authenticate(req, res, next) {
+        if (req.user) {
+          return next();
+        }
+
+        passport.authenticate(['bearer'], { session: false })(req, res, next);
+      };
+    exports.authenticate = _authenticate;
+
+    /**
      * Receive a perform attempt for consideration
      */
+    var multipartyMiddleware = multiparty();
     exports.perform = [
-        function(req, res, next) {
-            if (req.user) {
-              return next();
-            }
-            passport.authenticate(['bearer'], { session: false })(req, res, next);
-        },
+        multipartyMiddleware,
+        _authenticate,
         // _handler takes a callback for unit testing purposes.
         // passport.authenticate's next() callback screws everything up
         // when the server runs for real. This step, though goofy looking,
