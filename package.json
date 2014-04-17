@@ -64,7 +64,7 @@
     "body-parser": "^1.0.1",
     "strong-cluster-express-store": "0.0.x",
     "errorhandler": "^1.0.0",
-    "multiparty": "^3.2.4"
+    "connect-multiparty": "^1.0.3"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -76,7 +76,8 @@
     "database-cleaner": "~0.7.0",
     "nock": "~0.22.1",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-copy": "~0.4.1"
+    "grunt-contrib-copy": "~0.4.1",
+    "sinon": "^1.9.1"
   },
   "keywords": [
     "grunt",
