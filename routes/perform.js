@@ -27,8 +27,8 @@ module.exports = function(email) {
         var message = req.body,
             agent = req.user;
 
-        logger.info('message', message);
-        logger.info('req.files', req.files);
+        logger.info('message', JSON.stringify(message, null, 2));
+        logger.info('req.files', JSON.stringify(req.files, null, 2));
 
         // Form a social commitment
         sc.form(agent, 'perform', message).
