@@ -320,7 +320,7 @@ exports.verify = {
               });
     },
 
-    'Return permissions object for an admin agent attempting to perform an action on his own resource with dbName param set': function(test) {
+    'Return permissions object for an admin agent attempting to perform an action on his own resource with no receiver set': function(test) {
         test.expect(6);
         perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
                        { content: { resource: 'app@painter.com' } }).
@@ -400,7 +400,7 @@ exports.verify = {
                        { receiver: 'yanfen@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, 'yanfen_at_example_dot_com');
-                test.equal(verified.collectionName, undefined);
+                test.equal(verified.collectionName, 'yanfen@example.com');
                 test.equal(verified.read, false);
                 test.equal(verified.write, false);
                 test.equal(verified.execute, false);
@@ -418,7 +418,7 @@ exports.verify = {
                        { receiver: 'yanfen@example.com' }).
             then(function(verified) {
                 test.equal(verified.dbName, 'yanfen_at_example_dot_com');
-                test.equal(verified.collectionName, undefined);
+                test.equal(verified.collectionName, 'yanfen@example.com');
                 test.equal(verified.read, false);
                 test.equal(verified.write, false);
                 test.equal(verified.execute, false);

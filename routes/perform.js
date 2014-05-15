@@ -125,11 +125,10 @@ module.exports = function(email) {
     function _verify(agent, message) {
         var deferred = q.defer();
 
-		// A message's contents may be received as a string.
-		// This is experimental
-		if (typeof message.content === 'string') {
-		  message.content = JSON.parse(message.content);
-		}
+	// A message's contents may be received as a string.
+	if (typeof message.content === 'string') {
+	  message.content = JSON.parse(message.content);
+	}
 
         // A resource does not necessarily need to be specified
         // in every circumstance. The following is experimental
@@ -137,15 +136,25 @@ module.exports = function(email) {
         if (message.content && message.content.resource) {
           resource = utils.getMongoCollectionName(message.content.resource);
         }
+        // Experimental:
+        // If no resource is set, it is assumed the call to action
+        // is not tied with any resource. This is a temporary workaround.
+        // At the moment, this behaviour is enabled by setting execute permissions
+        // on the gebo agent's own email address.
+        //
+        // Obviously, this all needs to change
+        else {
+          resource = utils.getMongoCollectionName(message.receiver);
+        }
 
-		var verified = {
-				collectionName: resource,
-				admin: agent.admin,
-				dbName: utils.getMongoDbName(message.receiver),
-				read: false,
-				write: false,
-				execute: false,
-			};
+        var verified = {
+                collectionName: resource,
+		admin: agent.admin,
+		dbName: utils.getMongoDbName(message.receiver),
+		read: false,
+		write: false,
+		execute: false,
+            };
 
         if (!verified.dbName) {
           verified.dbName = utils.getMongoDbName(agent.email);
