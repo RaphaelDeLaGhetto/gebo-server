@@ -165,6 +165,7 @@ module.exports = function(email) {
   
           agentDb.friendModel.findOne({ email: agent.email }, function(err, friend) {
                 agentDb.connection.db.close();
+                logger.info('friendo:', agent.email, JSON.stringify(friend, null, 2));
                 if (err) {
                   deferred.reject(err);
                 }
