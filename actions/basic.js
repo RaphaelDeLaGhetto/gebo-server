@@ -308,7 +308,13 @@ module.exports = function(email) {
                      */
                     var criteria = {};
                     if (message && message.content.criteria) {
+                      var hexRegex = /^[0-9a-fA-F]{24}$/;
                       criteria = message.content.criteria;
+                      Object.keys(criteria).forEach(function(key) {
+                        if (hexRegex.test(criteria[key])) {
+                          criteria[key] = new mongo.ObjectID(criteria[key]);
+                        }
+                      });
                     }
 
                     var fields = ['name', '_id'];

@@ -1241,24 +1241,36 @@ exports.ls = {
                 if (err) {
                   throw err;
                 }
+//                console.log('hello');
+//                console.log('HEX', new mongo.ObjectID('4e4e1638c85e808431000003'));
+//                console.log('world');
+
                 this.collection = new mongo.Collection(client, cname);
                 this.collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
                             name: 'dan',
-                            occupation: 'Batman'
+                            occupation: 'Batman',
+                            foreignKeyId: new mongo.ObjectID('34567890abcdef0123456789'),
                         },
                         {
                             _id: new mongo.ObjectID('123456789ABC'),
                             name: 'yanfen',
-                            occupation: 'Being cool'
+                            occupation: 'Being cool',
+                            foreignKeyId: new mongo.ObjectID('234567890abcdef012345678'),
                         },
                         {
                             _id: new mongo.ObjectID('23456789ABCD'),
                             name: 'john',
-                            occupation: 'Seminarian'
+                            occupation: 'Seminarian',
+                            foreignKeyId: new mongo.ObjectID('1234567890abcdef01234567'),
+                        },
+                        {
+                            _id: new mongo.ObjectID('3456789ABCDE'),
+                            name: 'richard',
+                            occupation: 'Construction boss',
+                            foreignKeyId: new mongo.ObjectID('01234567890abcdef0123456'),
                         }
-
                     ],
                     function() {
                         callback();
@@ -1277,13 +1289,14 @@ exports.ls = {
     },
 
     'Return a list of document names contained in the collection if permitted': function(test) {
-        test.expect(4);
+        test.expect(5);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true }).
             then(function(list) {
-                test.equal(list.length, 3);
+                test.equal(list.length, 4);
                 test.equal(list[0].name, 'dan');
                 test.equal(list[1].name, 'yanfen');
                 test.equal(list[2].name, 'john');
+                test.equal(list[3].name, 'richard');
                 test.done();
             }).
             catch(
@@ -1295,17 +1308,20 @@ exports.ls = {
     },
 
     'Return a list of documents containing the fields specified': function(test) {
-        test.expect(7);
+        test.expect(9);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
                   { content: { fields: ['occupation'] } }).
             then(function(list) {
-                test.equal(list.length, 3);
+                test.equal(list.length, 4);
                 test.equal(list[0].name, undefined);
                 test.equal(list[0].occupation, 'Batman');
                 test.equal(list[1].name, undefined);
                 test.equal(list[1].occupation, 'Being cool');
                 test.equal(list[2].name, undefined);
                 test.equal(list[2].occupation, 'Seminarian');
+                test.equal(list[3].name, undefined);
+                test.equal(list[3].occupation, 'Construction boss');
+ 
                 test.done();
             }).
             catch(
@@ -1363,23 +1379,53 @@ exports.ls = {
     },
 
     'Return an ls request respecting the given options': function(test) {
-        test.expect(5);
+        test.expect(7);
         action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
                   { content: { options: { skip: 1, limit: 5, sort: '-name' }, fields: ['name', 'occupation'] } }).
             then(function(list) {
-                test.equal(list.length, 2);
+                test.equal(list.length, 3);
                 test.equal(list[0].name, 'yanfen');
                 test.equal(list[0].occupation, 'Being cool');
                 test.equal(list[1].name, 'john');
                 test.equal(list[1].occupation, 'Seminarian');
+                test.equal(list[2].name, 'richard');
+                test.equal(list[2].occupation, 'Construction boss');
                 test.done();
             }).
-            catch(
-                function(err) {
+            catch(function(err) {
                     console.log(err);
                     test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                  });
+    },
+
+    'Convert 24 character hex strings in search criteria into ObjectIds': function(test) {
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+                  { content: { criteria: { foreignKeyId: '01234567890abcdef0123456' } } }).
+            then(function(list) {
+                test.equal(list.length, 1);
+                test.equal(list[0].name, 'richard');
+                test.done();
+            }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, 'Shouldn\'t get here!!!');
+                test.done();
+              });
+    },
+
+    'Do not convert a 24 character non-hex string in search criteria into ObjectIds': function(test) {
+        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+                  { content: { criteria: { foreignKeyId: '0123456789abcdefg012345' } } }).
+            then(function(list) {
+                test.equal(list.length, 0);
+                test.done();
+            }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, 'Shouldn\'t get here!!!');
+                test.done();
+              });
     },
 };
 
