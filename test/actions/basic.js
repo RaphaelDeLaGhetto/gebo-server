@@ -23,7 +23,7 @@ var verifiedUser = {
 
 // Start up the test database
 nconf.file({ file: 'gebo.json' });
-var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
+var TEST_DB = utils.getMongoDbName(nconf.get('testEmail'));
 
 //var gebo = require('../../schemata/gebo')(TEST_DB),
 var agentSchema = require('../../schemata/agent'),
@@ -37,11 +37,9 @@ exports.testConnection = {
 
     setUp: function (callback) {
     	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
+            var server = new mongo.Server('localhost', 27017, {});
 
-            db = new mongo.Db(config.mongo.db, server, config.mongo.clientOptions);
+            db = new mongo.Db(TEST_DB, server, { safe: true });
             db.open(function (err, client) {
                 if (err) {
                   throw err;
@@ -51,17 +49,6 @@ exports.testConnection = {
     		    callback();
     		  });
               });
-
-//            this.db = new mongo.Db(config.mongo.db, server, config.mongo.clientOptions);
-//            this.db.open(function (err, client) {
-//                if (err) {
-//                  throw err;
-//                }
-//        	    this.collection = new mongo.Collection(client, cname);
-//    	    	    this.collection.remove({}, function(err) {
-//    		        callback();
-//    		      });
-//            });
     	} catch(e) {
             console.dir(e);
     	}
@@ -89,17 +76,15 @@ exports.testConnection = {
 };
 
 /**
- * Get the app's collection
+ * Get the gebo collection specified
  */
 exports.getCollection = {
 
    setUp: function (callback) {
     	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            db = new mongo.Db('dan_at_email_dot_com',
-                            server, config.mongo.clientOptions);
+            var server = new mongo.Server('localhost', 27017, {});
+
+            db = new mongo.Db(TEST_DB, server, { safe: true });
             db.open(function (err, client) {
                 if (err) {
                   throw err;
@@ -126,10 +111,9 @@ exports.getCollection = {
         });
     },
 
-    'Return a mongo collection object as admin': function (test) {
+    'Return a the requested collection object as admin': function (test) {
         test.expect(2);
-        var dbName = utils.getMongoDbName('dan@email.com');
-        action.getCollection({ dbName: dbName,
+        action.getCollection({ dbName: TEST_DB,
                                collectionName: cname,
                                admin: true }).
                 then(function(collection) {
@@ -151,10 +135,9 @@ exports.getCollection = {
                 });
     }, 
 
-    'Return a mongo collection object with execute permission': function (test) {
+    'Return the requested collection object with execute permission': function (test) {
         test.expect(2);
-        var dbName = utils.getMongoDbName('dan@email.com');
-        action.getCollection({ dbName: dbName,
+        action.getCollection({ dbName: TEST_DB,
                                collectionName: cname,
                                admin: false,
                                execute: true }).
@@ -177,10 +160,9 @@ exports.getCollection = {
                 });
     },
 
-    'Do not return a mongo collection without permission': function (test) {
+    'Do not return the requested collection without permission': function (test) {
         test.expect(1);
-        var dbName = utils.getMongoDbName('dan@email.com');
-        action.getCollection({ dbName: dbName,
+        action.getCollection({ dbName: TEST_DB,
                                collectionName: cname,
                                admin: false,
                                read: false,
@@ -204,12 +186,9 @@ exports.saveToDb = {
 
     setUp: function (callback) {
     	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
+            var server = new mongo.Server('localhost', 27017, {});
 
-            db = new mongo.Db('yanfen_at_example_dot_com',
-                            server, config.mongo.clientOptions);
+            db = new mongo.Db(TEST_DB, server, { safe: true });
             db.open(function (err, client) {
                 if (err) {
                   throw err;
@@ -223,22 +202,6 @@ exports.saveToDb = {
                         callback();
                     });
             });
-
-//            this.db = new mongo.Db('yanfen_at_example_dot_com',
-//                            server, config.mongo.clientOptions);
-//            this.db.open(function (err, client) {
-//                if (err) {
-//                  throw err;
-//                }
-//        	this.collection = new mongo.Collection(client, cname);
-//                this.collection.insert({
-//                        _id: new mongo.ObjectID('0123456789AB'), 
-//                        name: 'dan',
-//                        occupation: 'Batman'
-//                    }, function() {
-//                        callback();
-//                    });
-//            });
     	} catch(e) {
             console.dir(e);
     	}
@@ -252,28 +215,32 @@ exports.saveToDb = {
         });
     },
  
-   'Do not save to a non-existent database': function (test) {
-        test.expect(1);
-        
-        action.save({ dbName: 'no_one_at_not_here_dot_com',
-  		      collectionName: cname,
-		      admin: true },
-                    { content: { data: 'junk' } }).
-                then(function(docs) {
-                        console.log(docs);       
-                        test.ok(false, 'This database shouldn\'t exist. Delete manually');
-                        test.done();
-                    }).
-                catch(function(err) {
-                        test.ok(err);
-                        test.done();
-                    }).done();
-   }, 
+    /**
+     * Do I still need this?
+     * 2014-5-28
+     */
+//   'Do not save to a non-existent database': function (test) {
+//        test.expect(1);
+//        
+//        action.save({ dbName: 'no_one_at_not_here_dot_com',
+//  		      collectionName: cname,
+//		      admin: true },
+//                    { content: { data: 'junk' } }).
+//                then(function(docs) {
+//                        console.log(docs);       
+//                        test.ok(false, 'This database shouldn\'t exist. Delete manually');
+//                        test.done();
+//                    }).
+//                catch(function(err) {
+//                        test.ok(err);
+//                        test.done();
+//                    }).done();
+//   }, 
 
    'Save JSON to existing database as admin': function (test) {
         test.expect(3);
 
-        action.save({ dbName: 'yanfen_at_example_dot_com',
+        action.save({ dbName: TEST_DB,
 		      collectionName: cname,
 		      admin: true },
                     { content: { data: { junk: 'I like to move it move it' } } }).
@@ -295,18 +262,20 @@ exports.saveToDb = {
    'Update existing JSON document as admin': function(test) {
         test.expect(8);
 
+                    console.log('before cp');
         // Retrieve the existing document
-        action.cp({ dbName: 'yanfen_at_example_dot_com',
+        action.cp({ dbName: TEST_DB,
 		    collectionName: cname,
 		    admin: true },
                   { content: { id: '0123456789AB' } }).
             then(function(docs) {
+                    console.log('after cp');
                     test.ok(docs, 'Docs successfully copied');
                     test.equal(docs.name, 'dan');
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
                     return action.save(
-                            { dbName: 'yanfen_at_example_dot_com',
+                            { dbName: TEST_DB,
           		      collectionName: cname,
 		              admin: true },
                             { content: { data: docs } });
@@ -315,7 +284,7 @@ exports.saveToDb = {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
                     return action.cp(
-                            { dbName: 'yanfen_at_example_dot_com',
+                            { dbName: TEST_DB,
           		      collectionName: cname,
 		              admin: true },
                             { content: { id: '0123456789AB' } });
@@ -336,7 +305,7 @@ exports.saveToDb = {
    'Save JSON to existing database with write permission': function (test) {
         test.expect(3);
 
-        action.save({ dbName: 'yanfen_at_example_dot_com',
+        action.save({ dbName: TEST_DB,
 		      collectionName: cname,
 		      admin: false,
                       write: true },
@@ -359,7 +328,7 @@ exports.saveToDb = {
         test.expect(8);
 
         // Retrieve the existing document
-        action.cp({ dbName: 'yanfen_at_example_dot_com',
+        action.cp({ dbName: TEST_DB,
 		    collectionName: cname,
 		    admin: false,
                     read: true,
@@ -371,7 +340,7 @@ exports.saveToDb = {
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
                     return action.save(
-                            { dbName: 'yanfen_at_example_dot_com',
+                            { dbName: TEST_DB,
           		      collectionName: cname,
 		              admin: false,
                               read: true,
@@ -382,7 +351,7 @@ exports.saveToDb = {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
                     return action.cp(
-                            { dbName: 'yanfen_at_example_dot_com',
+                            { dbName: TEST_DB,
           		      collectionName: cname,
 		              admin: false,
                               read: true,
@@ -405,7 +374,7 @@ exports.saveToDb = {
    'Do not save without permission': function (test) {
         test.expect(1);
         
-        action.save({ dbName: 'yanfen_at_example_dot_com',
+        action.save({ dbName: TEST_DB,
   		      collectionName: cname,
 		      admin: false,
                       write: false },
@@ -680,7 +649,7 @@ exports.saveToFs = {
         var dir = 'docs/' + utils.getMongoDbName('dan@example.com') +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
-        action.save({ dbName: utils.getMongoDbName('dan@example.com'),
+        action.save({ dbName: TEST_DB,
                       collectionName: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
@@ -754,81 +723,81 @@ exports.saveToFs = {
 /**
  * dbExists
  */
-exports.dbExists = {
-
-    setUp: function (callback) {
-    	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
-            db.open(function (err, client) {
-                if (err) {
-                  throw err;
-                }
-        	collection = new mongo.Collection(client, cname);
-                collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
-                    callback();
-                });
-            });
-    	} catch(e) {
-            console.dir(e);
-    	}
-    },
-    
-    tearDown: function (callback) {
-        // Lose the database for next time
-        db.dropDatabase(function(err) { 
-            db.close();
-            callback();
-        });
-    },
- 
-   'Return an error if the database does not exist as admin': function (test) {
-        test.expect(1);
-
-        action.dbExists({ admin: true, dbName: 'non_existent_database' }).
-                        then(function() {
-                                // Shouldn't get here
-                                console.log('Shouldn\'t get here!!!');
-                                test.ok(false, 'Shouldn\'t get here!!!');
-                                test.done();
-                            }).
-                        catch(function(err) {
-                                test.ok(err, 'An error should be thrown');
-                                test.done();
-                            });
-   }, 
-
-   'Return a promise if the database does exist as admin': function (test) {
-        test.expect(1);
-
-        action.dbExists({ admin: true, dbName: 'existing_database' }).
-                then(function() {
-                        test.ok(true, 'Verified the database exists');
-                        test.done();
-                    }).
-                catch(function(err) {
-                        // Shouldn't get here
-                        test.ok(false, 'Shouldn\'t get here!!!');
-                        test.done();
-                     });
-   }, 
-
-   'Do not confirm database existence without permission': function (test) {
-        test.expect(1);
-
-        action.dbExists({ dbName: 'existing_database' }).
-                then(function() {
-                        test.ok(false, 'I should not be able to confirm database existence');
-                        test.done();
-                    }).
-                catch(function(err) {
-                        test.equal(err, 'You are not permitted to request or propose that action');
-                        test.done();
-                     });
-   },
-};
+//exports.dbExists = {
+//
+//    setUp: function (callback) {
+//    	try{
+//            var server = new mongo.Server(config.mongo.host,
+//                                          config.mongo.port,
+//                                          config.mongo.serverOptions);
+//            db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+//            db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//        	collection = new mongo.Collection(client, cname);
+//                collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
+//                    callback();
+//                });
+//            });
+//    	} catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//    
+//    tearDown: function (callback) {
+//        // Lose the database for next time
+//        db.dropDatabase(function(err) { 
+//            db.close();
+//            callback();
+//        });
+//    },
+// 
+//   'Return an error if the database does not exist as admin': function (test) {
+//        test.expect(1);
+//
+//        action.dbExists({ admin: true, dbName: 'non_existent_database' }).
+//                        then(function() {
+//                                // Shouldn't get here
+//                                console.log('Shouldn\'t get here!!!');
+//                                test.ok(false, 'Shouldn\'t get here!!!');
+//                                test.done();
+//                            }).
+//                        catch(function(err) {
+//                                test.ok(err, 'An error should be thrown');
+//                                test.done();
+//                            });
+//   }, 
+//
+//   'Return a promise if the database does exist as admin': function (test) {
+//        test.expect(1);
+//
+//        action.dbExists({ admin: true, dbName: 'existing_database' }).
+//                then(function() {
+//                        test.ok(true, 'Verified the database exists');
+//                        test.done();
+//                    }).
+//                catch(function(err) {
+//                        // Shouldn't get here
+//                        test.ok(false, 'Shouldn\'t get here!!!');
+//                        test.done();
+//                     });
+//   }, 
+//
+//   'Do not confirm database existence without permission': function (test) {
+//        test.expect(1);
+//
+//        action.dbExists({ dbName: 'existing_database' }).
+//                then(function() {
+//                        test.ok(false, 'I should not be able to confirm database existence');
+//                        test.done();
+//                    }).
+//                catch(function(err) {
+//                        test.equal(err, 'You are not permitted to request or propose that action');
+//                        test.done();
+//                     });
+//   },
+//};
 
 /**
  * Copy document from the database

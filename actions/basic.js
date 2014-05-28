@@ -2,6 +2,7 @@
 
 var config = require('../config/config'),
     mongo = require('mongodb'),
+    mongoDbConnection = require('../lib/connection'),
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
@@ -30,55 +31,55 @@ module.exports = function(email) {
      *
      * @return bool
      */
-    var _dbExists = function(verified) {
-        var deferred = q.defer();
-
-        if (verified.admin || verified.read || verified.write || verified.execute) { 
-          var server = new mongo.Server(
-                          config.mongo.host,
-                          config.mongo.port,
-                          config.mongo.serverOptions);
-          _db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
-
-          _db.open(function (err, client) {
-                  if (err) {
-                    console.log('ERROR! What is happening here?');
-                    console.log('Check ulimit -n??');
-                    console.log(err);
-                    throw(err);
-                  }
-                  client.collectionNames(function(err, names) {
-                      if (err) {
-                        console.log(err);
-                        throw(err);
-                      }
-    
-                      if (names.length === 0) {
-                        deferred.reject(
-                                new Error('Database: ' + verified.dbName + ' does not exist'));
-                        _db.dropDatabase(function(err) {
-                          if (err) {
-                            deferred.reject(new Error('Database: ' +
-                                            verified.dbName + ' was not dropped'));
-                          }
-                        });
-                      }
-                      else {
-                        deferred.resolve(client);
-                      }
-                    });
-                });
-        }
-        else {
-          deferred.reject('You are not permitted to request or propose that action');
-        }
- 
-        return deferred.promise;
-      };
-    exports.dbExists = _dbExists;
+//    var _dbExists = function(verified) {
+//        var deferred = q.defer();
+//
+//        if (verified.admin || verified.read || verified.write || verified.execute) { 
+//          var server = new mongo.Server(
+//                          config.mongo.host,
+//                          config.mongo.port,
+//                          config.mongo.serverOptions);
+//          _db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
+//
+//          _db.open(function (err, client) {
+//                  if (err) {
+//                    console.log('ERROR! What is happening here?');
+//                    console.log('Check ulimit -n??');
+//                    console.log(err);
+//                    throw(err);
+//                  }
+//                  client.collectionNames(function(err, names) {
+//                      if (err) {
+//                        console.log(err);
+//                        throw(err);
+//                      }
+//    
+//                      if (names.length === 0) {
+//                        deferred.reject(
+//                                new Error('Database: ' + verified.dbName + ' does not exist'));
+//                        _db.dropDatabase(function(err) {
+//                          if (err) {
+//                            deferred.reject(new Error('Database: ' +
+//                                            verified.dbName + ' was not dropped'));
+//                          }
+//                        });
+//                      }
+//                      else {
+//                        deferred.resolve(client);
+//                      }
+//                    });
+//                });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+// 
+//        return deferred.promise;
+//      };
+//    exports.dbExists = _dbExists;
 
     /**
-     * Get the app's collection
+     * Get the collection specified in the verified object parameter
      *
      * @param Object
      *
@@ -87,14 +88,16 @@ module.exports = function(email) {
     var _getCollection = function(verified) {
         var deferred = q.defer();
         if (verified.admin || verified.read || verified.write || verified.execute) { 
-          _dbExists(verified).
-              then(function(client) {
-                  var collection = new mongo.Collection(client, verified.collectionName);
-                  deferred.resolve(collection);
-                }).
-              catch(function(err) {
-                  deferred.reject(err);
-                });
+          mongoDbConnection(function(conn) {
+                conn.collection(verified.collectionName, function(err, collection) {
+                    if (err) {
+                      deferred.reject(err);
+                    }
+                    else {
+                      deferred.resolve(collection);
+                    }
+                  });
+            });
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -103,6 +106,29 @@ module.exports = function(email) {
       };
     exports.getCollection = _getCollection;
     
+//    var _getCollection = function(verified) {
+//        var deferred = q.defer();
+//        if (verified.admin || verified.read || verified.write || verified.execute) { 
+//          _dbExists(verified).
+//              then(function(client) {
+//                  var collection = new mongo.Collection(client, verified.collectionName);
+//                  deferred.resolve(collection);
+//                }).
+//              catch(function(err) {
+//                  deferred.reject(err);
+//                });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+//        return deferred.promise;
+//      };
+//    exports.getCollection = _getCollection;
+ 
+
+
+
+
     /**
      * Save JSON to user's profile
      *
@@ -126,7 +152,7 @@ module.exports = function(email) {
       
                               collection.save(message.content.data, { safe: true },
                                       function(err, ack) {
-                                          _db.close();
+//                                          _db.close();
                                           if (err) {
                                             deferred.reject(err);
                                           }
@@ -136,17 +162,17 @@ module.exports = function(email) {
                                         });
                             }
                             else {
-                              _db.close();
+//                              _db.close();
                               deferred.resolve();
                             }
                           }).
                         catch(function(err) {
-                            _db.close();
+//                            _db.close();
                             deferred.reject(err);
                           });
                     }).
                   catch(function(err) {
-                      _db.close();
+//                      _db.close();
                       deferred.reject(err);
                     }).
                   done();
@@ -172,7 +198,8 @@ module.exports = function(email) {
               then(function(collection) {
                       collection.find({ '_id': new mongo.ObjectID(message.content.id) }).toArray(
                               function(err, docs) {
-                                      _db.close();
+                                      console.log('got docs');
+//                                      _db.close();
                                       if (err) {
                                         deferred.reject(err);
                                       }
@@ -183,7 +210,7 @@ module.exports = function(email) {
                                     });
                     }).
                   catch(function(err) {
-                          _db.close();
+//                          _db.close();
                           deferred.reject(err);
                         });
         }
