@@ -414,7 +414,16 @@ exports.clientJwtBearerStrategy = {
                 if (err) {
                   console.log(err)
                 }
-                callback();
+                var agentDb = new agentSchema('dan@example.com');
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        agentDb.connection.db.close();
+                        if (err) {
+                          console.log(err)
+                        }
+                        callback();
+                      });
+                  });
               });
           });
     },
