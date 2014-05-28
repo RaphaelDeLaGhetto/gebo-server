@@ -25,13 +25,14 @@ var verifiedUser = {
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
-var gebo = require('../../schemata/gebo')(TEST_DB),
-    agentSchema = require('../../schemata/agent'),
+//var gebo = require('../../schemata/gebo')(TEST_DB),
+var agentSchema = require('../../schemata/agent'),
     action = require('../../actions/basic')(TEST_DB);
 
 /**
  * testConnection
  */
+var db, collection;
 exports.testConnection = {
 
     setUp: function (callback) {
@@ -39,23 +40,35 @@ exports.testConnection = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db(config.mongo.db, server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+
+            db = new mongo.Db(config.mongo.db, server, config.mongo.clientOptions);
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	    this.collection = new mongo.Collection(client, cname);
-    	    	    this.collection.remove({}, function(err) {
-    		        callback();
-    		      });
-            });
+        	collection = new mongo.Collection(client, cname);
+    	    	collection.remove({}, function(err) {
+    		    callback();
+    		  });
+              });
+
+//            this.db = new mongo.Db(config.mongo.db, server, config.mongo.clientOptions);
+//            this.db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//        	    this.collection = new mongo.Collection(client, cname);
+//    	    	    this.collection.remove({}, function(err) {
+//    		        callback();
+//    		      });
+//            });
     	} catch(e) {
             console.dir(e);
     	}
     },
     
     tearDown: function (callback) {
-        this.db.close();
+        db.close();
         callback();
     },
     
@@ -85,14 +98,14 @@ exports.getCollection = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('dan_at_email_dot_com',
+            db = new mongo.Db('dan_at_email_dot_com',
                             server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert({
+        	collection = new mongo.Collection(client, cname);
+                collection.insert({
                         _id: new mongo.ObjectID('0123456789AB'), 
                         name: 'dan',
                         occupation: 'Batman'
@@ -107,7 +120,8 @@ exports.getCollection = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             callback();
         });
     },
@@ -193,14 +207,15 @@ exports.saveToDb = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_example_dot_com',
+
+            db = new mongo.Db('yanfen_at_example_dot_com',
                             server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert({
+        	collection = new mongo.Collection(client, cname);
+                collection.insert({
                         _id: new mongo.ObjectID('0123456789AB'), 
                         name: 'dan',
                         occupation: 'Batman'
@@ -208,6 +223,22 @@ exports.saveToDb = {
                         callback();
                     });
             });
+
+//            this.db = new mongo.Db('yanfen_at_example_dot_com',
+//                            server, config.mongo.clientOptions);
+//            this.db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//        	this.collection = new mongo.Collection(client, cname);
+//                this.collection.insert({
+//                        _id: new mongo.ObjectID('0123456789AB'), 
+//                        name: 'dan',
+//                        occupation: 'Batman'
+//                    }, function() {
+//                        callback();
+//                    });
+//            });
     	} catch(e) {
             console.dir(e);
     	}
@@ -215,7 +246,8 @@ exports.saveToDb = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             callback();
         });
     },
@@ -409,7 +441,8 @@ exports.saveToFs = {
             /**
              * Setup a registrant
              */
-            var registrant = new gebo.registrantModel({
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
                     password: 'password123',
@@ -435,12 +468,19 @@ exports.saveToFs = {
             friend.hisPermissions.push({ email: 'canwrite@app.com', write: true });
             friend.hisPermissions.push({ email: 'cannotwrite@app.com' });
 
-            friend.save(function(err) {
+            registrant.save(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
-                agentDb.connection.db.close();
-                callback();
+ 
+                friend.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    agentDb.connection.db.close();
+                    callback();
+                });
             });
     	}
         catch(e) {
@@ -451,22 +491,36 @@ exports.saveToFs = {
     tearDown: function (callback) {
         rimraf.sync('docs/dan_at_example_dot_com');
 
-        gebo.connection.db.dropDatabase(function(err) { 
-            if (err) {
-              console.log(err);
-            }
-          });
-
-        var agentDb = new agentSchema('dan@example.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) { 
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
-                agentDb.connection.db.close();
-                callback();
+                var agentDb = new agentSchema('dan@example.com'); 
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
+                  });
               });
           });
+
+//        var agentDb = new agentSchema('dan@example.com'); 
+//        agentDb.connection.on('open', function(err) {
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                agentDb.connection.db.close();
+//                callback();
+//              });
+//          });
     },
 
     'Create agent and app directories on the file system if they do not exist': function(test) {
@@ -707,13 +761,13 @@ exports.dbExists = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db = new mongo.Db('existing_database', server, config.mongo.clientOptions);
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
+        	collection = new mongo.Collection(client, cname);
+                collection.insert({ name: 'dan', occupation: 'Batman' }, function() {
                     callback();
                 });
             });
@@ -724,7 +778,8 @@ exports.dbExists = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             callback();
         });
     },
@@ -785,14 +840,14 @@ exports.cp = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_example_dot_com', server,
+            db = new mongo.Db('yanfen_at_example_dot_com', server,
 			    config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert({
+        	collection = new mongo.Collection(client, cname);
+                collection.insert({
                         _id: new mongo.ObjectID('0123456789AB'),
                         name: 'dan',
                         occupation: 'Batman'
@@ -808,7 +863,8 @@ exports.cp = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             callback();
         });
     },
@@ -899,14 +955,14 @@ exports.rm = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_example_dot_com',
+            db = new mongo.Db('yanfen_at_example_dot_com',
 			    server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
+        	collection = new mongo.Collection(client, cname);
+                collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
                             name: 'dan',
@@ -929,7 +985,8 @@ exports.rm = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             if (err) {
               console.log(err);
             }
@@ -1081,14 +1138,14 @@ exports.rmdir = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('yanfen_at_example_dot_com',
+            db = new mongo.Db('yanfen_at_example_dot_com',
 			    server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-        	this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
+        	collection = new mongo.Collection(client, cname);
+                collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
                             name: 'dan',
@@ -1111,7 +1168,8 @@ exports.rmdir = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             callback();
         });
     },
@@ -1235,9 +1293,9 @@ exports.ls = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_database',
+            db = new mongo.Db('existing_database',
 			    server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
@@ -1245,8 +1303,8 @@ exports.ls = {
 //                console.log('HEX', new mongo.ObjectID('4e4e1638c85e808431000003'));
 //                console.log('world');
 
-                this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
+                collection = new mongo.Collection(client, cname);
+                collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
                             name: 'dan',
@@ -1283,7 +1341,8 @@ exports.ls = {
     
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) { 
+        db.dropDatabase(function(err) { 
+            db.close();
             callback();
         });
     },
@@ -1440,14 +1499,13 @@ exports.createDatabase = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db(TEST_DB,
-			    server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db = new mongo.Db(TEST_DB, server, config.mongo.clientOptions);
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-                this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
+                collection = new mongo.Collection(client, cname);
+                collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
                             name: 'dan',
@@ -1460,13 +1518,15 @@ exports.createDatabase = {
                         }
                     ],
                     function() {
-                        TEST_AGENT = new gebo.registrantModel({
+                        var geboDb = require('../../schemata/gebo')(TEST_DB);
+                        TEST_AGENT = new geboDb.registrantModel({
                                 name: 'Joey Joe Joe Jr. Shabadoo',
                                 email: 'jjjj@shabadoo.com',
                                 password: 'abc123',
                                 admin: 'true'
                               });
                         TEST_AGENT.save(function(err) {
+                            geboDb.connection.db.close();
                             callback();
                           });
                     });
@@ -1481,7 +1541,8 @@ exports.createDatabase = {
         var email = TEST_AGENT.email;
 
         // Drop the existing database defined in setup
-        this.db.dropDatabase(function(err) {
+        db.dropDatabase(function(err) {
+            db.close();
 
             // Lose the database for next time
             var server = new mongo.Server(config.mongo.host,
@@ -1499,11 +1560,17 @@ exports.createDatabase = {
                         if (err) {
                           console.log('Could not drop database: ' + err);
                         }
-                        gebo.connection.db.dropDatabase(function(err) {
-                            if (err) {
-                              console.log(err)
-                            }
+
+                        var geboDb = require('../../schemata/gebo')(TEST_DB);
+                        geboDb.connection.on('open', function(err) {
+                            geboDb.connection.db.dropDatabase(function(err) {
+                                geboDb.connection.db.close();
+                                if (err) {
+                                  console.log(err)
+                                }
+                                testDb.close();
                                 callback();
+                              });
                           });
                     });
                });
@@ -1522,39 +1589,37 @@ exports.createDatabase = {
                   }).
                 catch(function(err) {
                     test.ok(true, 'This database does not exist, which is good');
-                  });
 
-        action.createDatabase({ admin: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
-                then(function() {
-                    test.ok(true, 'Looks like ' + dbName + ' was created');
-                    action.getCollection({ admin: true, dbName: dbName, collectionName: 'profile' }).
-                            then(function(collection) {
-                                collection.findOne({ email: 'jjjj@shabadoo.com' },
-                                        function(err, doc) {
-                                            if (err) {
-                                              test.ok(false, err);
-                                              test.done();
-                                            }
-                                            else {
-                                              test.equal(doc.name,
-                                                      'Joey Joe Joe Jr. Shabadoo');
-                                              test.equal(doc.email, 'jjjj@shabadoo.com');
-                                              test.ok(doc.admin);
-                                              test.done();
-                                            }
-                                          }); 
+                    action.createDatabase({ admin: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
+                            then(function() {
+                                test.ok(true, 'Looks like ' + dbName + ' was created');
+                                action.getCollection({ admin: true, dbName: dbName, collectionName: 'profile' }).
+                                        then(function(collection) {
+                                            collection.findOne({ email: 'jjjj@shabadoo.com' },
+                                                    function(err, doc) {
+                                                        if (err) {
+                                                          test.ok(false, err);
+                                                          test.done();
+                                                        }
+                                                        else {
+                                                          test.equal(doc.name,
+                                                                  'Joey Joe Joe Jr. Shabadoo');
+                                                          test.equal(doc.email, 'jjjj@shabadoo.com');
+                                                          test.ok(doc.admin);
+                                                          test.done();
+                                                        }
+                                                      }); 
+                                          }).
+                                        catch(function(err) {
+                                            test.ok(false, err);
+                                            test.done();
+                                          });
                               }).
                             catch(function(err) {
                                 test.ok(false, err);
                                 test.done();
                               });
- 
 
-
-                  }).
-                catch(function(err) {
-                    test.ok(false, err);
-                    test.done();
                   });
     },
 
@@ -1685,13 +1750,13 @@ exports.dropDatabase = {
             var server = new mongo.Server(config.mongo.host,
                                           config.mongo.port,
                                           config.mongo.serverOptions);
-            this.db = new mongo.Db('existing_db', server, config.mongo.clientOptions);
-            this.db.open(function (err, client) {
+            db = new mongo.Db('existing_db', server, config.mongo.clientOptions);
+            db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
-                this.collection = new mongo.Collection(client, cname);
-                this.collection.insert([
+                collection = new mongo.Collection(client, cname);
+                collection.insert([
                         {
                             _id: new mongo.ObjectID('0123456789AB'),
                             name: 'dan',
@@ -1714,7 +1779,8 @@ exports.dropDatabase = {
 
     tearDown: function (callback) {
         // Lose the database for next time
-        this.db.dropDatabase(function(err) {
+        db.dropDatabase(function(err) {
+            db.close();
             callback();
         });
     },
@@ -1836,7 +1902,8 @@ exports.registerAgent = {
 
     setUp: function(callback) {
     	try{
-            var agent = new gebo.registrantModel(
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var agent = new geboDb.registrantModel(
                             { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
@@ -1844,6 +1911,7 @@ exports.registerAgent = {
                     if (err) {
                       console.log(err);
                     }
+                    geboDb.connection.db.close();
                     callback();
                   });
      	}
@@ -1854,17 +1922,23 @@ exports.registerAgent = {
     }, 
 
     tearDown: function(callback) {
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
           });
     }, 
 
     'Add a new agent to the database if admin': function(test) {
         test.expect(4);
-        gebo.registrantModel.find({}, function(err, agents) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.registrantModel.find({}, function(err, agents) {
+                geboDb.connection.db.close();
                 if (err) {
                   test.ok(false, err);
                   test.done();
@@ -1890,7 +1964,9 @@ exports.registerAgent = {
 
     'Add a new agent to the database with execute permissions': function(test) {
         test.expect(4);
-        gebo.registrantModel.find({}, function(err, agents) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.registrantModel.find({}, function(err, agents) {
+                geboDb.connection.db.close();
                 if (err) {
                   test.ok(false, err);
                   test.done();
@@ -1916,7 +1992,9 @@ exports.registerAgent = {
 
     'Do not add a new agent to the database without proper permissions': function(test) {
         test.expect(2);
-        gebo.registrantModel.find({}, function(err, agents) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.registrantModel.find({}, function(err, agents) {
+                geboDb.connection.db.close();
                 if (err) {
                   test.ok(false, err);
                   test.done();
@@ -1969,11 +2047,13 @@ exports.deregisterAgent = {
 
     setUp: function(callback) {
     	try{
-            var agent = new gebo.registrantModel(
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var agent = new geboDb.registrantModel(
                             { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
                               _id: new mongo.ObjectID('0123456789AB') });
             agent.save(function(err) {
+                    geboDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -1987,11 +2067,15 @@ exports.deregisterAgent = {
     }, 
 
     tearDown: function(callback) {
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            callback();
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
           });
     }, 
 
@@ -2001,7 +2085,9 @@ exports.deregisterAgent = {
         action.deregisterAgent({ admin: true }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.equal(ack, 1);
-                    gebo.registrantModel.find({}, function(err, agents) {
+                    var geboDb = require('../../schemata/gebo')(TEST_DB);
+                    geboDb.registrantModel.find({}, function(err, agents) {
+                        geboDb.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                           test.done();
@@ -2018,7 +2104,9 @@ exports.deregisterAgent = {
         action.deregisterAgent({ admin: false, execute: true }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.equal(ack, 1);
-                    gebo.registrantModel.find({}, function(err, agents) {
+                    var geboDb = require('../../schemata/gebo')(TEST_DB);
+                    geboDb.registrantModel.find({}, function(err, agents) {
+                        geboDb.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                           test.done();
@@ -2048,7 +2136,9 @@ exports.deregisterAgent = {
         test.expect(1);
         action.deregisterAgent({ admin: true }, { content: { email: 'nosuchagent@example.com' } }).
             then(function(ack) {
-                    gebo.registrantModel.find({}, function(err, agents) {
+                    var geboDb = require('../../schemata/gebo')(TEST_DB);
+                    geboDb.registrantModel.find({}, function(err, agents) {
+                        geboDb.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                           test.done();
@@ -2070,7 +2160,8 @@ exports.friend = {
             /**
              * Setup a registrant
              */
-            var registrant = new gebo.registrantModel({
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
                     password: 'password123',
@@ -2090,6 +2181,7 @@ exports.friend = {
                 });
 
             registrant.save(function(err) {
+                    geboDb.connection.db.close();
                     friend.save(function(err) {
                         if (err) {
                           console.log(err);
@@ -2107,22 +2199,27 @@ exports.friend = {
 
     tearDown: function(callback) {
        
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('dan@example.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err)
                 }
-                agentDb.connection.db.close();
-                callback();
+                var agentDb = new agentSchema('dan@example.com'); 
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
+                  });
               });
           });
+
+
      }, 
 
     'Add a new friend to the database if permitted': function(test) {
@@ -2141,6 +2238,7 @@ exports.friend = {
  
                 var agentDb = new agentSchema('dan@example.com');
                 agentDb.friendModel.find({}, function(err, friends) {
+                        agentDb.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                           test.done();
@@ -2214,7 +2312,8 @@ exports.defriend = {
             /**
              * Setup a registrant
              */
-            var registrant = new gebo.registrantModel({
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
                     password: 'password123',
@@ -2234,6 +2333,7 @@ exports.defriend = {
                 });
 
             registrant.save(function(err) {
+                    geboDb.connection.db.close();
                     friend.save(function(err) {
                         if (err) {
                           console.log(err);
@@ -2250,21 +2350,23 @@ exports.defriend = {
     }, 
 
     tearDown: function(callback) {
-       
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('dan@example.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
-                  console.log(err);
+                  console.log(err)
                 }
-                agentDb.connection.db.close();
-                callback();
+                var agentDb = new agentSchema('dan@example.com'); 
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
+                  });
               });
           });
      }, 
@@ -2277,6 +2379,7 @@ exports.defriend = {
 
                 var agentDb = new agentSchema('dan@example.com');
                 agentDb.friendModel.find({}, function(err, friends) {
+                        agentDb.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                           test.done();
@@ -2337,7 +2440,8 @@ exports.grantAccess = {
             /**
              * Setup a registrant
              */
-            var registrant = new gebo.registrantModel({
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
                     password: 'password123',
@@ -2359,6 +2463,7 @@ exports.grantAccess = {
             friend.hisPermissions.push({ email: 'some@coolapp.com' });
 
             registrant.save(function(err) {
+                geboDb.connection.db.close();
                 friend.save(function(err) {
                     if (err) {
                         console.log(err);
@@ -2375,21 +2480,23 @@ exports.grantAccess = {
     }, 
 
     tearDown: function(callback) {
-       
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('dan@example.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
-                  console.log(err);
+                  console.log(err)
                 }
-                agentDb.connection.db.close();
-                callback();
+                var agentDb = new agentSchema('dan@example.com'); 
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
+                  });
               });
           });
     }, 
@@ -2489,7 +2596,8 @@ exports.certificate = {
 
     setUp: function(callback) {
         try {
-            var registrant = new gebo.registrantModel({
+            var geboDb = require('../../schemata/gebo')(TEST_DB);
+            var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
                     password: 'password123',
@@ -2498,6 +2606,7 @@ exports.certificate = {
                 });
           
             registrant.save(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
@@ -2511,18 +2620,22 @@ exports.certificate = {
     }, 
 
     tearDown: function(callback) {
-        gebo.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            var agentDb = new agentSchema('dan@example.com'); 
-            agentDb.connection.on('open', function(err) {
-                agentDb.connection.db.dropDatabase(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    agentDb.connection.db.close();
-                    callback();
+        var geboDb = require('../../schemata/gebo')(TEST_DB);
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
+                geboDb.connection.db.close();
+                if (err) {
+                  console.log(err)
+                }
+                var agentDb = new agentSchema('dan@example.com'); 
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
                   });
               });
           });
