@@ -126,28 +126,28 @@ module.exports = function(email) {
       
                               collection.save(message.content.data, { safe: true },
                                       function(err, ack) {
+                                          _db.close();
                                           if (err) {
                                             deferred.reject(err);
                                           }
                                           else {
                                             deferred.resolve(ack);
                                           }
-                                          _db.close();
                                         });
                             }
                             else {
-                              deferred.resolve();
                               _db.close();
+                              deferred.resolve();
                             }
                           }).
                         catch(function(err) {
-                            deferred.reject(err);
                             _db.close();
+                            deferred.reject(err);
                           });
                     }).
                   catch(function(err) {
-                      deferred.reject(err);
                       _db.close();
+                      deferred.reject(err);
                     }).
                   done();
         }
@@ -172,6 +172,7 @@ module.exports = function(email) {
               then(function(collection) {
                       collection.find({ '_id': new mongo.ObjectID(message.content.id) }).toArray(
                               function(err, docs) {
+                                      _db.close();
                                       if (err) {
                                         deferred.reject(err);
                                       }
@@ -179,12 +180,11 @@ module.exports = function(email) {
                                         // Should I check for multiple matches?
                                         deferred.resolve(docs[0]);
                                       }
-                                      _db.close();
                                     });
                     }).
                   catch(function(err) {
-                          deferred.reject(err);
                           _db.close();
+                          deferred.reject(err);
                         });
         }
         else {
@@ -216,6 +216,7 @@ module.exports = function(email) {
                           else {
                             collection.remove({ _id: new mongo.ObjectID(message.content.id) },
                             function(err, ack) {
+                                _db.close();
                                 if (err || ack === 0) {
                                   deferred.reject(
                                           new Error('Could not delete document: ' +
@@ -224,16 +225,16 @@ module.exports = function(email) {
                                 else {
                                   deferred.resolve();
                                 }
-                                _db.close();
                               });
                           }
                         });
                     }).
                   catch(function(err) {
-                          deferred.reject(err);
                           _db.close();
-                        }).
-                  done();
+                          deferred.reject(err);
+                    });
+//                        }).
+//                  done();
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -266,6 +267,7 @@ module.exports = function(email) {
                           else {
                             collection.drop(
                                 function(err, ack) {
+                                    _db.close();
                                     if (err || ack === 0) {
                                       deferred.reject(
                                               new Error('Could not delete collection: ' +
@@ -279,9 +281,11 @@ module.exports = function(email) {
                         });
                     }).
               catch(function(err) {
-                      deferred.reject(err);
-                    }).
-              done();
+                    _db.close();
+                    deferred.reject(err);
+                });
+//                    }).
+//              done();
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -342,18 +346,18 @@ module.exports = function(email) {
 
                     cursor.toArray(
                         function(err, docs) {
+                            _db.close();
                             if (err) {
                               deferred.reject(err);
                             }
                             else {
                               deferred.resolve(docs);
                             }
-                            _db.close();
                           });
                 }).
               catch(function(err) {
-                      deferred.reject(err);
                       _db.close();
+                      deferred.reject(err);
                 });
         }
         else {
@@ -395,13 +399,13 @@ module.exports = function(email) {
                                 var collection = new mongo.Collection(client, 'profile');
                                 collection.save(message.content.profile.toObject(), { safe: true },
                                         function(err, ack) {
+                                            db.close();
                                             if (err) {
                                               deferred.reject(err);
                                             }
                                             else {
                                               deferred.resolve(ack);
                                             }
-                                            db.close();
                                           });
                               }
                             });
@@ -435,11 +439,14 @@ module.exports = function(email) {
 
                     db.open(function (err) {
                         if (err) {
-                          deferred.reject(err);
                           _db.close();
+                          db.close();
+                          deferred.reject(err);
                         }
                         else {
                           db.dropDatabase(function(err) {
+                              _db.close();
+                              db.close();
                               if (err) {
                                 deferred.reject(new Error('Database: ' +
                                                 dbName + ' was not dropped'));
@@ -447,12 +454,12 @@ module.exports = function(email) {
                               else {
                                 deferred.resolve();
                               }
-                              _db.close();
                             });
                         }
                       });
                   }).
                 catch(function(err) {
+                    _db.close();
                     deferred.reject(err);
                   });
         }
@@ -482,6 +489,7 @@ module.exports = function(email) {
               else {
                 var agent = new db.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
+                    db.connection.db.close();
                     if (err) {
                       deferred.reject(err);
                     }
@@ -511,6 +519,7 @@ module.exports = function(email) {
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
           db.registrantModel.remove({ email: message.content.email }, function(err, ack) {
+                  db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
                   }
