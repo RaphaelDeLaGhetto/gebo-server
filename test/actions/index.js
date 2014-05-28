@@ -1,5 +1,4 @@
 var nconf = require('nconf'),
-    mongo = require('mongodb'),
     path = require('path'),
     fs = require('fs'),
     utils = require('../../lib/utils');
