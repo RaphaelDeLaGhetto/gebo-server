@@ -6,5 +6,6 @@
     "httpsPort":3443,
     "docs": "docs",
     "cachify":false,
-    "testDb": "gebo-server-test@example.com"
+    "testDb": "gebo-server-test@example.com",
+    "testEmail": "gebo-server-test@example.com"
 }
