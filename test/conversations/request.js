@@ -247,10 +247,10 @@ exports.client = {
               });
 
         conversation.save(function(err) {
+            agentDb.connection.db.close();
             if (err) {
               console.log(err);
             }
-            agentDb.connection.db.close();
             callback();
           });
     },
