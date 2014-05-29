@@ -1,6 +1,5 @@
 
 var utils = require('../../lib/utils'),
-    config = require('../../config/config'),
     fs = require('fs'),
     nock = require('nock'),
     mkdirp = require('mkdirp'),
