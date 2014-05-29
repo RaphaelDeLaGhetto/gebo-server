@@ -15,36 +15,30 @@ exports.loadConversation = {
         // Drop the DB here because test documents have 
         // tendency to persist when errors are thrown
         // during testing
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                var conversation = new agentDb.conversationModel({
-                        type: 'request',
-                        role: 'client',
-                        conversationId: 'some conversation ID',
-                        gebo: 'https://mygebo.com',
-                      });
-        
-                conversation.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    agentDb.connection.db.close();
-                    callback();
+//        agentDb.connection.db.dropDatabase(function(err) {
+            var conversation = new agentDb.conversationModel({
+                    type: 'request',
+                    role: 'client',
+                    conversationId: 'some conversation ID',
+                    gebo: 'https://mygebo.com',
                   });
+        
+            conversation.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
               });
-          });
+//          });
     },
 
     tearDown: function(callback) {
         var agentDb = new agentSchema('dan@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
@@ -56,7 +50,6 @@ exports.loadConversation = {
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
-        		conversation.db.close();
 
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'client');
@@ -86,7 +79,6 @@ exports.loadConversation = {
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
-		        conversation.db.close();
 
                 test.equal(conversation.type, 'request');
                 test.equal(conversation.role, 'server');
@@ -113,7 +105,6 @@ exports.loadConversation = {
             then(function(conversation) {
                 // Connection should be open
                 test.equal(conversation.db.readyState, 1);
-        		conversation.db.close();
 
                 test.equal(conversation.type, 'propose');
                 test.equal(conversation.role, 'client');
@@ -126,7 +117,6 @@ exports.loadConversation = {
         		// Make sure it is saved
                 var agentDb = new agentSchema('dan@example.com');
                 agentDb.conversationModel.find({}, function(err, conversations) {
-                        agentDb.connection.db.close();
                         if (err) {
                           console.log(err);
                           test.ok(false, err);
@@ -188,21 +178,17 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
             if (err) {
               console.log(err);
             }
-            agentDb.connection.db.close();
             callback();
           });
     },
 
     tearDown: function(callback) {
         var agentDb = new agentSchema('dan@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
@@ -210,7 +196,6 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
         test.expect(2);
         var agentDb = new agentSchema('dan@example.com');
         agentDb.conversationModel.findOne({ conversationId: 'some conversation ID' }, function(err, conversation) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -225,7 +210,6 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
         test.expect(2);
         var agentDb = new agentSchema('dan@example.com');
         agentDb.conversationModel.findOne({ conversationId: 'some conversation ID' }, function(err, conversation) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -244,7 +228,6 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
         test.expect(2);
         var agentDb = new agentSchema('dan@example.com');
         agentDb.conversationModel.findOne({ conversationId: 'some conversation ID' }, function(err, conversation) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -263,7 +246,6 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
         test.expect(2);
         var agentDb = new agentSchema('dan@example.com');
         agentDb.conversationModel.findOne({ conversationId: 'some conversation ID' }, function(err, conversation) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -282,7 +264,6 @@ exports.getFirstUnfulfilledSocialCommitmentIndex = {
         test.expect(2);
         var agentDb = new agentSchema('dan@example.com');
         agentDb.conversationModel.findOne({ conversationId: 'some conversation ID' }, function(err, conversation) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -301,27 +282,21 @@ exports.startNewConversation = {
 
     setUp: function(callback) {
         var agentDb = new agentSchema('server@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
     tearDown: function(callback) {
         var agentDb = new agentSchema('server@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
@@ -329,7 +304,6 @@ exports.startNewConversation = {
         test.expect(13);
         var agentDb = new agentSchema('server@example.com');
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -343,7 +317,6 @@ exports.startNewConversation = {
                 then(function(conversation) {
                     // Connection should be open
                     test.equal(conversation.db.readyState, 1);
-    	            conversation.db.close();
 
                     test.equal(conversation.type, 'request');
                     test.equal(conversation.role, 'server');
@@ -355,7 +328,6 @@ exports.startNewConversation = {
                     // Make sure it is saved
                     var agentDb = new agentSchema('server@example.com');
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                            agentDb.connection.db.close();
                             if (err) {
                               console.log(err);
                               test.ok(false, err);
@@ -383,7 +355,6 @@ exports.startNewConversation = {
         test.expect(13);
         var agentDb = new agentSchema('server@example.com');
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -399,7 +370,6 @@ exports.startNewConversation = {
                 then(function(conversation) {
                     // Connection should be open
                     test.equal(conversation.db.readyState, 1);
-    	            conversation.db.close();
 
                     test.equal(conversation.type, 'request');
                     test.equal(conversation.role, 'server');
@@ -411,7 +381,6 @@ exports.startNewConversation = {
                     // Make sure it is saved
                     var agentDb = new agentSchema('server@example.com');
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                            agentDb.connection.db.close();
                             if (err) {
                               console.log(err);
                               test.ok(false, err);
@@ -439,7 +408,6 @@ exports.startNewConversation = {
         test.expect(4);
         var agentDb = new agentSchema('server@example.com');
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -461,7 +429,6 @@ exports.startNewConversation = {
                     test.equal(err, 'There\'s no propose conversation for this agree propose');
                     agentDb = new agentSchema('server@example.com');
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                        agentDb.connection.db.close();
                         if (err) {
                           console.log(err);
                           test.ok(false, err);
@@ -484,7 +451,6 @@ exports.startNewConversation = {
                 then(function(conversation) {
                     // Connection should be open
                     test.equal(conversation.db.readyState, 1);
-    	            conversation.db.close();
 
                     test.equal(conversation.type, 'request');
                     test.equal(conversation.role, 'server');
@@ -497,7 +463,6 @@ exports.startNewConversation = {
                     // Make sure it is saved
                     var agentDb = new agentSchema('server@example.com');
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                            agentDb.connection.db.close();
                             if (err) {
                               console.log(err);
                               test.ok(false, err);
@@ -532,7 +497,6 @@ exports.startNewConversation = {
                 then(function(conversation) {
                     // Connection should be open
                     test.equal(conversation.db.readyState, 1);
-    	            conversation.db.close();
 
                     test.equal(conversation.type, 'request');
                     test.equal(conversation.role, 'server');
@@ -545,7 +509,6 @@ exports.startNewConversation = {
                     // Make sure it is saved
                     var agentDb = new agentSchema('server@example.com');
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                            agentDb.connection.db.close();
                             if (err) {
                               console.log(err);
                               test.ok(false, err);
@@ -578,61 +541,44 @@ exports.getRole = {
     setUp: function(callback) {
 
         var agentDb = new agentSchema('client@example.com');
-        agentDb.connection.on('open', function(err) {
-            if (err) {
-              console.log(err)
-            }
-            agentDb.connection.db.dropDatabase(function(err) {
-                var clientConversation = new agentDb.conversationModel({
+//        agentDb.connection.db.dropDatabase(function(err) {
+            var clientConversation = new agentDb.conversationModel({
+                    type: 'request',
+                    role: 'client',
+                    conversationId: 'Some client conversation ID',
+                    gebo: 'https://mygebo.com',
+              });
+
+            clientConversation.save(function(err) {
+
+                agentDb = new agentSchema('server@example.com');
+                var serverConversation = new agentDb.conversationModel({
                         type: 'request',
-                        role: 'client',
+                        role: 'server',
+                        gebo: 'https://someothergebo.com',
                         conversationId: 'Some client conversation ID',
-                        gebo: 'https://mygebo.com',
-                  });
-
-                clientConversation.save(function(err) {
-                    agentDb.connection.db.close();
-
-                    agentDb = new agentSchema('server@example.com'); agentDb.connection.on('open', function(err) { if (err) {
-                          console.log(err)
-                        }
-
-                        var serverConversation = new agentDb.conversationModel({
-                                type: 'request',
-                                role: 'server',
-                                gebo: 'https://someothergebo.com',
-                                conversationId: 'Some client conversation ID',
-                              });
-    
-                        serverConversation.save(function(err) {
-                            agentDb.connection.db.close();
-                            if (err) {
-                              console.log(err);
-                            }
-                            callback();
-                          });
                       });
+    
+                serverConversation.save(function(err) {
+                    if (err) {
+                      console.log(err);
+                    }
+                    callback();
                   });
               });
-          });
+//          });
     },
 
     tearDown: function(callback) {
         var agentDb = new agentSchema('client@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
+        agentDb.connection.db.dropDatabase(function(err) {
 
-                agentDb = new agentSchema('server@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-                        callback();
-                      });
-                  });
+            agentDb = new agentSchema('server@example.com');
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                callback();
               });
           });
     },

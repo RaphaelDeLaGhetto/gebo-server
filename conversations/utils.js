@@ -152,6 +152,7 @@ var _getRole = function(message, incoming) {
       var agentDb = new agentSchema(email);
       agentDb.conversationModel.findOne({ conversationId: message.conversationId }, function(err, conversation) {
 
+              console.log('conversation',conversation);
             if (err) {
               deferred.reject(err);
             }
