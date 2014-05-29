@@ -247,7 +247,6 @@ exports.client = {
               });
 
         conversation.save(function(err) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
             }
@@ -257,14 +256,11 @@ exports.client = {
 
     tearDown: function(callback) {
         var agentDb = new agentSchema(CLIENT);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
@@ -932,21 +928,17 @@ exports.server = {
             if (err) {
               console.log(err);
             }
-            agentDb.connection.db.close();
             callback();
           });
     },
 
     tearDown: function(callback) {
         var agentDb = new agentSchema(SERVER);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 

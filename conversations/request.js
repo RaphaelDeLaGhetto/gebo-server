@@ -99,7 +99,6 @@ exports.client = function(message, agent) {
             }
  
             conversation.save(function(err, conversation) {
-                conversation.db.close();
                 if (err) {
                   deferred.reject(err);
                 }
@@ -225,7 +224,6 @@ exports.server = function(message, agent) {
             }
 
             conversation.save(function(err) {
-                conversation.db.close();
                 if (err) {
                   deferred.reject(err);
                 }

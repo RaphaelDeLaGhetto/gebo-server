@@ -8,9 +8,6 @@ var agentSchema = require('../schemata/agent'),
 /**
  * Retrieve the conversation, if it exists
  *
- * NOTE: the database connections are not closed.
- * That is left to the caller.
- *
  * @param Object - message
  * @param Object - agent
  *
@@ -36,7 +33,6 @@ exports.loadConversation = function(message, agent) {
                           deferred.reject(err);
                         }
                         else if (!conversation) {
-                          agentDb.connection.db.close();
                           _startNewConversation(message, agent, message.performative, role).
                             then(function(conversation) {
                                 deferred.resolve(conversation);
@@ -69,8 +65,6 @@ exports.loadConversation = function(message, agent) {
 
 /**
  * Start a new conversation
- *
- * NOTE: startNewConversation doesn't close the database connection.
  *
  * @param Object
  * @param Object
@@ -157,7 +151,6 @@ var _getRole = function(message, incoming) {
 
       var agentDb = new agentSchema(email);
       agentDb.conversationModel.findOne({ conversationId: message.conversationId }, function(err, conversation) {
-            agentDb.connection.db.close();
 
             if (err) {
               deferred.reject(err);
