@@ -1,5 +1,4 @@
-var config = require('../../config/config'),
-    nconf = require('nconf'),
+var nconf = require('nconf'),
     agentSchema = require('../../schemata/agent'),
     geboSchema = require('../../schemata/gebo');
     utils = require('../../lib/utils'),
