@@ -1,5 +1,4 @@
-var config = require('../../config/config'),
-    nconf = require('nconf'),
+var nconf = require('nconf'),
     mongo = require('mongodb'),
     gebo = require('../../schemata/gebo');
 
