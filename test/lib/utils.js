@@ -216,10 +216,10 @@ exports.saveFilesToAgentDirectory = {
         var agentDb = new agentSchema('dan@example.com'); 
         agentDb.connection.on('open', function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
+                agentDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
-                agentDb.connection.db.close();
                 callback();
               });
           });
@@ -453,6 +453,7 @@ exports.saveFilesToAgentDirectory = {
                 db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
                                        collectionName: utils.getMongoCollectionName('test@example.com') },
                     function(err, file) {
+                        db.connection.db.close();
                         if (err || !file) {
                           test.ok(false, err);
                         }
@@ -511,6 +512,7 @@ exports.saveFilesToAgentDirectory = {
                 var db = new agentSchema('dan@example.com');
                 db.fileModel.find({},
                     function(err, files) {
+                        db.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                         }
@@ -521,7 +523,6 @@ exports.saveFilesToAgentDirectory = {
                           test.equal(files[2].name, 'gebo-server-utils-test-3.txt'); 
                           test.equal(files[3].name, 'gebo-server-utils-test-4.txt'); 
                         }
-                        db.connection.db.close();
                         test.done();
                       });
               }).

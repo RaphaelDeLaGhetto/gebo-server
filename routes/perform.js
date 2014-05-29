@@ -3,7 +3,7 @@
 var passport = require('passport'),
     utils = require('../lib/utils'),
     sc = require('../lib/sc'),
-    geboSchema = require('../schemata/gebo'),
+//    geboSchema = require('../schemata/gebo'),
     agentSchema = require('../schemata/agent'),
     extend = require('extend'),
     multiparty = require('connect-multiparty'),
