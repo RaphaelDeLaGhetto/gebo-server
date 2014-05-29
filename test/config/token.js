@@ -71,12 +71,10 @@ exports.getFriend = {
             friend.hisPermissions.push({ email: 'someapp@example.com' });
 
             registrant.save(function(err) {
-                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
                 friend.save(function(err) {
-                    agentDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -92,22 +90,16 @@ exports.getFriend = {
 
     tearDown: function (callback) {
         var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
-                geboDb.connection.db.close();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                var agentDb = new agentSchema('dan@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-                        callback();
-                      });
-                  });
+                callback();
               });
           });
     }, 
@@ -177,12 +169,10 @@ exports.getKey = {
                 });
 
             registrant.save(function(err) {
-                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
                 key.save(function(err) {
-                    agentDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -198,22 +188,16 @@ exports.getKey = {
 
     tearDown: function (callback) {
         var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
-                geboDb.connection.db.close();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                var agentDb = new agentSchema('dan@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-                        callback();
-                      });
-                  });
+                callback();
               });
           });
     }, 
@@ -278,12 +262,10 @@ exports.getCertificate = {
                 });
 
             registrant.save(function(err) {
-                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
                 key.save(function(err) {
-                    agentDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -299,22 +281,16 @@ exports.getCertificate = {
 
     tearDown: function (callback) {
         var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
-                geboDb.connection.db.close();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                var agentDb = new agentSchema('dan@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-                        callback();
-                      });
-                  });
+                callback();
               });
           });
     }, 
@@ -421,8 +397,6 @@ exports.get = {
                                       console.log(err);
                                     }
                                     otherFriendKey.save(function(err) {
-                                        geboDb.connection.db.close();
-                                        agentDb.connection.db.close();
                                         if (err) {
                                           console.log(err);
                                         }
@@ -442,22 +416,16 @@ exports.get = {
 
     tearDown: function (callback) {
         var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
-                geboDb.connection.db.close();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                var agentDb = new agentSchema('dan@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-                        callback();
-                      });
-                  });
+                callback();
               });
           });
     },
@@ -530,7 +498,6 @@ exports.makeJwt = {
                         });
 
                     key.save(function(err) {
-                        agentDb.connection.db.close();
                         if (err) {
                           console.log(err);
                         }
@@ -543,7 +510,6 @@ exports.makeJwt = {
                                     });
 
                         friend.save(function(err) {
-                            agentDb.connection.db.close();
                             if (err) {
                               console.log(err);
                             }
@@ -565,33 +531,17 @@ exports.makeJwt = {
 
     tearDown: function (callback) {
         var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
-                geboDb.connection.db.close();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+ 
+            var agentDb = new agentSchema('dan@example.com');
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
- 
-                var agentDb = new agentSchema('dan@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        agentDb.connection.db.close();
-                        if (err) {
-                          console.log(err)
-                        }
-        
-                        agentDb = new agentSchema('john@painter.com');
-                        agentDb.connection.on('open', function(err) {
-                            agentDb.connection.db.dropDatabase(function(err) {
-                                agentDb.connection.db.close();
-                                if (err) {
-                                  console.log(err)
-                                }
-                                callback();
-                              });
-                          });
-                      });
-                  });
+                callback();
               });
           });
     },

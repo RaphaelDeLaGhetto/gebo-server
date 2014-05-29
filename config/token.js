@@ -11,7 +11,6 @@ var q = require('q'),
 
 module.exports = function(email) {
 
-    //nconf.argv().env().file({ file: 'local.json' });
     nconf.file({ file: 'gebo.json' });
 
     // JWT header
@@ -42,7 +41,6 @@ module.exports = function(email) {
 
         var agentDb = new agentSchema(dbName);
         agentDb.friendModel.findOne({ email: email }, function(err, friend) {
-            agentDb.connection.db.close();
             if (err) {
               deferred.reject(err);
             }
@@ -70,7 +68,6 @@ module.exports = function(email) {
 
         var agentDb = new agentSchema(dbName);
         agentDb.keyModel.findOne({ email: email }, function(err, key) {
-            agentDb.connection.db.close();
             if (err) {
               deferred.reject(err);
             }
@@ -98,7 +95,6 @@ module.exports = function(email) {
 
         var agentDb = new agentSchema(dbName);
         agentDb.keyModel.findOne({ email: email }, function(err, key) {
-            agentDb.connection.db.close();
             if (err) {
               deferred.reject(err);
             }
