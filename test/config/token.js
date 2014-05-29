@@ -1,5 +1,4 @@
 var nock = require('nock'),
-    config = require('../../config/config'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
     http = require('http'),
