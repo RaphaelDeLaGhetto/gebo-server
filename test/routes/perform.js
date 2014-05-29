@@ -1,6 +1,5 @@
 
-var config = require('../../config/config'),
-    nconf = require('nconf'),
+var nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('../../lib/utils'),
     extend = require('extend'),
