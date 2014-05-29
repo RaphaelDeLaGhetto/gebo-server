@@ -1,7 +1,6 @@
 'use strict';
 
-var config = require('../config/config'),
-    mongo = require('mongodb'),
+var mongo = require('mongodb'),
     mongoDbConnection = require('../lib/connection'),
     utils = require('../lib/utils'),
     q = require('q'),
@@ -15,71 +14,6 @@ module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
-
-    // For matching 12 and 24 char mongo ObjectIds
-//    var _hexRegex = /^[0-9a-fA-F]{12,24}$/;
-
-    // Global DB, because at some point I should
-    // close the connection.
-//    var _db;
-
-    /**
-     * Determine if the database exists. To do this,
-     * a database is opened and the number of 
-     * collections is counted. If the number is zero,
-     * this is a new database that did not previously
-     * exist.
-     *
-     * @param verified
-     *
-     * @return bool
-     */
-//    var _dbExists = function(verified) {
-//        var deferred = q.defer();
-//
-//        if (verified.admin || verified.read || verified.write || verified.execute) { 
-//          var server = new mongo.Server(
-//                          config.mongo.host,
-//                          config.mongo.port,
-//                          config.mongo.serverOptions);
-//          _db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
-//
-//          _db.open(function (err, client) {
-//                  if (err) {
-//                    console.log('ERROR! What is happening here?');
-//                    console.log('Check ulimit -n??');
-//                    console.log(err);
-//                    throw(err);
-//                  }
-//                  client.collectionNames(function(err, names) {
-//                      if (err) {
-//                        console.log(err);
-//                        throw(err);
-//                      }
-//    
-//                      if (names.length === 0) {
-//                        deferred.reject(
-//                                new Error('Database: ' + verified.dbName + ' does not exist'));
-//                        _db.dropDatabase(function(err) {
-//                          if (err) {
-//                            deferred.reject(new Error('Database: ' +
-//                                            verified.dbName + ' was not dropped'));
-//                          }
-//                        });
-//                      }
-//                      else {
-//                        deferred.resolve(client);
-//                      }
-//                    });
-//                });
-//        }
-//        else {
-//          deferred.reject('You are not permitted to request or propose that action');
-//        }
-// 
-//        return deferred.promise;
-//      };
-//    exports.dbExists = _dbExists;
 
     /**
      * Get the collection specified in the verified object parameter
@@ -109,29 +43,6 @@ module.exports = function(email) {
       };
     exports.getCollection = _getCollection;
     
-//    var _getCollection = function(verified) {
-//        var deferred = q.defer();
-//        if (verified.admin || verified.read || verified.write || verified.execute) { 
-//          _dbExists(verified).
-//              then(function(client) {
-//                  var collection = new mongo.Collection(client, verified.collectionName);
-//                  deferred.resolve(collection);
-//                }).
-//              catch(function(err) {
-//                  deferred.reject(err);
-//                });
-//        }
-//        else {
-//          deferred.reject('You are not permitted to request or propose that action');
-//        }
-//        return deferred.promise;
-//      };
-//    exports.getCollection = _getCollection;
- 
-
-
-
-
     /**
      * Save JSON to user's profile
      *
@@ -173,8 +84,7 @@ module.exports = function(email) {
                     }).
                   catch(function(err) {
                       deferred.reject(err);
-                    });//.
-//                  done();
+                    });
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -195,14 +105,9 @@ module.exports = function(email) {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
-                    // Get the unique mongo _id
-                    var id;
+                    // Make sure an ID was specified 
                     if (message.content && message.content.id) {
-                      id = message.content.id;
-
-                      if (_hexRegex.test(message.content.id)) {
-                        id = new mongo.ObjectID(id)
-                      }
+                      var id = _transformId(message.content.id);
 
                       collection.findOne({ '_id': id }, function(err, doc) {
                           if (err) {
@@ -250,7 +155,6 @@ module.exports = function(email) {
                           else {
                             collection.remove({ _id: new mongo.ObjectID(message.content.id) },
                             function(err, ack) {
-                                _db.close();
                                 if (err || ack === 0) {
                                   deferred.reject(
                                           new Error('Could not delete document: ' +
@@ -264,11 +168,8 @@ module.exports = function(email) {
                         });
                     }).
                   catch(function(err) {
-                          _db.close();
-                          deferred.reject(err);
+                        deferred.reject(err);
                     });
-//                        }).
-//                  done();
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -301,7 +202,6 @@ module.exports = function(email) {
                           else {
                             collection.drop(
                                 function(err, ack) {
-                                    _db.close();
                                     if (err || ack === 0) {
                                       deferred.reject(
                                               new Error('Could not delete collection: ' +
@@ -315,11 +215,8 @@ module.exports = function(email) {
                         });
                     }).
               catch(function(err) {
-                    _db.close();
                     deferred.reject(err);
                 });
-//                    }).
-//              done();
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -341,17 +238,15 @@ module.exports = function(email) {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) { 
+
                     /**
                      * Get search parameters
                      */
                     var criteria = {};
                     if (message && message.content.criteria) {
-                      var hexRegex = /^[0-9a-fA-F]{24}$/;
                       criteria = message.content.criteria;
                       Object.keys(criteria).forEach(function(key) {
-                        if (hexRegex.test(criteria[key])) {
-                          criteria[key] = new mongo.ObjectID(criteria[key]);
-                        }
+                          criteria[key] = _transformId(criteria[key]);
                       });
                     }
 
@@ -380,7 +275,6 @@ module.exports = function(email) {
 
                     cursor.toArray(
                         function(err, docs) {
-                            _db.close();
                             if (err) {
                               deferred.reject(err);
                             }
@@ -390,7 +284,6 @@ module.exports = function(email) {
                           });
                 }).
               catch(function(err) {
-                      _db.close();
                       deferred.reject(err);
                 });
         }
@@ -401,6 +294,13 @@ module.exports = function(email) {
       };
     exports.ls = _ls;
     
+    /** 
+     * createDatabase and dropDatabase have been mothballed (along
+     * with their respective tests). This functionality may be
+     * reimplemented in the future.
+     *
+     * 2014-5-29
+     */
     /**
      * Create a new database
      *
@@ -409,100 +309,100 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    var _createDatabase = function(verified, message) {
-        var deferred = q.defer();
-
-        if (verified.admin || verified.execute) {
-          _dbExists(verified).
-                  then(function() {
-                      deferred.reject();
-                      _db.close();
-                    }).
-                  catch(function() {
-                          var server = new mongo.Server(config.mongo.host,
-                                           config.mongo.port,
-                                           config.mongo.serverOptions);
-                          var db = new mongo.Db(
-  				verified.dbName, server, config.mongo.clientOptions);
-  
-                          db.open(function (err, client) {
-                              if (err) {
-                                deferred.reject(err);
-                              }
-                              else {
-                                var collection = new mongo.Collection(client, 'profile');
-                                collection.save(message.content.profile.toObject(), { safe: true },
-                                        function(err, ack) {
-                                            db.close();
-                                            if (err) {
-                                              deferred.reject(err);
-                                            }
-                                            else {
-                                              deferred.resolve(ack);
-                                            }
-                                          });
-                              }
-                            });
-                        });
-        }
-        else {
-          deferred.reject('You are not permitted to request or propose that action');
-        }
-
-        return deferred.promise;
-      };
-    exports.createDatabase = _createDatabase;
-
-    /**
-     * Drop a database
-     * 
-     * @param Object
-     *
-     * @return promise
-     */
-    var _dropDatabase = function(verified) {
-        var deferred = q.defer();
-
-        if (verified.admin || verified.execute) {
-        _dbExists(verified).
-                then(function() {
-                    var server = new mongo.Server(config.mongo.host,
-                                     config.mongo.port,
-                                     config.mongo.serverOptions);
-                    var db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
-
-                    db.open(function (err) {
-                        if (err) {
-                          _db.close();
-                          db.close();
-                          deferred.reject(err);
-                        }
-                        else {
-                          db.dropDatabase(function(err) {
-                              _db.close();
-                              db.close();
-                              if (err) {
-                                deferred.reject(new Error('Database: ' +
-                                                dbName + ' was not dropped'));
-                              }
-                              else {
-                                deferred.resolve();
-                              }
-                            });
-                        }
-                      });
-                  }).
-                catch(function(err) {
-                    _db.close();
-                    deferred.reject(err);
-                  });
-        }
-        else {
-          deferred.reject('You are not permitted to request or propose that action');
-        }
-        return deferred.promise;
-      };
-    exports.dropDatabase = _dropDatabase;
+//    var _createDatabase = function(verified, message) {
+//        var deferred = q.defer();
+//
+//        if (verified.admin || verified.execute) {
+//          _dbExists(verified).
+//                  then(function() {
+//                      deferred.reject();
+//                      _db.close();
+//                    }).
+//                  catch(function() {
+//                          var server = new mongo.Server(config.mongo.host,
+//                                           config.mongo.port,
+//                                           config.mongo.serverOptions);
+//                          var db = new mongo.Db(
+//  				verified.dbName, server, config.mongo.clientOptions);
+//  
+//                          db.open(function (err, client) {
+//                              if (err) {
+//                                deferred.reject(err);
+//                              }
+//                              else {
+//                                var collection = new mongo.Collection(client, 'profile');
+//                                collection.save(message.content.profile.toObject(), { safe: true },
+//                                        function(err, ack) {
+//                                            db.close();
+//                                            if (err) {
+//                                              deferred.reject(err);
+//                                            }
+//                                            else {
+//                                              deferred.resolve(ack);
+//                                            }
+//                                          });
+//                              }
+//                            });
+//                        });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+//
+//        return deferred.promise;
+//      };
+//    exports.createDatabase = _createDatabase;
+//
+//    /**
+//     * Drop a database
+//     * 
+//     * @param Object
+//     *
+//     * @return promise
+//     */
+//    var _dropDatabase = function(verified) {
+//        var deferred = q.defer();
+//
+//        if (verified.admin || verified.execute) {
+//        _dbExists(verified).
+//                then(function() {
+//                    var server = new mongo.Server(config.mongo.host,
+//                                     config.mongo.port,
+//                                     config.mongo.serverOptions);
+//                    var db = new mongo.Db(verified.dbName, server, config.mongo.clientOptions);
+//
+//                    db.open(function (err) {
+//                        if (err) {
+//                          _db.close();
+//                          db.close();
+//                          deferred.reject(err);
+//                        }
+//                        else {
+//                          db.dropDatabase(function(err) {
+//                              _db.close();
+//                              db.close();
+//                              if (err) {
+//                                deferred.reject(new Error('Database: ' +
+//                                                dbName + ' was not dropped'));
+//                              }
+//                              else {
+//                                deferred.resolve();
+//                              }
+//                            });
+//                        }
+//                      });
+//                  }).
+//                catch(function(err) {
+//                    _db.close();
+//                    deferred.reject(err);
+//                  });
+//        }
+//        else {
+//          deferred.reject('You are not permitted to request or propose that action');
+//        }
+//        return deferred.promise;
+//      };
+//    exports.dropDatabase = _dropDatabase;
 
     /**
      * This adds a new agent for this gebo to represent
@@ -523,7 +423,7 @@ module.exports = function(email) {
               else {
                 var agent = new db.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
-                    db.connection.db.close();
+//                    db.connection.db.close();
                     if (err) {
                       deferred.reject(err);
                     }
@@ -553,7 +453,7 @@ module.exports = function(email) {
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
           db.registrantModel.remove({ email: message.content.email }, function(err, ack) {
-                  db.connection.db.close();
+//                  db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
                   }
@@ -584,7 +484,6 @@ module.exports = function(email) {
           db.friendModel.findOneAndUpdate(
                           { email: message.content.email }, message.content, { upsert: true },
                           function(err, friend) {
-                                  db.connection.db.close();
                                   if (err) {
                                     deferred.reject(err);
                                   }
@@ -612,7 +511,6 @@ module.exports = function(email) {
         if (verified.write) {
           var db = new agentSchema(verified.dbName);
           db.friendModel.remove({ email: message.content.email }, function(err, ack) {
-                  db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
                   }
@@ -659,7 +557,6 @@ module.exports = function(email) {
                         });
 
                     friend.save(function(err, savedFriend) {
-                            db.connection.db.close();
                             if (err) {
                               deferred.reject(err);
                             }
@@ -694,7 +591,6 @@ module.exports = function(email) {
                 var db = new agentSchema(verified.dbName);
                 db.keyModel.findOneAndUpdate({ email: message.content.email }, data, { upsert: true },
                     function(err, key) {
-                        db.connection.db.close();
                         if (err) {
                           deferred.reject(err);
                         }
@@ -725,7 +621,6 @@ module.exports = function(email) {
      * to ObjectIds. If not, they can be left alone.
      */
     function _transformId(id) {
-        var hexRegex = /^[0-9a-fA-F]{12,24}$/;
         if (/^[0-9a-fA-F]{12,24}$/.test(id)) {
           return new mongo.ObjectID(id)
         }
