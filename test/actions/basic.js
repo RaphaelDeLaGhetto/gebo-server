@@ -30,6 +30,15 @@ var agentSchema = require('../../schemata/agent'),
     action = require('../../actions/basic')(TEST_DB);
 
 /**
+ * Currently, the connection object can connect to one of
+ * two databases defined in gebo.json. By calling it here
+ * I ensure that the test database is loaded by passing the 
+ * last boolean parameter.
+ */
+var mongoDbConnection = require('../../lib/connection');
+mongoDbConnection(function(conn) {}, true);
+
+/**
  * testConnection
  */
 var db, collection;
@@ -262,14 +271,12 @@ exports.saveToDb = {
    'Update existing JSON document as admin': function(test) {
         test.expect(8);
 
-                    console.log('before cp');
         // Retrieve the existing document
         action.cp({ dbName: TEST_DB,
 		    collectionName: cname,
 		    admin: true },
                   { content: { id: '0123456789AB' } }).
             then(function(docs) {
-                    console.log('after cp');
                     test.ok(docs, 'Docs successfully copied');
                     test.equal(docs.name, 'dan');
                     test.equal(docs.occupation, 'Batman');
@@ -418,7 +425,6 @@ exports.saveToFs = {
                     admin: false,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
-            registrant.save();
 
             /**
              * Make a friend for the registrant
@@ -458,6 +464,7 @@ exports.saveToFs = {
     },
     
     tearDown: function (callback) {
+        rimraf.sync('docs/' + TEST_DB);
         rimraf.sync('docs/dan_at_example_dot_com');
 
         var geboDb = require('../../schemata/gebo')(TEST_DB);
@@ -646,7 +653,7 @@ exports.saveToFs = {
     'Write multiple files to disk': function(test) {
         test.expect(2);
 
-        var dir = 'docs/' + utils.getMongoDbName('dan@example.com') +
+        var dir = 'docs/' + TEST_DB +
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
         action.save({ dbName: TEST_DB,
@@ -806,21 +813,31 @@ exports.cp = {
 
     setUp: function (callback) {
     	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            db = new mongo.Db('yanfen_at_example_dot_com', server,
-			    config.mongo.clientOptions);
+            var server = new mongo.Server('localhost', 27017, {});
+
+            db = new mongo.Db(TEST_DB, server, { safe: true });
             db.open(function (err, client) {
                 if (err) {
                   throw err;
                 }
         	collection = new mongo.Collection(client, cname);
-                collection.insert({
-                        _id: new mongo.ObjectID('0123456789AB'),
-                        name: 'dan',
-                        occupation: 'Batman'
-                    },
+                collection.insert([
+                        {
+                            _id: new mongo.ObjectID('0123456789AB'),
+                            name: 'dan',
+                            occupation: 'Batman'
+                        },
+                        {
+                            _id: new mongo.ObjectID('123456789ABCDEF012345678'),
+                            name: 'yanfen',
+                            occupation: 'Being cool'
+                        },
+                        {
+                            _id: 'Not an ObjectId',
+                            name: 'john',
+                            occupation: 'Pastor in Training'
+                        },
+                    ],
                     function() {
                         callback();
                     });
@@ -838,26 +855,35 @@ exports.cp = {
         });
     },
  
-   'Do not copy from non-existent database': function (test) {
-        test.expect(1);
-        action.cp({ dbName: 'no_one_at_not_here_dot_com',
-		    collectionName: cname,
-		    admin: true },
-		  { content: { id: '0123456789AB' } }).
-             then(function() {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
-                    test.done();
-                }).
-            catch(function(err) {
-                    test.ok(err, 'An error should be thrown');
-                    test.done();
-                });
-   }, 
+    /**
+     * I'm saving this for future reference. gebo can only
+     * access on database at the moment. This will almost
+     * certainly change, at which point this test will 
+     * become relevant again
+     *
+     * 2015-5-29
+     */
+//   'Do not copy from non-existent database': function (test) {
+//        test.expect(1);
+//        action.cp({ dbName: 'no_one_at_not_here_dot_com',
+//		    collectionName: cname,
+//		    admin: true },
+//		  { content: { id: '303132333435363738394143' } }).
+//             then(function(doc) {
+//                    // Shouldn't get here
+//                    console.log('doc', doc);
+//                    test.ok(false, 'Shouldn\'t get here!!!');
+//                    test.done();
+//                }).
+//            catch(function(err) {
+//                    test.ok(err, 'An error should be thrown');
+//                    test.done();
+//                });
+//   }, 
 
    'Copy from existing database as admin': function (test) {
         test.expect(3);
-        action.cp({ dbName: 'yanfen_at_example_dot_com',
+        action.cp({ dbName: TEST_DB,
 		    collectionName: cname,
 		    admin: true },
                   { content: { id: '0123456789AB' } }).
@@ -876,7 +902,7 @@ exports.cp = {
 
    'Copy from existing database with read permission': function (test) {
         test.expect(3);
-        action.cp({ dbName: 'yanfen_at_example_dot_com',
+        action.cp({ dbName: TEST_DB,
 		    collectionName: cname,
 		    admin: false,
                     read: true },
@@ -896,12 +922,12 @@ exports.cp = {
 
    'Do not copy from existing database without permission': function (test) {
         test.expect(1);
-        action.cp({ dbName: 'yanfen_at_example_dot_com',
+        action.cp({ dbName: TEST_DB,
 		    collectionName: cname,
 		    admin: false,
                     read: false },
                   { content: { id: '0123456789AB' } }).
-             then(function(docs) {
+            then(function(docs) {
                     test.ok(false, 'I should not be able to copy from the database');
                     test.done();
                 }).
@@ -911,6 +937,55 @@ exports.cp = {
                  });
    },
 
+   'Should handle 24 char hex keys (the other tests use 12 chars)': function(test) {
+        test.expect(2);
+        action.cp({ dbName: TEST_DB,
+		    collectionName: cname,
+                    read: true },
+                  { content: { id: '123456789ABCDEF012345678' } }).
+             then(function(docs) {
+                    test.equal(docs.name, 'yanfen');
+                    test.equal(docs.occupation, 'Being cool');
+                    test.done();
+                }).
+            catch(function(err) {
+                   test.ok(false, err);
+                   test.done();
+                 });
+   },
+
+   'Should handle non-mongo ObjectId as a key': function(test) {
+        test.expect(2);
+        action.cp({ dbName: TEST_DB,
+		    collectionName: cname,
+                    read: true },
+                  { content: { id: 'Not an ObjectId' } }).
+             then(function(docs) {
+                    test.equal(docs.name, 'john');
+                    test.equal(docs.occupation, 'Pastor in Training');
+                    test.done();
+                }).
+            catch(function(err) {
+                   test.ok(false, err);
+                   test.done();
+                 });
+   },
+
+   'Don\'t barf if the document ID is omitted': function(test) {
+        test.expect(1);
+        action.cp({ dbName: TEST_DB,
+		    collectionName: cname,
+                    read: true },
+                  { }).
+             then(function(docs) {
+                    test.ok(false);
+                    test.done();
+                }).
+            catch(function(err) {
+                   test.equal(err, 'You need to specify the ID of the document you want to copy');
+                   test.done();
+                 });
+   },
 
 };
 
@@ -921,11 +996,14 @@ exports.rm = {
 
     setUp: function (callback) {
     	try{
-            var server = new mongo.Server(config.mongo.host,
-                                          config.mongo.port,
-                                          config.mongo.serverOptions);
-            db = new mongo.Db('yanfen_at_example_dot_com',
-			    server, config.mongo.clientOptions);
+//            var server = new mongo.Server(config.mongo.host,
+//                                          config.mongo.port,
+//                                          config.mongo.serverOptions);
+//            db = new mongo.Db('yanfen_at_example_dot_com',
+//			    server, config.mongo.clientOptions);
+
+            var server = new mongo.Server('localhost', 27017, {});
+            db = new mongo.Db(TEST_DB, server, { safe: true });
             db.open(function (err, client) {
                 if (err) {
                   throw err;
@@ -2757,4 +2835,36 @@ exports.certificate = {
               });
     },
 };
+
+
+/**
+ * transformId
+ */
+exports.transformId = {
+
+    'It should convert a 12 char hex string to an ObjectId': function(test) {
+        test.expect(2);
+        var id = action.transformId('0123456789AB');
+        test.ok(id instanceof mongo.ObjectID);
+        test.equal(id, '303132333435363738394142');
+        test.done();
+    },
+
+    'It should convert a 24 char hex string to an ObjectId': function(test) {
+        test.expect(2);
+        var id = action.transformId('0123456789abcdefABCDEF01');
+        test.ok(id instanceof mongo.ObjectID);
+        test.equal(id, '0123456789abcdefabcdef01');
+        test.done();
+    },
+
+    'It should leave a non-hex string alone': function(test) {
+        test.expect(2);
+        var id = action.transformId('This is a non-hex string');
+        test.ok(typeof id, 'string');
+        test.equal(id, 'This is a non-hex string');
+        test.done();
+    },
+};
+
 

@@ -16,9 +16,12 @@ module.exports = function(email) {
     // Turn the email into a mongo-friend database name
     var dbName = utils.ensureDbName(email);
 
+    // For matching 12 and 24 char mongo ObjectIds
+//    var _hexRegex = /^[0-9a-fA-F]{12,24}$/;
+
     // Global DB, because at some point I should
     // close the connection.
-    var _db;
+//    var _db;
 
     /**
      * Determine if the database exists. To do this,
@@ -152,7 +155,6 @@ module.exports = function(email) {
       
                               collection.save(message.content.data, { safe: true },
                                       function(err, ack) {
-//                                          _db.close();
                                           if (err) {
                                             deferred.reject(err);
                                           }
@@ -162,20 +164,17 @@ module.exports = function(email) {
                                         });
                             }
                             else {
-//                              _db.close();
                               deferred.resolve();
                             }
                           }).
                         catch(function(err) {
-//                            _db.close();
                             deferred.reject(err);
                           });
                     }).
                   catch(function(err) {
-//                      _db.close();
                       deferred.reject(err);
-                    }).
-                  done();
+                    });//.
+//                  done();
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -196,23 +195,31 @@ module.exports = function(email) {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
-                      collection.find({ '_id': new mongo.ObjectID(message.content.id) }).toArray(
-                              function(err, docs) {
-                                      console.log('got docs');
-//                                      _db.close();
-                                      if (err) {
-                                        deferred.reject(err);
-                                      }
-                                      else {
-                                        // Should I check for multiple matches?
-                                        deferred.resolve(docs[0]);
-                                      }
-                                    });
-                    }).
-                  catch(function(err) {
-//                          _db.close();
-                          deferred.reject(err);
+                    // Get the unique mongo _id
+                    var id;
+                    if (message.content && message.content.id) {
+                      id = message.content.id;
+
+                      if (_hexRegex.test(message.content.id)) {
+                        id = new mongo.ObjectID(id)
+                      }
+
+                      collection.findOne({ '_id': id }, function(err, doc) {
+                          if (err) {
+                            deferred.reject(err);
+                          }
+                          else {
+                            deferred.resolve(doc);
+                          }                           
                         });
+                    }
+                    else {
+                      deferred.reject('You need to specify the ID of the document you want to copy');
+                    }
+                }).
+              catch(function(err) {
+                    deferred.reject(err);
+                });
         }
         else {
           deferred.reject('You are not permitted to request or propose that action');
@@ -712,6 +719,20 @@ module.exports = function(email) {
         return deferred.promise; 
       };
 
+    /**
+     * Mongo IDs can be just about anything, but if they're
+     * 12 or 24 char hex strings, they need to be converted
+     * to ObjectIds. If not, they can be left alone.
+     */
+    function _transformId(id) {
+        var hexRegex = /^[0-9a-fA-F]{12,24}$/;
+        if (/^[0-9a-fA-F]{12,24}$/.test(id)) {
+          return new mongo.ObjectID(id)
+        }
+        return id;
+      };
+    exports.transformId = _transformId;
+    
     return exports;
   };
 
