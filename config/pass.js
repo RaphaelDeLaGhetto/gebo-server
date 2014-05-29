@@ -52,7 +52,6 @@ module.exports = function(email) {
               return done(null, false, { message: 'Invalid email or password' });
             }
             agent.comparePassword(password, function(err, isMatch) {
-                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -75,7 +74,6 @@ module.exports = function(email) {
     passport.deserializeUser(function(id, done) {
         var db = new geboSchema(dbName);
         db.registrantModel.findById(id, function (err, agent) {
-            db.connection.db.close();
             done(err, agent);
           });
       });
@@ -118,7 +116,6 @@ module.exports = function(email) {
 
             var db = new geboSchema(dbName);
             db.clientModel.findOne({ name: clientName }, function(err, client) {
-                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -138,7 +135,6 @@ module.exports = function(email) {
             console.log('ClientPasswordStrategy');
             var db = new geboSchema(dbName);
             db.clientModel.findOne({ clientId: clientId, secret: secret }, function(err, client) {
-                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -185,7 +181,6 @@ module.exports = function(email) {
             
             // Look up the resource owner
             db.registrantModel.findOne({ _id: token.registrantId }, { password: 0 }, function(err, registrant) {
-                db.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -213,7 +208,6 @@ module.exports = function(email) {
     var _clientJwtBearerStrategy = function(claimSetIss, done) {
         var db = new geboSchema(dbName);
         db.registrantModel.findOne({ email: claimSetIss }, function(err, citizen) {
-            db.connection.db.close();
             if (err) {
               return done(err);
             }
