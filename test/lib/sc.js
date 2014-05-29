@@ -8,7 +8,6 @@ var mongo = require('mongodb'),
 var BASE_ADDRESS = 'http://theirhost.com';
 
 nconf.file({ file: 'gebo.json' });
-var geboDb = new geboSchema(nconf.get('testDb'));
 
 var SIGNING_PAIR;
 utils.getPrivateKeyAndCertificate().
@@ -26,6 +25,7 @@ exports.form = {
             /**
              * Setup a registrant
              */
+            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@example.com',
@@ -55,10 +55,12 @@ exports.form = {
                   });
 
             registrant.save(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
                 sc.save(function(err) {
+                    agentDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -73,21 +75,22 @@ exports.form = {
     },
 
     tearDown: function(callback) {
-
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('yanfen@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                agentDb.connection.db.close();
-                callback();
+                var agentDb = new agentSchema('yanfen@example.com');
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
+                  });
               });
           });
     },
@@ -203,6 +206,7 @@ exports.fulfil = {
             /**
              * Setup a registrant
              */
+            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@example.com',
@@ -213,6 +217,7 @@ exports.fulfil = {
 
             // There has got to be a better way to do this...
             registrant.save(function(err) {
+                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
@@ -233,21 +238,22 @@ exports.fulfil = {
     },
 
     tearDown: function(callback) {
-
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-          });
-
-        var agentDb = new agentSchema('yanfen@example.com');
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
+        var geboDb = new geboSchema(nconf.get('testDb'));
+        geboDb.connection.on('open', function(err) {
+            geboDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                agentDb.connection.db.close();
-                callback();
+                var agentDb = new agentSchema('yanfen@example.com');
+                agentDb.connection.on('open', function(err) {
+                    agentDb.connection.db.dropDatabase(function(err) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        agentDb.connection.db.close();
+                        callback();
+                      });
+                  });
               });
           });
     },
