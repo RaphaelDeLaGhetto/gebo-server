@@ -234,6 +234,8 @@ module.exports = function(email) {
      * @return promise
      */
     var _ls = function(verified, message) {
+            console.log('_ls verified', verified);
+            console.log('_ls message', message);
         var deferred = q.defer();
         if (verified.admin || verified.read) { 
           _getCollection(verified).
@@ -256,6 +258,7 @@ module.exports = function(email) {
                     }
 
                     var cursor = collection.find(criteria, fields);
+            console.log('_ls cursor', cursor);
 
                     // Were any options set?
                     if (message && message.content.options) {

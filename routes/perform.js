@@ -3,7 +3,6 @@
 var passport = require('passport'),
     utils = require('../lib/utils'),
     sc = require('../lib/sc'),
-//    geboSchema = require('../schemata/gebo'),
     agentSchema = require('../schemata/agent'),
     extend = require('extend'),
     multiparty = require('connect-multiparty'),
@@ -33,13 +32,18 @@ module.exports = function(email) {
         // Form a social commitment
         sc.form(agent, 'perform', message).
             then(function(socialCommitment) {
+                console.log('socialCommitment', socialCommitment);
                 _verify(agent, message).
                     then(function(verified) {
+
+                        console.log('verified', verified);
 
                         // There might be files attached to the message.
                         // They are included here, because it seems 
                         // silly to attach them to the social commitment.
                         extend(true, message, req.files);
+
+                        console.log('verified', verified);
 
                         /**
                          * Make sure this agent knows how to
@@ -156,6 +160,7 @@ module.exports = function(email) {
 		execute: false,
             };
 
+
         if (!verified.dbName) {
           verified.dbName = utils.getMongoDbName(agent.email);
         }
@@ -164,7 +169,6 @@ module.exports = function(email) {
           var agentDb = new agentSchema(verified.dbName);
   
           agentDb.friendModel.findOne({ email: agent.email }, function(err, friend) {
-                agentDb.connection.db.close();
                 logger.info('friendo:', agent.email, JSON.stringify(friend, null, 2));
                 if (err) {
                   deferred.reject(err);
