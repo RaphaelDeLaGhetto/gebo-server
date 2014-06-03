@@ -45,7 +45,6 @@ exports.schemaAdd = {
         test.equal(typeof gebo.schemata.test, 'function');
         var db = new gebo.schemata.test(TEST_DB);
         test.equal(typeof db, 'object');
-        db.connection.db.close();
     
         test.done();
     },
@@ -63,12 +62,10 @@ exports.schemaAdd = {
         test.equal(typeof gebo.schemata.test1, 'function');
         var db = new gebo.schemata.test1(TEST_DB);
         test.equal(typeof db, 'object');
-        db.connection.db.close();
 
         test.equal(typeof gebo.schemata.test2, 'function');
         db = new gebo.schemata.test2(TEST_DB)
         test.equal(typeof db, 'object');
-        db.connection.db.close();
 
         test.done();
     },
@@ -101,7 +98,6 @@ exports.schemata = {
                 email: 'some@guy.com',
                 gebo: 'https://somegebo.com',
             });
-        dbName.connection.db.close();
 
         test.equal(friend.name, 'Some guy');
         test.equal(friend.email, 'some@guy.com');
@@ -112,7 +108,6 @@ exports.schemata = {
                 name: 'Some guy',
                 email: 'some@guy.com',
             });
-        dbName.connection.db.close();
 
         test.equal(registrant.name, 'Some guy');
         test.equal(registrant.email, 'some@guy.com');
