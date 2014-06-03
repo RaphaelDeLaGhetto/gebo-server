@@ -25,7 +25,6 @@ var _sendMessageHandler = function(req, res, done) {
 
     conversationUtils.loadConversation(message, agent).
         then(function(conversation) {
-            conversation.db.close();
 
             // If this is new conversation, the message will
             // not have a conversationId
@@ -98,7 +97,7 @@ var _receiveMessageHandler = function(req, res, done) {
     console.log(message);
     conversationUtils.loadConversation(message, { email: message.receiver }).
         then(function(conversation) {
-            conversation.db.close();
+//            conversation.db.close();
 
             // If this is new conversation, the message will
             // not have a conversationId

@@ -5,7 +5,8 @@ var message = require('../../routes/message'),
     q = require('q'),
     extend = require('extend'),
     utils = require('../../lib/utils'),
-    agentSchema = require('../../schemata/agent');
+    agentSchema = require('../../schemata/agent'),
+    agentDb = new agentSchema();
 
 var CLIENT = 'yanfen@example.com',
     SERVER = 'dan@example.com';
@@ -38,39 +39,26 @@ exports.sendMessageHandler = {
         _code = undefined;
         _content = undefined;
 
-        var agentDb = new agentSchema(CLIENT);
-        agentDb.connection.on('open', function(err) {
-            if (err) {
-              console.log(err)
-            }
-            agentDb.connection.db.dropDatabase(function(err) {
-                    var conversation = new agentDb.conversationModel({
-                            type: 'request',
-                            role: 'client',
-                            conversationId: 'Some conversation ID',
-                            gebo: 'https://mygebo.com',
-                          });
-                    conversation.save(function(err) {
-                            agentDb.connection.db.close();
-                            if (err) {
-                              console.log(err);
-                            }
-                            callback();
-                          });
+        var conversation = new agentDb.conversationModel({
+                type: 'request',
+                role: 'client',
+                conversationId: 'Some conversation ID',
+                gebo: 'https://mygebo.com',
               });
+        conversation.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
           });
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema(CLIENT);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
@@ -81,9 +69,7 @@ exports.sendMessageHandler = {
                 post('/receive').
                 reply(200, { data: 'Okay' });  
 
-        var agentDb = new agentSchema(CLIENT);
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -93,14 +79,12 @@ exports.sendMessageHandler = {
             test.equal(conversations.length, 1);
 
             message.sendMessageHandler(SEND_REQ, RES, function(err, result) {
-                    var agentDb = new agentSchema(CLIENT);
                     agentDb.conversationModel.find({}, function(err, conversations) {
                             if (err) {
                               console.log(err);
                               test.ok(false, err);
                             }
                             scope.done();
-                            agentDb.connection.db.close();
                             test.equal(conversations.length, 2);
                             test.equal(_code, 200);
                             test.equal(_content.conversationId.search(CLIENT), 0);
@@ -126,9 +110,7 @@ exports.sendMessageHandler = {
                 post('/receive').
                 reply(200, { data: 'Okay' });  
 
-        var agentDb = new agentSchema(CLIENT);
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -141,9 +123,7 @@ exports.sendMessageHandler = {
             extend(true, req, SEND_REQ);
             req.body.conversationId = 'Some conversation ID';
             message.sendMessageHandler(req, RES, function(err, result) {
-                    var agentDb = new agentSchema(CLIENT);
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                            agentDb.connection.db.close();
                             test.equal(conversations.length, 1);
                             test.equal(_code, 200);
                             test.equal(_content.conversationId, 'Some conversation ID');
@@ -206,48 +186,34 @@ exports.receiveMessageHandler = {
         _code = undefined;
         _content = undefined;
 
-        var agentDb = new agentSchema(SERVER);
-        agentDb.connection.on('open', function(err) {
-            if (err) {
-              console.log(err)
-            }
-            agentDb.connection.db.dropDatabase(function(err) {
-                    var conversation = new agentDb.conversationModel({
-                            type: 'request',
-                            role: 'server',
-                            conversationId: 'Some conversation ID',
-                            gebo: 'https://mygebo.com',
-                          });
-                    conversation.save(function(err) {
-                            agentDb.connection.db.close();
-                            if (err) {
-                              console.log(err);
-                            }
-                            callback();
-                          });
+        var conversation = new agentDb.conversationModel({
+                type: 'request',
+                role: 'server',
+                conversationId: 'Some conversation ID',
+                gebo: 'https://mygebo.com',
               });
+
+        conversation.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
           });
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema(SERVER);
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
 
     'Should create a new conversation when matching conversationId doesn\'t exist': function(test) {
         test.expect(15);
 
-        var agentDb = new agentSchema(SERVER);
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -261,13 +227,11 @@ exports.receiveMessageHandler = {
             req.user.email = SERVER;
  
             message.receiveMessageHandler(req, RES, function(err, result) {
-                    var agentDb = new agentSchema(SERVER);
                     agentDb.conversationModel.find({}, function(err, conversations) {
                             if (err) {
                               console.log(err);
                               test.ok(false, err);
                             }
-                            agentDb.connection.db.close();
                             test.equal(conversations.length, 2);
                             test.equal(_code, 200);
                             test.equal(_content.conversationId.search(CLIENT), 0);
@@ -289,9 +253,7 @@ exports.receiveMessageHandler = {
     'Should return an ongoing conversation when a conversationId exists': function(test) {
         test.expect(13);
 
-        var agentDb = new agentSchema(SERVER);
         agentDb.conversationModel.find({}, function(err, conversations) {
-            agentDb.connection.db.close();
             if (err) {
               console.log(err);
               test.ok(false, err);
@@ -305,9 +267,7 @@ exports.receiveMessageHandler = {
             req.body.conversationId = 'Some conversation ID';
 
             message.receiveMessageHandler(req, RES, function(err, result) {
-                    var agentDb = new agentSchema(SERVER);
                     agentDb.conversationModel.find({}, function(err, conversations) {
-                            agentDb.connection.db.close();
                             test.equal(conversations.length, 1);
                             test.equal(_code, 200);
                             test.equal(_content.conversationId, 'Some conversation ID');
