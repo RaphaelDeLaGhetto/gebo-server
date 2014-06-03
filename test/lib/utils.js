@@ -213,15 +213,12 @@ exports.saveFilesToAgentDirectory = {
     tearDown: function (callback) {
         rimraf.sync('docs/dan_at_example_dot_com');
 
-        var agentDb = new agentSchema('dan@example.com'); 
-        agentDb.connection.on('open', function(err) {
-            agentDb.connection.db.dropDatabase(function(err) {
-                agentDb.connection.db.close();
-                if (err) {
-                  console.log(err);
-                }
-                callback();
-              });
+        var agentDb = new agentSchema(); 
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
           });
     },
 
@@ -449,11 +446,10 @@ exports.saveFilesToAgentDirectory = {
                           collectionName: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
-                var db = new agentSchema('dan@example.com');
+                var db = new agentSchema();
                 db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
                                        collectionName: utils.getMongoCollectionName('test@example.com') },
                     function(err, file) {
-                        db.connection.db.close();
                         if (err || !file) {
                           test.ok(false, err);
                         }
@@ -509,10 +505,9 @@ exports.saveFilesToAgentDirectory = {
                           collectionName: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
-                var db = new agentSchema('dan@example.com');
+                var db = new agentSchema();
                 db.fileModel.find({},
                     function(err, files) {
-                        db.connection.db.close();
                         if (err) {
                           test.ok(false, err);
                         }
