@@ -11,29 +11,25 @@ var agentSchema = require('../../schemata/agent'),
 exports.loadConversation = {
 
     setUp: function(callback) {
-        var agentDb = new agentSchema('dan@example.com');
-        // Drop the DB here because test documents have 
-        // tendency to persist when errors are thrown
-        // during testing
-//        agentDb.connection.db.dropDatabase(function(err) {
-            var conversation = new agentDb.conversationModel({
-                    type: 'request',
-                    role: 'client',
-                    conversationId: 'some conversation ID',
-                    gebo: 'https://mygebo.com',
-                  });
-        
-            conversation.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                callback();
+        var agentDb = new agentSchema();
+
+        var conversation = new agentDb.conversationModel({
+                type: 'request',
+                role: 'client',
+                conversationId: 'some conversation ID',
+                gebo: 'https://mygebo.com',
               });
-//          });
+        
+        conversation.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema('dan@example.com');
+        var agentDb = new agentSchema();
         agentDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
