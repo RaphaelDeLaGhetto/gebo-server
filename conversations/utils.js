@@ -26,7 +26,7 @@ exports.loadConversation = function(message, agent) {
     _getRole(message, incoming).
         then(function(role) {
             if (message.conversationId) {
-              var agentDb = new agentSchema(agent.email);
+              var agentDb = new agentSchema();
               agentDb.conversationModel.findOne({ conversationId: message.conversationId },
                   function(err, conversation) {
                         if (err) {
@@ -88,7 +88,7 @@ var _startNewConversation = function(message, agent, type, role) {
         gebo = utils.getDefaultDomain();
       }
  
-      var agentDb = new agentSchema(agent.email);
+      var agentDb = new agentSchema();
       var conversation = new agentDb.conversationModel({
               type: type,
               role: role,
@@ -149,10 +149,8 @@ var _getRole = function(message, incoming) {
         email = message.receiver;
       }
 
-      var agentDb = new agentSchema(email);
+      var agentDb = new agentSchema();
       agentDb.conversationModel.findOne({ conversationId: message.conversationId }, function(err, conversation) {
-
-//              console.log('conversation',conversation);
             if (err) {
               deferred.reject(err);
             }
