@@ -423,7 +423,6 @@ module.exports = function(email) {
               else {
                 var agent = new db.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
-//                    db.connection.db.close();
                     if (err) {
                       deferred.reject(err);
                     }
@@ -453,7 +452,6 @@ module.exports = function(email) {
         if (verified.admin || verified.execute) {
           var db = new geboSchema(dbName);
           db.registrantModel.remove({ email: message.content.email }, function(err, ack) {
-//                  db.connection.db.close();
                   if (err) {
                     deferred.reject(err);
                   }
