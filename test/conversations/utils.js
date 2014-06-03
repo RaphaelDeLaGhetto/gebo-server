@@ -534,52 +534,40 @@ exports.startNewConversation = {
 };
 
 /**
- * getRole
+ * getRole: client
+ *
+ * 2014-6-3
+ * At the time of writing, the gebo-server only consults
+ * its own database. As such, there must be two distinct
+ * sets of getRole tests: client and server (see below)
+ * 
  */
-exports.getRole = {
+exports.getRoleClient = {
 
     setUp: function(callback) {
+        var agentDb = new agentSchema();
+        var clientConversation = new agentDb.conversationModel({
+                type: 'request',
+                role: 'client',
+                conversationId: 'Some client conversation ID',
+                gebo: 'https://mygebo.com',
+          });
 
-        var agentDb = new agentSchema('client@example.com');
-//        agentDb.connection.db.dropDatabase(function(err) {
-            var clientConversation = new agentDb.conversationModel({
-                    type: 'request',
-                    role: 'client',
-                    conversationId: 'Some client conversation ID',
-                    gebo: 'https://mygebo.com',
-              });
-
-            clientConversation.save(function(err) {
-
-                agentDb = new agentSchema('server@example.com');
-                var serverConversation = new agentDb.conversationModel({
-                        type: 'request',
-                        role: 'server',
-                        gebo: 'https://someothergebo.com',
-                        conversationId: 'Some client conversation ID',
-                      });
-    
-                serverConversation.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    callback();
-                  });
-              });
-//          });
+        clientConversation.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema('client@example.com');
+        var agentDb = new agentSchema();
         agentDb.connection.db.dropDatabase(function(err) {
-
-            agentDb = new agentSchema('server@example.com');
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
+            if (err) {
+              console.log(err)
+            }
+            callback();
           });
     },
     
@@ -592,40 +580,6 @@ exports.getRole = {
                 action: 'friend'}, false).
             then(function(role) {
                 test.equal(role, 'client');
-                test.done();
-              }).
-            catch(function(err) {
-                console.log(err);
-                test.ok(false, err);
-              });
-    },
-
-    'Return \'server\' when receiving a new request': function(test) {
-        test.expect(1);
-        utils.getRole({
-                sender: 'client@example.com',
-                receiver: 'server@example.com',
-                performative: 'request',
-                action: 'friend'}, true).
-            then(function(role) {
-                test.equal(role, 'server');
-                test.done();
-              }).
-            catch(function(err) {
-                console.log(err);
-                test.ok(false, err);
-              });
-    },
-    
-    'Return \'server\' when sending a new propose': function(test) {
-        test.expect(1);
-        utils.getRole({
-                sender: 'server@example.com',
-                receiver: 'client@example.com',
-                performative: 'propose',
-                action: 'friend'}, false).
-            then(function(role) {
-                test.equal(role, 'server');
                 test.done();
               }).
             catch(function(err) {
@@ -669,6 +623,76 @@ exports.getRole = {
                 test.done();
               });
     },
+};
+
+/**
+ * getRole: server
+ *
+ * 2014-6-3
+ * See notes on the client tests above
+ */
+exports.getRoleServer = {
+
+    setUp: function(callback) {
+        var agentDb = new agentSchema();
+        var serverConversation = new agentDb.conversationModel({
+                type: 'request',
+                role: 'server',
+                gebo: 'https://someothergebo.com',
+                conversationId: 'Some client conversation ID',
+              });
+    
+        serverConversation.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    tearDown: function(callback) {
+        var agentDb = new agentSchema();
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    },
+    
+    'Return \'server\' when receiving a new request': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'client@example.com',
+                receiver: 'server@example.com',
+                performative: 'request',
+                action: 'friend'}, true).
+            then(function(role) {
+                test.equal(role, 'server');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
+    },
+    
+    'Return \'server\' when sending a new propose': function(test) {
+        test.expect(1);
+        utils.getRole({
+                sender: 'server@example.com',
+                receiver: 'client@example.com',
+                performative: 'propose',
+                action: 'friend'}, false).
+            then(function(role) {
+                test.equal(role, 'server');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, err);
+              });
+    },
 
     'Return \'server\' when sending an \'agree request\'': function(test) {
         test.expect(1);
@@ -688,8 +712,10 @@ exports.getRole = {
                 test.done();
               });
     },
-  
 };
+
+
+
 
 /**
  * getOptions
