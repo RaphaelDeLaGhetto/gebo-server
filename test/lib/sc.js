@@ -25,7 +25,7 @@ exports.form = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema(nconf.get('testDb'));
+            var geboDb = new geboSchema();
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@example.com',
@@ -44,7 +44,7 @@ exports.form = {
                     hisCertificate: 'some certificate',
                 };
  
-            var agentDb = new agentSchema('yanfen@example.com'); 
+            var agentDb = new agentSchema(); 
             var sc = new agentDb.socialCommitmentModel({
                     performative: 'request',
                     action: 'friend',
@@ -55,12 +55,10 @@ exports.form = {
                   });
 
             registrant.save(function(err) {
-                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
                 sc.save(function(err) {
-                    agentDb.connection.db.close();
                     if (err) {
                       console.log(err);
                     }
@@ -75,22 +73,17 @@ exports.form = {
     },
 
     tearDown: function(callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
+        var geboDb = new geboSchema();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema();
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                var agentDb = new agentSchema('yanfen@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        if (err) {
-                          console.log(err)
-                        }
-                        agentDb.connection.db.close();
-                        callback();
-                      });
-                  });
+                callback();
               });
           });
     },
@@ -206,7 +199,7 @@ exports.fulfil = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema(nconf.get('testDb'));
+            var geboDb = new geboSchema();
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@example.com',
@@ -217,7 +210,6 @@ exports.fulfil = {
 
             // There has got to be a better way to do this...
             registrant.save(function(err) {
-                geboDb.connection.db.close();
                 if (err) {
                   console.log(err);
                 }
@@ -238,32 +230,26 @@ exports.fulfil = {
     },
 
     tearDown: function(callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
-        geboDb.connection.on('open', function(err) {
-            geboDb.connection.db.dropDatabase(function(err) {
+        var geboDb = new geboSchema();
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            var agentDb = new agentSchema();
+            agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
                 }
-                var agentDb = new agentSchema('yanfen@example.com');
-                agentDb.connection.on('open', function(err) {
-                    agentDb.connection.db.dropDatabase(function(err) {
-                        if (err) {
-                          console.log(err)
-                        }
-                        agentDb.connection.db.close();
-                        callback();
-                      });
-                  });
+                callback();
               });
           });
     },
 
     'Set the fulfillment date on the socialCommitment document': function(test) {
         test.expect(10);
-        var agentDb = new agentSchema('yanfen@example.com');
+        var agentDb = new agentSchema();
         agentDb.socialCommitmentModel.findOne({ creditor: 'richard@construction.com' },
             function(err, socialCommitment) {
-                agentDb.connection.db.close();
                 if (err) {
                   console.log(err);
                   test.ok(false, err);
