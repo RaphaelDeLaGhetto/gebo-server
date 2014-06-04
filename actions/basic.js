@@ -1,20 +1,22 @@
 'use strict';
 
 var mongo = require('mongodb'),
-    mongoDbConnection = require('../lib/connection'),
+    mongoDbConnection = require('../lib/native-mongo-connection'),
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
     mv = require('mv'),
-    mkdirp = require('mkdirp'),
-    agentSchema = require('../schemata/agent'),
-    geboSchema = require('../schemata/gebo');
+    mkdirp = require('mkdirp');
 
-module.exports = function(email) {
+module.exports = function(testing) {
 
-    // Turn the email into a mongo-friend database name
-//    var dbName = utils.ensureDbName(email);
+    if (typeof testing !== 'boolean') {
+      testing = false;
+    }
 
+    var agentDb = require('../schemata/agent')(testing),
+        geboDb = require('../schemata/gebo')(testing);
+    
     /**
      * Get the collection specified in the verified object parameter
      *
@@ -25,7 +27,7 @@ module.exports = function(email) {
     var _getCollection = function(verified) {
         var deferred = q.defer();
         if (verified.admin || verified.read || verified.write || verified.execute) { 
-          mongoDbConnection(function(conn) {
+          mongoDbConnection(testing, function(conn) {
                 conn.collection(verified.collectionName, function(err, collection) {
                     if (err) {
                       deferred.reject(err);
@@ -414,14 +416,13 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          var db = new geboSchema();
 
-          db.registrantModel.findOne({ email: message.content.newAgent.email }, function(err, registrant) {
+          geboDb.registrantModel.findOne({ email: message.content.newAgent.email }, function(err, registrant) {
               if (registrant) {
                 deferred.reject('That email address has already been registered');
               }
               else {
-                var agent = new db.registrantModel(message.content.newAgent);
+                var agent = new geboDb.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
                     if (err) {
                       deferred.reject(err);
@@ -450,8 +451,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          var db = new geboSchema();
-          db.registrantModel.remove({ email: message.content.email }, function(err, ack) {
+          geboDb.registrantModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);
                   }
@@ -478,8 +478,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) {
-          var db = new agentSchema(verified.dbName);
-          db.friendModel.findOneAndUpdate(
+          agentDb.friendModel.findOneAndUpdate(
                           { email: message.content.email }, message.content, { upsert: true },
                           function(err, friend) {
                                   if (err) {
@@ -507,8 +506,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.write) {
-          var db = new agentSchema(verified.dbName);
-          db.friendModel.remove({ email: message.content.email }, function(err, ack) {
+          agentDb.friendModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);
                   }
@@ -536,8 +534,7 @@ module.exports = function(email) {
     exports.grantAccess = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || verified.write) {
-          var db = new agentSchema(verified.dbName);
-          db.friendModel.findOne({ email: message.content.friend }, function(err, friend) {
+          agentDb.friendModel.findOne({ email: message.content.friend }, function(err, friend) {
                   if (err) {
                     deferred.reject(err);
                   }
@@ -586,8 +583,7 @@ module.exports = function(email) {
                         email: message.content.email
                     };
 
-                var db = new agentSchema(verified.dbName);
-                db.keyModel.findOneAndUpdate({ email: message.content.email }, data, { upsert: true },
+                agentDb.keyModel.findOneAndUpdate({ email: message.content.email }, data, { upsert: true },
                     function(err, key) {
                         if (err) {
                           deferred.reject(err);
