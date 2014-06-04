@@ -13,7 +13,7 @@ var mongo = require('mongodb'),
 module.exports = function(email) {
 
     // Turn the email into a mongo-friend database name
-    var dbName = utils.ensureDbName(email);
+//    var dbName = utils.ensureDbName(email);
 
     /**
      * Get the collection specified in the verified object parameter
@@ -234,8 +234,6 @@ module.exports = function(email) {
      * @return promise
      */
     var _ls = function(verified, message) {
-            console.log('_ls verified', verified);
-            console.log('_ls message', message);
         var deferred = q.defer();
         if (verified.admin || verified.read) { 
           _getCollection(verified).
@@ -258,7 +256,6 @@ module.exports = function(email) {
                     }
 
                     var cursor = collection.find(criteria, fields);
-            console.log('_ls cursor', cursor);
 
                     // Were any options set?
                     if (message && message.content.options) {
@@ -417,7 +414,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          var db = new geboSchema(dbName);
+          var db = new geboSchema();
 
           db.registrantModel.findOne({ email: message.content.newAgent.email }, function(err, registrant) {
               if (registrant) {
@@ -453,7 +450,7 @@ module.exports = function(email) {
         var deferred = q.defer();
 
         if (verified.admin || verified.execute) {
-          var db = new geboSchema(dbName);
+          var db = new geboSchema();
           db.registrantModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);

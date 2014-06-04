@@ -32,11 +32,8 @@ module.exports = function(email) {
         // Form a social commitment
         sc.form(agent, 'perform', message).
             then(function(socialCommitment) {
-                console.log('socialCommitment', socialCommitment);
                 _verify(agent, message).
                     then(function(verified) {
-
-                        console.log('verified', verified);
 
                         // There might be files attached to the message.
                         // They are included here, because it seems 

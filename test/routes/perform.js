@@ -21,7 +21,7 @@ var COL_NAME = 'appCollection',
 var BASE_ADDRESS = 'http://theirhost.com';
 
 var performRoute = require('../../routes/perform');
-var perform = new performRoute(nconf.get('testDb'));
+var perform = new performRoute();
 
 var SIGNING_PAIR;
 utils.getPrivateKeyAndCertificate().
@@ -39,16 +39,16 @@ var CLIENT = 'yanfen@example.com',
     SERVER = 'dan@example.com';
 
 var SEND_REQ = {
-    body: { 
-         sender: CLIENT,
-         receiver: SERVER,
-         action: 'ls',
-         content: {
-            resource: 'friends',
-         }
-      },
-    user: { email: CLIENT, admin: false },
-  };
+        body: { 
+             sender: CLIENT,
+             receiver: SERVER,
+             action: 'ls',
+             content: {
+                resource: 'friends',
+             }
+          },
+        user: { email: CLIENT, admin: false },
+      };
 
 var _code, _content;
 var RES = {
@@ -436,7 +436,6 @@ exports.verify = {
 exports.handler = {
 
     setUp: function(callback) {
-                console.log('hello');
         _code = undefined;
         _content = undefined;
 
@@ -454,13 +453,14 @@ exports.handler = {
             if (err) {
               console.log(err);
             }
+//            console.log('--------------------------kj;jkljkjlkjkljkljljl;'); 
+//            console.log(agentDb);
             callback();
           });
     },
 
     tearDown: function(callback) {
         agentDb.connection.db.dropDatabase(function(err) {
-        //geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
@@ -471,12 +471,9 @@ exports.handler = {
     'Form a social commitment on receipt of a perform message': function(test) {
         test.expect(9);
         agentDb.socialCommitmentModel.find({}, function(err, scs) {
-        //geboDb.socialCommitmentModel.find({}, function(err, scs) {
-                console.log('scs', scs);
             test.equal(scs.length, 0);
 
             perform.handler(SEND_REQ, RES, function(err, results) { 
-                console.log('results', results);
                 if (err) {
                   console.log(err);
                   test.ok(false, err);
@@ -517,40 +514,42 @@ exports.handler = {
     },
 
     'Fulfil social commitment and return data when action is performed': function(test) {
-//        test.expect(12);
+        test.expect(13);
         var req = {};
         extend(true, req, SEND_REQ);
-        req.body.receiver = nconf.get('testDb');
+        req.body.receiver = nconf.get('email');
 
-        console.log('SEND_REQ', req);
-        console.log('RES', RES);
-        perform.handler(req, RES, function(err, results) { 
-////            console.log('_content', _content);
+        // Make sure a friend has actually been written to the DB
+        agentDb.friendModel.find({}, function(err, docs) {
             if (err) {
               console.log(err);
               test.ok(false, err);
             }
-            // Return data
-            console.log('code', _code);
-            console.log('content', _content);
-            test.equal(_code, 200);
-            test.equal(_content.length, 1);
-//            console.log('HEEELLO', _content.length);
-//            test.equal(_content[0].name, 'Yanfen');
-//            test.equal(!!_content[0]._id, true);
-//            
-////            var agentDb = new agentSchema();
-//            agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//                test.equal(scs.length, 1);
-//                test.equal(scs[0].performative, 'perform');
-//                test.equal(scs[0].action, 'ls');
-//                test.equal(!!scs[0].message, true);
-//                test.equal(scs[0].creditor, CLIENT);
-//                test.equal(scs[0].debtor, SERVER);
-//                test.equal(!!scs[0].created, true);
-//                test.equal(!!scs[0].fulfilled, true);
-                test.done();
-//              });
+            test.equal(docs.length, 1);
+
+            perform.handler(req, RES, function(err, results) { 
+                if (err) {
+                  console.log(err);
+                  test.ok(false, err);
+                }
+                // Return data
+                test.equal(_code, 200);
+                test.equal(_content.length, 1);
+                test.equal(_content[0].name, 'Yanfen');
+                test.equal(!!_content[0]._id, true);
+                
+                agentDb.socialCommitmentModel.find({}, function(err, scs) {
+                    test.equal(scs.length, 1);
+                    test.equal(scs[0].performative, 'perform');
+                    test.equal(scs[0].action, 'ls');
+                    test.equal(!!scs[0].message, true);
+                    test.equal(scs[0].creditor, CLIENT);
+                    test.equal(scs[0].debtor, nconf.get('email'));
+                    test.equal(!!scs[0].created, true);
+                    test.equal(!!scs[0].fulfilled, true);
+                    test.done();
+                  });
+              });
           });
     },
 
