@@ -77,13 +77,6 @@ exports.verify = {
             /**
              * Make a friend for the registrant
              */
-//            var adminAgentDb = new agentSchema();
-//            var adminFriend = new adminAgentDb.friendModel({
-//                    name: 'john',
-//                    email: 'john@painter.com',
-//                    uri: BASE_ADDRESS,
-//                    _id: new mongo.ObjectID('23456789ABCD')
-//                });
             var adminFriend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -111,13 +104,6 @@ exports.verify = {
             /**
              * Make a friend for the new registrant
              */
-//            var regularAgentDb = new agentSchema();
-//            var friend = new regularAgentDb.friendModel({
-//                    name: 'richard',
-//                    email: 'richard@construction.com',
-//                    uri: BASE_ADDRESS,
-//                    _id: new mongo.ObjectID('3456789ABCDE')
-//                });
             var friend = new agentDb.friendModel({
                     name: 'richard',
                     email: 'richard@construction.com',
@@ -167,8 +153,6 @@ exports.verify = {
             if (err) {
               console.log(err)
             }
-//            var regularAgentDb = new agentSchema();
-//            regularAgentDb.connection.db.dropDatabase(function(err) {
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -437,7 +421,6 @@ exports.handler = {
         _content = undefined;
 
         var friend = new agentDb.friendModel({
-        //var friend = new geboDb.friendModel({
                             name: 'Yanfen',
                             email: CLIENT,
                             uri: BASE_ADDRESS,
@@ -530,20 +513,20 @@ exports.handler = {
                 // Return data
                 test.equal(_code, 200);
                 test.equal(_content.length, 1);
-//                test.equal(_content[0].name, 'Yanfen');
-//                test.equal(!!_content[0]._id, true);
-//                
-//                agentDb.socialCommitmentModel.find({}, function(err, scs) {
-//                    test.equal(scs.length, 1);
-//                    test.equal(scs[0].performative, 'perform');
-//                    test.equal(scs[0].action, 'ls');
-//                    test.equal(!!scs[0].message, true);
-//                    test.equal(scs[0].creditor, CLIENT);
-//                    test.equal(scs[0].debtor, nconf.get('testEmail'));
-//                    test.equal(!!scs[0].created, true);
-//                    test.equal(!!scs[0].fulfilled, true);
+                test.equal(_content[0].name, 'Yanfen');
+                test.equal(!!_content[0]._id, true);
+                
+                agentDb.socialCommitmentModel.find({}, function(err, scs) {
+                    test.equal(scs.length, 1);
+                    test.equal(scs[0].performative, 'perform');
+                    test.equal(scs[0].action, 'ls');
+                    test.equal(!!scs[0].message, true);
+                    test.equal(scs[0].creditor, CLIENT);
+                    test.equal(scs[0].debtor, nconf.get('testEmail'));
+                    test.equal(!!scs[0].created, true);
+                    test.equal(!!scs[0].fulfilled, true);
                     test.done();
-//                  });
+                  });
               });
           });
     },
