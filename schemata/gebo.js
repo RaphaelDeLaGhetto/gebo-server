@@ -1,66 +1,23 @@
 'use strict';
 
-var geboDb = require('../lib/geboDb'),
-    utils = require('../lib/utils'),
-    extend = require('extend');
+var bcrypt = require('bcrypt'),
+    extend = require('extend'),
+    geboDb = require('../lib/mongoose-connection'),
+    mongoose = require('mongoose'),
+    utils = require('../lib/utils');
 
-//module.exports = function (email) {
-module.exports = function() {
+module.exports = function(testing) {
 
-    // Turn the email into a mongo-friend database name
-//    var dbName = utils.ensureDbName(email);
+    if (typeof testing !== 'boolean') {
+      testing = false;
+    }
 
-    /**
-     * The gebo is just a specialized agent. As such,
-     * he should have all the collections associated with a 
-     * regular agent in addition to the gebo-specific
-     * task of managing registrants and tokens
-     */
-//    var agent = require('./agent')(dbName);
-//    extend(true, exports, agent);
-
-    /** 
-     * Thank you to jaredhanson/passport-local
-     * https://github.com/jaredhanson/passport-local
-     *
-     * and jaredhanson/oauth2orize
-     * https://github.com/jaredhanson/oauth2orize
-     */
-    var mongoose = require('mongoose'),
-        bcrypt = require('bcrypt'),
-        SALT_WORK_FACTOR = 10;
-
-    /**
-     *  Database config
-     */
-//    var uristring =
-//        process.env.MONGOLAB_URI ||
-//        process.env.MONGOHQ_URL ||
-//        'mongodb://localhost/' + dbName;
-//
-//    var mongoOptions = { db: { safe: true }};
-//
-//    /**
-//     * Connect to mongo
-//     */
-//    var connection = mongoose.createConnection(uristring, mongoOptions);
-//    connection.on('open', function() {
-//        console.log ('Successfully connected to: ' + uristring);
-//      });
-//
-//    connection.on('error', function(err) {
-//        console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-//      });
-//
-//    // This is handy for when I need to drop a database
-//    // during testing
-//    exports.connection = connection;
-
-    //******* Database schema TODO add more validation
+    var SALT_WORK_FACTOR = 10;
     var Schema = mongoose.Schema,
         ObjectId = Schema.Types.ObjectId;
 
-    geboDb(function(connection) {
+    // Get the DB connection
+    geboDb(testing, function(connection) {
 
         /**
          * This is handy for when I need to drop a database

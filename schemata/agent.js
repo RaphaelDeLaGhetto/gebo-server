@@ -1,44 +1,20 @@
 'use strict';
 
-var geboDb = require('../lib/geboDb'),
+var geboDb = require('../lib/mongoose-connection'),
+    mongoose = require('mongoose'),
     utils = require('../lib/utils');
 
-//module.exports = function (email) {
-module.exports = function() {
+module.exports = function(testing) {
 
-    // Turn the email into a mongo-friendly database name
-//    var dbName = utils.ensureDbName(email);
+    if (typeof testing !== 'boolean') {
+      testing = false;
+    }
 
-    var mongoose = require('mongoose');
-
-    /**
-     *  Database config
-     */
-//    var uristring =
-//        process.env.MONGOLAB_URI ||
-//        process.env.MONGOHQ_URL ||
-//        'mongodb://localhost/' + dbName;
-//
-//    var mongoOptions = { db: { safe: true } };
-//
-//    /**
-//     * Connect to mongo
-//     */
-//    var connection = mongoose.createConnection(uristring, mongoOptions);
-//
-//    connection.on('open', function() {
-//        console.log ('Successfully connected to: ' + uristring);
-//      });
-//
-//    connection.on('error', function(err) {
-//        console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-//      });
-//
-    //******* Database schema TODO add more validation
     var Schema = mongoose.Schema,
         ObjectId = Schema.Types.ObjectId;
 
-    geboDb(function(connection) {
+    // Get the DB connection
+    geboDb(testing, function(connection) {
 
         /**
          * This is handy for when I need to drop a database
