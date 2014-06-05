@@ -1,21 +1,19 @@
 'use strict';
 
-var passport = require('passport'),
+var action = require('../actions')(),
+    passport = require('passport'),
     utils = require('../lib/utils'),
     sc = require('../lib/sc'),
-    agentSchema = require('../schemata/agent'),
+    agentDb = require('../schemata/agent')(),
     extend = require('extend'),
     multiparty = require('connect-multiparty'),
     q = require('q'),
     winston = require('winston');
 
-module.exports = function(email) {
+module.exports = function() {
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
-    // Turn the email into a mongo-friendly database name
-    var dbName = utils.ensureDbName(email);
-    var action = require('../actions')(dbName);
 
     /**
      * Handle incoming attempts to perform
@@ -40,7 +38,7 @@ module.exports = function(email) {
                         // silly to attach them to the social commitment.
                         extend(true, message, req.files);
 
-                        console.log('verified', verified);
+                        logger.info('verified', verified);
 
                         /**
                          * Make sure this agent knows how to
@@ -163,8 +161,6 @@ module.exports = function(email) {
         }
 
         if (utils.getMongoDbName(agent.email) !== verified.dbName && !verified.admin) {
-          var agentDb = new agentSchema(verified.dbName);
-  
           agentDb.friendModel.findOne({ email: agent.email }, function(err, friend) {
                 logger.info('friendo:', agent.email, JSON.stringify(friend, null, 2));
                 if (err) {
