@@ -16,11 +16,12 @@ var passport = require('passport'),
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
     ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy,
-    geboDb = require('../schemata/gebo')(),
     cluster = require('cluster'),
     winston = require('winston');
 
 module.exports = function() {
+
+    var geboDb = require('../schemata/gebo')();
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
