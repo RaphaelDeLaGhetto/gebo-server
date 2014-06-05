@@ -10,11 +10,15 @@ nconf.file({ file: 'gebo.json' });
  */
 exports.instantiate = {
 
-    tearDown: function(callback) {
+    setUp: function(callback) {
         delete require.cache[require.resolve('../../lib/native-mongo-connection')];
         callback();
     },
 
+    tearDown: function(callback) {
+        delete require.cache[require.resolve('../../lib/native-mongo-connection')];
+        callback();
+    },
 
     'Should return a connection instance': function(test) {
         test.expect(1);
