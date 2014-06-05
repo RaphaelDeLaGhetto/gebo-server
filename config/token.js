@@ -7,11 +7,13 @@ var q = require('q'),
     agentDb = require('../schemata/agent')(),
     utils = require('../lib/utils'),
     nconf = require('nconf'),
-    fs = require('fs');
+    fs = require('fs'),
+    winston = require('winston');
 
 module.exports = function(email) {
 
     nconf.file({ file: 'gebo.json' });
+    var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
     // JWT header
     var HEADER = {
@@ -168,25 +170,23 @@ module.exports = function(email) {
                               res.setEncoding('utf8');
                               res.on('data', function(t) {
                                       token = t;
-                                      console.log('token.token');
-                                      console.log(token);
+                                      logger.info('token.token', token);
                                   });
                               res.on('end', function() {
-                                      console.log('end');
+                                      logger.info('Token received');
                                       token = JSON.parse(token);
                                       if (token.error) {
-                                        console.log('token.error_description');
-                                        console.log(token.error_description);
+                                        logger.error('token.error_description', token.error_description);
                                         deferred.reject(token.error_description);
                                       }
                                       else {
+                                        logger.info('token', token);
                                         deferred.resolve(token);
                                       }
                                   });
                           }).
                         on('error', function(err){
-                                console.log('err');
-              			console.log(err);
+                                logger.error(err);
                                 deferred.reject(err);
                           });
               
