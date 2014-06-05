@@ -6,7 +6,10 @@ var passport = require('passport'),
     https = require('https'),
     extend = require('extend'),
     conversations = require('../conversations'),
-    q = require('q');
+    q = require('q'),
+    winston = require('winston');
+
+var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
 /**
  * Handles an agent's outgoing messages
@@ -15,11 +18,9 @@ var _sendMessageHandler = function(req, res, done) {
     var message = req.body,
         agent = req.user;
 
-    console.log('_sendMessageHandler');
-    console.log('agent');
-    console.log(agent);
-    console.log('message');
-    console.log(message);
+    logger.info('_sendMessageHandler');
+    logger.info('agent',  JSON.stringify(agent, null, 2));
+    logger.info('message', JSON.stringify(message, null, 2));
 
     conversationUtils.loadConversation(message, agent).
         then(function(conversation) {
@@ -32,18 +33,15 @@ var _sendMessageHandler = function(req, res, done) {
 
             conversations[conversation.type][conversation.role](message, agent).
                 then(function(conversation) {
-                    console.log('conversation.gebo');
-                    console.log(conversation.gebo);
+                    logger.info('conversation.gebo', conversation.gebo);
                     conversationUtils.postMessage(conversation.gebo, '/receive', message).
                         then(function(data) {
-                            console.log('data');
-                            console.log(data);
+                            logger.info('data', data);
                             res.send(200, conversation);
                             done();
                           }).
                         catch(function(err) {
-                            console.log('err');
-                            console.log(err);
+                            logger.error(err);
                             res.send(500, err);
                             done();
                           });
@@ -88,11 +86,10 @@ exports.send = [
  * Handle incoming messages
  */
 var _receiveMessageHandler = function(req, res, done) { 
-    console.log('receive');
+    logger.info('receive');
     var message = req.body;
 
-    console.log('message');
-    console.log(message);
+    logger.info('message', JSON.stringify(message, null, 2));
     conversationUtils.loadConversation(message, { email: message.receiver }).
         then(function(conversation) {
 
@@ -104,8 +101,7 @@ var _receiveMessageHandler = function(req, res, done) {
 
             conversations[conversation.type][conversation.role](message, { email: message.receiver }).
                 then(function(conversation) {
-                    console.log('conversation');
-                    console.log(conversation);
+                    logger.info('conversation', JSON.stringify(conversation, null, 2));
                     res.send(200, conversation);
                     done();
                   }).

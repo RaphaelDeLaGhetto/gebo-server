@@ -184,8 +184,6 @@ exports.verify = {
                 test.done();
               }).
             catch(function(err) {
-                console.log('err');
-                console.log(err);
                 test.ok(false, err);
                 test.done();      
               });
@@ -206,8 +204,6 @@ exports.verify = {
                 test.done();
               }).
             catch(function(err) {
-                console.log('err');
-                console.log(err);
                 test.ok(false, err);
                 test.done();      
               });
@@ -461,7 +457,6 @@ exports.handler = {
 
             perform.handler(SEND_REQ, RES, function(err, results) { 
                 if (err) {
-                  console.log(err);
                   test.ok(false, err);
                 }
 
@@ -505,15 +500,12 @@ exports.handler = {
         // Make sure a friend has actually been written to the DB
         agentDb.friendModel.find({}, function(err, docs) {
             if (err) {
-              console.log(err);
               test.ok(false, err);
             }
             test.equal(docs.length, 1);
-            console.log('docs', docs);
 
             perform.handler(SEND_REQ, RES, function(err, results) { 
                 if (err) {
-                  console.log(err);
                   test.ok(false, err);
                 }
                 // Return data
@@ -546,7 +538,6 @@ exports.handler = {
 
         perform.handler(req, RES, function(err, results) { 
             if (err) {
-              console.log(err);
               test.ok(false, err);
             }
             test.equal(_code, 501);
