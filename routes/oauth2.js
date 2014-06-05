@@ -18,19 +18,17 @@ var oauth2orize = require('oauth2orize'),
     crypto = require('crypto'),
     base64url = require('base64url'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
-    geboSchema = require('../schemata/gebo'),
-    mongoose = require('mongoose');
+    geboDb = require('../schemata/gebo')(),
+    agentDb = require('../schemata/agent')(),
+    mongoose = require('mongoose'),
+    winston = require('winston');
 
-//nconf.argv().env().file({ file: 'local.json' });
 nconf.file({ file: 'gebo.json' });
 
-module.exports = function(email) {
+module.exports = function() {
+    var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
-    // Turn the email into a mongo-friendly database name
-    var dbName = utils.ensureDbName(email);
-
-    var agentSchema = require('../schemata/agent'),
-        Token = require('../config/token');
+    var Token = require('../config/token');
     
     // create OAuth 2.0 server
     var server = oauth2orize.createServer();
@@ -49,26 +47,21 @@ module.exports = function(email) {
     // the client by ID from the database.
     
     server.serializeClient(function (resourceEmail, done) {
-        console.log('serializeClient');
-        console.log(resourceEmail);
+        logger.info('serializeClient', resourceEmail);
         return done(null, resourceEmail);
       });
     
     server.deserializeClient(function (requestDetails, done) {
-        console.log('deserializeClient');
+        logger.info('deserializeClient', requestDetails);
     
-        var agentDb = new agentSchema(requestDetails.agent);
         agentDb.friendModel.findOne({ email: requestDetails.friend }, function (err, friend) {
-                console.log('friendModel');
-                console.log(err);
-                console.log(friend);
+                logger.info('friendModel', friend);
                 var id = null;
                 if (friend) {
                   id = friend._id;
                 }
                 requestDetails.friend = id;
-                console.log('requestDetails');
-                console.log(requestDetails);
+                logger.info('requestDetails', requestDetails);
                 if (err) {
                   return done(err);
                 }
@@ -93,7 +86,6 @@ module.exports = function(email) {
     server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, done) {
         var code = utils.uid(16);
       
-        var geboDb = new geboSchema(dbName);
         var authorization = new geboDb.authorizationModel({
             userId: user.id,
             clientId: client.id,
@@ -102,7 +94,6 @@ module.exports = function(email) {
           });
     
         authorization.save(function (err, code) {
-            geboDb.connection.db.close();
             if (err) {
               return done(err);
             }
@@ -115,14 +106,10 @@ module.exports = function(email) {
      * Here's my attempt at an implicit grant
      */
     server.grant(oauth2orize.grant.token(function(requestDetails, user, ares, done) {
-        console.log('------ implicit grant');
-        console.log(requestDetails);
-        console.log(user);
-        console.log(ares);
+        logger.info('Implicit grant', requestDetails, user, ares);
     
         var tokenStr = utils.uid(256);
       
-        var geboDb = new geboSchema(dbName);
         var token = new geboDb.tokenModel({
             registrantId: user._id,
             friendId: requestDetails.friend,
@@ -132,12 +119,10 @@ module.exports = function(email) {
           });
       
         token.save(function (err, token) {
-            geboDb.connection.db.close();
             if (err) {
               return done(err);
             }
-            console.log('token');
-            console.log(token);
+            logger.info('Token', token);
             return done(null, token.string);
           });
       }));
@@ -149,8 +134,7 @@ module.exports = function(email) {
     // code.
     
     server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
-        console.log('------ regular exchange, no no');
-        var geboDb = new geboSchema(dbName);
+        logger.warn('------ regular exchange, no no');
         geboDb.authorizationModel.findOne({ code: code }, function (err, authCode) {
             if (err) {
               return done(err);
@@ -171,7 +155,6 @@ module.exports = function(email) {
               });
     
             token.save(function (err, token) {
-                geboDb.connection.db.close();
                 if (err) {
                   return done(err);
                 }
@@ -184,7 +167,7 @@ module.exports = function(email) {
      * For server login
      */
     var _jwtBearerExchange = function(citizen, data, signature, done) {
-        console.log('------ JWT, yeah yeah');
+        logger.info('JWT, yeah yeah');
     
         // The signature hasn't been verified yet, but
         // I need the user in the prn field to get the
@@ -200,11 +183,9 @@ module.exports = function(email) {
           decodedData.prn = decodedData.iss;
         }
     
-        var agentDb = new agentSchema(citizen.email);
         agentDb.friendModel.findOne({ email: decodedData.prn }, function(err, friend) {
-            agentDb.connection.db.close();
             if (err) {
-              console.log(err);
+              logger.error(err);
               done(err);
             }
         
@@ -213,7 +194,7 @@ module.exports = function(email) {
             verifier.update(data);
             
             if (verifier.verify(friend.certificate, signature, 'base64')) {
-              console.log('verified');
+              logger.info('verified');
     
               var scope = _processScope(decodedData.scope);
     
@@ -227,7 +208,6 @@ module.exports = function(email) {
                               return done(decodedData.prn + ' breached friendship');
                             }
     
-                            var geboDb = new geboSchema(dbName);
                             geboDb.registrantModel.findOne({ email: citizen.email }, function(err, owner) {
                                     if (err) {
                                       return done(err);
@@ -242,7 +222,6 @@ module.exports = function(email) {
                                       });
                         
                                     token.save(function (err, token) {
-                                        geboDb.connection.db.close();
                                         if (err) {
                                           return done(err);
                                         }
@@ -255,7 +234,7 @@ module.exports = function(email) {
                           });
             }
             else {
-              console.log('error');
+              logger.error('error');
               return done(new Error('Could not verify data with signature'));
             }
           });
@@ -276,9 +255,7 @@ module.exports = function(email) {
      */
     var _verifyFriendship = function(scope, citizen, foreignAgent) {
         var deferred = q.defer();
-        var db = new agentSchema(citizen);
-        db.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
-            db.connection.db.close();
+        agentDb.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
             if (err) {
               deferred.reject(err);
             }
@@ -349,7 +326,7 @@ module.exports = function(email) {
     exports.authorization = [
         login.ensureLoggedIn(),
         server.authorization(function (email, redirectUri, done) {
-            console.log('authorization');
+            logger.info('authorization');
             // { resource: email } gets passed to the serializeClient function's
             // resourceEmail parameter. The agent email and originating IP address
             // is added just before the dialog window is rendered
@@ -360,9 +337,7 @@ module.exports = function(email) {
         // the emails parameter in the [de]serializeClient functions.
         // Hence, req.oauth2.client.agent = req.user.email
         function (req, res) {
-            console.log('render dialog');
-            console.log(req.query);
-            console.log(req.user);
+            logger.info('render dialog', req.query, req.user);
     
             // Add some details to the oauth2 object
             // created by oauth2orize. This will all get
@@ -376,8 +351,7 @@ module.exports = function(email) {
                                userreq.connection.socket.remoteAddress; 
             req.oauth2.req.clientName = req.query.client_name;
     
-            console.log('oauth2');
-            console.log(req.oauth2);
+            logger.info('oauth2', req.oauth2);
     
             res.render('dialog', {
                     transactionID: req.oauth2.transactionID,
@@ -420,8 +394,7 @@ module.exports = function(email) {
     exports.verify = [
         passport.authenticate('bearer', { session: false }),
         function (req, res) {
-            console.log('api ---------------------------------');
-            console.log(req.user);
+            logger.info('api', req.user);
             res.json(req.user);
           },
      ];
