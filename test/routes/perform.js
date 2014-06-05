@@ -1,13 +1,23 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
 
-var nconf = require('nconf'),
-    mongo = require('mongodb'),
+var mongo = require('mongodb'),
     utils = require('../../lib/utils'),
     extend = require('extend'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent'),
     sinon = require('sinon');
 
+var nconf = require('nconf');
 nconf.file({ file: 'gebo.json' });
+
+var geboDb = new geboSchema(),
+    agentDb = new agentSchema();
+
 
 var COL_NAME = 'appCollection',
     HAI = 'A human-agent interface',
@@ -26,14 +36,12 @@ utils.getPrivateKeyAndCertificate().
         SIGNING_PAIR = pair
       });
 
-var geboDb = new geboSchema(true),
-    agentDb = new agentSchema(true);
-
 /**
  * For testing the routes
  */
 var CLIENT = 'yanfen@example.com',
-    SERVER = 'dan@example.com';
+    //SERVER = 'dan@example.com';
+    SERVER = nconf.get('testEmail');
 
 var SEND_REQ = {
         body: { 
@@ -493,9 +501,6 @@ exports.handler = {
 
     'Fulfil social commitment and return data when action is performed': function(test) {
         test.expect(13);
-        var req = {};
-        extend(true, req, SEND_REQ);
-        req.body.receiver = nconf.get('testEmail');
 
         // Make sure a friend has actually been written to the DB
         agentDb.friendModel.find({}, function(err, docs) {
@@ -504,8 +509,9 @@ exports.handler = {
               test.ok(false, err);
             }
             test.equal(docs.length, 1);
+            console.log('docs', docs);
 
-            perform.handler(req, RES, function(err, results) { 
+            perform.handler(SEND_REQ, RES, function(err, results) { 
                 if (err) {
                   console.log(err);
                   test.ok(false, err);
