@@ -32,9 +32,9 @@ module.exports = function(root) {
     var pass = require('./config/pass'),
         basic_routes = require('./routes/basic'),
         message_routes = require('./routes/message'),
-        perform_route = require('./routes/perform')(nconf.get('email')),
-        oauth2_routes = require('./routes/oauth2')(nconf.get('email')),
-        user_routes = require('./routes/user')(nconf.get('email'));
+        perform_route = require('./routes/perform')(),
+        oauth2_routes = require('./routes/oauth2')(),
+        user_routes = require('./routes/user')();
     
     /**
      * Expose the necessary modules 
