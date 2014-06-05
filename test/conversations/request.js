@@ -1,6 +1,14 @@
 'use strict';
 
-var agentSchema = require('../../schemata/agent'),
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
+
+var agentDb = require('../../schemata/agent')(),
     request = require('../../conversations/request'),
     utils = require('../../conversations/utils');
 
@@ -238,7 +246,7 @@ function clientAgreeProposeDischargePerformAction(conversation, isServer) {
 exports.client = {
 
     setUp: function(callback) {
-        var agentDb = new agentSchema(CLIENT);
+//        var agentDb = new agentSchema(CLIENT);
         var conversation = new agentDb.conversationModel({
                 type: 'request',
                 role: 'client',
@@ -255,7 +263,7 @@ exports.client = {
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema(CLIENT);
+//        var agentDb = new agentSchema(CLIENT);
         agentDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
@@ -916,7 +924,7 @@ exports.client = {
 exports.server = {
 
     setUp: function(callback) {
-        var agentDb = new agentSchema(SERVER);
+//        var agentDb = new agentSchema(SERVER);
         var conversation = new agentDb.conversationModel({
                 type: 'request',
                 role: 'server',
@@ -933,7 +941,7 @@ exports.server = {
     },
 
     tearDown: function(callback) {
-        var agentDb = new agentSchema(SERVER);
+//        var agentDb = new agentSchema(SERVER);
         agentDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)

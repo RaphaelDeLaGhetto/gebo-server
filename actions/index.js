@@ -1,5 +1,4 @@
 var utils = require('../lib/utils'),
-    agentSchema = require('../schemata/agent'),
     q = require('q');
 
 /**
@@ -9,14 +8,11 @@ var utils = require('../lib/utils'),
  * Load `*.js` under current directory as properties
  * i.e., `User.js` will become `exports['User']` or `exports.User`
  */
-module.exports = function(email) {
-
-    // Turn the email into a mongo-friendly database name
-    var dbName = utils.ensureDbName(email);
+module.exports = function() {
 
     require('fs').readdirSync(__dirname + '/').forEach(function(file) {
         if (file.match(/^\w+\.js/g) !== null && file !== 'index.js') {
-          var actions = require('./' + file)(dbName);
+          var actions = require('./' + file)();
           var keys = Object.keys(actions);
 
           for (var i = 0; i < keys.length; i++) {

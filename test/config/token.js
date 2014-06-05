@@ -1,3 +1,10 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
 var nock = require('nock'),
     nconf = require('nconf'),
     mongo = require('mongodb'),
@@ -6,8 +13,8 @@ var nock = require('nock'),
     base64url = require('base64url'),
     crypto = require('crypto'),
     fs = require('fs'),
-    geboSchema = require('../../schemata/gebo'),
-    agentSchema = require('../../schemata/agent');
+    geboDb = require('../../schemata/gebo')(),
+    agentDb = require('../../schemata/agent')();
 
 // Foreign agent configurations
 var CLIENT_ID = 'abc123',
@@ -30,11 +37,9 @@ var JWT_RESPONSE = {
     };
 
 // Start up the test database
-//nconf.argv().env().file({ file: 'local.json' });
 nconf.file({ file: 'gebo.json' });
 var Token = require('../../config/token');
 
-//var geboDb = new geboSchema(nconf.get('testDb'));
 
 /**
  * Load a friend's token verification parameters
@@ -46,7 +51,6 @@ exports.getFriend = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -58,7 +62,6 @@ exports.getFriend = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema('dan@example.com');
             var friend = new agentDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
@@ -89,12 +92,10 @@ exports.getFriend = {
     },
 
     tearDown: function (callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema('dan@example.com');
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -149,7 +150,6 @@ exports.getKey = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -161,7 +161,6 @@ exports.getKey = {
             /**
              * Make a key 
              */
-            var agentDb = new agentSchema('dan@example.com');
             var key = new agentDb.keyModel({
                     public: 'some public certificate',
                     private: 'some private key',
@@ -187,12 +186,10 @@ exports.getKey = {
     },
 
     tearDown: function (callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema('dan@example.com');
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -242,7 +239,6 @@ exports.getCertificate = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -254,7 +250,6 @@ exports.getCertificate = {
             /**
              * Make a key 
              */
-            var agentDb = new agentSchema('dan@example.com');
             var key = new agentDb.keyModel({
                     public: 'some public certificate',
                     private: 'some private key',
@@ -280,12 +275,10 @@ exports.getCertificate = {
     },
 
     tearDown: function (callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema('dan@example.com');
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -337,7 +330,6 @@ exports.get = {
             /**
              * Set up the gebo registrant
              */
-            var geboDb = new geboSchema(nconf.get('testDb'));
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -349,7 +341,6 @@ exports.get = {
             /**
              * Make a friend for the gebo registrant
              */
-            var agentDb = new agentSchema('dan@example.com');
             var friend = new agentDb.friendModel({
                     name: 'John',
                     email: 'john@painter.com',
@@ -415,12 +406,10 @@ exports.get = {
     },
 
     tearDown: function (callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema('dan@example.com');
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -490,7 +479,6 @@ exports.makeJwt = {
             utils.getPrivateKeyAndCertificate().
                 then(function(pair) {
                     _pair = pair;
-                    var agentDb = new agentSchema('dan@example.com');
                     var key = new agentDb.keyModel({
                             public: _pair.certificate,
                             private: _pair.privateKey,
@@ -502,7 +490,6 @@ exports.makeJwt = {
                           console.log(err);
                         }
 
-                        agentDb = new agentSchema('john@painter.com');
                         var friend = new agentDb.friendModel({
                                         name: 'Dan',
                                         email: 'dan@example.com',
@@ -530,13 +517,10 @@ exports.makeJwt = {
     },
 
     tearDown: function (callback) {
-        var geboDb = new geboSchema(nconf.get('testDb'));
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
- 
-            var agentDb = new agentSchema('dan@example.com');
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -588,8 +572,6 @@ exports.makeJwt = {
         var token = new Token('dan@example.com');
         token.makeJwt(claim, 'john@painter.com').
             then(function(jwt) {
-
-                var agentDb = new agentSchema('john@painter.com');
                 agentDb.friendModel.findOne({ email: 'dan@example.com' }, function(err, friend) {
                         var verifier = crypto.createVerify('sha256WithRSAEncryption');
                         var data = jwt.split('.');

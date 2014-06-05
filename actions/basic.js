@@ -1,22 +1,19 @@
 'use strict';
+console.log('Second');
 
-var mongo = require('mongodb'),
-    mongoDbConnection = require('../lib/native-mongo-connection'),
+var agentDb = require('../schemata/agent')(),
+    geboDb = require('../schemata/gebo')(),
+    mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
     mv = require('mv'),
     mkdirp = require('mkdirp');
 
-module.exports = function(testing) {
+module.exports = function() {
 
-    if (typeof testing !== 'boolean') {
-      testing = false;
-    }
+    var mongoDbConnection = require('../lib/native-mongo-connection');
 
-    var agentDb = require('../schemata/agent')(testing),
-        geboDb = require('../schemata/gebo')(testing);
-    
     /**
      * Get the collection specified in the verified object parameter
      *
@@ -27,7 +24,7 @@ module.exports = function(testing) {
     var _getCollection = function(verified) {
         var deferred = q.defer();
         if (verified.admin || verified.read || verified.write || verified.execute) { 
-          mongoDbConnection(testing, function(conn) {
+          mongoDbConnection(function(conn) {
                 conn.collection(verified.collectionName, function(err, collection) {
                     if (err) {
                       deferred.reject(err);

@@ -1,3 +1,9 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
 
 var utils = require('../../lib/utils'),
     fs = require('fs'),
@@ -7,9 +13,6 @@ var utils = require('../../lib/utils'),
     agentSchema = require('../../schemata/agent'),
     rimraf = require('rimraf');
 
-
-//nconf.argv().env().file({ file: 'local.json' });
-//var gebo = require('../../schemata/gebo')(nconf.get('testDb'));
 
 nconf.file({ file: 'gebo.json' });
 

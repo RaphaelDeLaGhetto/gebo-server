@@ -1,7 +1,6 @@
 'use strict';
 
-var agentSchema = require('../schemata/agent'),
-    utils = require('./utils'),
+var utils = require('./utils'),
     generalUtils = require('../lib/utils'),
     q = require('q');
 

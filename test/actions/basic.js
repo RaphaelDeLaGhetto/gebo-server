@@ -1,3 +1,11 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+console.log('First');
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
 var utils = require('../../lib/utils'),
     mongo = require('mongodb'),
     nconf = require('nconf'),
@@ -20,12 +28,13 @@ var verifiedUser = {
 	read: true,
     };
 
-// Start up the test database
+// Get the test database name
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testEmail'));
 
-var agentSchema = require('../../schemata/agent'),
-    action = require('../../actions/basic')(true);
+var agentDb = require('../../schemata/agent')(),
+    geboDb = require('../../schemata/gebo')(),
+    action = require('../../actions/basic')();
 
 /**
  * testConnection
@@ -407,7 +416,6 @@ exports.saveToFs = {
             /**
              * Setup a registrant
              */
-            var geboDb = require('../../schemata/gebo')(true);
             var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
@@ -419,7 +427,6 @@ exports.saveToFs = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema(true);
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -455,12 +462,10 @@ exports.saveToFs = {
         rimraf.sync('docs/' + TEST_DB);
         rimraf.sync('docs/dan_at_example_dot_com');
 
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.connection.db.dropDatabase(function(err) { 
             if (err) {
               console.log(err);
             }
-            var agentDb = new agentSchema(true); 
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err);
@@ -524,8 +529,7 @@ exports.saveToFs = {
                       },
                     }).
             then(function() {
-                var db = new agentSchema(true);
-                db.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
+                agentDb.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
                                        collectionName: utils.getMongoCollectionName('canwrite@app.com') },
                     function(err, file) {
                         if (err) {
@@ -1458,7 +1462,6 @@ exports.ls = {
 //                        }
 //                    ],
 //                    function() {
-//                        var geboDb = require('../../schemata/gebo')(TEST_DB);
 //                        TEST_AGENT = new geboDb.registrantModel({
 //                                name: 'Joey Joe Joe Jr. Shabadoo',
 //                                email: 'jjjj@shabadoo.com',
@@ -1501,10 +1504,8 @@ exports.ls = {
 //                          console.log('Could not drop database: ' + err);
 //                        }
 //
-//                        var geboDb = require('../../schemata/gebo')(TEST_DB);
 //                        geboDb.connection.on('open', function(err) {
 //                            geboDb.connection.db.dropDatabase(function(err) {
-//                                geboDb.connection.db.close();
 //                                if (err) {
 //                                  console.log(err)
 //                                }
@@ -1842,7 +1843,6 @@ exports.registerAgent = {
 
     setUp: function(callback) {
     	try{
-            var geboDb = require('../../schemata/gebo')(true);
             var agent = new geboDb.registrantModel(
                             { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
@@ -1861,7 +1861,6 @@ exports.registerAgent = {
     }, 
 
     tearDown: function(callback) {
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
@@ -1872,7 +1871,6 @@ exports.registerAgent = {
 
     'Add a new agent to the database if admin': function(test) {
         test.expect(4);
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.registrantModel.find({}, function(err, agents) {
                 if (err) {
                   test.ok(false, err);
@@ -1899,7 +1897,6 @@ exports.registerAgent = {
 
     'Add a new agent to the database with execute permissions': function(test) {
         test.expect(4);
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.registrantModel.find({}, function(err, agents) {
                 if (err) {
                   test.ok(false, err);
@@ -1926,7 +1923,6 @@ exports.registerAgent = {
 
     'Do not add a new agent to the database without proper permissions': function(test) {
         test.expect(2);
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.registrantModel.find({}, function(err, agents) {
                 if (err) {
                   test.ok(false, err);
@@ -1980,7 +1976,6 @@ exports.deregisterAgent = {
 
     setUp: function(callback) {
     	try{
-            var geboDb = require('../../schemata/gebo')(TEST_DB);
             var agent = new geboDb.registrantModel(
                             { name: 'dan', email: 'dan@example.com',
                               password: 'password123', admin: true,  
@@ -1999,7 +1994,6 @@ exports.deregisterAgent = {
     }, 
 
     tearDown: function(callback) {
-        var geboDb = require('../../schemata/gebo')(TEST_DB);
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
@@ -2014,7 +2008,6 @@ exports.deregisterAgent = {
         action.deregisterAgent({ admin: true }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.equal(ack, 1);
-                    var geboDb = require('../../schemata/gebo')(TEST_DB);
                     geboDb.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);
@@ -2032,7 +2025,6 @@ exports.deregisterAgent = {
         action.deregisterAgent({ admin: false, execute: true }, { content: { email: 'dan@example.com' } }).
             then(function(ack) {
                     test.equal(ack, 1);
-                    var geboDb = require('../../schemata/gebo')(TEST_DB);
                     geboDb.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);
@@ -2063,7 +2055,6 @@ exports.deregisterAgent = {
         test.expect(1);
         action.deregisterAgent({ admin: true }, { content: { email: 'nosuchagent@example.com' } }).
             then(function(ack) {
-                    var geboDb = require('../../schemata/gebo')(TEST_DB);
                     geboDb.registrantModel.find({}, function(err, agents) {
                         if (err) {
                           test.ok(false, err);
@@ -2086,7 +2077,6 @@ exports.friend = {
             /**
              * Setup a registrant
              */
-            var geboDb = require('../../schemata/gebo')(true);
             var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
@@ -2098,7 +2088,6 @@ exports.friend = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema(true);
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -2122,12 +2111,10 @@ exports.friend = {
     }, 
 
     tearDown: function(callback) {
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema(true); 
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -2151,7 +2138,6 @@ exports.friend = {
                 test.equal(friend.email, 'yanfen@example.com');
                 test.equal(friend.gebo, 'http://theirhost.com');
  
-                var agentDb = new agentSchema(true);
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2182,7 +2168,6 @@ exports.friend = {
               }).
             catch(function(err) {
                 test.equal(err, 'You are not permitted to request or propose that action');
-                var agentDb = new agentSchema(true);
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2226,7 +2211,6 @@ exports.defriend = {
             /**
              * Setup a registrant
              */
-            var geboDb = require('../../schemata/gebo')(true);
             var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
@@ -2238,7 +2222,6 @@ exports.defriend = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema(true); 
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -2262,12 +2245,10 @@ exports.defriend = {
     }, 
 
     tearDown: function(callback) {
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema(true); 
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -2283,7 +2264,6 @@ exports.defriend = {
             then(function(ack) {  
                 test.equal(ack, 1);
 
-                var agentDb = new agentSchema(true);
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2309,7 +2289,6 @@ exports.defriend = {
               }).
             catch(function(err) {
                 test.equal(err, 'You are not permitted to request or propose that action');
-                var agentDb = new agentSchema(true);
                 agentDb.friendModel.find({}, function(err, friends) {
                         if (err) {
                           test.ok(false, err);
@@ -2345,7 +2324,6 @@ exports.grantAccess = {
             /**
              * Setup a registrant
              */
-            var geboDb = require('../../schemata/gebo')(true);
             var registrant = new geboDb.registrantModel({
                     name: 'dan',
                     email: 'dan@example.com',
@@ -2357,7 +2335,6 @@ exports.grantAccess = {
             /**
              * Make a friend for the registrant
              */
-            var agentDb = new agentSchema(true); 
             var friend = new agentDb.friendModel({
                     name: 'john',
                     email: 'john@painter.com',
@@ -2383,12 +2360,10 @@ exports.grantAccess = {
     }, 
 
     tearDown: function(callback) {
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema(true); 
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -2493,7 +2468,6 @@ exports.certificate = {
 
     setUp: function(callback) {
         try {
-            var geboDb = require('../../schemata/gebo')(TEST_DB);
             var registrant = new geboDb.registrantModel({
                     name: 'Dan',
                     email: 'dan@example.com',
@@ -2516,12 +2490,10 @@ exports.certificate = {
     }, 
 
     tearDown: function(callback) {
-        var geboDb = require('../../schemata/gebo')(true);
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema(true); 
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -2540,7 +2512,6 @@ exports.certificate = {
                 test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
 
                 // Make sure the certificate was saved to the database
-                var agentDb = new agentSchema(true);
                 agentDb.keyModel.findOne({ email: 'yanfen@example.com' }, function(err, key) {
                     if (err) {
                       console.log(err);
@@ -2568,7 +2539,6 @@ exports.certificate = {
                 test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
 
                 // Make sure the certificate was saved to the database
-                var agentDb = new agentSchema(true);
                 agentDb.friendModel.findOne({ email: 'yanfen@example.com' }, function(err, friend) {
                     if (err) {
                       console.log(err);
@@ -2588,7 +2558,6 @@ exports.certificate = {
     },
     
     'Overwrite an existing agent and key': function(test) {
-        var agentDb = new agentSchema(true);
         agentDb.friendModel.find(function(err, friends) {
             if (err) {
               console.log(err);
@@ -2607,7 +2576,6 @@ exports.certificate = {
                         test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
                         test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
 
-                        var agentDb = new agentSchema(true);
                         agentDb.friendModel.find(function(err, friends) {
                             if (err) {
                               console.log(err);
@@ -2625,7 +2593,6 @@ exports.certificate = {
                                     then(function(certificate) {
                                         test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
                                         test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
-                                        var agentDb = new agentSchema(true);
                                         agentDb.friendModel.find(function(err, friends) {
                                             if (err) {
                                               console.log(err);
@@ -2709,51 +2676,58 @@ exports.transformId = {
 /**
  * Test modes
  */
-exports.testModes = {
-
-    setUp: function(callback) {
-        delete require.cache[require.resolve('../../actions/basic')];
-        delete require.cache[require.resolve('../../lib/native-mongo-connection')];
-        callback();
-    },
-
-    'Should go into test mode when parameter is set to true': function(test) {
-        var basic = require('../../actions/basic')(true);
-        basic.getCollection({ read: true, collectionName: 'friends' }).
-            then(function(collection) {
-                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('testEmail'))); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Should go into production mode when parameter is set to false': function(test) {
-        var basic = require('../../actions/basic')(false);
-        basic.getCollection({ read: true, collectionName: 'friends' }).
-            then(function(collection) {
-                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('email'))); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Should go into production mode when parameter is not set': function(test) {
-        var basic = require('../../actions/basic')();
-        basic.getCollection({ read: true, collectionName: 'friends' }).
-            then(function(collection) {
-                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('email'))); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-};
+//exports.testModes = {
+//
+//    setUp: function(callback) {
+//        delete require.cache[require.resolve('../../actions/basic')];
+//        delete require.cache[require.resolve('../../lib/native-mongo-connection')];
+//        callback();
+//    },
+//
+//    tearDown: function(callback) {
+//        delete require.cache[require.resolve('../../actions/basic')];
+//        delete require.cache[require.resolve('../../lib/native-mongo-connection')];
+//        callback();
+//    },
+//
+//
+//    'Should go into test mode when parameter is set to true': function(test) {
+//        var basic = require('../../actions/basic')(true);
+//        basic.getCollection({ read: true, collectionName: 'friends' }).
+//            then(function(collection) {
+//                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('testEmail'))); 
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Should go into production mode when parameter is set to false': function(test) {
+//        var basic = require('../../actions/basic')(false);
+//        basic.getCollection({ read: true, collectionName: 'friends' }).
+//            then(function(collection) {
+//                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('email'))); 
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Should go into production mode when parameter is not set': function(test) {
+//        var basic = require('../../actions/basic')();
+//        basic.getCollection({ read: true, collectionName: 'friends' }).
+//            then(function(collection) {
+//                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('email'))); 
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//};
 

@@ -4,17 +4,14 @@ var geboDb = require('../lib/mongoose-connection'),
     mongoose = require('mongoose'),
     utils = require('../lib/utils');
 
-module.exports = function(testing) {
+module.exports = function() {
 
-    if (typeof testing !== 'boolean') {
-      testing = false;
-    }
 
     var Schema = mongoose.Schema,
         ObjectId = Schema.Types.ObjectId;
 
     // Get the DB connection
-    geboDb(testing, function(connection) {
+    geboDb(function(connection) {
 
         /**
          * This is handy for when I need to drop a database

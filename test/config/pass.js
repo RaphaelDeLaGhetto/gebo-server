@@ -1,3 +1,10 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
 var nconf = require('nconf'),
     utils = require('../../lib/utils'),
     mongo = require('mongodb');
@@ -15,9 +22,9 @@ var COL_NAME = 'appCollection',
 var FRIEND_GEBO_URI = 'http://theirhost.com';
 
 nconf.file({ file: 'gebo.json' });
-var geboDb = require('../../schemata/gebo')(true),
-    agentDb = require('../../schemata/agent')(true),
-    pass = require('../../config/pass')(true);
+var geboDb = require('../../schemata/gebo')(),
+    agentDb = require('../../schemata/agent')(),
+    pass = require('../../config/pass')();
 
 /**
  * localStrategy

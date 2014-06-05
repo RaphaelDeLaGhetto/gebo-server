@@ -4,8 +4,6 @@ var passport = require('passport'),
     generalUtils = require('../lib/utils'),
     conversationUtils = require('../conversations/utils'),
     https = require('https'),
-    geboSchema = require('../schemata/gebo'),
-    agentSchema = require('../schemata/agent'),
     extend = require('extend'),
     conversations = require('../conversations'),
     q = require('q');
@@ -97,7 +95,6 @@ var _receiveMessageHandler = function(req, res, done) {
     console.log(message);
     conversationUtils.loadConversation(message, { email: message.receiver }).
         then(function(conversation) {
-//            conversation.db.close();
 
             // If this is new conversation, the message will
             // not have a conversationId

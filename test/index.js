@@ -6,6 +6,13 @@ nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 /**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../lib/mongoose-connection')(true, function(){});
+
+/**
  * Add an action
  */
 exports.actionAdd = {

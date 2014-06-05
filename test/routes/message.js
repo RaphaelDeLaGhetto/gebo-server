@@ -1,12 +1,18 @@
 'use strict';
 
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
 var message = require('../../routes/message'),
     nock = require('nock'),
     q = require('q'),
     extend = require('extend'),
     utils = require('../../lib/utils'),
-    agentSchema = require('../../schemata/agent'),
-    agentDb = new agentSchema();
+    agentDb = require('../../schemata/agent')();
 
 var CLIENT = 'yanfen@example.com',
     SERVER = 'dan@example.com';

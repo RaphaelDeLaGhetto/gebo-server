@@ -1,9 +1,16 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
 var mongo = require('mongodb'),
-    geboSchema = require('../../schemata/gebo'),
     nconf = require('nconf'),
     utils = require('../../lib/utils'),
     sc = require('../../lib/sc'),
-    agentSchema = require('../../schemata/agent');
+    geboDb = require('../../schemata/gebo')(),
+    agentDb = require('../../schemata/agent')();
 
 var BASE_ADDRESS = 'http://theirhost.com';
 
@@ -25,7 +32,6 @@ exports.form = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema();
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@example.com',
@@ -44,7 +50,6 @@ exports.form = {
                     hisCertificate: 'some certificate',
                 };
  
-            var agentDb = new agentSchema(); 
             var sc = new agentDb.socialCommitmentModel({
                     performative: 'request',
                     action: 'friend',
@@ -73,12 +78,10 @@ exports.form = {
     },
 
     tearDown: function(callback) {
-        var geboDb = new geboSchema();
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema();
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -199,7 +202,6 @@ exports.fulfil = {
             /**
              * Setup a registrant
              */
-            var geboDb = new geboSchema();
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
                     email: 'yanfen@example.com',
@@ -230,12 +232,10 @@ exports.fulfil = {
     },
 
     tearDown: function(callback) {
-        var geboDb = new geboSchema();
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema();
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)
@@ -247,7 +247,6 @@ exports.fulfil = {
 
     'Set the fulfillment date on the socialCommitment document': function(test) {
         test.expect(10);
-        var agentDb = new agentSchema();
         agentDb.socialCommitmentModel.findOne({ creditor: 'richard@construction.com' },
             function(err, socialCommitment) {
                 if (err) {

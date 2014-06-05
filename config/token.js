@@ -4,7 +4,7 @@ var q = require('q'),
     https = require('https'),
     base64url = require('base64url'),
     crypto = require('crypto'),
-    agentSchema = require('../schemata/agent'),
+    agentDb = require('../schemata/agent')(),
     utils = require('../lib/utils'),
     nconf = require('nconf'),
     fs = require('fs');
@@ -39,7 +39,6 @@ module.exports = function(email) {
     var _getFriend = function(email) {
         var deferred = q.defer();
 
-        var agentDb = new agentSchema(dbName);
         agentDb.friendModel.findOne({ email: email }, function(err, friend) {
             if (err) {
               deferred.reject(err);
@@ -66,7 +65,6 @@ module.exports = function(email) {
     var _getKey = function(email) {
         var deferred = q.defer();
 
-        var agentDb = new agentSchema(dbName);
         agentDb.keyModel.findOne({ email: email }, function(err, key) {
             if (err) {
               deferred.reject(err);
@@ -93,7 +91,6 @@ module.exports = function(email) {
     var _getCertificate = function(email) {
         var deferred = q.defer();
 
-        var agentDb = new agentSchema(dbName);
         agentDb.keyModel.findOne({ email: email }, function(err, key) {
             if (err) {
               deferred.reject(err);
