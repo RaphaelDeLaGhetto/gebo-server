@@ -1,6 +1,4 @@
 var nconf = require('nconf'),
-    agentSchema = require('../../schemata/agent'),
-    geboSchema = require('../../schemata/gebo');
     utils = require('../../lib/utils'),
     mongo = require('mongodb');
 
@@ -17,8 +15,9 @@ var COL_NAME = 'appCollection',
 var FRIEND_GEBO_URI = 'http://theirhost.com';
 
 nconf.file({ file: 'gebo.json' });
-var geboDb = require('../../schemata/gebo')(nconf.get('testDb')),
-    pass = require('../../config/pass')(nconf.get('testDb'));
+var geboDb = require('../../schemata/gebo')(true),
+    agentDb = require('../../schemata/agent')(true),
+    pass = require('../../config/pass')(true);
 
 /**
  * localStrategy
@@ -362,7 +361,6 @@ exports.clientJwtBearerStrategy = {
             /**
              * Setup a friend
              */
-            var agentDb = new agentSchema('dan@example.com');
             var friend = new agentDb.friendModel({
                     name: 'Yanfen',
                     email: 'yanfen@agent.com',
@@ -394,7 +392,6 @@ exports.clientJwtBearerStrategy = {
             if (err) {
               console.log(err)
             }
-            var agentDb = new agentSchema('dan@example.com');
             agentDb.connection.db.dropDatabase(function(err) {
                 if (err) {
                   console.log(err)

@@ -524,7 +524,7 @@ exports.saveToFs = {
                       },
                     }).
             then(function() {
-                var db = new agentSchema('dan@example.com');
+                var db = new agentSchema(true);
                 db.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
                                        collectionName: utils.getMongoCollectionName('canwrite@app.com') },
                     function(err, file) {
