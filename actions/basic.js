@@ -1,9 +1,6 @@
 'use strict';
-console.log('Second');
 
-var agentDb = require('../schemata/agent')(),
-    geboDb = require('../schemata/gebo')(),
-    mongo = require('mongodb'),
+var mongo = require('mongodb'),
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
@@ -12,7 +9,9 @@ var agentDb = require('../schemata/agent')(),
 
 module.exports = function() {
 
-    var mongoDbConnection = require('../lib/native-mongo-connection');
+    var agentDb = require('../schemata/agent')(),
+        geboDb = require('../schemata/gebo')(),
+        mongoDbConnection = require('../lib/native-mongo-connection');
 
     /**
      * Get the collection specified in the verified object parameter
