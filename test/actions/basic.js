@@ -2,7 +2,6 @@
  * This ensures that a connection is made to the
  * test databases
  */
-console.log('First');
 var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
     mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
 
