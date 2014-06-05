@@ -1,4 +1,14 @@
-var fs = require('fs'), nconf = require('nconf'), path = require('path'), //Schema = require('mongoose').Schema,
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var nativeMongoConnection = require('../../lib/native-mongo-connection')(true, function(){}),
+    mongooseConnection = require('../../lib/mongoose-connection')(true, function(){});
+
+var fs = require('fs'),
+    nconf = require('nconf'),
+    path = require('path'),
+    //Schema = require('mongoose').Schema,
     utils = require('../../lib/utils');
 
 
