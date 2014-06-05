@@ -19,9 +19,6 @@ module.exports = function(email) {
             typ: 'JWT',
         };
 
-    // Turn the email into a mongo-friend database name
-    var dbName = utils.ensureDbName(email);
-
     /**
      *  This response type must be passed to the authorization endpoint using
      *  the implicit grant flow (4.2.1 of RFC 6749).
