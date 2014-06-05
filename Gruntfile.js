@@ -3,8 +3,8 @@ var utils = require('./lib/utils'),
     nconf = require('nconf');
 
 nconf.file({ file: 'gebo.json' });
-var db = require('./schemata/gebo')(nconf.get('email')),
-    action = require('./actions/basic')(nconf.get('email'));
+//var db = require('./schemata/gebo')(nconf.get('email'));
+    //action = require('./actions/basic')(nconf.get('email'));
 
 
 module.exports = function (grunt) {
@@ -89,6 +89,7 @@ module.exports = function (grunt) {
             // convert adm string to bool
             adm = (adm === 'true');
 
+            var db = require('./schemata/gebo')();
             var agent = new db.registrantModel({
                 name: usr,
                 email: emailaddress,
@@ -106,19 +107,19 @@ module.exports = function (grunt) {
                 }
                 else {
                   console.log('Registered ' + agent.name);
-                  action.createDatabase({ admin: true,
-                                          dbName: utils.getMongoDbName(emailaddress) },
-                                        { content: { profile: agent } }).
-                    then(function() {
+//                  action.createDatabase({ admin: true,
+//                                          dbName: utils.getMongoDbName(emailaddress) },
+//                                        { content: { profile: agent } }).
+//                    then(function() {
                         done();
-                      }).
-                    catch(function(err) {
-                        if (err) {
-                          console.log(err);
-                          done(false);
-                        }
-                        done();
-                      });
+//                      }).
+//                    catch(function(err) {
+//                        if (err) {
+//                          console.log(err);
+//                          done(false);
+//                        }
+//                        done();
+//                      });
                 }
               });
           });
@@ -153,8 +154,7 @@ module.exports = function (grunt) {
  
             utils.getPrivateKeyAndCertificate().
                 then(function(pair) {
-                    var agentDb = require('./schemata/agent')(agentEmail);
-        
+                    var agentDb = require('./schemata/agent')();
                     var friend = new agentDb.friendModel({
                             name: name,
                             email: email,
@@ -191,7 +191,7 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('setpermission', 'Set access to an agent\'s resource',
         function(friendAgent, ownerAgent, resource, read, write, execute) {
-            var agentDb = require('./schemata/agent')(ownerAgent);
+            var agentDb = require('./schemata/agent')();
             
             // Save call is async. Put grunt into async mode to work
             var done = this.async();
