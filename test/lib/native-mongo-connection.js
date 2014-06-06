@@ -63,7 +63,7 @@ exports.instantiate = {
         var nativeConn = require('../../lib/native-mongo-connection');
         test.ok(nativeConn instanceof events.EventEmitter);
         nativeConn.get(function(conn) {});
-        nativeConn.on('nativeConnect', function() {
+        nativeConn.on('native-connect', function() {
             test.ok(true);
             test.done();
         });
