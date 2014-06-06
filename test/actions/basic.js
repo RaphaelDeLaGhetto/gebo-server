@@ -2671,6 +2671,96 @@ exports.transformId = {
     },
 };
 
+/**
+ * lsCollections
+ */
+exports.lsCollections = {
+
+    setUp: function(callback) {
+        action.save({ dbName: TEST_DB,
+                      collectionName: cname,
+                      admin: true },  
+                    { content: { data: { some: 'data'} } }).
+            then(function(ack) {
+                callback();
+              }).
+            catch(function(err) {
+                console.log(err);
+              });
+    },
+
+    tearDown: function(callback) {
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    'Return a list of relevant collections stored in the gebo database an authorized user': function(test) {
+        test.expect(2);
+        action.lsCollections({ dbName: TEST_DB, read: true },
+                             { sender: 'dan@example.com' }).
+            then(function(collections) {
+                test.equal(collections.length, 1);
+                test.equal(collections[0], cname);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Return a list of relevant collections stored in the gebo database to an admin': function(test) {
+        test.expect(2);
+        action.lsCollections({ dbName: TEST_DB, admin: true },
+                             { sender: 'admin@example.com' }).
+            then(function(collections) {
+                test.equal(collections.length, 1);
+                test.equal(collections[0], cname);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Return a list of all collections stored in the gebo database to an authorized user': function(test) {
+        test.expect(3);
+        action.lsCollections({ dbName: TEST_DB, read: true },
+                              { sender: 'john@painter.com', content: { flag: 'all' } }).
+            then(function(collections) {
+                test.equal(collections.length, 2);
+                test.equal(collections[0], cname);
+                test.equal(collections[1], 'system.indexes');
+                test.done();
+              }).
+            catch(function(err) {
+                console.log(err);
+                test.ok(false, 'Shouldn\'t get here');
+                test.done();
+              });
+    },
+
+    'Do not return a list of relevant collections stored in the gebo database to an unauthorized user': function(test) {
+        test.expect(1);
+        action.lsCollections({ dbName: TEST_DB },
+                             { sender: 'richard@construction.com' }).
+            then(function(collections) {
+                test.ok(false, 'Shouldn\'t get here');
+                test.done();
+              }).
+            catch(function(err) {
+                test.equal(err, 'You are not permitted to request or propose that action');      
+                test.done();
+              });
+    },
+};
+
+
 
 /**
  * Test modes

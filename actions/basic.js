@@ -292,6 +292,55 @@ module.exports = function() {
       };
     exports.ls = _ls;
     
+    /**
+     * Return a list of collections in this gebo's database
+     *
+     * @param Object
+     * @param Object
+     *
+     * @return promise
+     */
+    function _lsCollections(verified, message) {
+        var deferred = q.defer();
+        if (verified.admin || verified.read) {
+          mongoDbConnection(function(client) {
+            client.collectionNames(function(err, names) {
+                if (err) {
+                  deferred.reject(err);
+                }
+                else {
+                  console.log(names);
+                  var cleanNames = [];
+                  names.forEach(function(item) {
+                      item = item.name.replace(verified.dbName + '.', ''); 
+                      if (message.content &&
+                          message.content.flag.toLowerCase() === 'all') {
+                        cleanNames.push(item);
+                      }
+                      else if(item !== 'system.indexes' &&
+                              item !== 'conversations' &&
+                              item !== 'registrants' &&
+                              item !== 'files' &&
+                              item !== 'tokens' &&
+                              item !== 'socialcommitments' &&
+                              item !== 'permissions' &&
+                              item !== 'keys' &&
+                              item !== 'friends'){
+                        cleanNames.push(item);
+                      }
+                    });
+                  deferred.resolve(cleanNames);
+                }
+              });
+            });
+        }
+        else {
+          deferred.reject('You are not permitted to request or propose that action');
+        }
+        return deferred.promise;
+      };
+    exports.lsCollections = _lsCollections;
+
     /** 
      * createDatabase and dropDatabase have been mothballed (along
      * with their respective tests). This functionality may be
