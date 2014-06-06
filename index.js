@@ -2,13 +2,33 @@ var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     https = require('https'),
+    mongooseConnection = require('./lib/mongoose-connection'),
+    nativeMongoConnection = require('./lib/native-mongo-connection'),
     nconf = require('nconf'),
     passport = require('passport'),
     server = express(),
     utils = require('./lib/utils'),
     winston = require('winston');
 
-module.exports = function(root) {
+module.exports = function(testing, root) {
+
+    if (testing === undefined || typeof testing === 'string') {
+      root = testing;
+      testing = false;
+    }
+
+    /**
+     * Use these functions to retrieve the
+     * appropriate database connection. This
+     * step ensures that the gebo establishes
+     * the correct connection to the database
+     * (i.e., testing or production)
+     */
+    nativeMongoConnection.get(testing, function(){ console.log('native'); }); 
+    mongooseConnection.get(testing, function(){}); 
+
+    exports.nativeMongoConnection = nativeMongoConnection;
+    exports.mongooseConnection = mongooseConnection;
 
     /**
      * The gebo's root directory must be
@@ -23,7 +43,7 @@ module.exports = function(root) {
      * Load gebo configurations
      */
     nconf.file({ file: root + '/gebo.json' });
-    
+
     /**
      * Load passport configuration,
      * standard gebo routes, and basic 
@@ -39,7 +59,7 @@ module.exports = function(root) {
     /**
      * Expose the necessary modules 
      */   
-    exports.actions = require('./actions')(nconf.get('email')); 
+    exports.actions = require('./actions')(); 
     exports.schemata = require('./schemata');
     exports.server = server;
     exports.utils = utils;
@@ -87,6 +107,7 @@ module.exports = function(root) {
      */
     server.post('/send', message_routes.send);
     server.post('/receive', message_routes.receive);
+ //   });    
 
     /**
      * Start the gebo servers

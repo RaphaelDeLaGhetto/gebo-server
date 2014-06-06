@@ -1,12 +1,12 @@
 
-var geboDb = require('../../../lib/mongoose-connection'),
+var mongooseConnection = require('../../../lib/mongoose-connection'),
     mongoose = require('mongoose'),
     utils = require('../../../lib/utils');
     
 module.exports = function() {
 
     // Get the DB connection
-    geboDb(function(connection) {
+    mongooseConnection.get(function(connection) {
 
         /**
          * This is handy for when I need to drop a database

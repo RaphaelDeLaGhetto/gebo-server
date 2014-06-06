@@ -1,11 +1,11 @@
 
-var geboDb = require('../../../lib/mongoose-connection'),
+var mongooseConnection = require('../../../lib/mongoose-connection'),
     mongoose = require('mongoose'),
     utils = require('../../../lib/utils');
 
 module.exports = function (email) {
 
-    geboDb(function(connection) {
+    mongooseConnection.get(function(connection) {
         exports.connection = connection;
     
         //******* Database schema TODO add more validation

@@ -11,7 +11,7 @@ module.exports = function() {
 
     var agentDb = require('../schemata/agent')(),
         geboDb = require('../schemata/gebo')(),
-        mongoDbConnection = require('../lib/native-mongo-connection');
+        nativeConnection = require('../lib/native-mongo-connection');
 
     /**
      * Get the collection specified in the verified object parameter
@@ -23,7 +23,7 @@ module.exports = function() {
     var _getCollection = function(verified) {
         var deferred = q.defer();
         if (verified.admin || verified.read || verified.write || verified.execute) { 
-          mongoDbConnection(function(conn) {
+          nativeConnection.get(function(conn) {
                 conn.collection(verified.collectionName, function(err, collection) {
                     if (err) {
                       deferred.reject(err);
@@ -303,13 +303,12 @@ module.exports = function() {
     function _lsCollections(verified, message) {
         var deferred = q.defer();
         if (verified.admin || verified.read) {
-          mongoDbConnection(function(client) {
+          nativeConnection.get(function(client) {
             client.collectionNames(function(err, names) {
                 if (err) {
                   deferred.reject(err);
                 }
                 else {
-                  console.log(names);
                   var cleanNames = [];
                   names.forEach(function(item) {
                       item = item.name.replace(verified.dbName + '.', ''); 
