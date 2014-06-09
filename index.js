@@ -24,7 +24,7 @@ module.exports = function(testing, root) {
      * the correct connection to the database
      * (i.e., testing or production)
      */
-    nativeMongoConnection.get(testing, function(){ console.log('native'); }); 
+    nativeMongoConnection.get(testing, function(){}); 
     mongooseConnection.get(testing, function(){}); 
 
     exports.nativeMongoConnection = nativeMongoConnection;
