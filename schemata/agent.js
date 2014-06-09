@@ -1,8 +1,7 @@
 'use strict';
 
 var mongooseConnection = require('../lib/mongoose-connection'),
-    mongoose = require('mongoose'),
-    utils = require('../lib/utils');
+    mongoose = require('mongoose');
 
 module.exports = function() {
 
