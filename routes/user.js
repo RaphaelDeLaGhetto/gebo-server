@@ -7,26 +7,26 @@ var passport = require('passport'),
     cluster = require('cluster'),
     winston = require('winston');
 
-module.exports = function(dbName) {
+module.exports = function() {
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
+    nconf.file({ file: './gebo.json' });
     /**
 
      * Set the database name, if not set already 
      */
-    if (!dbName) {
-      nconf.file({ file: 'gebo.json' });
-      dbName = nconf.get('email');
-    }
-    var pass = require('../config/pass')(dbName);
+//    if (!dbName) {
+//      dbName = nconf.get('email');
+//    }
+
+    var pass = require('../config/pass')();
 
     exports.account = [
         login.ensureLoggedIn(),
         function (req, res) {
-            var agent = require('../schemata/agent')(req.user.email);
+            var agent = require('../schemata/agent')();
             agent.friendModel.find({}, function(err, friends) {
                 agent.socialCommitmentModel.find({}).where('fulfilled', null).sort('-created').exec(function(err, scs) {
-                    agent.connection.db.close();
                     res.render('account', { agent: req.user,
                                             friends: friends,
                                             socialCommitments: scs,
@@ -47,10 +47,10 @@ module.exports = function(dbName) {
         pass.ensureAuthenticated,
         pass.ensureAdmin,
         function (req, res) {
-            var gebo = require('../schemata/gebo')(dbName);
+            var gebo = require('../schemata/gebo')();
+            var agent = require('../schemata/agent')();
             gebo.registrantModel.find({}, function(err, registrants) {
-                gebo.friendModel.find({}, function(err, friends) {
-                    gebo.connection.db.close();
+                agent.friendModel.find({}, function(err, friends) {
                     res.render('admin', { agent: req.user,
                                           registrants: registrants,
                                           friends: friends,
@@ -77,7 +77,7 @@ module.exports = function(dbName) {
      * POST /signup
      */
     exports.signUp = function(req, res) {
-        var gebo = require('../schemata/gebo')(dbName);
+        var gebo = require('../schemata/gebo')();
 
         // Add the admin param
 //        req.body.admin = false;
@@ -94,8 +94,5 @@ module.exports = function(dbName) {
           });
       };
 
-    /**
-     * API
-     */
     return exports;
   };
