@@ -5,7 +5,7 @@
  * test databases
  */
 var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
-    mongooseConnection = require('../../lib/mongoose-connection').get(true, function(){});
+    mongoose = require('gebo-mongoose-connection').get(true);
 
 var message = require('../../routes/message'),
     nock = require('nock'),

@@ -1,18 +1,17 @@
 
-var mongooseConnection = require('../../../lib/mongoose-connection'),
-    mongoose = require('mongoose'),
+var mongoose = require('gebo-mongoose-connection').get(),
     utils = require('../../../lib/utils');
     
 module.exports = function() {
 
     // Get the DB connection
-    mongooseConnection.get(function(connection) {
+//    mongooseConnection.get(function(connection) {
 
         /**
          * This is handy for when I need to drop a database
          * during testing
          */
-        exports.connection = connection;
+        exports.connection = mongoose.connection;
     
         //******* Database schema TODO add more validation
         var Schema = mongoose.Schema,
@@ -27,7 +26,7 @@ module.exports = function() {
     
         // Export test2Model
         try {
-            var test2Model = connection.model('Test2', test2Schema);
+            var test2Model = mongoose.model('Test2', test2Schema);
             exports.test2Model = test2Model;
           }
         catch (error) {}
@@ -41,12 +40,12 @@ module.exports = function() {
     
         // Export test3Model
         try {
-            var test3Model = connection.model('Test2', test3Schema);
+            var test3Model = mongoose.model('Test2', test3Schema);
             exports.test3Model = test3Model;
           }
         catch (error) {}
     
-    });
+//    });
 
     return exports;
   };

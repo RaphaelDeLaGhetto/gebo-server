@@ -2,7 +2,6 @@ var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     https = require('https'),
-    mongooseConnection = require('./lib/mongoose-connection'),
     nativeMongoConnection = require('./lib/native-mongo-connection'),
     nconf = require('nconf'),
     passport = require('passport'),
@@ -25,10 +24,8 @@ module.exports = function(testing, root) {
      * (i.e., testing or production)
      */
     nativeMongoConnection.get(testing, function(){}); 
-    mongooseConnection.get(testing, function(){}); 
-
     exports.nativeMongoConnection = nativeMongoConnection;
-    exports.mongooseConnection = mongooseConnection;
+    exports.mongooseConnection = require('gebo-mongoose-connection').get(testing);
 
     /**
      * The gebo's root directory must be

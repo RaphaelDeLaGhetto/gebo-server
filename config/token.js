@@ -238,10 +238,6 @@ module.exports = function(email) {
       };
     exports.makeJwt = _makeJwt;
 
-    /**
-     * API
-     */
     return exports;
-
   };
 
