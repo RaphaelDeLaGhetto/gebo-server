@@ -30,7 +30,7 @@ module.exports = function(testing) {
      */
     nativeMongoConnection.get(testing, function(){}); 
     exports.nativeMongoConnection = nativeMongoConnection;
-    exports.mongooseConnection = require('gebo-mongoose-connection').get(testing);
+    exports.mongoose = require('gebo-mongoose-connection').get(testing);
 
     /**
      * The gebo's root directory must be

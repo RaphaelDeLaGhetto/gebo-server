@@ -41,8 +41,8 @@ exports.testModes = {
                 test.equal(nativeConn.databaseName, TEST_DB);
 
                 // Test gebo-mongoose-connection
-                test.equal(gebo.mongooseConnection.connection.name, TEST_DB); 
-                gebo.mongooseConnection.connection.db.close();
+                test.equal(gebo.mongoose.connection.name, TEST_DB); 
+                gebo.mongoose.connection.db.close();
                 test.done();
               });
           });
@@ -56,8 +56,8 @@ exports.testModes = {
                 test.equal(nativeConn.databaseName, utils.getMongoDbName(nconf.get('email'))); 
 
                 // Test gebo-mongoose-connection
-                test.equal(gebo.mongooseConnection.connection.name, utils.getMongoDbName(nconf.get('email'))); 
-                gebo.mongooseConnection.connection.db.close();
+                test.equal(gebo.mongoose.connection.name, utils.getMongoDbName(nconf.get('email'))); 
+                gebo.mongoose.connection.db.close();
                 test.done();
               });
           });
@@ -71,8 +71,8 @@ exports.testModes = {
                 test.equal(nativeConn.databaseName, utils.getMongoDbName(nconf.get('email'))); 
 
                 // Test gebo-mongoose-connection
-                test.equal(gebo.mongooseConnection.connection.name, utils.getMongoDbName(nconf.get('email'))); 
-                gebo.mongooseConnection.connection.db.close();
+                test.equal(gebo.mongoose.connection.name, utils.getMongoDbName(nconf.get('email'))); 
+                gebo.mongoose.connection.db.close();
                 test.done();
               });
           });
