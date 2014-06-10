@@ -40,7 +40,7 @@
     "express": "4.x.x",
     "express-session": "^1.0.2",
     "extend": "~1.2.1",
-    "gebo-mongoose-connection": "0.0.0",
+    "gebo-mongoose-connection": "*",
     "gebo-utils": "0.0.1",
     "jade": "*",
     "method-override": "^1.0.0",
@@ -66,8 +66,7 @@
     "uglify-js": "*",
     "uglifycss": "*",
     "winston": "*",
-    "winston-request-logger": "*",
-    "gebo-mongoose-connection": "0.0.0"
+    "winston-request-logger": "*"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
