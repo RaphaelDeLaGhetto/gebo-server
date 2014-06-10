@@ -212,8 +212,5 @@ module.exports = function() {
     exports.clientJwtBearerStrategy = _clientJwtBearerStrategy; 
     passport.use(new ClientJwtBearerStrategy(_clientJwtBearerStrategy));
 
-    /**
-     * API
-     */
     return exports;
   };

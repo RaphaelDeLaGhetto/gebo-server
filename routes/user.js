@@ -11,13 +11,6 @@ module.exports = function() {
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
     nconf.file({ file: './gebo.json' });
-    /**
-
-     * Set the database name, if not set already 
-     */
-//    if (!dbName) {
-//      dbName = nconf.get('email');
-//    }
 
     var pass = require('../config/pass')();
 
