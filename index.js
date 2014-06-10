@@ -9,10 +9,15 @@ var express = require('express'),
     utils = require('./lib/utils'),
     winston = require('winston');
 
-module.exports = function(testing, root) {
+//module.exports = function(testing, root) {
+module.exports = function(testing) {
 
-    if (testing === undefined || typeof testing === 'string') {
-      root = testing;
+//    if (testing === undefined || typeof testing === 'string') {
+//      root = testing;
+//      testing = false;
+//    }
+
+    if (testing === undefined || typeof testing !== 'boolean') {
       testing = false;
     }
 
@@ -32,14 +37,14 @@ module.exports = function(testing, root) {
      * specified in order to read a custom
      * gebo.json configuration file.
      */
-    if(!root) {
-      root = __dirname;
-    }
+//    if(!root) {
+//      root = __dirname;
+//    }
     
     /**
      * Load gebo configurations
      */
-    nconf.file({ file: root + '/gebo.json' });
+    nconf.file({ file: './gebo.json' });
 
     /**
      * Load passport configuration,
@@ -69,7 +74,8 @@ module.exports = function(testing, root) {
     /**
      * Apply settings
      */
-    require('./config/settings')(server, express, passport, logger, root);
+    //require('./config/settings')(server, express, passport, logger, root);
+    require('./config/settings')(server, express, passport, logger);
 
     /**
      * Basic routes
@@ -116,13 +122,15 @@ module.exports = function(testing, root) {
         
         // HTTPS
         var options = {
-            key: fs.readFileSync(root + '/cert/key.pem'),
-            cert: fs.readFileSync(root + '/cert/cert.pem'),
+//            key: fs.readFileSync(root + '/cert/key.pem'),
+//            cert: fs.readFileSync(root + '/cert/cert.pem'),
+            key: fs.readFileSync('./cert/key.pem'),
+            cert: fs.readFileSync('./cert/cert.pem'),
         };
         
-        if (root === __dirname) {
-          logger.warn('HTTPS is using the default private key and certificate');
-        }
+//        if (root === __dirname) {
+//          logger.warn('HTTPS is using the default private key and certificate');
+//        }
         logger.info('HTTPS listening on', nconf.get('httpsPort'));
 
         https.createServer(options, server).listen(nconf.get('httpsPort'));

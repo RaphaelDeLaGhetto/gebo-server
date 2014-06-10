@@ -1,4 +1,5 @@
-module.exports = function (app, express, passport, logger, root) {
+//module.exports = function (app, express, passport, logger, root) {
+module.exports = function (app, express, passport, logger) {
 
     var nconf = require('nconf'),
 //        cachify = require('connect-cachify'),
@@ -13,10 +14,11 @@ module.exports = function (app, express, passport, logger, root) {
         errorHandler = require('errorhandler'),
         ClusterStore = require('strong-cluster-express-store')(session);
 
-    if (!root) {
-      root = path.normalize(__dirname + '/..');
-    }
-    nconf.file({ file: root + '/gebo.json' });
+//    if (!root) {
+//      root = path.normalize(__dirname + '/..');
+//    }
+//    nconf.file({ file: root + '/gebo.json' });
+    nconf.file({ file: './gebo.json' });
 
     // load assets node from configuration file.
     var assets = nconf.get('assets') || {};
@@ -78,14 +80,17 @@ module.exports = function (app, express, passport, logger, root) {
 
     // Global Configuration
     app.use(allowCrossDomain);
-    app.set('views', root + '/views');
+    //app.set('views', root + '/views');
+    app.set('views', './views');
     app.set('view engine', 'jade');
     app.set('view options', { layout: false });
     app.use(cookieParser());
     app.use(bodyParser());
     app.use(methodOverride());
-    app.use(express.static(root + '/public'));
-    app.use(favicon(root + '/favicon.ico'));
+    //app.use(express.static(root + '/public'));
+    app.use(express.static('./public'));
+    //app.use(favicon(root + '/favicon.ico'));
+    app.use(favicon('./favicon.ico'));
     app.use(session({
                 store: new ClusterStore(),
                 secret: 'What the halo!?'}));
