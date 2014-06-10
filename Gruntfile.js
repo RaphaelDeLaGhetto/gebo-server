@@ -2,7 +2,7 @@
 var utils = require('./lib/utils'),
     nconf = require('nconf');
 
-nconf.file({ file: 'gebo.json' });
+nconf.file({ file: './gebo.json' });
 //var db = require('./schemata/gebo')(nconf.get('email'));
     //action = require('./actions/basic')(nconf.get('email'));
 
@@ -78,8 +78,8 @@ module.exports = function (grunt) {
     grunt.registerTask('dbseed', 'seed the database', function () {
         grunt.task.run('registeragent:admin:admin@example.com:secret:true');
         grunt.task.run('registeragent:bob:bob@example.com:secret:false');
-        grunt.task.run('addfriend:bob:bob@example.com:admin@example.com');
-        grunt.task.run('addfriend:admin:admin@example.com:bob@example.com');
+        grunt.task.run('friendo:bob:bob@example.com:admin@example.com');
+        grunt.task.run('friendo:admin:admin@example.com:bob@example.com');
         grunt.task.run('setpermission:bob@example.com:admin@example.com:gebo-server@example.com:true:false:false');
         grunt.task.run('setpermission:admin@example.com:bob@example.com:gebo-server@example.com:true:false:false');
       });
@@ -107,19 +107,7 @@ module.exports = function (grunt) {
                 }
                 else {
                   console.log('Registered ' + agent.name);
-//                  action.createDatabase({ admin: true,
-//                                          dbName: utils.getMongoDbName(emailaddress) },
-//                                        { content: { profile: agent } }).
-//                    then(function() {
-                        done();
-//                      }).
-//                    catch(function(err) {
-//                        if (err) {
-//                          console.log(err);
-//                          done(false);
-//                        }
-//                        done();
-//                      });
+                  done();
                 }
               });
           });
@@ -129,8 +117,10 @@ module.exports = function (grunt) {
             // async mode
             var done = this.async();
 
-            db.connection.db.on('open', function () {
-                db.connection.db.dropDatabase(function (err) {
+            var geboMongoose = require('gebo-mongoose-connection');
+            var mongoose = geboMongoose.get();
+            geboMongoose.on('mongoose-connect', function () {
+                mongoose.connection.db.dropDatabase(function (err) {
                     if (err) {
                       console.log('Error: ' + err);
                       done(false);
@@ -140,13 +130,13 @@ module.exports = function (grunt) {
                       done();
                     }
                   });
-              })
+              });
           });
 
     /**
      * addfriend
      */
-    grunt.registerTask('addfriend', 'add a friend to the agent specified',
+    grunt.registerTask('friendo', 'add a friendo to the agent specified',
         function (name, email, agentEmail, geboUri) {
 
             // Put grunt into async mode
@@ -175,7 +165,7 @@ module.exports = function (grunt) {
                                   done(false);
                                 }
                                 else {
-                                  console.log('Saved friend: ' + friend.name);
+                                  console.log('Saved friendo: ' + friend.name);
                                   done();
                                 }
                               });
