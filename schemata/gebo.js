@@ -2,7 +2,8 @@
 
 var bcrypt = require('bcrypt'),
     extend = require('extend'),
-    nativeConnection = require('../lib/mongoose-connection'),
+    //mongooseConnection = require('../lib/mongoose-connection'),
+    mongooseConnection = require('gebo-mongoose-connection'),
     mongoose = require('mongoose'),
     utils = require('../lib/utils');
 
@@ -13,7 +14,7 @@ module.exports = function() {
         ObjectId = Schema.Types.ObjectId;
 
     // Get the DB connection
-    nativeConnection.get(function(connection) {
+    mongooseConnection.get(function(connection) {
 
         /**
          * This is handy for when I need to drop a database
