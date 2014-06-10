@@ -3,7 +3,8 @@
  * test databases
  */
 var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
-    mongooseConnection = require('../../lib/mongoose-connection').get(true, function(){});
+    //mongooseConnection = require('../../lib/mongoose-connection').get(true, function(){});
+    mongoose = require('gebo-mongoose-connection').get(true);
 
 var nconf = require('nconf'),
     utils = require('../../lib/utils'),

@@ -12,13 +12,14 @@ module.exports = function() {
     // Get the DB connection
     var mongoose = geboMongoose.get();
 
+    var Schema = mongoose.Schema,
+        ObjectId = Schema.Types.ObjectId;
+
     /**
      * This is handy for when I need to drop a database
      * during testing
      */
     exports.connection = mongoose.connection;
-    var Schema = mongoose.Schema,
-        ObjectId = Schema.Types.ObjectId;
 
     /**
      * Registrant schema

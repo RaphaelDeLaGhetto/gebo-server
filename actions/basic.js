@@ -12,7 +12,6 @@ module.exports = function() {
     var agentDb = require('../schemata/agent')(),
         geboDb = require('../schemata/gebo')(),
         nativeConnection = require('../lib/native-mongo-connection');
-//    console.log('geboDb', geboDb);
 
     /**
      * Get the collection specified in the verified object parameter
