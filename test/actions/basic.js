@@ -3,7 +3,8 @@
  * test databases
  */
 var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
-    mongooseConnection = require('../../lib/mongoose-connection').get(true, function(){});
+    mongooseConnection = require('gebo-mongoose-connection'),
+    mongoose = mongooseConnection.get(true);
 
 var utils = require('../../lib/utils'),
     mongo = require('mongodb'),
@@ -443,7 +444,6 @@ exports.saveToFs = {
                 if (err) {
                   console.log(err);
                 }
- 
                 friend.save(function(err) {
                     if (err) {
                       console.log(err);
@@ -2759,64 +2759,3 @@ exports.lsCollections = {
               });
     },
 };
-
-
-
-/**
- * Test modes
- */
-//exports.testModes = {
-//
-//    setUp: function(callback) {
-//        delete require.cache[require.resolve('../../actions/basic')];
-//        delete require.cache[require.resolve('../../lib/native-mongo-connection')];
-//        callback();
-//    },
-//
-//    tearDown: function(callback) {
-//        delete require.cache[require.resolve('../../actions/basic')];
-//        delete require.cache[require.resolve('../../lib/native-mongo-connection')];
-//        callback();
-//    },
-//
-//
-//    'Should go into test mode when parameter is set to true': function(test) {
-//        var basic = require('../../actions/basic')(true);
-//        basic.getCollection({ read: true, collectionName: 'friends' }).
-//            then(function(collection) {
-//                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('testEmail'))); 
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.ok(false, err);
-//                test.done();
-//              });
-//    },
-//
-//    'Should go into production mode when parameter is set to false': function(test) {
-//        var basic = require('../../actions/basic')(false);
-//        basic.getCollection({ read: true, collectionName: 'friends' }).
-//            then(function(collection) {
-//                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('email'))); 
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.ok(false, err);
-//                test.done();
-//              });
-//    },
-//
-//    'Should go into production mode when parameter is not set': function(test) {
-//        var basic = require('../../actions/basic')();
-//        basic.getCollection({ read: true, collectionName: 'friends' }).
-//            then(function(collection) {
-//                test.equal(collection.db.databaseName, utils.getMongoDbName(nconf.get('email'))); 
-//                test.done();
-//              }).
-//            catch(function(err) {
-//                test.ok(false, err);
-//                test.done();
-//              });
-//    },
-//};
-
