@@ -18,13 +18,8 @@ var nock = require('nock'),
 
 // Foreign agent configurations
 var CLIENT_ID = 'abc123',
-    REDIRECT_URI = 'http://myhost.com',
     BASE_ADDRESS = 'theirhost.com',
     AUTHORIZATION_ENDPOINT = '/authorize',
-    VERIFICATION_ENDPOINT = '/verify',
-    REQUEST_ENDPOINT = '/request',
-    PROPOSE_ENDPOINT = '/propose',
-    INFORM_ENDPOINT = '/inform',
     ACCESS_TOKEN = '1234';
 
 // Agent configs
@@ -121,7 +116,7 @@ exports.getFriend = {
     },
 
     'Return an existing friend object': function(test) {
-        test.expect(6);
+        test.expect(3);
 
         var token = new Token('dan@example.com');
         token.getFriend('john@painter.com').
@@ -129,9 +124,6 @@ exports.getFriend = {
                 test.equal(friend.name, 'John');
                 test.equal(friend.email, 'john@painter.com');
                 test.equal(friend.gebo, BASE_ADDRESS);
-                test.equal(friend.request, REQUEST_ENDPOINT);
-                test.equal(friend.propose, PROPOSE_ENDPOINT);
-                test.equal(friend.inform, INFORM_ENDPOINT);
                 test.done();
               }).
             catch(function(err) {

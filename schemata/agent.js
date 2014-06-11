@@ -41,20 +41,20 @@ module.exports = function() {
         email: { type: String, required: true, unique: true },
     
         // Current access tokens
-          myToken: { type: String, default: null, unique: false },
+        myToken: { type: String, default: null, unique: false },
     
         // Experimental
-          myPrivateKey: { type: String, default: null, required: false },
-          myCertificate: { type: String, default: null, required: false },
+        myPrivateKey: { type: String, default: null, required: false },
+        myCertificate: { type: String, default: null, required: false },
         certificate: { type: String, default: null, unique: false },
     
         // I don't think I need to store his token. The gebo does that.
         // Access can be granted or denied with permissions. Friendship
         // implies the ability to obtain an access token
-          hisToken: {
-              string: { type: String, default: null, unique: false },
-              expiry: { type: Date, default: null },
-            },
+        hisToken: {
+            string: { type: String, default: null, unique: false },
+            expiry: { type: Date, default: null },
+          },
     
         // Permissions
         myPermissions: [permissionSchema],
@@ -62,14 +62,6 @@ module.exports = function() {
     
         // Agent communication
         gebo: { type: String, required: false, unique: false },
-        request: { type: String, required: false, unique: false, default: '/request' },
-        propose: { type: String, required: false, unique: false, default: '/propose' },
-        inform: { type: String, required: false, unique: false, default: '/inform' },
-    
-        // OAuth2
-        verify: { type: String, required: false, unique: false, default: '/verify' },
-        authorize: { type: String, required: false, unique: false, default: '/authorize' },
-        redirect: { type: String, required: false, unique: false, default: '/callback' }, 
       });
     
     // Export friend model

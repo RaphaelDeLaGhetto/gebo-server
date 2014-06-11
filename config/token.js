@@ -127,7 +127,7 @@ module.exports = function(email) {
               var claim = {
                       iss: friendEmail,
                       scope: '*',
-                      aud: friend.gebo + friend.authorize,
+                      aud: friend.gebo + '/authorize',
                       exp: new Date()/1000 + 3600*1000,
                       iat: new Date()/1000, 
                       prn: email,
@@ -156,7 +156,7 @@ module.exports = function(email) {
                       var options = {
                               host: gebo,
                               port: port,
-                              path: friend.authorize,
+                              path: '/authorize',
                               method: 'POST',
                               rejectUnauthorized: false,
                               requestCert: true,
