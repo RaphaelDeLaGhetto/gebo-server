@@ -2734,8 +2734,8 @@ exports.lsCollections = {
                               { sender: 'john@painter.com', content: { flag: 'all' } }).
             then(function(collections) {
                 test.equal(collections.length, 2);
-                test.equal(collections[0], cname);
-                test.equal(collections[1], 'system.indexes');
+                test.ok(collections.indexOf(cname) > -1);
+                test.ok(collections.indexOf('system.indexes') > -1);
                 test.done();
               }).
             catch(function(err) {
