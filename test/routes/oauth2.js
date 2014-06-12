@@ -55,7 +55,7 @@ exports.jwtBearerExchange = {
                             certificate: pair.certificate,
                             _id: new mongo.ObjectID('123456789ABC')
                         });
-                    friend.hisPermissions.push({ email: 'some@resource.com' });
+                    friend.hisPermissions.push({ resource: 'someCollection' });
 
                     registrant.save(function(err) {
                         if (err) {
@@ -105,7 +105,7 @@ exports.jwtBearerExchange = {
         test.expect(5);
 
         var claim = { iss: 'dan@example.com',
-                      scope: 'r some@resource.com',
+                      scope: 'r someCollection',
                       aud: 'https://accounts.google.com/o/oauth2/token',
                       exp: 1328554385,
                       iat: 1328550785,
@@ -134,7 +134,7 @@ exports.jwtBearerExchange = {
                                           geboDb.tokenModel.findOne({ string: tokenString }, function(err, token) {
                                                 test.equal(token.registrantId, new mongo.ObjectID('0123456789AB').toString());
                                                 test.equal(token.friendId, new mongo.ObjectID('123456789ABC').toString());
-                                                test.equal(token.collectionName, 'some@resource.com');
+                                                test.equal(token.collectionName, 'someCollection');
                                                 test.equal(token.string, tokenString);
                                                 test.done();
                                             });
@@ -185,44 +185,47 @@ exports.jwtBearerExchange = {
               });
     },
 
-    'Do not return a token when an agent\'s scope doesn\'t match his assigned permissions': function(test) {
-        test.expect(1);
-
-        var claim = { iss: 'dan@example.com',
-                      scope: 'rw some@resource.com',
-                      aud: 'https://accounts.google.com/o/oauth2/token',
-                      exp: 1328554385,
-                      iat: 1328550785,
-                      prn: 'yanfen@agent.com' };
-
-        var token = new Token('yanfen@agent.com');
-        token.makeJwt(claim, 'dan@example.com').
-            then(function(jwt) {
-        
-                var data = jwt.split('.');
-                var signature = data.pop();
-                data = data.join('.');
-
-                oauth2.jwtBearerExchange({ name: 'Dan',
-                                           email: 'dan@example.com',
-                                           admin: false,
-                                        }, data, signature,
-                                    function(err, token) {
-                                        if (err) {
-                                          test.equal(err, 'yanfen@agent.com breached friendship');
-                                        }
-                                        else {
-                                          test.ok(false, 'Shouldn\'t get here');
-                                        }
-                                        test.done();
-                                    });
-              }).
-            catch(function(err) {
-                console.log(err);
-                test.ok(false, err);
-                test.done();
-              });
-    },
+    /**
+     * 2014-6-11 Mothballed
+     */
+//    'Do not return a token when an agent\'s scope doesn\'t match his assigned permissions': function(test) {
+//        test.expect(1);
+//
+//        var claim = { iss: 'dan@example.com',
+//                      scope: 'rw someCollection',
+//                      aud: 'https://accounts.google.com/o/oauth2/token',
+//                      exp: 1328554385,
+//                      iat: 1328550785,
+//                      prn: 'yanfen@agent.com' };
+//
+//        var token = new Token('yanfen@agent.com');
+//        token.makeJwt(claim, 'dan@example.com').
+//            then(function(jwt) {
+//        
+//                var data = jwt.split('.');
+//                var signature = data.pop();
+//                data = data.join('.');
+//
+//                oauth2.jwtBearerExchange({ name: 'Dan',
+//                                           email: 'dan@example.com',
+//                                           admin: false,
+//                                        }, data, signature,
+//                                    function(err, token) {
+//                                        if (err) {
+//                                          test.equal(err, 'yanfen@agent.com breached friendship');
+//                                        }
+//                                        else {
+//                                          test.ok(false, 'Shouldn\'t get here');
+//                                        }
+//                                        test.done();
+//                                    });
+//              }).
+//            catch(function(err) {
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
 };
 
 /**
@@ -232,7 +235,7 @@ exports.processScope = {
 
     'Return null if ill-formatted': function(test) {
         test.expect(3);
-        var scope = oauth2.processScope('some@resource.com');
+        var scope = oauth2.processScope('someCollection');
         test.equal(scope, null);
 
         scope = oauth2.processScope();
@@ -246,14 +249,14 @@ exports.processScope = {
 
     'Return object with correct resource, owner, and permissions': function(test) {
         test.expect(8);
-        var scope = oauth2.processScope('rwx some@resource.com');
-        test.equal(scope.resource, 'some@resource.com');
+        var scope = oauth2.processScope('rwx someCollection');
+        test.equal(scope.resource, 'someCollection');
         test.equal(scope.read, true);
         test.equal(scope.write, true);
         test.equal(scope.execute, true);
 
-        var scope = oauth2.processScope('x some@resource.com');
-        test.equal(scope.resource, 'some@resource.com');
+        var scope = oauth2.processScope('x someCollection');
+        test.equal(scope.resource, 'someCollection');
         test.equal(scope.read, false);
         test.equal(scope.write, false);
         test.equal(scope.execute, true);
@@ -263,93 +266,96 @@ exports.processScope = {
 };
 
 /**
+ * 2014-6-11 Mothballed. See notes in module
+ *
+/**
  * verifyFriendship
  */
-exports.verifyFriendship = {
-
-   setUp: function(callback) {
-           var registrant = new geboDb.registrantModel({
-                    name: 'Dan',
-                    email: 'dan@example.com',
-                    password: 'password123',
-                    admin: false,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-
-            var friend = new agentDb.friendModel({
-                    name: 'Yanfen',
-                    email: 'yanfen@example.com',
-                    _id: new mongo.ObjectID('123456789ABC')
-                });
-            friend.hisPermissions.push({ email: 'some@resource.com' });
-
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                friend.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    callback();
-                  });
-              });
-    },
-
-    tearDown: function(callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                 }
-                 callback();
-              });
-          });
-    },
-
-    'Return the friend model when an agent is a friend with correct scope': function(test) {
-        test.expect(1);
-        var scope = oauth2.processScope('r some@resource.com');
-        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
-            then(function(friend) {
-                test.equal(friend.name, 'Yanfen');
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);      
-                test.done();
-              });
-    },
-    
-    'Return false when an agent is a friend with incorrect scope': function(test) {
-        test.expect(1);
-        var scope = oauth2.processScope('rwx some@resource.com');
-        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
-            then(function(weAreFriends) {
-                test.equal(weAreFriends, false);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);      
-                test.done();
-              });
-    },
-
-    'Return false when an agent is not a friend': function(test) {
-        test.expect(1);
-        var scope = oauth2.processScope('rw some@resource.com');
-        oauth2.verifyFriendship(scope, 'dan@example.com', 'foreign@agent.com').
-            then(function(weAreFriends) {
-                test.equal(weAreFriends, false);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);      
-                test.done();
-              });
-    },
-};
+//exports.verifyFriendship = {
+//
+//   setUp: function(callback) {
+//           var registrant = new geboDb.registrantModel({
+//                    name: 'Dan',
+//                    email: 'dan@example.com',
+//                    password: 'password123',
+//                    admin: false,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//
+//            var friend = new agentDb.friendModel({
+//                    name: 'Yanfen',
+//                    email: 'yanfen@example.com',
+//                    _id: new mongo.ObjectID('123456789ABC')
+//                });
+//            friend.hisPermissions.push({ resource: 'someCollection' });
+//
+//            registrant.save(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                friend.save(function(err) {
+//                    if (err) {
+//                      console.log(err);
+//                    }
+//                    callback();
+//                  });
+//              });
+//    },
+//
+//    tearDown: function(callback) {
+//        geboDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err)
+//            }
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err)
+//                 }
+//                 callback();
+//              });
+//          });
+//    },
+//
+//    'Return the friend model when an agent is a friend with correct scope': function(test) {
+//        test.expect(1);
+//        var scope = oauth2.processScope('r someCollection');
+//        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
+//            then(function(friend) {
+//                test.equal(friend.name, 'Yanfen');
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);      
+//                test.done();
+//              });
+//    },
+//    
+//    'Return false when an agent is a friend with incorrect scope': function(test) {
+//        test.expect(1);
+//        var scope = oauth2.processScope('rwx someCollection');
+//        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
+//            then(function(weAreFriends) {
+//                test.equal(weAreFriends, false);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);      
+//                test.done();
+//              });
+//    },
+//
+//    'Return false when an agent is not a friend': function(test) {
+//        test.expect(1);
+//        var scope = oauth2.processScope('rw someCollection');
+//        oauth2.verifyFriendship(scope, 'dan@example.com', 'foreign@agent.com').
+//            then(function(weAreFriends) {
+//                test.equal(weAreFriends, false);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);      
+//                test.done();
+//              });
+//    },
+//};
 

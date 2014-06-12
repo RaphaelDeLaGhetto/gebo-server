@@ -202,12 +202,15 @@ module.exports = function() {
                 return done('You did not correctly specify the scope of your request');
               }
     
-              _verifyFriendship(scope, citizen.email, decodedData.prn).
-                      then(function(friend) {
-                            if (!friend) {
-                              return done(decodedData.prn + ' breached friendship');
-                            }
-    
+              /**
+               * 2014-6-11 Mothballed
+               */
+//              _verifyFriendship(scope, citizen.email, decodedData.prn).
+//                      then(function(friend) {
+//                            if (!friend) {
+//                              return done(decodedData.prn + ' breached friendship');
+//                            }
+//    
                             geboDb.registrantModel.findOne({ email: citizen.email }, function(err, owner) {
                                     if (err) {
                                       return done(err);
@@ -228,10 +231,10 @@ module.exports = function() {
                                         return done(null, token.string);
                                       });
                               });
-                          }).
-                        catch(function(err) {
-                            return done(err);
-                          });
+//                          }).
+//                        catch(function(err) {
+//                            return done(err);
+//                          });
             }
             else {
               logger.error('error');
@@ -243,6 +246,14 @@ module.exports = function() {
     server.exchange('urn:ietf:params:oauth:grant-type:jwt-bearer', jwtBearer(_jwtBearerExchange));
     
     /**
+     * 2014-6-11
+     * Mothballed
+     *
+     * This funciton verified the friendship between
+     * agents. This is no longer necessary at the moment.
+     * It is doubtful that the generic gebo will be required to 
+     * mediate friendship between agents again.
+    /**
      * Given a foreign agent, a citizen agent, and a
      * set of permissions, verify that the two agents are 
      * friends.
@@ -253,31 +264,31 @@ module.exports = function() {
      *
      * @return promise
      */
-    var _verifyFriendship = function(scope, citizen, foreignAgent) {
-        var deferred = q.defer();
-        agentDb.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
-            if (err) {
-              deferred.reject(err);
-            }
-            if (!friend) {
-              deferred.resolve(false);
-            }
-            else {
-              var index = utils.getIndexOfObject(friend.hisPermissions, 'email', scope.resource);
-              if (index > -1 &&
-                  friend.hisPermissions[index].read === scope.read &&
-                  friend.hisPermissions[index].write === scope.write &&
-                  friend.hisPermissions[index].execute === scope.execute) {
-                deferred.resolve(friend);
-              }
-              else {
-                deferred.resolve(false);
-              }
-            }
-          });
-        return deferred.promise;
-      };
-    exports.verifyFriendship = _verifyFriendship;
+//    var _verifyFriendship = function(scope, citizen, foreignAgent) {
+//        var deferred = q.defer();
+//        agentDb.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
+//            if (err) {
+//              deferred.reject(err);
+//            }
+//            if (!friend) {
+//              deferred.resolve(false);
+//            }
+//            else {
+//              var index = utils.getIndexOfObject(friend.hisPermissions, 'email', scope.resource);
+//              if (index > -1 &&
+//                  friend.hisPermissions[index].read === scope.read &&
+//                  friend.hisPermissions[index].write === scope.write &&
+//                  friend.hisPermissions[index].execute === scope.execute) {
+//                deferred.resolve(friend);
+//              }
+//              else {
+//                deferred.resolve(false);
+//              }
+//            }
+//          });
+//        return deferred.promise;
+//      };
+//    exports.verifyFriendship = _verifyFriendship;
     
     /**
      * Take the scope provided in a JWT claim and
