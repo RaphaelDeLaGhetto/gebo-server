@@ -40,9 +40,6 @@ module.exports = function() {
         name: { type: String, required: true, unique: false, default: 'Innominate' },
         email: { type: String, required: true, unique: true },
     
-        // Current access tokens
-        myToken: { type: String, default: null, unique: false },
-    
         // Experimental
         myPrivateKey: { type: String, default: null, required: false },
         myCertificate: { type: String, default: null, required: false },
