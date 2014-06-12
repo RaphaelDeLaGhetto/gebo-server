@@ -583,13 +583,13 @@ module.exports = function() {
                     deferred.reject(err);
                   }
                   else {
-                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', message.content.permission.email);
+                    var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', message.content.permission.resource);
                     if (index > -1) {
                       friend.hisPermissions.splice(index, 1);
                     }
 
                     friend.hisPermissions.push({
-                            email: message.content.permission.email,
+                            resource: message.content.permission.resource,
                             read: message.content.permission.read,
                             write: message.content.permission.write,
                             execute: message.content.permission.execute,

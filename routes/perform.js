@@ -124,43 +124,40 @@ module.exports = function() {
     function _verify(agent, message) {
         var deferred = q.defer();
 
-	// A message's contents may be received as a string.
-	if (typeof message.content === 'string') {
-	  message.content = JSON.parse(message.content);
-	}
+        // A message's contents may be received as a string.
+        if (typeof message.content === 'string') {
+          message.content = JSON.parse(message.content);
+        }
 
-        // A resource does not necessarily need to be specified
-        // in every circumstance. The following is experimental
-        var resource;
+        /**
+         * A resource may be a DB collection or an action
+         * performed by the gebo. If no collection is specified
+         * then the relevant resource must be an action
+         */
+        var resource = message.action;
         if (message.content && message.content.resource) {
           resource = utils.getMongoCollectionName(message.content.resource);
-        }
-        // Experimental:
-        // If no resource is set, it is assumed the call to action
-        // is not tied with any resource. This is a temporary workaround.
-        // At the moment, this behaviour is enabled by setting execute permissions
-        // on the gebo agent's own email address.
-        //
-        // Obviously, this all needs to change
-        else {
-          resource = utils.getMongoCollectionName(message.receiver);
         }
 
         var verified = {
                 collectionName: resource,
-		admin: agent.admin,
-		dbName: utils.getMongoDbName(message.receiver),
-		read: false,
-		write: false,
-		execute: false,
+                admin: agent.admin,
+                read: false,
+                write: false,
+                execute: false,
             };
-
 
         if (!verified.dbName) {
           verified.dbName = utils.getMongoDbName(agent.email);
         }
 
-        if (utils.getMongoDbName(agent.email) !== verified.dbName && !verified.admin) {
+        if (agent.admin) {
+          verified.read = true;
+          verified.write = true;
+          verified.execute = true;
+          deferred.resolve(verified);
+        }
+        else {
           agentDb.friendModel.findOne({ email: agent.email }, function(err, friend) {
                 logger.info('friendo:', agent.email, JSON.stringify(friend, null, 2));
                 if (err) {
@@ -168,11 +165,10 @@ module.exports = function() {
                 }
                 if (!friend) {
                   deferred.resolve(verified);
-                  //deferred.reject('I don\'t know you');
                 }
                 else { 
                   // Search the array for relevant resource
-                  var index = utils.getIndexOfObject(friend.hisPermissions, 'email', verified.collectionName);
+                  var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', verified.collectionName);
 
                   if (index > -1) {
                     verified.read = friend.hisPermissions[index].read;
@@ -184,18 +180,11 @@ module.exports = function() {
                 }
               });
         }
-        // This agent is attempting to perform an action on his own resource
-        else {
-          verified.read = true;
-          verified.write = true;
-          verified.execute = true;
-          deferred.resolve(verified);
-        }
 
         return deferred.promise;
       };
     exports.verify = _verify;
-    
+
     return exports;
   };
 

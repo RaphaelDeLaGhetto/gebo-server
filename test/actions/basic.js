@@ -437,8 +437,8 @@ exports.saveToFs = {
             /**
              * Set permissions for this friend
              */
-            friend.hisPermissions.push({ email: 'canwrite@app.com', write: true });
-            friend.hisPermissions.push({ email: 'cannotwrite@app.com' });
+            friend.hisPermissions.push({ resource: 'canWriteToCollection', write: true });
+            friend.hisPermissions.push({ resource: 'cannotWriteToCollection' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -2341,7 +2341,7 @@ exports.grantAccess = {
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
-            friend.hisPermissions.push({ email: 'some@coolapp.com' });
+            friend.hisPermissions.push({ resource: 'someCoolCollection' });
 
             registrant.save(function(err) {
                 friend.save(function(err) {
@@ -2380,17 +2380,17 @@ exports.grantAccess = {
                           content: {
                               friend: 'john@painter.com',
                               permission: {
-                                      email: 'new@app.com',
+                                      resource: 'someNewCollection',
                                       read: 'true',
                                       write: 'true',
                                       execute: 'false'},
                             },
                         }).
             then(function(friend) {
-                var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'new@app.com');
+                var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', 'someNewCollection');
                 test.equal(index, 1);
                 test.equal(friend.hisPermissions.length, 2);
-                test.equal(friend.hisPermissions[index].email, 'new@app.com');
+                test.equal(friend.hisPermissions[index].resource, 'someNewCollection');
                 test.equal(friend.hisPermissions[index].read, true);
                 test.equal(friend.hisPermissions[index].write, true);
                 test.equal(friend.hisPermissions[index].execute, false);
@@ -2411,17 +2411,17 @@ exports.grantAccess = {
                           content: {
                               friend: 'john@painter.com',
                               permission: {
-                                      email: 'some@coolapp.com',
+                                      resource: 'someCoolCollection',
                                       read: 'false',
                                       write: 'false',
                                       execute: 'true'},
                             }
                         }).
             then(function(friend) {
-                var index = utils.getIndexOfObject(friend.hisPermissions, 'email', 'some@coolapp.com');
+                var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', 'someCoolCollection');
                 test.equal(index, 0);
                 test.equal(friend.hisPermissions.length, 1);
-                test.equal(friend.hisPermissions[index].email, 'some@coolapp.com');
+                test.equal(friend.hisPermissions[index].resource, 'someCoolCollection');
                 test.equal(friend.hisPermissions[index].read, false);
                 test.equal(friend.hisPermissions[index].write, false);
                 test.equal(friend.hisPermissions[index].execute, true);
@@ -2442,7 +2442,7 @@ exports.grantAccess = {
                           content: {
                               friend: 'john@painter.com',
                               permission: {
-                                      email: 'some@coolapp.com',
+                                      resource: 'someCoolCollection',
                                       read: 'false',
                                       write: 'false',
                                       execute: 'true'},

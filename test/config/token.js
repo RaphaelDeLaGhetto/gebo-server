@@ -66,7 +66,7 @@ exports.getFriend = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.hisPermissions.push({ email: 'someapp@example.com' });
+            friend.hisPermissions.push({ resource: 'someAppCollection' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -127,7 +127,7 @@ exports.getFriend = {
                 test.done();
               }).
             catch(function(err) {
-                test.ok(false, err);      
+                test.ok(false, err);
                 test.done();
               });
     },

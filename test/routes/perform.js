@@ -40,7 +40,6 @@ utils.getPrivateKeyAndCertificate().
  * For testing the routes
  */
 var CLIENT = 'yanfen@example.com',
-    //SERVER = 'dan@example.com';
     SERVER = nconf.get('testEmail');
 
 var SEND_REQ = {
@@ -65,89 +64,213 @@ var RES = {
   };
 
 /**
+ * handler
+ */
+exports.handler = {
+
+    setUp: function(callback) {
+        _code = undefined;
+        _content = undefined;
+
+        var friend = new agentDb.friendModel({
+                            name: 'Yanfen',
+                            email: CLIENT,
+                            uri: BASE_ADDRESS,
+                            _id: new mongo.ObjectID('23456789ABCD')
+                        });
+    
+        friend.hisPermissions.push({ resource: 'friends' });
+        
+        friend.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    tearDown: function(callback) {
+        agentDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            callback();
+          });
+    },
+
+    'Form a social commitment on receipt of a perform message': function(test) {
+        test.expect(9);
+        agentDb.socialCommitmentModel.find({}, function(err, scs) {
+            test.equal(scs.length, 0);
+
+            perform.handler(SEND_REQ, RES, function(err, results) { 
+                if (err) {
+                  test.ok(false, err);
+                }
+
+                agentDb.socialCommitmentModel.find({}, function(err, scs) {
+                    test.equal(scs.length, 1);
+                    test.equal(scs[0].performative, 'perform');
+                    test.equal(scs[0].action, 'ls');
+                    test.equal(!!scs[0].message, true);
+                    test.equal(scs[0].creditor, CLIENT);
+                    test.equal(scs[0].debtor, SERVER);
+                    test.equal(!!scs[0].created, true);
+                    // The successful call will immediately
+                    // fulfil this commitment
+                    test.equal(!!scs[0].fulfilled, true);
+                    test.done();
+                  });
+              });
+          });
+    },
+
+    'Respond with 401 unauthorized when an unknown agent makes tries to perform an action': function(test) {
+        test.expect(3);
+        var req = {};
+        extend(true, req, SEND_REQ);
+        req.user.email = 'some@foreignagent.com';
+
+        perform.handler(req, RES, function(err, results) { 
+            if (err) {
+              test.equal(err, 'You are not allowed access to that resource');
+            }
+            test.equal(_code, 401);
+            test.equal(_content, 'You are not allowed access to that resource');
+            test.done();
+          });
+
+    },
+
+    'Fulfil social commitment and return data when action is performed': function(test) {
+        test.expect(13);
+
+        // Make sure a friend has actually been written to the DB
+        agentDb.friendModel.find({}, function(err, docs) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(docs.length, 1);
+
+            perform.handler(SEND_REQ, RES, function(err, results) { 
+                if (err) {
+                  test.ok(false, err);
+                }
+                // Return data
+                test.equal(_code, 200);
+                test.equal(_content.length, 1);
+                test.equal(_content[0].name, 'Yanfen');
+                test.equal(!!_content[0]._id, true);
+                
+                agentDb.socialCommitmentModel.find({}, function(err, scs) {
+                    test.equal(scs.length, 1);
+                    test.equal(scs[0].performative, 'perform');
+                    test.equal(scs[0].action, 'ls');
+                    test.equal(!!scs[0].message, true);
+                    test.equal(scs[0].creditor, CLIENT);
+                    test.equal(scs[0].debtor, nconf.get('testEmail'));
+                    test.equal(!!scs[0].created, true);
+                    test.equal(!!scs[0].fulfilled, true);
+                    test.done();
+                  });
+              });
+          });
+    },
+
+    'Return a 501 error if the agent does not know how to perform the requested action': function(test) {
+        test.expect(2);
+
+        var req = {};
+        extend(true, req, SEND_REQ);
+        req.body.action = 'bakeACake';
+
+        perform.handler(req, RES, function(err, results) { 
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(_code, 501);
+            test.equal(_content, 'I don\'t know how to bakeACake');
+            test.done();
+        }); 
+    },
+};
+
+// I can't figure out how to use sinon's mocks, stubs, etc.
+// As such, I can't tell if passport.authenticate is being called
+// TODO: figure out sinon
+/**
+ * authenticate
+ */
+exports.authenticate = {
+
+    setUp: function(callback) {
+        callback();
+    },
+
+    tearDown: function(callback) {
+        callback();
+    },
+
+    'call passort.authenticate if no user in request': function(test) {
+        test.done();
+    },
+
+    'do not call passort.authenticate if user in request': function(test) {
+        test.done();
+    },
+
+};
+
+
+/**
  * verify
  */
 exports.verify = {
 
     setUp: function(callback) {
         try {
-            /**
-             * Setup a registrant
-             */
-            var adminRegistrant = new geboDb.registrantModel({
-                    name: 'dan',
-                    email: 'dan@example.com',
-                    password: 'password123',
-                    admin: true,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-          
-            /**
-             * Make a friend for the registrant
-             */
-            var adminFriend = new agentDb.friendModel({
+          /**
+           * Setup an admin registrant
+           */
+          var adminRegistrant = new geboDb.registrantModel({
+                  name: 'dan',
+                  email: 'dan@example.com',
+                  password: 'password123',
+                  admin: true,
+                  _id: new mongo.ObjectID('0123456789AB')
+              });
+
+          /**
+           * Make a friendo for the gebo
+           */
+          var friendo = new agentDb.friendModel({ 
                     name: 'john',
                     email: 'john@painter.com',
                     uri: BASE_ADDRESS,
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
+          /**
+           * Create access permissions for imaginary collection
+           */
+          friendo.hisPermissions.push({ resource: 'painterApp' });
 
-            /**
-             * Create access permissions for imaginary collection
-             */
-            adminFriend.hisPermissions.push({ email: 'app@painter.com' });
+          /**
+           * Create access permissions for action with no associated collection 
+           */
+          friendo.hisPermissions.push({ resource: 'getCurrentTime', read: false, execute: true });
 
-            /** 
-             * Set up another registrant
-             */
-            var registrant = new geboDb.registrantModel({
-                    name: 'yanfen',
-                    email: 'yanfen@example.com',
-                    password: 'password123',
-                    admin: false,
-                    _id: new mongo.ObjectID('123456789ABC')
+          adminRegistrant.save(function(err) {
+              if (err) {
+                console.log(err);
+              }
+              friendo.save(function(err) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  callback();
                 });
-
-            /**
-             * Make a friend for the new registrant
-             */
-            var friend = new agentDb.friendModel({
-                    name: 'richard',
-                    email: 'richard@construction.com',
-                    uri: BASE_ADDRESS,
-                    _id: new mongo.ObjectID('3456789ABCDE')
-                });
-
-
-            /**
-             * Create access permissions for imaginary collection
-             */
-            friend.hisPermissions.push({ email: 'someotherapp@example.com' });
-            friend.hisPermissions.push({ email: 'app@construction.com' });
-
-            // There has got to be a better way to do this...
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                friend.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    adminRegistrant.save(function(err) {
-                        if (err) {
-                          console.log(err);
-                        }
-                        adminFriend.save(function(err) {
-                            if (err) {
-                              console.log(err);
-                            }
-                            callback();
-                          });
-                      });
-                  });
-              });
+            });
         }
         catch(err) {
             console.log(err);
@@ -156,7 +279,6 @@ exports.verify = {
     },
 
     tearDown: function(callback) {
-
         geboDb.connection.db.dropDatabase(function(err) {
             if (err) {
               console.log(err)
@@ -170,52 +292,30 @@ exports.verify = {
           });
     },
 
-    'Return permissions object for a friend attempting to perform an action on a resource owned by a citizen agent': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                       { receiver: 'yanfen@example.com', content: { resource: 'app@construction.com' } }).
-            then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, false); 
-                test.equal(verified.execute, false); 
-                test.equal(verified.admin, false); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();      
-              });
-    },
-
-    'Return permissions object (as above) when content field is a string': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                       { receiver: 'yanfen@example.com',
-		         content: JSON.stringify({ resource: 'app@construction.com' }) }).
-            then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, false); 
-                test.equal(verified.execute, false); 
-                test.equal(verified.admin, false); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();      
-              });
-    },
-
-    'Return permissions object for a friend attempting to perform an action on a resource owned by an admin agent': function(test) {
-        test.expect(6);
+    'Return permissions object for a friendo': function(test) {
+        test.expect(5);
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
-                       { receiver: 'dan@example.com', content: { resource: 'app@painter.com' } }).
+                       { content: { resource: 'painterApp' } }).
             then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
+                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.read, true); 
+                test.equal(verified.write, false); 
+                test.equal(verified.execute, false); 
+                test.equal(verified.admin, false);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Return permissions object for a friendo when content field is a string': function(test) {
+        test.expect(5);
+        perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
+                       { content: JSON.stringify({ resource: 'painterApp' }) }).
+            then(function(verified) {
+                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
                 test.equal(verified.read, true); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, false); 
@@ -227,38 +327,22 @@ exports.verify = {
                 test.done();      
               });
     },
-    
-    'Return permissions object for an admin agent attempting to perform an action on a friend\'s resource': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'richard', email: 'richard@construction.com', admin: true },
-                       { receiver: 'yanfen@example.com', content: { resource: 'someotherapp@example.com' } }).
-            then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, true); 
-                test.equal(verified.execute, true); 
-                test.equal(verified.admin, true); 
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();      
-              });
-    },
 
-    'Return permissions object for a regular agent attempting to perform an action on his own resource with dbName param set': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'yanfen', email: 'yanfen@example.com', admin: false },
-                       { receiver: 'yanfen@example.com', content: { resource: 'someotherapp@example.com' } }).
+    /**
+     * If no resource is specified, then there is no DB collection associated
+     * with the attempted action. Thus, the action itself becomes the resource
+     */
+    'Return permissions object for a friendo when no resource is specified': function(test) {
+        test.expect(5);
+        perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
+                       { action: 'getCurrentTime' }).
             then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, true); 
+                test.equal(verified.collectionName, utils.getMongoCollectionName('getCurrentTime')); 
+                test.equal(verified.read, false); 
+                test.equal(verified.write, false); 
                 test.equal(verified.execute, true); 
                 test.equal(verified.admin, false); 
-                test.done();      
+                test.done();
               }).
             catch(function(err) {
                 test.ok(false, err);
@@ -266,18 +350,17 @@ exports.verify = {
               });
     },
 
-    'Return permissions object for a regular agent attempting to perform an action on his own resource without dbName param set': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'yanfen', email: 'yanfen@example.com', admin: false },
-                       { content: { resource: 'someotherapp@example.com' } }).
+    'Return permissions object for a friendo without permission to access the specified resource': function(test) {
+        test.expect(5);
+        perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
+                       { action: 'ls' }).
             then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('someotherapp@example.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, true); 
-                test.equal(verified.execute, true); 
+                test.equal(verified.collectionName, utils.getMongoCollectionName('ls')); 
+                test.equal(verified.read, false); 
+                test.equal(verified.write, false); 
+                test.equal(verified.execute, false); 
                 test.equal(verified.admin, false); 
-                test.done();      
+                test.done();
               }).
             catch(function(err) {
                 test.ok(false, err);
@@ -285,131 +368,74 @@ exports.verify = {
               });
     },
 
-    'Return permissions object for an admin agent attempting to perform an action on his own resource with dbName param set': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
-                       { receiver: 'dan@example.com', content: { resource: 'app@painter.com' } }).
-            then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, true); 
-                test.equal(verified.execute, true); 
-                test.equal(verified.admin, true); 
-                test.done();      
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();      
-              });
-    },
-
-    'Return permissions object for an admin agent attempting to perform an action on his own resource with no receiver set': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
-                       { content: { resource: 'app@painter.com' } }).
-            then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('app@painter.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, true); 
-                test.equal(verified.execute, true); 
-                test.equal(verified.admin, true); 
-                test.done();      
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();      
-              });
-    },
-
-    'Return permissions object for an admin agent attempting to perform an action on a non-friend\'s resources': function(test) {
-        test.expect(6);
-        perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
-                       { receiver: 'yanfen@example.com', content: { resource: 'app@construction.com' } }).
-            then(function(verified) {
-                test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-                test.equal(verified.collectionName, utils.getMongoCollectionName('app@construction.com')); 
-                test.equal(verified.read, true); 
-                test.equal(verified.write, true); 
-                test.equal(verified.execute, true); 
-                test.equal(verified.admin, true); 
-                test.done();      
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();      
-              });
-    },
-
-    'Return a permissions object for a non-friend (non-admin) attempting to perform an action on a resource': function(test) {
+    'Return permissions object for an adminstrator': function(test) {
         test.expect(5);
-        perform.verify({ name: 'dan', email: 'dan@example.com', admin: false },
-                       { receiver: 'yanfen@example.com', content: { resource: 'app@construction.com' } }).
+        perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
+                       { content: { resource: 'painterApp' } }).
             then(function(verified) {
-                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
-                test.equal(verified.collectionName, 'app@construction.com');
-                test.equal(verified.read, false);
-                test.equal(verified.write, false);
-                test.equal(verified.execute, false);
+                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.read, true); 
+                test.equal(verified.write, true); 
+                test.equal(verified.execute, true); 
+                test.equal(verified.admin, true); 
                 test.done();      
               }).
             catch(function(err) {
-                test.ok(false, 'rwx permission should have been denied in each case');
+                test.ok(false, err);
                 test.done();      
               });
     },
 
-    'Return a permissions object for a friend who has not been granted to the resource in question': function(test) {
+    'Return permissions object for an administrator when no resource is specified': function(test) {
+        test.expect(5);
+        perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
+                       { action: 'getCurrentTime' }).
+            then(function(verified) {
+                test.equal(verified.collectionName, utils.getMongoCollectionName('getCurrentTime')); 
+                test.equal(verified.read, true); 
+                test.equal(verified.write, true); 
+                test.equal(verified.execute, true); 
+                test.equal(verified.admin, true); 
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();      
+              });
+    },
+
+    'Return permissions object for a non-friendo': function(test) {
         test.expect(5);
         perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                       { receiver: 'yanfen@example.com', content: { resource: 'someother@inaccessibleapp.com' } }).
+                       { content: { resource: 'painterApp' } }).
             then(function(verified) {
-                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
-                test.equal(verified.collectionName, 'someother@inaccessibleapp.com');
-                test.equal(verified.read, false);
-                test.equal(verified.write, false);
-                test.equal(verified.execute, false);
-                test.done();      
+                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.read, false); 
+                test.equal(verified.write, false); 
+                test.equal(verified.execute, false); 
+                test.equal(verified.admin, false);
+                test.done();
               }).
             catch(function(err) {
-                test.ok(false, 'rwx permission should have been denied in each case');
+                test.ok(false, err);
                 test.done();
               });
     },
 
-    'Return a permissions object for a friend when no resource is specified': function(test) {
+    'Return permissions object for a non-friendo when no resource is specified': function(test) {
         test.expect(5);
         perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
-                       { receiver: 'yanfen@example.com' }).
+                       { action: 'getCurrentTime' }).
             then(function(verified) {
-                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
-                test.equal(verified.collectionName, 'yanfen@example.com');
-                test.equal(verified.read, false);
-                test.equal(verified.write, false);
-                test.equal(verified.execute, false);
-                test.done();      
-              }).
-            catch(function(err) {
-                test.ok(false, 'rwx permission have been denied in each case');
+                test.equal(verified.collectionName, utils.getMongoCollectionName('getCurrentTime')); 
+                test.equal(verified.read, false); 
+                test.equal(verified.write, false); 
+                test.equal(verified.execute, false); 
+                test.equal(verified.admin, false);
                 test.done();
-              });
-    },
-
-    'Return a permissions object for a non-friend when no resource is specified': function(test) {
-        test.expect(5);
-        perform.verify({ name: 'dan', email: 'dan@example.com', admin: false },
-                       { receiver: 'yanfen@example.com' }).
-            then(function(verified) {
-                test.equal(verified.dbName, 'yanfen_at_example_dot_com');
-                test.equal(verified.collectionName, 'yanfen@example.com');
-                test.equal(verified.read, false);
-                test.equal(verified.write, false);
-                test.equal(verified.execute, false);
-                test.done();      
               }).
             catch(function(err) {
-                test.ok(false, 'rwx permission have been denied in each case');
+                test.ok(false, err);
                 test.done();
               });
     },
@@ -431,7 +457,7 @@ exports.handler = {
                             _id: new mongo.ObjectID('23456789ABCD')
                         });
     
-        friend.hisPermissions.push({ email: 'friends' });
+        friend.hisPermissions.push({ resource: 'friends' });
         
         friend.save(function(err) {
             if (err) {

@@ -4,7 +4,7 @@ var geboMongoose = require('gebo-mongoose-connection');
 
 module.exports = function() {
 
-    // Get the DB connection
+    // Get the mongoose instance
     var mongoose = geboMongoose.get();
 
     var Schema = mongoose.Schema,
@@ -20,7 +20,7 @@ module.exports = function() {
      * Permission schema
      */
     var permissionSchema = new Schema({
-        email: { type: String, required: true, unique: false },
+        resource: { type: String, required: true, unique: false },
         read: { type: Boolean, required: true, default: true },
         write: { type: Boolean, required: true, default: false },
         execute: { type: Boolean, required: true, default: false },
