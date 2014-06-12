@@ -9,13 +9,7 @@ var express = require('express'),
     utils = require('./lib/utils'),
     winston = require('winston');
 
-//module.exports = function(testing, root) {
 module.exports = function(testing) {
-
-//    if (testing === undefined || typeof testing === 'string') {
-//      root = testing;
-//      testing = false;
-//    }
 
     if (testing === undefined || typeof testing !== 'boolean') {
       testing = false;
@@ -32,15 +26,6 @@ module.exports = function(testing) {
     exports.nativeMongoConnection = nativeMongoConnection;
     exports.mongoose = require('gebo-mongoose-connection').get(testing);
 
-    /**
-     * The gebo's root directory must be
-     * specified in order to read a custom
-     * gebo.json configuration file.
-     */
-//    if(!root) {
-//      root = __dirname;
-//    }
-    
     /**
      * Load gebo configurations
      */
@@ -74,7 +59,6 @@ module.exports = function(testing) {
     /**
      * Apply settings
      */
-    //require('./config/settings')(server, express, passport, logger, root);
     require('./config/settings')(server, express, passport, logger);
 
     /**
@@ -110,7 +94,6 @@ module.exports = function(testing) {
      */
     server.post('/send', message_routes.send);
     server.post('/receive', message_routes.receive);
- //   });    
 
     /**
      * Start the gebo servers
@@ -122,15 +105,10 @@ module.exports = function(testing) {
         
         // HTTPS
         var options = {
-//            key: fs.readFileSync(root + '/cert/key.pem'),
-//            cert: fs.readFileSync(root + '/cert/cert.pem'),
             key: fs.readFileSync('./cert/key.pem'),
             cert: fs.readFileSync('./cert/cert.pem'),
         };
         
-//        if (root === __dirname) {
-//          logger.warn('HTTPS is using the default private key and certificate');
-//        }
         logger.info('HTTPS listening on', nconf.get('httpsPort'));
 
         https.createServer(options, server).listen(nconf.get('httpsPort'));
