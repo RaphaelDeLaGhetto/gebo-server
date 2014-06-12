@@ -311,7 +311,8 @@ module.exports = function() {
                 else {
                   var cleanNames = [];
                   names.forEach(function(item) {
-                      item = item.name.replace(verified.dbName + '.', ''); 
+                      item = item.name.replace(
+                                agentDb.connection.name + '.', ''); 
                       if (message.content &&
                           message.content.flag.toLowerCase() === 'all') {
                         cleanNames.push(item);
