@@ -39,45 +39,45 @@ block content
                                         div Created: #{socialCommitments[i].created}
                                         div Fulfilled: #{socialCommitments[i].fulfilled}
                                         div Data: #{JSON.stringify(socialCommitments[i].data)}
-    .panel-group(id="friendsAccordion")
+    .panel-group(id="friendosAccordion")
         .panel.panel-default
             .panel-heading
                 .panel-title
-                    a(data-toggle="collapse", data-parent="#friendsAccordion", href="#friendsCollapse") Friends (#{friends.length})
-            .panel-collapse.collapse(id="friendsCollapse")
+                    a(data-toggle="collapse", data-parent="#friendosAccordion", href="#friendosCollapse") Friends (#{friendos.length})
+            .panel-collapse.collapse(id="friendosCollapse")
                  .panel-body
                     form.form-inline(role="form", action="/request", method="post")
                         .form-group
-                            input(type="hidden", name="action", value="friend")
+                            input(type="hidden", name="action", value="friendo")
                         .form-group
-                            input.form-control(type="email", name="recipient", placeholder="Your friend's email")
+                            input.form-control(type="email", name="recipient", placeholder="Your friendo's email")
                         .form-group
-                            input.form-control(type="url", name="uri", placeholder="Your friend's gebo")
+                            input.form-control(type="url", name="uri", placeholder="Your friendo's gebo")
                         button.btn.btn-default(type="submit") Friend!
                     br                            
-                    - for (var i = 0; i < friends.length; i++)
-                        .panel-group(id="#{friends[i]._id}Accordion}")
+                    - for (var i = 0; i < friendos.length; i++)
+                        .panel-group(id="#{friendos[i]._id}Accordion}")
                             .panel.panel-default
                                 .panel-heading
                                     .panel-title
-                                        a(data-toggle="collapse", data-parent="##{friends[i]._id}Accordion", href="##{friends[i]._id}")
-                                            | #{friends[i].name}: #{friends[i].email}
-                                .panel-collapse.collapse(id="#{friends[i]._id}")
+                                        a(data-toggle="collapse", data-parent="##{friendos[i]._id}Accordion", href="##{friendos[i]._id}")
+                                            | #{friendos[i].name}: #{friendos[i].email}
+                                .panel-collapse.collapse(id="#{friendos[i]._id}")
                                     .panel-body
-                                        - for (var j = 0; j < friends[i].permissions.length; j++)
-                                            div #{friends[i].permissions[j].email}
+                                        - for (var j = 0; j < friendos[i].permissions.length; j++)
+                                            div #{friendos[i].permissions[j].email}
                                             form.form-inline(role="form", action="/request", method="post") 
                                                 .form-group
                                                     input(type="hidden", name="recipient", value=agent.email)
                                                     input(type="hidden", name="action", value="grantAccess")
-                                                    input(type="hidden", name="friend", value=friends[i].email)
-                                                    input(type="hidden", name="relevantResource", value=friends[i].permissions[j].email)
+                                                    input(type="hidden", name="friendo", value=friendos[i].email)
+                                                    input(type="hidden", name="relevantResource", value=friendos[i].permissions[j].email)
                                                     label(for="read") Read
-                                                    input(type="checkbox", id="read", name="read", value="true", onclick="this.form.submit()", checked=friends[i].permissions[j].read)
+                                                    input(type="checkbox", id="read", name="read", value="true", onclick="this.form.submit()", checked=friendos[i].permissions[j].read)
                                                     label(for="write") Write
-                                                    input(type="checkbox", id="write", name="write", value="true", onclick="this.form.submit()", checked=friends[i].permissions[j].write)
+                                                    input(type="checkbox", id="write", name="write", value="true", onclick="this.form.submit()", checked=friendos[i].permissions[j].write)
                                                     label(for="execute") Execute
-                                                    input(type="checkbox", id="execute", name="execute", value="true", onclick="this.form.submit()", checked=friends[i].permissions[j].execute)
+                                                    input(type="checkbox", id="execute", name="execute", value="true", onclick="this.form.submit()", checked=friendos[i].permissions[j].execute)
 
 
 

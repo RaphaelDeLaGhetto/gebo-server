@@ -54,13 +54,13 @@ module.exports = function() {
     server.deserializeClient(function (requestDetails, done) {
         logger.info('deserializeClient', requestDetails);
     
-        agentDb.friendModel.findOne({ email: requestDetails.friend }, function (err, friend) {
-                logger.info('friendModel', friend);
+        agentDb.friendoModel.findOne({ email: requestDetails.friendo }, function (err, friendo) {
+                logger.info('friendoModel', friendo);
                 var id = null;
-                if (friend) {
-                  id = friend._id;
+                if (friendo) {
+                  id = friendo._id;
                 }
-                requestDetails.friend = id;
+                requestDetails.friendo = id;
                 logger.info('requestDetails', requestDetails);
                 if (err) {
                   return done(err);
@@ -112,7 +112,7 @@ module.exports = function() {
       
         var token = new geboDb.tokenModel({
             registrantId: user._id,
-            friendId: requestDetails.friend,
+            friendoId: requestDetails.friendo,
             resource: utils.getMongoCollectionName(requestDetails.resource),
             ip: requestDetails.ip,
             string: tokenStr,
@@ -183,7 +183,7 @@ module.exports = function() {
           decodedData.prn = decodedData.iss;
         }
     
-        agentDb.friendModel.findOne({ email: decodedData.prn }, function(err, friend) {
+        agentDb.friendoModel.findOne({ email: decodedData.prn }, function(err, friendo) {
             if (err) {
               logger.error(err);
               done(err);
@@ -193,7 +193,7 @@ module.exports = function() {
         
             verifier.update(data);
             
-            if (verifier.verify(friend.certificate, signature, 'base64')) {
+            if (verifier.verify(friendo.certificate, signature, 'base64')) {
               logger.info('verified');
     
               var scope = _processScope(decodedData.scope);
@@ -206,9 +206,9 @@ module.exports = function() {
                * 2014-6-11 Mothballed
                */
 //              _verifyFriendship(scope, citizen.email, decodedData.prn).
-//                      then(function(friend) {
-//                            if (!friend) {
-//                              return done(decodedData.prn + ' breached friendship');
+//                      then(function(friendo) {
+//                            if (!friendo) {
+//                              return done(decodedData.prn + ' breached friendoship');
 //                            }
 //    
                             geboDb.registrantModel.findOne({ email: citizen.email }, function(err, owner) {
@@ -219,7 +219,7 @@ module.exports = function() {
                                     var tokenStr = utils.uid(256);
                                     var token = new geboDb.tokenModel({
                                         registrantId: owner._id,
-                                        friendId: friend._id,
+                                        friendoId: friendo._id,
                                         resource: scope.resource,
                                         string: tokenStr,
                                       });
@@ -249,14 +249,14 @@ module.exports = function() {
      * 2014-6-11
      * Mothballed
      *
-     * This funciton verified the friendship between
+     * This funciton verified the friendoship between
      * agents. This is no longer necessary at the moment.
      * It is doubtful that the generic gebo will be required to 
-     * mediate friendship between agents again.
+     * mediate friendoship between agents again.
     /**
      * Given a foreign agent, a citizen agent, and a
      * set of permissions, verify that the two agents are 
-     * friends.
+     * friendos.
      *
      * @param Object
      * @param string
@@ -266,20 +266,20 @@ module.exports = function() {
      */
 //    var _verifyFriendship = function(scope, citizen, foreignAgent) {
 //        var deferred = q.defer();
-//        agentDb.friendModel.findOne({ email: foreignAgent }, function(err, friend) {
+//        agentDb.friendoModel.findOne({ email: foreignAgent }, function(err, friendo) {
 //            if (err) {
 //              deferred.reject(err);
 //            }
-//            if (!friend) {
+//            if (!friendo) {
 //              deferred.resolve(false);
 //            }
 //            else {
-//              var index = utils.getIndexOfObject(friend.permissions, 'email', scope.resource);
+//              var index = utils.getIndexOfObject(friendo.permissions, 'email', scope.resource);
 //              if (index > -1 &&
-//                  friend.permissions[index].read === scope.read &&
-//                  friend.permissions[index].write === scope.write &&
-//                  friend.permissions[index].execute === scope.execute) {
-//                deferred.resolve(friend);
+//                  friendo.permissions[index].read === scope.read &&
+//                  friendo.permissions[index].write === scope.write &&
+//                  friendo.permissions[index].execute === scope.execute) {
+//                deferred.resolve(friendo);
 //              }
 //              else {
 //                deferred.resolve(false);
@@ -355,7 +355,7 @@ module.exports = function() {
             // passed through deserializeClient on its way to
             // the implicit grant.
             req.oauth2.client.agent = req.user.email;
-            req.oauth2.client.friend = req.query.friend;
+            req.oauth2.client.friendo = req.query.friendo;
             req.oauth2.client.ip = req.headers['x-forwarded-for'] || 
                                    req.connection.remoteAddress || 
                                    req.socket.remoteAddress ||

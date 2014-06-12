@@ -36,7 +36,7 @@ module.exports = function() {
     /**
      * Friend schema
      */
-    var friendSchema = new Schema({
+    var friendoSchema = new Schema({
         name: { type: String, required: true, unique: false, default: 'Innominate' },
         email: { type: String, required: true, unique: true },
     
@@ -51,10 +51,10 @@ module.exports = function() {
         gebo: { type: String, required: false, unique: false },
       });
     
-    // Export friend model
+    // Export friendo model
     try {
-        var friendModel = mongoose.model('Friend', friendSchema);
-        exports.friendModel = friendModel;
+        var friendoModel = mongoose.model('Friendo', friendoSchema);
+        exports.friendoModel = friendoModel;
       }
     catch (error) {}
     

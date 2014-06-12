@@ -37,7 +37,7 @@ var Token = require('../../config/token');
 
 
 /**
- * Load a friend's token verification parameters
+ * Load a friendo's token verification parameters
  * from the database
  */
 exports.getFriend = {
@@ -55,9 +55,9 @@ exports.getFriend = {
                 });
             
             /**
-             * Make a friend for the registrant
+             * Make a friendo for the registrant
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'John',
                     email: 'john@painter.com',
                     gebo: BASE_ADDRESS,
@@ -66,13 +66,13 @@ exports.getFriend = {
             /**
              * Create access permissions for imaginary collection
              */
-            friend.permissions.push({ resource: 'someAppCollection' });
+            friendo.permissions.push({ resource: 'someAppCollection' });
 
             registrant.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
-                friend.save(function(err) {
+                friendo.save(function(err) {
                     if (err) {
                       console.log(err);
                     }
@@ -100,30 +100,30 @@ exports.getFriend = {
           });
     }, 
 
-    'Don\'t barf if the requested friend doesn\'t exist': function(test) {
+    'Don\'t barf if the requested friendo doesn\'t exist': function(test) {
         test.expect(1);
 
         var token = new Token('dan@example.com');
-        token.getFriend('nosuchguy@friend.com').
-            then(function(friend) {
+        token.getFriend('nosuchguy@friendo.com').
+            then(function(friendo) {
                 test.ok(false, 'Shouldn\'t get here');
                 test.done();
               }).
             catch(function(err) {
-                test.equal(err, 'You are not friends with nosuchguy@friend.com');
+                test.equal(err, 'nosuchguy@friendo.com is not your friendo');
                 test.done();
               });
     },
 
-    'Return an existing friend object': function(test) {
+    'Return an existing friendo object': function(test) {
         test.expect(3);
 
         var token = new Token('dan@example.com');
         token.getFriend('john@painter.com').
-            then(function(friend) {
-                test.equal(friend.name, 'John');
-                test.equal(friend.email, 'john@painter.com');
-                test.equal(friend.gebo, BASE_ADDRESS);
+            then(function(friendo) {
+                test.equal(friendo.name, 'John');
+                test.equal(friendo.email, 'john@painter.com');
+                test.equal(friendo.gebo, BASE_ADDRESS);
                 test.done();
               }).
             catch(function(err) {
@@ -195,13 +195,13 @@ exports.getKey = {
         test.expect(1);
 
         var token = new Token('dan@example.com');
-        token.getKey('nosuchguy@friend.com').
-            then(function(friend) {
+        token.getKey('nosuchguy@friendo.com').
+            then(function(friendo) {
                 test.ok(false, 'Shouldn\'t get here');
                 test.done();
               }).
             catch(function(err) {
-                test.equal(err, 'You have not created a key for nosuchguy@friend.com');
+                test.equal(err, 'You have not created a key for nosuchguy@friendo.com');
                 test.done();
               });
     },
@@ -284,13 +284,13 @@ exports.getCertificate = {
         test.expect(1);
 
         var token = new Token('dan@example.com');
-        token.getCertificate('nosuchguy@friend.com').
-            then(function(friend) {
+        token.getCertificate('nosuchguy@friendo.com').
+            then(function(friendo) {
                 test.ok(false, 'Shouldn\'t get here');
                 test.done();
               }).
             catch(function(err) {
-                test.equal(err, 'You have not created a certificate for nosuchguy@friend.com');
+                test.equal(err, 'You have not created a certificate for nosuchguy@friendo.com');
                 test.done();
               });
     },
@@ -331,15 +331,15 @@ exports.get = {
                 });
 
             /**
-             * Make a friend for the gebo registrant
+             * Make a friendo for the gebo registrant
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'John',
                     email: 'john@painter.com',
                     gebo: BASE_ADDRESS,
                 });
             
-            var otherFriend = new agentDb.friendModel({
+            var otherFriend = new agentDb.friendoModel({
                     name: 'Richard',
                     email: 'richard@construction.com',
                     gebo: BASE_ADDRESS + ':3443',
@@ -350,7 +350,7 @@ exports.get = {
              */
             utils.getPrivateKeyAndCertificate().
                 then(function(pair) {
-                    var friendKey = new agentDb.keyModel({
+                    var friendoKey = new agentDb.keyModel({
                             public: pair.certificate,
                             private: pair.privateKey,
                             email: 'john@painter.com',
@@ -367,7 +367,7 @@ exports.get = {
                         if (err) {
                           console.log(err);
                         }
-                        friendKey.save(function(err) {
+                        friendoKey.save(function(err) {
                             if (err) {
                               console.log(err);
                             }
@@ -375,7 +375,7 @@ exports.get = {
                                 if (err) {
                                   console.log(err);
                                 }
-                                friend.save(function(err) {
+                                friendo.save(function(err) {
                                     if (err) {
                                       console.log(err);
                                     }
@@ -482,13 +482,13 @@ exports.makeJwt = {
                           console.log(err);
                         }
 
-                        var friend = new agentDb.friendModel({
+                        var friendo = new agentDb.friendoModel({
                                         name: 'Dan',
                                         email: 'dan@example.com',
                                         certificate: _pair.certificate,
                                     });
 
-                        friend.save(function(err) {
+                        friendo.save(function(err) {
                             if (err) {
                               console.log(err);
                             }
@@ -564,14 +564,14 @@ exports.makeJwt = {
         var token = new Token('dan@example.com');
         token.makeJwt(claim, 'john@painter.com').
             then(function(jwt) {
-                agentDb.friendModel.findOne({ email: 'dan@example.com' }, function(err, friend) {
+                agentDb.friendoModel.findOne({ email: 'dan@example.com' }, function(err, friendo) {
                         var verifier = crypto.createVerify('sha256WithRSAEncryption');
                         var data = jwt.split('.');
                         var signature = data.pop();
                         data = data.join('.');
                         verifier.update(data);
     
-                        test.ok(verifier.verify(friend.certificate, signature, 'base64'));
+                        test.ok(verifier.verify(friendo.certificate, signature, 'base64'));
                         test.done();
                   });
               }).

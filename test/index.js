@@ -177,15 +177,15 @@ exports.schemata = {
         var gebo = require('../index')(true);
 
         var dbName = new gebo.schemata.agent();
-        var friend = new dbName.friendModel({
+        var friendo = new dbName.friendoModel({
                 name: 'Some guy',
                 email: 'some@guy.com',
                 gebo: 'https://somegebo.com',
             });
 
-        test.equal(friend.name, 'Some guy');
-        test.equal(friend.email, 'some@guy.com');
-        test.equal(friend.gebo, 'https://somegebo.com');
+        test.equal(friendo.name, 'Some guy');
+        test.equal(friendo.email, 'some@guy.com');
+        test.equal(friendo.gebo, 'https://somegebo.com');
 
         dbName = new gebo.schemata.gebo();
         var registrant = new dbName.registrantModel({

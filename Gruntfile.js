@@ -134,7 +134,7 @@ module.exports = function (grunt) {
           });
 
     /**
-     * addfriend
+     * addfriendo
      */
     grunt.registerTask('friendo', 'add a friendo to the agent specified',
         function (name, email, agentEmail, geboUri) {
@@ -145,7 +145,7 @@ module.exports = function (grunt) {
             utils.getPrivateKeyAndCertificate().
                 then(function(pair) {
                     var agentDb = require('./schemata/agent')();
-                    var friend = new agentDb.friendModel({
+                    var friendo = new agentDb.friendoModel({
                             name: name,
                             email: email,
                             uri: geboUri,
@@ -154,10 +154,10 @@ module.exports = function (grunt) {
                         });
         
                     // Can't modify ID in findOneAndUpdate
-                    friend._id = undefined;
+                    friendo._id = undefined;
        
-                    agentDb.friendModel.findOneAndUpdate({ email: friend.email },
-                            friend.toObject(),
+                    agentDb.friendoModel.findOneAndUpdate({ email: friendo.email },
+                            friendo.toObject(),
                             { upsert: true },
                             function (err) {
                                 if (err) {
@@ -165,7 +165,7 @@ module.exports = function (grunt) {
                                   done(false);
                                 }
                                 else {
-                                  console.log('Saved friendo: ' + friend.name);
+                                  console.log('Saved friendo: ' + friendo.name);
                                   done();
                                 }
                               });
@@ -180,30 +180,30 @@ module.exports = function (grunt) {
      * setpermission
      */
     grunt.registerTask('setpermission', 'Set access to an agent\'s resource',
-        function(friendAgent, ownerAgent, resource, read, write, execute) {
+        function(friendoAgent, ownerAgent, resource, read, write, execute) {
             var agentDb = require('./schemata/agent')();
             
             // Save call is async. Put grunt into async mode to work
             var done = this.async();
 
-            agentDb.friendModel.findOne({ email: friendAgent },
-                function(err, friend) {
+            agentDb.friendoModel.findOne({ email: friendoAgent },
+                function(err, friendo) {
                     if (err) {
                       console.log(err);
                     }
 
-                    var index = utils.getIndexOfObject(friend.permissions, 'email', resource);
+                    var index = utils.getIndexOfObject(friendo.permissions, 'email', resource);
 
                     if (index > -1) {
-                      friend.permissions.splice(index, 1);
+                      friendo.permissions.splice(index, 1);
                     }
-                    friend.permissions.push({ email: resource,
+                    friendo.permissions.push({ email: resource,
                                                  read: read === 'true', 
                                                  write: write === 'true', 
                                                  execute: execute === 'true', 
                                                });
 
-                    friend.save(function(err) {
+                    friendo.save(function(err) {
                         if (err) {
                           console.log(err);
                         }

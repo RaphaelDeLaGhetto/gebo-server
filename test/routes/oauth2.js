@@ -48,20 +48,20 @@ exports.jwtBearerExchange = {
             utils.getPrivateKeyAndCertificate().
                 then(function(pair) {
 
-                    var friend = new agentDb.friendModel({
+                    var friendo = new agentDb.friendoModel({
                             name: 'Yanfen',
                             email: 'yanfen@agent.com',
                             gebo: 'https://agent.com',
                             certificate: pair.certificate,
                             _id: new mongo.ObjectID('123456789ABC')
                         });
-                    friend.permissions.push({ resource: 'someCollection' });
+                    friendo.permissions.push({ resource: 'someCollection' });
 
                     registrant.save(function(err) {
                         if (err) {
                           console.log(err);
                         }
-                        friend.save(function(err) {
+                        friendo.save(function(err) {
                             if (err) {
                               console.log(err);
                             }
@@ -133,7 +133,7 @@ exports.jwtBearerExchange = {
 
                                           geboDb.tokenModel.findOne({ string: tokenString }, function(err, token) {
                                                 test.equal(token.registrantId, new mongo.ObjectID('0123456789AB').toString());
-                                                test.equal(token.friendId, new mongo.ObjectID('123456789ABC').toString());
+                                                test.equal(token.friendoId, new mongo.ObjectID('123456789ABC').toString());
                                                 test.equal(token.resource, 'someCollection');
                                                 test.equal(token.string, tokenString);
                                                 test.done();
@@ -212,7 +212,7 @@ exports.jwtBearerExchange = {
 //                                        }, data, signature,
 //                                    function(err, token) {
 //                                        if (err) {
-//                                          test.equal(err, 'yanfen@agent.com breached friendship');
+//                                          test.equal(err, 'yanfen@agent.com breached friendoship');
 //                                        }
 //                                        else {
 //                                          test.ok(false, 'Shouldn\'t get here');
@@ -282,18 +282,18 @@ exports.processScope = {
 //                    _id: new mongo.ObjectID('0123456789AB')
 //                });
 //
-//            var friend = new agentDb.friendModel({
+//            var friendo = new agentDb.friendoModel({
 //                    name: 'Yanfen',
 //                    email: 'yanfen@example.com',
 //                    _id: new mongo.ObjectID('123456789ABC')
 //                });
-//            friend.permissions.push({ resource: 'someCollection' });
+//            friendo.permissions.push({ resource: 'someCollection' });
 //
 //            registrant.save(function(err) {
 //                if (err) {
 //                  console.log(err);
 //                }
-//                friend.save(function(err) {
+//                friendo.save(function(err) {
 //                    if (err) {
 //                      console.log(err);
 //                    }
@@ -316,12 +316,12 @@ exports.processScope = {
 //          });
 //    },
 //
-//    'Return the friend model when an agent is a friend with correct scope': function(test) {
+//    'Return the friendo model when an agent is a friendo with correct scope': function(test) {
 //        test.expect(1);
 //        var scope = oauth2.processScope('r someCollection');
 //        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
-//            then(function(friend) {
-//                test.equal(friend.name, 'Yanfen');
+//            then(function(friendo) {
+//                test.equal(friendo.name, 'Yanfen');
 //                test.done();
 //              }).
 //            catch(function(err) {
@@ -330,7 +330,7 @@ exports.processScope = {
 //              });
 //    },
 //    
-//    'Return false when an agent is a friend with incorrect scope': function(test) {
+//    'Return false when an agent is a friendo with incorrect scope': function(test) {
 //        test.expect(1);
 //        var scope = oauth2.processScope('rwx someCollection');
 //        oauth2.verifyFriendship(scope, 'dan@example.com', 'yanfen@example.com').
@@ -344,7 +344,7 @@ exports.processScope = {
 //              });
 //    },
 //
-//    'Return false when an agent is not a friend': function(test) {
+//    'Return false when an agent is not a friendo': function(test) {
 //        test.expect(1);
 //        var scope = oauth2.processScope('rw someCollection');
 //        oauth2.verifyFriendship(scope, 'dan@example.com', 'foreign@agent.com').

@@ -573,7 +573,7 @@ exports.getRoleClient = {
                 sender: 'client@example.com',
                 receiver: 'server@example.com',
                 performative: 'request',
-                action: 'friend'}, false).
+                action: 'friendo'}, false).
             then(function(role) {
                 test.equal(role, 'client');
                 test.done();
@@ -590,7 +590,7 @@ exports.getRoleClient = {
                 sender: 'server@example.com',
                 receiver: 'client@example.com',
                 performative: 'propose',
-                action: 'friend'}, true).
+                action: 'friendo'}, true).
             then(function(role) {
                 test.equal(role, 'client');
                 test.done();
@@ -608,7 +608,7 @@ exports.getRoleClient = {
                 receiver: 'client@example.com',
                 performative: 'agree request',
                 conversationId: 'Some client conversation ID',
-                action: 'friend'}, true).
+                action: 'friendo'}, true).
             then(function(role) {
                 test.equal(role, 'client');
                 test.done();
@@ -662,7 +662,7 @@ exports.getRoleServer = {
                 sender: 'client@example.com',
                 receiver: 'server@example.com',
                 performative: 'request',
-                action: 'friend'}, true).
+                action: 'friendo'}, true).
             then(function(role) {
                 test.equal(role, 'server');
                 test.done();
@@ -679,7 +679,7 @@ exports.getRoleServer = {
                 sender: 'server@example.com',
                 receiver: 'client@example.com',
                 performative: 'propose',
-                action: 'friend'}, false).
+                action: 'friendo'}, false).
             then(function(role) {
                 test.equal(role, 'server');
                 test.done();
@@ -697,7 +697,7 @@ exports.getRoleServer = {
                 receiver: 'client@example.com',
                 performative: 'agree request',
                 conversationId: 'Some client conversation ID',
-                action: 'friend'}, false).
+                action: 'friendo'}, false).
             then(function(role) {
                 test.equal(role, 'server');
                 test.done();

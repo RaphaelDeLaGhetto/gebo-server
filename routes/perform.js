@@ -158,22 +158,22 @@ module.exports = function() {
           deferred.resolve(verified);
         }
         else {
-          agentDb.friendModel.findOne({ email: agent.email }, function(err, friend) {
-                logger.info('friendo:', agent.email, JSON.stringify(friend, null, 2));
+          agentDb.friendoModel.findOne({ email: agent.email }, function(err, friendo) {
+                logger.info('friendo:', agent.email, JSON.stringify(friendo, null, 2));
                 if (err) {
                   deferred.reject(err);
                 }
-                if (!friend) {
+                if (!friendo) {
                   deferred.resolve(verified);
                 }
                 else { 
                   // Search the array for relevant resource
-                  var index = utils.getIndexOfObject(friend.permissions, 'resource', verified.resource);
+                  var index = utils.getIndexOfObject(friendo.permissions, 'resource', verified.resource);
 
                   if (index > -1) {
-                    verified.read = friend.permissions[index].read;
-                    verified.write = friend.permissions[index].write;
-                    verified.execute = friend.permissions[index].execute;
+                    verified.read = friendo.permissions[index].read;
+                    verified.write = friendo.permissions[index].write;
+                    verified.execute = friendo.permissions[index].execute;
                   }
 
                   deferred.resolve(verified);

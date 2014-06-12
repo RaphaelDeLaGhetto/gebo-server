@@ -52,7 +52,7 @@ exports.form = {
  
             var sc = new agentDb.socialCommitmentModel({
                     performative: 'request',
-                    action: 'friend',
+                    action: 'friendo',
                     message: { newFriend: newFriend },
                     creditor: 'dan@example.com',
                     debtor: 'yanfen@example.com',
@@ -94,7 +94,7 @@ exports.form = {
     'Add a social commitment to the agent\'s database': function(test) {
         test.expect(10);
 
-        var friend = {
+        var friendo = {
                 name: 'richard',
                 email: 'richard@construction.com',
                 uri: BASE_ADDRESS,
@@ -106,15 +106,15 @@ exports.form = {
               };
 
         var message = {
-                newFriend: friend,
+                newFriend: friendo,
                 receiver: 'yanfen@example.com',
-                action: 'friend',
+                action: 'friendo',
               };
 
         sc.form(agent, 'request', message).
             then(function(socialCommitment) {
                 test.equal(socialCommitment.performative, 'request');
-                test.equal(socialCommitment.action, 'friend');
+                test.equal(socialCommitment.action, 'friendo');
                 test.equal(socialCommitment.message.newFriend.name, 'richard');
                 test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
                 test.equal(socialCommitment.message.newFriend.uri, BASE_ADDRESS);
@@ -135,7 +135,7 @@ exports.form = {
     'Return an existing social commitment if provided an ID': function(test) {
         test.expect(10);
 
-        var friend = {
+        var friendo = {
                 name: 'Dan',
                 email: 'dan@example.com',
                 uri: 'https://theirhost.com',
@@ -144,8 +144,8 @@ exports.form = {
  
         var message = {
                 receiver: 'yanfen@example.com',
-                action: 'friend',
-                newFriend: friend,
+                action: 'friendo',
+                newFriend: friendo,
                 socialCommitmentId: new mongo.ObjectID('123456789ABC')
               };
 
@@ -156,7 +156,7 @@ exports.form = {
         sc.form(agent, 'request', message).
             then(function(socialCommitment) {
                 test.equal(socialCommitment.performative, 'request');
-                test.equal(socialCommitment.action, 'friend');
+                test.equal(socialCommitment.action, 'friendo');
                 test.equal(socialCommitment.message.newFriend.name, 'Dan');
                 test.equal(socialCommitment.message.newFriend.email, 'dan@example.com');
                 test.equal(socialCommitment.message.newFriend.uri, 'https://theirhost.com');
@@ -182,7 +182,7 @@ exports.fulfil = {
 
     setUp: function(callback) {
         try {
-            var friend = {
+            var friendo = {
                     name: 'richard',
                     email: 'richard@construction.com',
                     uri: BASE_ADDRESS,
@@ -194,9 +194,9 @@ exports.fulfil = {
                   };
     
             var message = {
-                    newFriend: friend,
+                    newFriend: friendo,
                     receiver: 'yanfen@example.com',
-                    action: 'friend',
+                    action: 'friendo',
                   };
 
             /**
@@ -256,7 +256,7 @@ exports.fulfil = {
                 sc.fulfil('yanfen@example.com', socialCommitment._id).
                     then(function(socialCommitment) {
                         test.equal(socialCommitment.performative, 'request');
-                        test.equal(socialCommitment.action, 'friend');
+                        test.equal(socialCommitment.action, 'friendo');
                         test.equal(socialCommitment.message.newFriend.name, 'richard');
                         test.equal(socialCommitment.message.newFriend.email, 'richard@construction.com');
                         test.equal(socialCommitment.message.newFriend.uri, BASE_ADDRESS);

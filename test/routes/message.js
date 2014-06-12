@@ -22,7 +22,7 @@ var SEND_REQ = {
          sender: CLIENT,
          receiver: SERVER,
          performative: 'request',
-         action: 'friend',
+         action: 'friendo',
       },
     user: { email: CLIENT },
   }

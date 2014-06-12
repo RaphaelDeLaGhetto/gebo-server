@@ -48,7 +48,7 @@ var SEND_REQ = {
              receiver: SERVER,
              action: 'ls',
              content: {
-                resource: 'friends',
+                resource: 'friendos',
              }
           },
         user: { email: CLIENT, admin: false },
@@ -72,16 +72,16 @@ exports.handler = {
         _code = undefined;
         _content = undefined;
 
-        var friend = new agentDb.friendModel({
+        var friendo = new agentDb.friendoModel({
                             name: 'Yanfen',
                             email: CLIENT,
                             uri: BASE_ADDRESS,
                             _id: new mongo.ObjectID('23456789ABCD')
                         });
     
-        friend.permissions.push({ resource: 'friends' });
+        friendo.permissions.push({ resource: 'friendos' });
         
-        friend.save(function(err) {
+        friendo.save(function(err) {
             if (err) {
               console.log(err);
             }
@@ -145,8 +145,8 @@ exports.handler = {
     'Fulfil social commitment and return data when action is performed': function(test) {
         test.expect(13);
 
-        // Make sure a friend has actually been written to the DB
-        agentDb.friendModel.find({}, function(err, docs) {
+        // Make sure a friendo has actually been written to the DB
+        agentDb.friendoModel.find({}, function(err, docs) {
             if (err) {
               test.ok(false, err);
             }
@@ -243,7 +243,7 @@ exports.verify = {
           /**
            * Make a friendo for the gebo
            */
-          var friendo = new agentDb.friendModel({ 
+          var friendo = new agentDb.friendoModel({ 
                     name: 'john',
                     email: 'john@painter.com',
                     uri: BASE_ADDRESS,
@@ -450,16 +450,16 @@ exports.handler = {
         _code = undefined;
         _content = undefined;
 
-        var friend = new agentDb.friendModel({
+        var friendo = new agentDb.friendoModel({
                             name: 'Yanfen',
                             email: CLIENT,
                             uri: BASE_ADDRESS,
                             _id: new mongo.ObjectID('23456789ABCD')
                         });
     
-        friend.permissions.push({ resource: 'friends' });
+        friendo.permissions.push({ resource: 'friendos' });
         
-        friend.save(function(err) {
+        friendo.save(function(err) {
             if (err) {
               console.log(err);
             }
@@ -523,8 +523,8 @@ exports.handler = {
     'Fulfil social commitment and return data when action is performed': function(test) {
         test.expect(13);
 
-        // Make sure a friend has actually been written to the DB
-        agentDb.friendModel.find({}, function(err, docs) {
+        // Make sure a friendo has actually been written to the DB
+        agentDb.friendoModel.find({}, function(err, docs) {
             if (err) {
               test.ok(false, err);
             }

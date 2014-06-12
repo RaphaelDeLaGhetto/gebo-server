@@ -123,7 +123,7 @@ exports.bearerStrategy = {
                 });
           
             /**
-             * Create an access token for the friend
+             * Create an access token for the friendo
              */
             var adminToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
@@ -241,7 +241,7 @@ exports.bearerStrategy = {
     },
 
 
-//    'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
+//    'Return permissions object for a friendo requesting a resource from a regular agent': function(test) {
 //        test.expect(7);
 //
 //        pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
@@ -261,7 +261,7 @@ exports.bearerStrategy = {
 //        });
 //    },
 //
-//    'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
+//    'Return permissions object for a friendo requesting a resource from an admin agent': function(test) {
 //        test.expect(7);
 //        pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
 //            if (err) {
@@ -335,7 +335,7 @@ exports.bearerStrategy = {
 
     'Return error if the token provided is expired': function(test) {
         test.expect(1);
-        pass.bearerStrategy(EXPIRED_TOKEN, function(err, friend) {
+        pass.bearerStrategy(EXPIRED_TOKEN, function(err, friendo) {
             if (err) {
               test.equal(err, 'The token provided is invalid');       
             } 
@@ -366,9 +366,9 @@ exports.clientJwtBearerStrategy = {
                 });
           
             /**
-             * Setup a friend
+             * Setup a friendo
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'Yanfen',
                     email: 'yanfen@agent.com',
                     gebo: 'https://agent.com',
@@ -376,7 +376,7 @@ exports.clientJwtBearerStrategy = {
                 });
 
             // There has got to be a better way to do this.
-            friend.save(function(err) {
+            friendo.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
@@ -440,7 +440,7 @@ exports.clientJwtBearerStrategy = {
 //    },
 //
 //
-//    'Return permissions object for a friend requesting a resource from a regular agent': function(test) {
+//    'Return permissions object for a friendo requesting a resource from a regular agent': function(test) {
 //        test.expect(7);
 //
 //        pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
@@ -460,7 +460,7 @@ exports.clientJwtBearerStrategy = {
 //        });
 //    },
 //
-//    'Return permissions object for a friend requesting a resource from an admin agent': function(test) {
+//    'Return permissions object for a friendo requesting a resource from an admin agent': function(test) {
 //        test.expect(7);
 //        pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
 //            if (err) {
@@ -534,7 +534,7 @@ exports.clientJwtBearerStrategy = {
 //
 //    'Return error if the token provided is expired': function(test) {
 //        test.expect(1);
-//        pass.bearerStrategy(EXPIRED_TOKEN, function(err, friend) {
+//        pass.bearerStrategy(EXPIRED_TOKEN, function(err, friendo) {
 //            if (err) {
 //              test.equal(err, 'The token provided is invalid');       
 //            } 

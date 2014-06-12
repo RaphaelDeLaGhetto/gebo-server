@@ -425,9 +425,9 @@ exports.saveToFs = {
                 });
 
             /**
-             * Make a friend for the registrant
+             * Make a friendo for the registrant
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'john',
                     email: 'john@painter.com',
                     gebo: 'http://theirhost.com',
@@ -435,16 +435,16 @@ exports.saveToFs = {
                 });
 
             /**
-             * Set permissions for this friend
+             * Set permissions for this friendo
              */
-            friend.permissions.push({ resource: 'canWriteToCollection', write: true });
-            friend.permissions.push({ resource: 'cannotWriteToCollection' });
+            friendo.permissions.push({ resource: 'canWriteToCollection', write: true });
+            friendo.permissions.push({ resource: 'cannotWriteToCollection' });
 
             registrant.save(function(err) {
                 if (err) {
                   console.log(err);
                 }
-                friend.save(function(err) {
+                friendo.save(function(err) {
                     if (err) {
                       console.log(err);
                     }
@@ -2067,9 +2067,9 @@ exports.deregisterAgent = {
 };
 
 /**
- * friend 
+ * friendo 
  */
-exports.friend = {
+exports.friendo = {
 
     setUp: function(callback) {
         try {
@@ -2085,9 +2085,9 @@ exports.friend = {
                 });
           
             /**
-             * Make a friend for the registrant
+             * Make a friendo for the registrant
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'john',
                     email: 'john@painter.com',
                     gebo: 'http://theirhost.com',
@@ -2095,7 +2095,7 @@ exports.friend = {
                 });
 
             registrant.save(function(err) {
-                    friend.save(function(err) {
+                    friendo.save(function(err) {
                         if (err) {
                           console.log(err);
                         }
@@ -2123,7 +2123,7 @@ exports.friend = {
           });
      }, 
 
-    'Add a new friend to the database if permitted': function(test) {
+    'Add a new friendo to the database if permitted': function(test) {
         test.expect(4);
         var newFriend = {
                 name: 'yanfen',
@@ -2131,18 +2131,18 @@ exports.friend = {
                 gebo: 'http://theirhost.com',
                 myPrivateKey: 'some key',
             };
-        action.friend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: newFriend }).
-            then(function(friend) {  
-                test.equal(friend.name, 'yanfen');
-                test.equal(friend.email, 'yanfen@example.com');
-                test.equal(friend.gebo, 'http://theirhost.com');
+        action.friendo({ write: true, dbName: 'dan_at_example_dot_com' }, { content: newFriend }).
+            then(function(friendo) {  
+                test.equal(friendo.name, 'yanfen');
+                test.equal(friendo.email, 'yanfen@example.com');
+                test.equal(friendo.gebo, 'http://theirhost.com');
  
-                agentDb.friendModel.find({}, function(err, friends) {
+                agentDb.friendoModel.find({}, function(err, friendos) {
                         if (err) {
                           test.ok(false, err);
                           test.done();
                         }
-                        test.equal(friends.length, 2); 
+                        test.equal(friendos.length, 2); 
                         test.done();
                   });
               }).
@@ -2153,32 +2153,32 @@ exports.friend = {
               });
     },
 
-    'Do not add a new friend to the database if not permitted': function(test) {
+    'Do not add a new friendo to the database if not permitted': function(test) {
         test.expect(2);
         var newFriend = {
                 name: 'yanfen',
                 email: 'yanfen@example.com',
                 gebo: 'http://theirhost.com',
             };
-        action.friend({ write: false, dbName: 'dan_at_example_dot_com' }, { content: newFriend }).
-            then(function(friend) {  
-                test.ok(false, 'Should not be allowed to add a new friend');
+        action.friendo({ write: false, dbName: 'dan_at_example_dot_com' }, { content: newFriend }).
+            then(function(friendo) {  
+                test.ok(false, 'Should not be allowed to add a new friendo');
                 test.done();
               }).
             catch(function(err) {
                 test.equal(err, 'You are not permitted to request or propose that action');
-                agentDb.friendModel.find({}, function(err, friends) {
+                agentDb.friendoModel.find({}, function(err, friendos) {
                         if (err) {
                           test.ok(false, err);
                           test.done();
                         }
-                        test.equal(friends.length, 1); 
+                        test.equal(friendos.length, 1); 
                         test.done();
                   });
               });
     },
 
-    'Update an existing friend': function(test) {
+    'Update an existing friendo': function(test) {
         test.expect(3);
         var existingFriend = {
                     name: 'john',
@@ -2186,11 +2186,11 @@ exports.friend = {
                     gebo: 'http://someotherhost.com',
                 };
 
-        action.friend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: existingFriend }).
-                then(function(friend) {
-                    test.equal(friend.name, 'john');
-                    test.equal(friend.email, 'john@painter.com');
-                    test.equal(friend.gebo, 'http://someotherhost.com');
+        action.friendo({ write: true, dbName: 'dan_at_example_dot_com' }, { content: existingFriend }).
+                then(function(friendo) {
+                    test.equal(friendo.name, 'john');
+                    test.equal(friendo.email, 'john@painter.com');
+                    test.equal(friendo.gebo, 'http://someotherhost.com');
                     test.done();
                   }).
                 catch(function(err) {
@@ -2201,9 +2201,9 @@ exports.friend = {
 };
 
 /**
- * defriend 
+ * defriendo 
  */
-exports.defriend = {
+exports.defriendo = {
 
     setUp: function(callback) {
         try {
@@ -2219,9 +2219,9 @@ exports.defriend = {
                 });
           
             /**
-             * Make a friend for the registrant
+             * Make a friendo for the registrant
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'john',
                     email: 'john@painter.com',
                     gebo: 'http://theirhost.com',
@@ -2229,7 +2229,7 @@ exports.defriend = {
                 });
 
             registrant.save(function(err) {
-                    friend.save(function(err) {
+                    friendo.save(function(err) {
                         if (err) {
                           console.log(err);
                         }
@@ -2257,18 +2257,18 @@ exports.defriend = {
           });
      }, 
 
-    'Remove a friend from the database if permitted': function(test) {
+    'Remove a friendo from the database if permitted': function(test) {
         test.expect(2);
-        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: { email: 'john@painter.com' } }).
+        action.defriendo({ write: true, dbName: 'dan_at_example_dot_com' }, { content: { email: 'john@painter.com' } }).
             then(function(ack) {  
                 test.equal(ack, 1);
 
-                agentDb.friendModel.find({}, function(err, friends) {
+                agentDb.friendoModel.find({}, function(err, friendos) {
                         if (err) {
                           test.ok(false, err);
                           test.done();
                         }
-                        test.equal(friends.length, 0); 
+                        test.equal(friendos.length, 0); 
                         test.done();
                   });
 
@@ -2279,29 +2279,29 @@ exports.defriend = {
               });
     },
 
-    'Do not remove a friend from the database if not permitted': function(test) {
+    'Do not remove a friendo from the database if not permitted': function(test) {
         test.expect(2);
-        action.defriend({ write: false }, { content: { email: 'john@painter.com' } }).
-            then(function(friend) {  
-                test.ok(false, 'Should not be allowed to delete a friend');
+        action.defriendo({ write: false }, { content: { email: 'john@painter.com' } }).
+            then(function(friendo) {  
+                test.ok(false, 'Should not be allowed to delete a friendo');
                 test.done();
               }).
             catch(function(err) {
                 test.equal(err, 'You are not permitted to request or propose that action');
-                agentDb.friendModel.find({}, function(err, friends) {
+                agentDb.friendoModel.find({}, function(err, friendos) {
                         if (err) {
                           test.ok(false, err);
                           test.done();
                         }
-                        test.equal(friends.length, 1); 
+                        test.equal(friendos.length, 1); 
                         test.done();
                   });
               });
     },
 
-    'Don\'t barf if the email provided matches no friend': function(test) {
+    'Don\'t barf if the email provided matches no friendo': function(test) {
         test.expect(1);
-        action.defriend({ write: true, dbName: 'dan_at_example_dot_com' }, { content: { email: 'yanfen@example.com' } }).
+        action.defriendo({ write: true, dbName: 'dan_at_example_dot_com' }, { content: { email: 'yanfen@example.com' } }).
                 then(function(ack) {
                     test.equal(ack, 0);
                     test.done();
@@ -2332,19 +2332,19 @@ exports.grantAccess = {
                 });
           
             /**
-             * Make a friend for the registrant
+             * Make a friendo for the registrant
              */
-            var friend = new agentDb.friendModel({
+            var friendo = new agentDb.friendoModel({
                     name: 'john',
                     email: 'john@painter.com',
                     gebo: 'http://theirhost.com',
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
-            friend.permissions.push({ resource: 'someCoolCollection' });
+            friendo.permissions.push({ resource: 'someCoolCollection' });
 
             registrant.save(function(err) {
-                friend.save(function(err) {
+                friendo.save(function(err) {
                     if (err) {
                         console.log(err);
                       }
@@ -2372,13 +2372,13 @@ exports.grantAccess = {
           });
     }, 
 
-    'Grant a friend access to a resource he didn\'t have access to before': function(test) {
+    'Grant a friendo access to a resource he didn\'t have access to before': function(test) {
         test.expect(6);
-        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', resource: 'friends' },
+        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', resource: 'friendos' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
                           content: {
-                              friend: 'john@painter.com',
+                              friendo: 'john@painter.com',
                               permission: {
                                       resource: 'someNewCollection',
                                       read: 'true',
@@ -2386,14 +2386,14 @@ exports.grantAccess = {
                                       execute: 'false'},
                             },
                         }).
-            then(function(friend) {
-                var index = utils.getIndexOfObject(friend.permissions, 'resource', 'someNewCollection');
+            then(function(friendo) {
+                var index = utils.getIndexOfObject(friendo.permissions, 'resource', 'someNewCollection');
                 test.equal(index, 1);
-                test.equal(friend.permissions.length, 2);
-                test.equal(friend.permissions[index].resource, 'someNewCollection');
-                test.equal(friend.permissions[index].read, true);
-                test.equal(friend.permissions[index].write, true);
-                test.equal(friend.permissions[index].execute, false);
+                test.equal(friendo.permissions.length, 2);
+                test.equal(friendo.permissions[index].resource, 'someNewCollection');
+                test.equal(friendo.permissions[index].read, true);
+                test.equal(friendo.permissions[index].write, true);
+                test.equal(friendo.permissions[index].execute, false);
                 test.done();
               }).
             catch(function(err) {
@@ -2403,13 +2403,13 @@ exports.grantAccess = {
               });
     },
 
-    'Change a friend\'s access level to a resource': function(test) {
+    'Change a friendo\'s access level to a resource': function(test) {
         test.expect(6);
-        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', resource: 'friends' },
+        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', resource: 'friendos' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
                           content: {
-                              friend: 'john@painter.com',
+                              friendo: 'john@painter.com',
                               permission: {
                                       resource: 'someCoolCollection',
                                       read: 'false',
@@ -2417,14 +2417,14 @@ exports.grantAccess = {
                                       execute: 'true'},
                             }
                         }).
-            then(function(friend) {
-                var index = utils.getIndexOfObject(friend.permissions, 'resource', 'someCoolCollection');
+            then(function(friendo) {
+                var index = utils.getIndexOfObject(friendo.permissions, 'resource', 'someCoolCollection');
                 test.equal(index, 0);
-                test.equal(friend.permissions.length, 1);
-                test.equal(friend.permissions[index].resource, 'someCoolCollection');
-                test.equal(friend.permissions[index].read, false);
-                test.equal(friend.permissions[index].write, false);
-                test.equal(friend.permissions[index].execute, true);
+                test.equal(friendo.permissions.length, 1);
+                test.equal(friendo.permissions[index].resource, 'someCoolCollection');
+                test.equal(friendo.permissions[index].read, false);
+                test.equal(friendo.permissions[index].write, false);
+                test.equal(friendo.permissions[index].execute, true);
                 test.done();
               }).
             catch(function(err) {
@@ -2436,11 +2436,11 @@ exports.grantAccess = {
 
     'Don\'t allow access without write or admin permission': function(test) {
         test.expect(1);
-        action.grantAccess({ read: true, dbName: 'dan_at_example_dot_com', resource: 'friends' },
+        action.grantAccess({ read: true, dbName: 'dan_at_example_dot_com', resource: 'friendos' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
                           content: {
-                              friend: 'john@painter.com',
+                              friendo: 'john@painter.com',
                               permission: {
                                       resource: 'someCoolCollection',
                                       read: 'false',
@@ -2448,7 +2448,7 @@ exports.grantAccess = {
                                       execute: 'true'},
                             },
                         }).
-            then(function(friend) {
+            then(function(friendo) {
                 test.ok(false, 'Shouldn\'t get here');
                 test.done();
               }).
@@ -2529,7 +2529,7 @@ exports.certificate = {
               });
     },
 
-    'Add an agent to the friend collection': function(test) {
+    'Add an agent to the friendo collection': function(test) {
         test.expect(5);
         action.certificate({ write: true, dbName: 'dan_at_example_dot_com', resource: 'keys' },
                            { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
@@ -2538,14 +2538,14 @@ exports.certificate = {
                 test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
 
                 // Make sure the certificate was saved to the database
-                agentDb.friendModel.findOne({ email: 'yanfen@example.com' }, function(err, friend) {
+                agentDb.friendoModel.findOne({ email: 'yanfen@example.com' }, function(err, friendo) {
                     if (err) {
                       console.log(err);
                       test.ok(false, err);
                     }
-                    test.equal(friend.name, 'Innominate');
-                    test.equal(friend.email, 'yanfen@example.com');
-                    test.equal(friend.gebo, 'https://foreigngebo.com');
+                    test.equal(friendo.name, 'Innominate');
+                    test.equal(friendo.email, 'yanfen@example.com');
+                    test.equal(friendo.gebo, 'https://foreigngebo.com');
                     test.done();
                   });
               }).
@@ -2557,12 +2557,12 @@ exports.certificate = {
     },
     
     'Overwrite an existing agent and key': function(test) {
-        agentDb.friendModel.find(function(err, friends) {
+        agentDb.friendoModel.find(function(err, friendos) {
             if (err) {
               console.log(err);
             }
 
-            test.equal(friends.length, 0);
+            test.equal(friendos.length, 0);
             agentDb.keyModel.find(function(err, keys) {
                 if (err) {
                   console.log(err);
@@ -2575,12 +2575,12 @@ exports.certificate = {
                         test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
                         test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
 
-                        agentDb.friendModel.find(function(err, friends) {
+                        agentDb.friendoModel.find(function(err, friendos) {
                             if (err) {
                               console.log(err);
                             }
 
-                            test.equal(friends.length, 1);
+                            test.equal(friendos.length, 1);
                             agentDb.keyModel.find(function(err, keys) {
                                 if (err) {
                                   console.log(err);
@@ -2592,12 +2592,12 @@ exports.certificate = {
                                     then(function(certificate) {
                                         test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
                                         test.equal(certificate.search('-----END CERTIFICATE-----'), 365);
-                                        agentDb.friendModel.find(function(err, friends) {
+                                        agentDb.friendoModel.find(function(err, friendos) {
                                             if (err) {
                                               console.log(err);
                                             }
                     
-                                            test.equal(friends.length, 1);
+                                            test.equal(friendos.length, 1);
                                             agentDb.keyModel.find(function(err, keys) {
                                                 if (err) {
                                                   console.log(err);

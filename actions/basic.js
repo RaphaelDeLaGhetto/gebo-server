@@ -324,7 +324,7 @@ module.exports = function() {
                               item !== 'socialcommitments' &&
                               item !== 'permissions' &&
                               item !== 'keys' &&
-                              item !== 'friends'){
+                              item !== 'friendos'){
                         cleanNames.push(item);
                       }
                     });
@@ -512,24 +512,24 @@ module.exports = function() {
     exports.deregisterAgent = _deregisterAgent;
 
     /**
-     * This adds a new friend to the registrant's
+     * This adds a new friendo to the registrant's
      * database
      *
      * @param Object
      * @param Object
      */
-    var _friend = function(verified, message) {
+    var _friendo = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.admin || verified.write) {
-          agentDb.friendModel.findOneAndUpdate(
+          agentDb.friendoModel.findOneAndUpdate(
                           { email: message.content.email }, message.content, { upsert: true },
-                          function(err, friend) {
+                          function(err, friendo) {
                                   if (err) {
                                     deferred.reject(err);
                                   }
                                   else {
-                                    deferred.resolve(friend);
+                                    deferred.resolve(friendo);
                                   }
                             });
         }
@@ -538,19 +538,19 @@ module.exports = function() {
         }
         return deferred.promise; 
       };
-    exports.friend = _friend;
+    exports.friendo = _friendo;
 
     /**
-     * Remove a friend from this registrant's database
+     * Remove a friendo from this registrant's database
      *
      * @param Object
      * @param Object
      */
-    var _defriend = function(verified, message) {
+    var _defriendo = function(verified, message) {
         var deferred = q.defer();
 
         if (verified.write) {
-          agentDb.friendModel.remove({ email: message.content.email }, function(err, ack) {
+          agentDb.friendoModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
                     deferred.reject(err);
                   }
@@ -564,7 +564,7 @@ module.exports = function() {
         }
         return deferred.promise; 
       };
-    exports.defriend = _defriend;
+    exports.defriendo = _defriendo;
 
     /**
      * Change the access level to the requested
@@ -578,24 +578,24 @@ module.exports = function() {
     exports.grantAccess = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || verified.write) {
-          agentDb.friendModel.findOne({ email: message.content.friend }, function(err, friend) {
+          agentDb.friendoModel.findOne({ email: message.content.friendo }, function(err, friendo) {
                   if (err) {
                     deferred.reject(err);
                   }
                   else {
-                    var index = utils.getIndexOfObject(friend.permissions, 'resource', message.content.permission.resource);
+                    var index = utils.getIndexOfObject(friendo.permissions, 'resource', message.content.permission.resource);
                     if (index > -1) {
-                      friend.permissions.splice(index, 1);
+                      friendo.permissions.splice(index, 1);
                     }
 
-                    friend.permissions.push({
+                    friendo.permissions.push({
                             resource: message.content.permission.resource,
                             read: message.content.permission.read,
                             write: message.content.permission.write,
                             execute: message.content.permission.execute,
                         });
 
-                    friend.save(function(err, savedFriend) {
+                    friendo.save(function(err, savedFriend) {
                             if (err) {
                               deferred.reject(err);
                             }
@@ -633,8 +633,8 @@ module.exports = function() {
                           deferred.reject(err);
                         }
                         else {
-                          _friend(verified, message).
-                                then(function(friend) {
+                          _friendo(verified, message).
+                                then(function(friendo) {
                                     deferred.resolve(key.public);
                                   }).
                                 catch(function(err) {

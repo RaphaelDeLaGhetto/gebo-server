@@ -18,10 +18,10 @@ module.exports = function() {
         login.ensureLoggedIn(),
         function (req, res) {
             var agent = require('../schemata/agent')();
-            agent.friendModel.find({}, function(err, friends) {
+            agent.friendoModel.find({}, function(err, friendos) {
                 agent.socialCommitmentModel.find({}).where('fulfilled', null).sort('-created').exec(function(err, scs) {
                     res.render('account', { agent: req.user,
-                                            friends: friends,
+                                            friendos: friendos,
                                             socialCommitments: scs,
                                             error: err });
                   });
@@ -43,10 +43,10 @@ module.exports = function() {
             var gebo = require('../schemata/gebo')();
             var agent = require('../schemata/agent')();
             gebo.registrantModel.find({}, function(err, registrants) {
-                agent.friendModel.find({}, function(err, friends) {
+                agent.friendoModel.find({}, function(err, friendos) {
                     res.render('admin', { agent: req.user,
                                           registrants: registrants,
-                                          friends: friends,
+                                          friendos: friendos,
                                           error: err });
                   });
               });

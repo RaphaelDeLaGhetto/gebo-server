@@ -90,8 +90,8 @@ module.exports = function() {
     var tokenSchema = new Schema({
         // The resource owner
         registrantId: { type: ObjectId, required: true, unique: false },
-        // The ID of the friend granted access to the resource
-        friendId: { type: ObjectId, required: false, default: null },
+        // The ID of the friendo granted access to the resource
+        friendoId: { type: ObjectId, required: false, default: null },
         // The resource
         resource: { type: String, required: true, unique: false },
         // The authorized IP address

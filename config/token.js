@@ -29,7 +29,7 @@ module.exports = function(email) {
     
     
     /**
-     * Load a friend's profile from the database
+     * Load a friendo's profile from the database
      *
      * @param string
      *
@@ -38,15 +38,15 @@ module.exports = function(email) {
     var _getFriend = function(email) {
         var deferred = q.defer();
 
-        agentDb.friendModel.findOne({ email: email }, function(err, friend) {
+        agentDb.friendoModel.findOne({ email: email }, function(err, friendo) {
             if (err) {
               deferred.reject(err);
             }
-            else if (!friend) {
-              deferred.reject('You are not friends with ' + email);
+            else if (!friendo) {
+              deferred.reject(email + ' is not your friendo');
             }
             else {
-              deferred.resolve(friend);
+              deferred.resolve(friendo);
             }
           });
 
@@ -113,27 +113,27 @@ module.exports = function(email) {
      *
      * @return promise
      */
-    exports.get = function(friendEmail) {
+    exports.get = function(friendoEmail) {
         var deferred = q.defer();
 
-        _getFriend(friendEmail).
-            then(function(friend) {
+        _getFriend(friendoEmail).
+            then(function(friendo) {
 
-            if (!friend) {
-              deferred.reject(friendEmail + ' is not your friendo');
+            if (!friendo) {
+              deferred.reject(friendoEmail + ' is not your friendo');
             }
             else {
               // Make the claim 
               var claim = {
-                      iss: friendEmail,
+                      iss: friendoEmail,
                       scope: '*',
-                      aud: friend.gebo + '/authorize',
+                      aud: friendo.gebo + '/authorize',
                       exp: new Date()/1000 + 3600*1000,
                       iat: new Date()/1000, 
                       prn: email,
                   };
       
-              _makeJwt(claim, friendEmail).
+              _makeJwt(claim, friendoEmail).
                 then(function(jwt) {
                       var params = JSON.stringify({
                               grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -142,7 +142,7 @@ module.exports = function(email) {
 
                       // https.request is pretty picky. Collect the
                       // parameters it wants...
-                      var gebo = friend.gebo;
+                      var gebo = friendo.gebo;
                       var splitUri = gebo.split('https://'); 
                       gebo = splitUri.pop();
                       splitUri = gebo.split(':'); 

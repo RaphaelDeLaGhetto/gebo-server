@@ -26,8 +26,8 @@ exports.onLoad = {
         //test.equal(typeof actions.dropDatabase, 'function');
         test.equal(typeof actions.registerAgent, 'function');
         test.equal(typeof actions.deregisterAgent, 'function');
-        test.equal(typeof actions.friend, 'function');
-        test.equal(typeof actions.defriend, 'function');
+        test.equal(typeof actions.friendo, 'function');
+        test.equal(typeof actions.defriendo, 'function');
         test.equal(typeof actions.grantAccess, 'function');
         test.equal(typeof actions.certificate, 'function');
         test.done();
