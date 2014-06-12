@@ -45,8 +45,6 @@ module.exports = function() {
         myCertificate: { type: String, default: null, required: false },
         certificate: { type: String, default: null, unique: false },
     
-        // Permissions
-        myPermissions: [permissionSchema],
         hisPermissions: [permissionSchema],
     
         // Agent communication
