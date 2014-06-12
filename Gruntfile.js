@@ -192,12 +192,12 @@ module.exports = function (grunt) {
                       console.log(err);
                     }
 
-                    var index = utils.getIndexOfObject(friend.hisPermissions, 'email', resource);
+                    var index = utils.getIndexOfObject(friend.permissions, 'email', resource);
 
                     if (index > -1) {
-                      friend.hisPermissions.splice(index, 1);
+                      friend.permissions.splice(index, 1);
                     }
-                    friend.hisPermissions.push({ email: resource,
+                    friend.permissions.push({ email: resource,
                                                  read: read === 'true', 
                                                  write: write === 'true', 
                                                  execute: execute === 'true', 

@@ -64,20 +64,20 @@ block content
                                             | #{friends[i].name}: #{friends[i].email}
                                 .panel-collapse.collapse(id="#{friends[i]._id}")
                                     .panel-body
-                                        - for (var j = 0; j < friends[i].hisPermissions.length; j++)
-                                            div #{friends[i].hisPermissions[j].email}
+                                        - for (var j = 0; j < friends[i].permissions.length; j++)
+                                            div #{friends[i].permissions[j].email}
                                             form.form-inline(role="form", action="/request", method="post") 
                                                 .form-group
                                                     input(type="hidden", name="recipient", value=agent.email)
                                                     input(type="hidden", name="action", value="grantAccess")
                                                     input(type="hidden", name="friend", value=friends[i].email)
-                                                    input(type="hidden", name="relevantResource", value=friends[i].hisPermissions[j].email)
+                                                    input(type="hidden", name="relevantResource", value=friends[i].permissions[j].email)
                                                     label(for="read") Read
-                                                    input(type="checkbox", id="read", name="read", value="true", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].read)
+                                                    input(type="checkbox", id="read", name="read", value="true", onclick="this.form.submit()", checked=friends[i].permissions[j].read)
                                                     label(for="write") Write
-                                                    input(type="checkbox", id="write", name="write", value="true", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].write)
+                                                    input(type="checkbox", id="write", name="write", value="true", onclick="this.form.submit()", checked=friends[i].permissions[j].write)
                                                     label(for="execute") Execute
-                                                    input(type="checkbox", id="execute", name="execute", value="true", onclick="this.form.submit()", checked=friends[i].hisPermissions[j].execute)
+                                                    input(type="checkbox", id="execute", name="execute", value="true", onclick="this.form.submit()", checked=friends[i].permissions[j].execute)
 
 
 

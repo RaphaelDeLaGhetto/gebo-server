@@ -55,7 +55,7 @@ exports.jwtBearerExchange = {
                             certificate: pair.certificate,
                             _id: new mongo.ObjectID('123456789ABC')
                         });
-                    friend.hisPermissions.push({ resource: 'someCollection' });
+                    friend.permissions.push({ resource: 'someCollection' });
 
                     registrant.save(function(err) {
                         if (err) {
@@ -287,7 +287,7 @@ exports.processScope = {
 //                    email: 'yanfen@example.com',
 //                    _id: new mongo.ObjectID('123456789ABC')
 //                });
-//            friend.hisPermissions.push({ resource: 'someCollection' });
+//            friend.permissions.push({ resource: 'someCollection' });
 //
 //            registrant.save(function(err) {
 //                if (err) {

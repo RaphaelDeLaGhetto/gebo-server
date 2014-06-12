@@ -437,8 +437,8 @@ exports.saveToFs = {
             /**
              * Set permissions for this friend
              */
-            friend.hisPermissions.push({ resource: 'canWriteToCollection', write: true });
-            friend.hisPermissions.push({ resource: 'cannotWriteToCollection' });
+            friend.permissions.push({ resource: 'canWriteToCollection', write: true });
+            friend.permissions.push({ resource: 'cannotWriteToCollection' });
 
             registrant.save(function(err) {
                 if (err) {
@@ -2341,7 +2341,7 @@ exports.grantAccess = {
                     _id: new mongo.ObjectID('23456789ABCD')
                 });
 
-            friend.hisPermissions.push({ resource: 'someCoolCollection' });
+            friend.permissions.push({ resource: 'someCoolCollection' });
 
             registrant.save(function(err) {
                 friend.save(function(err) {
@@ -2387,13 +2387,13 @@ exports.grantAccess = {
                             },
                         }).
             then(function(friend) {
-                var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', 'someNewCollection');
+                var index = utils.getIndexOfObject(friend.permissions, 'resource', 'someNewCollection');
                 test.equal(index, 1);
-                test.equal(friend.hisPermissions.length, 2);
-                test.equal(friend.hisPermissions[index].resource, 'someNewCollection');
-                test.equal(friend.hisPermissions[index].read, true);
-                test.equal(friend.hisPermissions[index].write, true);
-                test.equal(friend.hisPermissions[index].execute, false);
+                test.equal(friend.permissions.length, 2);
+                test.equal(friend.permissions[index].resource, 'someNewCollection');
+                test.equal(friend.permissions[index].read, true);
+                test.equal(friend.permissions[index].write, true);
+                test.equal(friend.permissions[index].execute, false);
                 test.done();
               }).
             catch(function(err) {
@@ -2418,13 +2418,13 @@ exports.grantAccess = {
                             }
                         }).
             then(function(friend) {
-                var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', 'someCoolCollection');
+                var index = utils.getIndexOfObject(friend.permissions, 'resource', 'someCoolCollection');
                 test.equal(index, 0);
-                test.equal(friend.hisPermissions.length, 1);
-                test.equal(friend.hisPermissions[index].resource, 'someCoolCollection');
-                test.equal(friend.hisPermissions[index].read, false);
-                test.equal(friend.hisPermissions[index].write, false);
-                test.equal(friend.hisPermissions[index].execute, true);
+                test.equal(friend.permissions.length, 1);
+                test.equal(friend.permissions[index].resource, 'someCoolCollection');
+                test.equal(friend.permissions[index].read, false);
+                test.equal(friend.permissions[index].write, false);
+                test.equal(friend.permissions[index].execute, true);
                 test.done();
               }).
             catch(function(err) {

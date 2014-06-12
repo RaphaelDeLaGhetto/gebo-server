@@ -45,7 +45,7 @@ module.exports = function() {
         myCertificate: { type: String, default: null, required: false },
         certificate: { type: String, default: null, unique: false },
     
-        hisPermissions: [permissionSchema],
+        permissions: [permissionSchema],
     
         // Agent communication
         gebo: { type: String, required: false, unique: false },

@@ -274,11 +274,11 @@ module.exports = function() {
 //              deferred.resolve(false);
 //            }
 //            else {
-//              var index = utils.getIndexOfObject(friend.hisPermissions, 'email', scope.resource);
+//              var index = utils.getIndexOfObject(friend.permissions, 'email', scope.resource);
 //              if (index > -1 &&
-//                  friend.hisPermissions[index].read === scope.read &&
-//                  friend.hisPermissions[index].write === scope.write &&
-//                  friend.hisPermissions[index].execute === scope.execute) {
+//                  friend.permissions[index].read === scope.read &&
+//                  friend.permissions[index].write === scope.write &&
+//                  friend.permissions[index].execute === scope.execute) {
 //                deferred.resolve(friend);
 //              }
 //              else {

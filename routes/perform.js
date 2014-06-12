@@ -168,12 +168,12 @@ module.exports = function() {
                 }
                 else { 
                   // Search the array for relevant resource
-                  var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', verified.resource);
+                  var index = utils.getIndexOfObject(friend.permissions, 'resource', verified.resource);
 
                   if (index > -1) {
-                    verified.read = friend.hisPermissions[index].read;
-                    verified.write = friend.hisPermissions[index].write;
-                    verified.execute = friend.hisPermissions[index].execute;
+                    verified.read = friend.permissions[index].read;
+                    verified.write = friend.permissions[index].write;
+                    verified.execute = friend.permissions[index].execute;
                   }
 
                   deferred.resolve(verified);

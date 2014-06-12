@@ -79,7 +79,7 @@ exports.handler = {
                             _id: new mongo.ObjectID('23456789ABCD')
                         });
     
-        friend.hisPermissions.push({ resource: 'friends' });
+        friend.permissions.push({ resource: 'friends' });
         
         friend.save(function(err) {
             if (err) {
@@ -253,12 +253,12 @@ exports.verify = {
           /**
            * Create access permissions for imaginary collection
            */
-          friendo.hisPermissions.push({ resource: 'painterApp' });
+          friendo.permissions.push({ resource: 'painterApp' });
 
           /**
            * Create access permissions for action with no associated collection 
            */
-          friendo.hisPermissions.push({ resource: 'getCurrentTime', read: false, execute: true });
+          friendo.permissions.push({ resource: 'getCurrentTime', read: false, execute: true });
 
           adminRegistrant.save(function(err) {
               if (err) {
@@ -457,7 +457,7 @@ exports.handler = {
                             _id: new mongo.ObjectID('23456789ABCD')
                         });
     
-        friend.hisPermissions.push({ resource: 'friends' });
+        friend.permissions.push({ resource: 'friends' });
         
         friend.save(function(err) {
             if (err) {
