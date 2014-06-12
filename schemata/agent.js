@@ -48,14 +48,6 @@ module.exports = function() {
         myCertificate: { type: String, default: null, required: false },
         certificate: { type: String, default: null, unique: false },
     
-        // I don't think I need to store his token. The gebo does that.
-        // Access can be granted or denied with permissions. Friendship
-        // implies the ability to obtain an access token
-        hisToken: {
-            string: { type: String, default: null, unique: false },
-            expiry: { type: Date, default: null },
-          },
-    
         // Permissions
         myPermissions: [permissionSchema],
         hisPermissions: [permissionSchema],
