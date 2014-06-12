@@ -134,7 +134,7 @@ exports.jwtBearerExchange = {
                                           geboDb.tokenModel.findOne({ string: tokenString }, function(err, token) {
                                                 test.equal(token.registrantId, new mongo.ObjectID('0123456789AB').toString());
                                                 test.equal(token.friendId, new mongo.ObjectID('123456789ABC').toString());
-                                                test.equal(token.collectionName, 'someCollection');
+                                                test.equal(token.resource, 'someCollection');
                                                 test.equal(token.string, tokenString);
                                                 test.done();
                                             });

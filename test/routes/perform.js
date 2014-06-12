@@ -297,7 +297,7 @@ exports.verify = {
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
                        { content: { resource: 'painterApp' } }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('painterApp')); 
                 test.equal(verified.read, true); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, false); 
@@ -315,7 +315,7 @@ exports.verify = {
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
                        { content: JSON.stringify({ resource: 'painterApp' }) }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('painterApp')); 
                 test.equal(verified.read, true); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, false); 
@@ -337,7 +337,7 @@ exports.verify = {
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
                        { action: 'getCurrentTime' }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('getCurrentTime')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('getCurrentTime')); 
                 test.equal(verified.read, false); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, true); 
@@ -355,7 +355,7 @@ exports.verify = {
         perform.verify({ name: 'john', email: 'john@painter.com', admin: false },
                        { action: 'ls' }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('ls')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('ls')); 
                 test.equal(verified.read, false); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, false); 
@@ -373,7 +373,7 @@ exports.verify = {
         perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
                        { content: { resource: 'painterApp' } }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('painterApp')); 
                 test.equal(verified.read, true); 
                 test.equal(verified.write, true); 
                 test.equal(verified.execute, true); 
@@ -391,7 +391,7 @@ exports.verify = {
         perform.verify({ name: 'dan', email: 'dan@example.com', admin: true },
                        { action: 'getCurrentTime' }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('getCurrentTime')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('getCurrentTime')); 
                 test.equal(verified.read, true); 
                 test.equal(verified.write, true); 
                 test.equal(verified.execute, true); 
@@ -409,7 +409,7 @@ exports.verify = {
         perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
                        { content: { resource: 'painterApp' } }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('painterApp')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('painterApp')); 
                 test.equal(verified.read, false); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, false); 
@@ -427,7 +427,7 @@ exports.verify = {
         perform.verify({ name: 'richard', email: 'richard@construction.com', admin: false },
                        { action: 'getCurrentTime' }).
             then(function(verified) {
-                test.equal(verified.collectionName, utils.getMongoCollectionName('getCurrentTime')); 
+                test.equal(verified.resource, utils.getMongoCollectionName('getCurrentTime')); 
                 test.equal(verified.read, false); 
                 test.equal(verified.write, false); 
                 test.equal(verified.execute, false); 

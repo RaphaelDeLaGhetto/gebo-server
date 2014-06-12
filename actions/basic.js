@@ -24,7 +24,7 @@ module.exports = function() {
         var deferred = q.defer();
         if (verified.admin || verified.read || verified.write || verified.execute) { 
           nativeConnection.get(function(conn) {
-                conn.collection(verified.collectionName, function(err, collection) {
+                conn.collection(verified.resource, function(err, collection) {
                     if (err) {
                       deferred.reject(err);
                     }
@@ -148,7 +148,7 @@ module.exports = function() {
                           if (count === 0) {
                             deferred.reject(
                                     new Error('Collection: ' +
-                                            verified.collectionName + ' does not exist'));
+                                            verified.resource + ' does not exist'));
                           }
                           else {
                             collection.remove({ _id: new mongo.ObjectID(message.content.id) },
@@ -195,7 +195,7 @@ module.exports = function() {
                           if (count === 0) {
                             deferred.reject(
                               new Error('Collection: ' +
-                                      verified.collectionName + ' does not exist'));
+                                      verified.resource + ' does not exist'));
                           }
                           else {
                             collection.drop(
@@ -203,7 +203,7 @@ module.exports = function() {
                                     if (err || ack === 0) {
                                       deferred.reject(
                                               new Error('Could not delete collection: ' +
-                                                      verified.collectionName));
+                                                      verified.resource));
                                     }
                                     else {
                                       deferred.resolve();

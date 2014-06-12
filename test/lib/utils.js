@@ -69,48 +69,48 @@ exports.getMongoCollectionName = {
     'Remove $s': function(test) {
         test.expect(1);
         var str = '$$ bill, y\'all!$!';
-        var collectionName = utils.getMongoCollectionName(str);
-        test.equal(collectionName, '_dollarsign__dollarsign_ bill, y\'all!_dollarsign_!');
+        var resource = utils.getMongoCollectionName(str);
+        test.equal(resource, '_dollarsign__dollarsign_ bill, y\'all!_dollarsign_!');
         test.done();
     },
 
     'Handle an empty string': function(test) {
         test.expect(1);
         var str = '';
-        var collectionName = utils.getMongoCollectionName(str);
-        test.equal(collectionName, 'No collection');
+        var resource = utils.getMongoCollectionName(str);
+        test.equal(resource, 'No collection');
         test.done();
     },
 
     'Prepend a _ to names starting with digits': function(test) {
         test.expect(1);
         var str = '12 ways to do something';
-        var collectionName = utils.getMongoCollectionName(str);
-        test.equal(collectionName, '_12 ways to do something');
+        var resource = utils.getMongoCollectionName(str);
+        test.equal(resource, '_12 ways to do something');
         test.done();
     },
 
     'Handle a null character': function(test) {
         test.expect(1);
         var str = null;
-        var collectionName = utils.getMongoCollectionName(str);
-        test.equal(collectionName, 'No collection');
+        var resource = utils.getMongoCollectionName(str);
+        test.equal(resource, 'No collection');
         test.done();
     },
 
     'Prepend a _ to the \'system.\' prefix': function(test) {
         test.expect(1);
         var str = 'system.meltdown';
-        var collectionName = utils.getMongoCollectionName(str);
-        test.equal(collectionName, '_system.meltdown');
+        var resource = utils.getMongoCollectionName(str);
+        test.equal(resource, '_system.meltdown');
         test.done();
     },
 
     'Prepend a _ to a non-alpha prefix': function(test) {
         test.expect(1);
         var str = '? hello'
-        var collectionName = utils.getMongoCollectionName(str);
-        test.equal(collectionName, '_? hello');
+        var resource = utils.getMongoCollectionName(str);
+        test.equal(resource, '_? hello');
         test.done();
     },
 };
@@ -247,7 +247,7 @@ exports.saveFilesToAgentDirectory = {
                         //}, 'docs/' + utils.getMongoDbName('dan@example.com') + '/' + utils.getMongoCollectionName('test@example.com')).
                         },
                         { dbName: utils.getMongoDbName('dan@example.com'),
-                          collectionName: utils.getMongoCollectionName('test@example.com')
+                          resource: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
                 var files = fs.readdirSync(dir);
@@ -272,12 +272,12 @@ exports.saveFilesToAgentDirectory = {
                             },
                         },
                         { dbName: utils.getMongoDbName('dan@example.com'),
-                          collectionName: utils.getMongoCollectionName('test@example.com')
+                          resource: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function(files) {
                 test.equal(files.length, 1);
                 test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
-                test.equal(files[0].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[0].resource, utils.getMongoCollectionName('test@example.com'));
                 test.equal(files[0].type, 'text/plain');
                 test.equal(files[0].size, 16);
                 test.ok(files[0].lastModified);
@@ -329,7 +329,7 @@ exports.saveFilesToAgentDirectory = {
                             },
                         },
                         { dbName: utils.getMongoDbName('dan@example.com'),
-                          collectionName: utils.getMongoCollectionName('test@example.com')
+                          resource: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
                 var files = fs.readdirSync(dir);
@@ -378,27 +378,27 @@ exports.saveFilesToAgentDirectory = {
                             },
                         },
                         { dbName: utils.getMongoDbName('dan@example.com'),
-                          collectionName: utils.getMongoCollectionName('test@example.com')
+                          resource: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function(files) {
                 test.equal(files.length, 4);
                 test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
-                test.equal(files[0].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[0].resource, utils.getMongoCollectionName('test@example.com'));
                 test.equal(files[0].type, 'text/plain');
                 test.equal(files[0].size, 16);
                 test.ok(files[0].lastModified);
                 test.equal(files[1].name, 'gebo-server-utils-test-2.txt');
-                test.equal(files[1].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[1].resource, utils.getMongoCollectionName('test@example.com'));
                 test.equal(files[1].type, 'text/plain');
                 test.equal(files[1].size, 37);
                 test.ok(files[1].lastModified);
                 test.equal(files[2].name, 'gebo-server-utils-test-3.txt');
-                test.equal(files[2].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[2].resource, utils.getMongoCollectionName('test@example.com'));
                 test.equal(files[2].type, 'text/plain');
                 test.equal(files[2].size, 29);
                 test.ok(files[2].lastModified);
                 test.equal(files[3].name, 'gebo-server-utils-test-4.txt');
-                test.equal(files[3].collectionName, utils.getMongoCollectionName('test@example.com'));
+                test.equal(files[3].resource, utils.getMongoCollectionName('test@example.com'));
                 test.equal(files[3].type, 'text/plain');
                 test.equal(files[3].size, 11);
                 test.ok(files[3].lastModified);
@@ -446,19 +446,19 @@ exports.saveFilesToAgentDirectory = {
                             },
                         },
                         { dbName: utils.getMongoDbName('dan@example.com'),
-                          collectionName: utils.getMongoCollectionName('test@example.com')
+                          resource: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
                 var db = new agentSchema();
                 db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
-                                       collectionName: utils.getMongoCollectionName('test@example.com') },
+                                       resource: utils.getMongoCollectionName('test@example.com') },
                     function(err, file) {
                         if (err || !file) {
                           test.ok(false, err);
                         }
                         else {
                           test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
-                          test.equal(file.collectionName, utils.getMongoCollectionName('test@example.com')); 
+                          test.equal(file.resource, utils.getMongoCollectionName('test@example.com')); 
                           test.equal(file.type, 'text/plain'); 
                           test.equal(file.size, 16); 
                           test.equal(file.lastModified === null, false); 
@@ -505,7 +505,7 @@ exports.saveFilesToAgentDirectory = {
                             },
                         },
                         { dbName: utils.getMongoDbName('dan@example.com'),
-                          collectionName: utils.getMongoCollectionName('test@example.com')
+                          resource: utils.getMongoCollectionName('test@example.com')
                         }).
             then(function() {
                 var db = new agentSchema();

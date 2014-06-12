@@ -93,7 +93,7 @@ module.exports = function() {
         // The ID of the friend granted access to the resource
         friendId: { type: ObjectId, required: false, default: null },
         // The resource
-        collectionName: { type: String, required: true, unique: false },
+        resource: { type: String, required: true, unique: false },
         // The authorized IP address
         ip: { type: String, required: false, unique: false },
         // The token itself

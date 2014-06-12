@@ -113,7 +113,7 @@ module.exports = function() {
         var token = new geboDb.tokenModel({
             registrantId: user._id,
             friendId: requestDetails.friend,
-            collectionName: utils.getMongoCollectionName(requestDetails.resource),
+            resource: utils.getMongoCollectionName(requestDetails.resource),
             ip: requestDetails.ip,
             string: tokenStr,
           });
@@ -220,7 +220,7 @@ module.exports = function() {
                                     var token = new geboDb.tokenModel({
                                         registrantId: owner._id,
                                         friendId: friend._id,
-                                        collectionName: scope.resource,
+                                        resource: scope.resource,
                                         string: tokenStr,
                                       });
                         

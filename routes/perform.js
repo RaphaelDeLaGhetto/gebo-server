@@ -140,7 +140,7 @@ module.exports = function() {
         }
 
         var verified = {
-                collectionName: resource,
+                resource: resource,
                 admin: agent.admin,
                 read: false,
                 write: false,
@@ -168,7 +168,7 @@ module.exports = function() {
                 }
                 else { 
                   // Search the array for relevant resource
-                  var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', verified.collectionName);
+                  var index = utils.getIndexOfObject(friend.hisPermissions, 'resource', verified.resource);
 
                   if (index > -1) {
                     verified.read = friend.hisPermissions[index].read;

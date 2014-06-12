@@ -17,13 +17,13 @@ var cname = 'unitTest';
 
 var verifiedAdmin = {
 	dbName: utils.getMongoDbName('dan@example.com'),
-        collectionName: cname,
+        resource: cname,
 	admin: true,
     };
 
 var verifiedUser = {
 	dbName: utils.getMongoDbName('yanfen@example.com'),
-        collectionName: cname,
+        resource: cname,
 	admin: false,
 	read: true,
     };
@@ -122,7 +122,7 @@ exports.getCollection = {
     'Return a the requested collection object as admin': function (test) {
         test.expect(2);
         action.getCollection({ dbName: TEST_DB,
-                               collectionName: cname,
+                               resource: cname,
                                admin: true }).
                 then(function(collection) {
                     test.ok(true);    
@@ -146,7 +146,7 @@ exports.getCollection = {
     'Return the requested collection object with execute permission': function (test) {
         test.expect(2);
         action.getCollection({ dbName: TEST_DB,
-                               collectionName: cname,
+                               resource: cname,
                                admin: false,
                                execute: true }).
                 then(function(collection) {
@@ -171,7 +171,7 @@ exports.getCollection = {
     'Do not return the requested collection without permission': function (test) {
         test.expect(1);
         action.getCollection({ dbName: TEST_DB,
-                               collectionName: cname,
+                               resource: cname,
                                admin: false,
                                read: false,
                                write: false,
@@ -231,7 +231,7 @@ exports.saveToDb = {
 //        test.expect(1);
 //        
 //        action.save({ dbName: 'no_one_at_not_here_dot_com',
-//  		      collectionName: cname,
+//  		      resource: cname,
 //		      admin: true },
 //                    { content: { data: 'junk' } }).
 //                then(function(docs) {
@@ -249,7 +249,7 @@ exports.saveToDb = {
         test.expect(3);
 
         action.save({ dbName: TEST_DB,
-		      collectionName: cname,
+		      resource: cname,
 		      admin: true },
                     { content: { data: { junk: 'I like to move it move it' } } }).
                 then(function(docs) {
@@ -272,7 +272,7 @@ exports.saveToDb = {
 
         // Retrieve the existing document
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
 		    admin: true },
                   { content: { id: '0123456789AB' } }).
             then(function(docs) {
@@ -282,7 +282,7 @@ exports.saveToDb = {
                     docs.occupation = 'AI Practitioner';
                     return action.save(
                             { dbName: TEST_DB,
-          		      collectionName: cname,
+          		      resource: cname,
 		              admin: true },
                             { content: { data: docs } });
                 }).
@@ -291,7 +291,7 @@ exports.saveToDb = {
 		    test.equal(ack, '1');
                     return action.cp(
                             { dbName: TEST_DB,
-          		      collectionName: cname,
+          		      resource: cname,
 		              admin: true },
                             { content: { id: '0123456789AB' } });
                 }).
@@ -312,7 +312,7 @@ exports.saveToDb = {
         test.expect(3);
 
         action.save({ dbName: TEST_DB,
-		      collectionName: cname,
+		      resource: cname,
 		      admin: false,
                       write: true },
                     { content: { data: { junk: 'I like to move it move it' } } }).
@@ -335,7 +335,7 @@ exports.saveToDb = {
 
         // Retrieve the existing document
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
 		    admin: false,
                     read: true,
                     write: true },
@@ -347,7 +347,7 @@ exports.saveToDb = {
                     docs.occupation = 'AI Practitioner';
                     return action.save(
                             { dbName: TEST_DB,
-          		      collectionName: cname,
+          		      resource: cname,
 		              admin: false,
                               read: true,
                               write: true },
@@ -358,7 +358,7 @@ exports.saveToDb = {
 		    test.equal(ack, '1');
                     return action.cp(
                             { dbName: TEST_DB,
-          		      collectionName: cname,
+          		      resource: cname,
 		              admin: false,
                               read: true,
                               write: true },
@@ -381,7 +381,7 @@ exports.saveToDb = {
         test.expect(1);
         
         action.save({ dbName: TEST_DB,
-  		      collectionName: cname,
+  		      resource: cname,
 		      admin: false,
                       write: false },
                     { content: { data: 'junk' } }).
@@ -489,7 +489,7 @@ exports.saveToFs = {
         }
 
         action.save({ dbName: utils.getMongoDbName('dan@example.com'),
-                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      resource: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
                         test: {
@@ -516,7 +516,7 @@ exports.saveToFs = {
     'Write a file object to the agent\'s file collection in the DB': function(test) {
         test.expect(5);
         action.save({ dbName: utils.getMongoDbName('dan@example.com'),
-                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      resource: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
                         test: {
@@ -529,14 +529,14 @@ exports.saveToFs = {
                     }).
             then(function() {
                 agentDb.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
-                                       collectionName: utils.getMongoCollectionName('canwrite@app.com') },
+                                       resource: utils.getMongoCollectionName('canwrite@app.com') },
                     function(err, file) {
                         if (err) {
                           test.ok(false, err);
                         }
                         else {
                           test.equal(file.name, 'gebo-server-save-test-1.txt'); 
-                          test.equal(file.collectionName, utils.getMongoCollectionName('canwrite@app.com')); 
+                          test.equal(file.resource, utils.getMongoCollectionName('canwrite@app.com')); 
                           test.equal(file.type, 'text/plain'); 
                           test.equal(file.size, 21); 
                           test.equal(file.lastModified === null, false); 
@@ -554,7 +554,7 @@ exports.saveToFs = {
    
     'Do not allow an agent to save to the file system without permission': function(test) {
         action.save({ dbName: utils.getMongoDbName('dan@example.com'),
-                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      resource: utils.getMongoCollectionName('canwrite@app.com'),
                       write: false },
                     { files: {
                         test: {
@@ -582,7 +582,7 @@ exports.saveToFs = {
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
         action.save({ dbName: utils.getMongoDbName('dan@example.com'),
-                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      resource: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
                         test: {
@@ -599,7 +599,7 @@ exports.saveToFs = {
 
                 fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
                 action.save({ dbName: utils.getMongoDbName('dan@example.com'),
-                              collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                              resource: utils.getMongoCollectionName('canwrite@app.com'),
                               write: true },
                             { files: {
                                 test: {
@@ -631,7 +631,7 @@ exports.saveToFs = {
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
         action.save({ dbName: TEST_DB,
-                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      resource: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
                         test1: {
@@ -667,7 +667,7 @@ exports.saveToFs = {
                   '/' + utils.getMongoCollectionName('canwrite@app.com');
 
         action.save({ dbName: utils.getMongoDbName('dan@example.com'),
-                      collectionName: utils.getMongoCollectionName('canwrite@app.com'),
+                      resource: utils.getMongoCollectionName('canwrite@app.com'),
                       write: true },
                     { files: {
                         test: {
@@ -761,7 +761,7 @@ exports.cp = {
 //   'Do not copy from non-existent database': function (test) {
 //        test.expect(1);
 //        action.cp({ dbName: 'no_one_at_not_here_dot_com',
-//		    collectionName: cname,
+//		    resource: cname,
 //		    admin: true },
 //		  { content: { id: '303132333435363738394143' } }).
 //             then(function(doc) {
@@ -779,7 +779,7 @@ exports.cp = {
    'Copy from existing database as admin': function (test) {
         test.expect(3);
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
 		    admin: true },
                   { content: { id: '0123456789AB' } }).
              then(function(docs) {
@@ -798,7 +798,7 @@ exports.cp = {
    'Copy from existing database with read permission': function (test) {
         test.expect(3);
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
 		    admin: false,
                     read: true },
                   { content: { id: '0123456789AB' } }).
@@ -818,7 +818,7 @@ exports.cp = {
    'Do not copy from existing database without permission': function (test) {
         test.expect(1);
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
 		    admin: false,
                     read: false },
                   { content: { id: '0123456789AB' } }).
@@ -835,7 +835,7 @@ exports.cp = {
    'Should handle 24 char hex keys (the other tests use 12 chars)': function(test) {
         test.expect(2);
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
                     read: true },
                   { content: { id: '123456789ABCDEF012345678' } }).
              then(function(docs) {
@@ -852,7 +852,7 @@ exports.cp = {
    'Should handle non-mongo ObjectId as a key': function(test) {
         test.expect(2);
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
                     read: true },
                   { content: { id: 'Not an ObjectId' } }).
              then(function(docs) {
@@ -869,7 +869,7 @@ exports.cp = {
    'Don\'t barf if the document ID is omitted': function(test) {
         test.expect(1);
         action.cp({ dbName: TEST_DB,
-		    collectionName: cname,
+		    resource: cname,
                     read: true },
                   { }).
              then(function(docs) {
@@ -939,7 +939,7 @@ exports.rm = {
 //
 //        // Retrieve the existing document
 //        action.rm({ dbName: 'no_one_at_not_here_dot_com',
-//		    collectionName: cname,
+//		    resource: cname,
 //		    admin: true },
 //                  { content: { id: '0123456789AB' } }).
 //             then(function() {
@@ -959,7 +959,7 @@ exports.rm = {
 
         // Retrieve the existing document
         action.rm({ dbName: 'yanfen_at_example_dot_com',
-		    collectionName: 'NoSuchCollection',
+		    resource: 'NoSuchCollection',
 		    admin: true },
                   { content: { id: '0123456789AB' } }).
             then(
@@ -979,7 +979,7 @@ exports.rm = {
         test.expect(1);
 
         action.rm({ dbName: 'yanfen_at_example_dot_com',
-		    collectionName: cname,
+		    resource: cname,
 		    admin: true },
                   { content: { id: 'NoSuchDocABC' } }).
             then(
@@ -1003,7 +1003,7 @@ exports.rm = {
         });
 
         action.rm({ dbName: 'yanfen_at_example_dot_com',
-		    collectionName: cname,
+		    resource: cname,
 		    admin: true },
                     { content: { id: '123456789ABC' } }).
             then(function() {
@@ -1028,7 +1028,7 @@ exports.rm = {
         });
 
         action.rm({ dbName: 'yanfen_at_example_dot_com',
-		    collectionName: cname,
+		    resource: cname,
 		    admin: false,
                     write: true },
                     { content: { id: '123456789ABC' } }).
@@ -1054,7 +1054,7 @@ exports.rm = {
         });
 
         action.rm({ dbName: 'yanfen_at_example_dot_com',
-		    collectionName: cname,
+		    resource: cname,
 		    admin: false,
                     write: false },
                     { content: { id: '123456789ABC' } }).
@@ -1121,7 +1121,7 @@ exports.rmdir = {
 //        test.expect(1);
 //
 //        action.rmdir({ dbName: 'no_one_at_not_here_dot_com',
-//  		       collectionName: cname,
+//  		       resource: cname,
 //		       admin: true,
 //                       execute: true }).
 //            then(function() {
@@ -1139,7 +1139,7 @@ exports.rmdir = {
         test.expect(1);
 
         action.rmdir({ dbName: TEST_DB,
-  		       collectionName: 'NoSuchCollection',
+  		       resource: 'NoSuchCollection',
 		       admin: true,
                        execute: true }).
             then(function() {
@@ -1161,7 +1161,7 @@ exports.rmdir = {
         });
 
         action.rmdir({ dbName: TEST_DB,
-  		       collectionName: cname,
+  		       resource: cname,
 		       admin: true,
                        execute: true }).
             then(function() {
@@ -1186,7 +1186,7 @@ exports.rmdir = {
         });
 
         action.rmdir({ dbName: TEST_DB,
-  		       collectionName: cname,
+  		       resource: cname,
 		       admin: false,
                        execute: true }).
             then(function() {
@@ -1211,7 +1211,7 @@ exports.rmdir = {
         });
 
         action.rmdir({ dbName: 'yanfen_at_example_dot_com',
-  		       collectionName: cname,
+  		       resource: cname,
 		       admin: false,
                        execute: false }).
             then(function() {
@@ -1286,7 +1286,7 @@ exports.ls = {
 
     'Return a list of document names contained in the collection if permitted': function(test) {
         test.expect(5);
-        action.ls({ dbName: TEST_DB, collectionName: cname, read: true }).
+        action.ls({ dbName: TEST_DB, resource: cname, read: true }).
             then(function(list) {
                 test.equal(list.length, 4);
                 test.equal(list[0].name, 'dan');
@@ -1305,7 +1305,7 @@ exports.ls = {
 
     'Return a list of documents containing the fields specified': function(test) {
         test.expect(9);
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+        action.ls({ dbName: 'existing_database', resource: cname, read: true },
                   { content: { fields: ['occupation'] } }).
             then(function(list) {
                 test.equal(list.length, 4);
@@ -1330,7 +1330,7 @@ exports.ls = {
 
     'Return an empty list from an empty collection if permitted': function(test) {
         test.expect(1);
-        action.ls({ dbName: 'existing_database', collectionName: 'no_such_collection', read: true }).
+        action.ls({ dbName: 'existing_database', resource: 'no_such_collection', read: true }).
             then(function(list) {
                 test.equal(list.length, 0);
                 test.done();
@@ -1345,7 +1345,7 @@ exports.ls = {
 
     'Reject an ls request if the agent is not permitted': function(test) {
         test.expect(1);
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: false }).
+        action.ls({ dbName: 'existing_database', resource: cname, read: false }).
             then(function(list) {
                 // Shouldn't get here
                 test.ok(false, 'Shouldn\'t get here!!!');
@@ -1359,7 +1359,7 @@ exports.ls = {
 
     'Return an ls request respecting the given criteria': function(test) {
         test.expect(2);
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+        action.ls({ dbName: 'existing_database', resource: cname, read: true },
                   { content: { criteria: { name: 'yanfen' } } }).
             then(function(list) {
                 test.equal(list.length, 1);
@@ -1376,7 +1376,7 @@ exports.ls = {
 
     'Return an ls request respecting the given options': function(test) {
         test.expect(7);
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+        action.ls({ dbName: 'existing_database', resource: cname, read: true },
                   { content: { options: { skip: 1, limit: 5, sort: '-name' }, fields: ['name', 'occupation'] } }).
             then(function(list) {
                 test.equal(list.length, 3);
@@ -1396,7 +1396,7 @@ exports.ls = {
     },
 
     'Convert 24 character hex strings in search criteria into ObjectIds': function(test) {
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+        action.ls({ dbName: 'existing_database', resource: cname, read: true },
                   { content: { criteria: { foreignKeyId: '01234567890abcdef0123456' } } }).
             then(function(list) {
                 test.equal(list.length, 1);
@@ -1411,7 +1411,7 @@ exports.ls = {
     },
 
     'Do not convert a 24 character non-hex string in search criteria into ObjectIds': function(test) {
-        action.ls({ dbName: 'existing_database', collectionName: cname, read: true },
+        action.ls({ dbName: 'existing_database', resource: cname, read: true },
                   { content: { criteria: { foreignKeyId: '0123456789abcdefg012345' } } }).
             then(function(list) {
                 test.equal(list.length, 0);
@@ -1533,7 +1533,7 @@ exports.ls = {
 //                    action.createDatabase({ admin: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
 //                            then(function() {
 //                                test.ok(true, 'Looks like ' + dbName + ' was created');
-//                                action.getCollection({ admin: true, dbName: dbName, collectionName: 'profile' }).
+//                                action.getCollection({ admin: true, dbName: dbName, resource: 'profile' }).
 //                                        then(function(collection) {
 //                                            collection.findOne({ email: 'jjjj@shabadoo.com' },
 //                                                    function(err, doc) {
@@ -1580,7 +1580,7 @@ exports.ls = {
 //        action.createDatabase({ admin: false, execute: true, dbName: dbName }, { content: { profile: TEST_AGENT } }).
 //                then(function() {
 //                    test.ok(true, 'Looks like ' + dbName + ' was created');
-//                    action.getCollection({ admin: false, execute: true, dbName: dbName, collectionName: 'profile' }).
+//                    action.getCollection({ admin: false, execute: true, dbName: dbName, resource: 'profile' }).
 //                            then(function(collection) {
 //                                collection.findOne({ email: 'jjjj@shabadoo.com' },
 //                                        function(err, doc) {
@@ -1653,7 +1653,7 @@ exports.ls = {
 //                  }).
 //                catch(function(err) {
 //                    test.ok(true);
-//                    action.getCollection({ admin: true, execute: true, dbName: dbName, collectionName: cname }).
+//                    action.getCollection({ admin: true, execute: true, dbName: dbName, resource: cname }).
 //                        then(function(collection) {
 //                            test.ok(true, 'Collection retrieved');
 //                            collection.find().toArray(function(err, docs) {
@@ -2374,7 +2374,7 @@ exports.grantAccess = {
 
     'Grant a friend access to a resource he didn\'t have access to before': function(test) {
         test.expect(6);
-        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
+        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', resource: 'friends' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
                           content: {
@@ -2405,7 +2405,7 @@ exports.grantAccess = {
 
     'Change a friend\'s access level to a resource': function(test) {
         test.expect(6);
-        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
+        action.grantAccess({ write: true, dbName: 'dan_at_example_dot_com', resource: 'friends' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
                           content: {
@@ -2436,7 +2436,7 @@ exports.grantAccess = {
 
     'Don\'t allow access without write or admin permission': function(test) {
         test.expect(1);
-        action.grantAccess({ read: true, dbName: 'dan_at_example_dot_com', collectionName: 'friends' },
+        action.grantAccess({ read: true, dbName: 'dan_at_example_dot_com', resource: 'friends' },
                         { action: 'grantAccess',
                           recipient: 'dan@example.com',
                           content: {
@@ -2504,7 +2504,7 @@ exports.certificate = {
 
     'Return a public certificate and add a key to the collection': function(test) {
         test.expect(5);
-        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', resource: 'keys' },
                            { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
             then(function(certificate) {
                 test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
@@ -2531,7 +2531,7 @@ exports.certificate = {
 
     'Add an agent to the friend collection': function(test) {
         test.expect(5);
-        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+        action.certificate({ write: true, dbName: 'dan_at_example_dot_com', resource: 'keys' },
                            { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
             then(function(certificate) {
                 test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
@@ -2569,7 +2569,7 @@ exports.certificate = {
                 }
 
                 test.equal(keys.length, 0);
-                action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+                action.certificate({ write: true, dbName: 'dan_at_example_dot_com', resource: 'keys' },
                                    { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
                     then(function(certificate) {
                         test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
@@ -2587,7 +2587,7 @@ exports.certificate = {
                                 }
 
                                 test.equal(keys.length, 1);
-                                action.certificate({ write: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+                                action.certificate({ write: true, dbName: 'dan_at_example_dot_com', resource: 'keys' },
                                                    { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
                                     then(function(certificate) {
                                         test.equal(certificate.search('-----BEGIN CERTIFICATE-----'), 0);
@@ -2627,7 +2627,7 @@ exports.certificate = {
 
     'Don\'t allow access without write or admin permission': function(test) {
         test.expect(1);
-        action.certificate({ read: true, dbName: 'dan_at_example_dot_com', collectionName: 'keys' },
+        action.certificate({ read: true, dbName: 'dan_at_example_dot_com', resource: 'keys' },
                            { content: { email: 'yanfen@example.com', gebo: 'https://foreigngebo.com' } }).
             then(function(certificate) {
                 test.ok(false, 'Shouldn\'t get here');
@@ -2678,7 +2678,7 @@ exports.lsCollections = {
 
     setUp: function(callback) {
         action.save({ dbName: TEST_DB,
-                      collectionName: cname,
+                      resource: cname,
                       admin: true },  
                     { content: { data: { some: 'data'} } }).
             then(function(ack) {

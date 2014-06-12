@@ -127,7 +127,7 @@ exports.bearerStrategy = {
              */
             var adminToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('0123456789AB'),
-                    collectionName: HAI_EMAIL,
+                    resource: HAI_EMAIL,
                     ip: IP,
                     string: ADMIN_TOKEN,
                 });
@@ -148,7 +148,7 @@ exports.bearerStrategy = {
              */
             var regularToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('123456789ABC'),
-                    collectionName: HAI_EMAIL,
+                    resource: HAI_EMAIL,
                     ip: IP,
                     string: REGULAR_TOKEN,
                 });
@@ -158,7 +158,7 @@ exports.bearerStrategy = {
              */
             var expiredToken = new geboDb.tokenModel({
                     registrantId: new mongo.ObjectID('456789ABCDEF'),
-                    collectionName: HAI_EMAIL,
+                    resource: HAI_EMAIL,
                     ip: IP,
                     string: EXPIRED_TOKEN,
                     expires: Date.now() - 60*60*1000,
@@ -251,7 +251,7 @@ exports.bearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
+//              test.equal(verified.resource, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
 //              test.equal(verified.execute, false); 
@@ -272,7 +272,7 @@ exports.bearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
+//              test.equal(verified.resource, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
 //              test.equal(verified.execute, false); 
@@ -291,7 +291,7 @@ exports.bearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
+//              test.equal(verified.resource, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
 //              test.equal(verified.execute, true); 
@@ -310,7 +310,7 @@ exports.bearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
+//              test.equal(verified.resource, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
 //              test.equal(verified.execute, true); 
@@ -450,7 +450,7 @@ exports.clientJwtBearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
+//              test.equal(verified.resource, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
 //              test.equal(verified.execute, false); 
@@ -471,7 +471,7 @@ exports.clientJwtBearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName('human-agent@interface.org')); 
+//              test.equal(verified.resource, utils.getMongoCollectionName('human-agent@interface.org')); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, false); 
 //              test.equal(verified.execute, false); 
@@ -490,7 +490,7 @@ exports.clientJwtBearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'dan'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
+//              test.equal(verified.resource, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
 //              test.equal(verified.execute, true); 
@@ -509,7 +509,7 @@ exports.clientJwtBearerStrategy = {
 //            else {
 //              test.equal(verified.agentName, 'yanfen'); 
 //              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-//              test.equal(verified.collectionName, utils.getMongoCollectionName(HAI_EMAIL)); 
+//              test.equal(verified.resource, utils.getMongoCollectionName(HAI_EMAIL)); 
 //              test.equal(verified.read, true); 
 //              test.equal(verified.write, true); 
 //              test.equal(verified.execute, true); 
