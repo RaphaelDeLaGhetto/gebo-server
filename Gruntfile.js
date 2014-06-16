@@ -1,11 +1,9 @@
 'use strict';
+
 var utils = require('./lib/utils'),
     nconf = require('nconf');
 
 nconf.file({ file: './gebo.json' });
-//var db = require('./schemata/gebo')(nconf.get('email'));
-    //action = require('./actions/basic')(nconf.get('email'));
-
 
 module.exports = function (grunt) {
 
@@ -134,7 +132,7 @@ module.exports = function (grunt) {
           });
 
     /**
-     * addfriendo
+     * friendo
      */
     grunt.registerTask('friendo', 'add a friendo to the agent specified',
         function (name, email, agentEmail, geboUri) {
@@ -192,16 +190,16 @@ module.exports = function (grunt) {
                       console.log(err);
                     }
 
-                    var index = utils.getIndexOfObject(friendo.permissions, 'email', resource);
+                    var index = utils.getIndexOfObject(friendo.permissions, 'resource', resource);
 
                     if (index > -1) {
                       friendo.permissions.splice(index, 1);
                     }
-                    friendo.permissions.push({ email: resource,
-                                                 read: read === 'true', 
-                                                 write: write === 'true', 
-                                                 execute: execute === 'true', 
-                                               });
+                    friendo.permissions.push({ resource: resource,
+                                               read: read === 'true', 
+                                               write: write === 'true', 
+                                               execute: execute === 'true', 
+                                             });
 
                     friendo.save(function(err) {
                         if (err) {
