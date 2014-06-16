@@ -1,19 +1,26 @@
 'use strict';
 
 var action = require('../actions')(),
-    passport = require('passport'),
-    utils = require('../lib/utils'),
-    sc = require('../lib/sc'),
     agentDb = require('../schemata/agent')(),
     extend = require('extend'),
     multiparty = require('connect-multiparty'),
+    nconf = require('nconf'),
+    passport = require('passport'),
     q = require('q'),
+    sc = require('../lib/sc'),
+    utils = require('../lib/utils'),
     winston = require('winston');
 
-module.exports = function() {
+module.exports = function(testing) {
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
+    // Get this agent's email. Put into
+    // test mode, if specified
+    var agentEmail = nconf.get('email');
+    if (testing) {
+      agentEmail = nconf.get('testEmail');
+    }
 
     /**
      * Handle incoming attempts to perform
@@ -26,6 +33,12 @@ module.exports = function() {
 
         logger.info('message', JSON.stringify(message, null, 2));
         logger.info('req.files', JSON.stringify(req.files, null, 2));
+
+        // A message's receiver used to be specified in the 
+        // message body. Since the vanilla gebo no longer mediates
+        // between external agents, the vanilla gebo is always
+        // the receiver.
+        message.receiver = agentEmail;
 
         // Form a social commitment
         sc.form(agent, 'perform', message).

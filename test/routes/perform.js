@@ -27,8 +27,8 @@ var COL_NAME = 'appCollection',
 // Agent configs
 var BASE_ADDRESS = 'http://theirhost.com';
 
-var performRoute = require('../../routes/perform');
-var perform = new performRoute();
+var perform = require('../../routes/perform')(true);
+
 
 var SIGNING_PAIR;
 utils.getPrivateKeyAndCertificate().
@@ -45,7 +45,6 @@ var CLIENT = 'yanfen@example.com',
 var SEND_REQ = {
         body: { 
              sender: CLIENT,
-             receiver: SERVER,
              action: 'ls',
              content: {
                 resource: 'friendos',
