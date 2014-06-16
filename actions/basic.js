@@ -314,6 +314,7 @@ module.exports = function() {
                       item = item.name.replace(
                                 agentDb.connection.name + '.', ''); 
                       if (message.content &&
+                          message.content.flag &&
                           message.content.flag.toLowerCase() === 'all') {
                         cleanNames.push(item);
                       }

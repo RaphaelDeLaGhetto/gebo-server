@@ -2714,4 +2714,19 @@ exports.lsCollections = {
                 test.done();
               });
     },
+
+    'Don\'t barf if the content field is set without the flag property': function(test) {
+        test.expect(2);
+        action.lsCollections({ read: true },
+                             { sender: 'john@painter.com', content: { resource: 'thisShouldNotHappenAnyway' } }).
+            then(function(collections) {
+                test.equal(collections.length, 1);
+                test.equal(collections[0], cname);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
 };
