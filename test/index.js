@@ -85,9 +85,6 @@ exports.testModes = {
  * test databases
  */
 var nativeMongoConnection = require('../lib/native-mongo-connection').get(true, function(){});
-    //mongooseConnection = require('../lib/mongoose-connection').get(true, function(){});
-//    mongoose = require('gebo-mongoose-connection').get(true);
-
 
 /**
  * Add an action
@@ -200,4 +197,23 @@ exports.schemata = {
     },
 };
 
+/**
+ * enable
+ */
+exports.enable = {
+    'Add schema from action module': function(test) {
+        test.done();
+    },
 
+    'Don\'t barf if no schema is included in the action module': function(test) {
+        test.done();
+    },
+
+    'Add actions from action module': function(test) {
+        test.done();
+    },
+
+    'Don\'t barf if no actions are included in the action module': function(test) {
+        test.done();
+    },
+};

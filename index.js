@@ -96,6 +96,13 @@ module.exports = function(testing) {
     server.post('/receive', message_routes.receive);
 
     /**
+     * Enable behaviour defined in action module
+     */
+    exports.enable = function(actionModule) {
+
+      };
+
+    /**
      * Start the gebo servers
      */
     exports.start = function() {
