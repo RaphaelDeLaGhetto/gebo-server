@@ -124,7 +124,7 @@ exports.schemaAdd = {
         gebo.schemata.add('test', testSchema);
 
         test.equal(typeof gebo.schemata.test, 'function');
-        var db = new gebo.schemata.test(TEST_DB);
+        var db = new gebo.schemata.test();
         test.equal(typeof db, 'object');
     
         test.done();
@@ -141,11 +141,11 @@ exports.schemaAdd = {
         gebo.schemata.add(testSchemata);
 
         test.equal(typeof gebo.schemata.test1, 'function');
-        var db = new gebo.schemata.test1(TEST_DB);
+        var db = new gebo.schemata.test1();
         test.equal(typeof db, 'object');
 
         test.equal(typeof gebo.schemata.test2, 'function');
-        db = new gebo.schemata.test2(TEST_DB)
+        db = new gebo.schemata.test2()
         test.equal(typeof db, 'object');
 
         test.done();
@@ -200,32 +200,60 @@ exports.schemata = {
 /**
  * enable
  */
+var _gebo;
 exports.enable = {
+
+    setUp: function(callback) {
+        delete require.cache[require.resolve('../index')];
+        delete require.cache[require.resolve('./mocks/full-action-module')];
+        delete require.cache[require.resolve('./mocks/no-actions')];
+        delete require.cache[require.resolve('./mocks/no-schema')];
+        delete require.cache[require.resolve('./mocks/schema')];
+        delete require.cache[require.resolve('./mocks/actions')];
+        _gebo = require('..')(true);
+        callback();
+    },
+
+    tearDown: function(callback) {
+        // Why on earth do I have to do this? The cache deletions
+        // have no impact on which schemata and actions are
+        // included within the gebo. I delete these modules
+        // before each test, look in the gebo after each require,
+        // and there they be.
+        _gebo.schemata.remove('mocks');
+        _gebo.actions.remove('mocks');
+        callback();
+    },
+
     'Add schema and actions from action module': function(test) {
-        test.expect(2);
-        var gebo = require('..')(true);
-        gebo.enable(require('./mocks/full-action-module'));
-        test.equal(typeof gebo.schemata.someModel, 'object');
-        test.equal(typeof gebo.actions.someAction, 'function');
+        test.expect(4);
+        _gebo.enable('mocks', require('./mocks/full-action-module'));
+
+        test.equal(typeof _gebo.schemata.mocks, 'function');
+        var db = new _gebo.schemata.mocks();
+        test.equal(typeof db.someModel, 'function');
+        test.equal(typeof _gebo.actions.mocks.someAction, 'function');
+        test.equal(_gebo.actions.mocks.someAction(), 'Hi, guy!');
         test.done();
     },
 
     'Don\'t barf if no schema is included in the action module': function(test) {
-        test.expect(2);
-        var gebo = require('..')(true);
-        gebo.enable(require('./mocks/no-schema'));
-        test.equal(gebo.schemata.someModel, undefined);
-        test.equal(typeof gebo.actions.someAction, 'function');
+        test.expect(3);
+        _gebo.enable('mocks', require('./mocks/no-schema'));
+        test.equal(_gebo.schemata.mocks, undefined);
+        test.equal(typeof _gebo.actions.mocks.someAction, 'function');
+        test.equal(_gebo.actions.mocks.someAction(), 'Hi, guy!');
         test.done();
     },
 
     'Don\'t barf if no actions are included in the action module': function(test) {
-        test.expect(2);
-        var gebo = require('..')(true);
-        gebo.enable(require('./mocks/no-actions'));
-        test.equal(typeof gebo.schemata.someModel, 'object');
-        console.log('gebo.actions.someAction', gebo.actions.someAction);
-        test.equal(gebo.actions.someAction, undefined);
+        test.expect(3);
+        _gebo.enable('mocks', require('./mocks/no-actions'));
+
+        test.equal(typeof _gebo.schemata.mocks, 'function');
+        var db = new _gebo.schemata.mocks();
+        test.equal(typeof db.someModel, 'function');
+        test.equal(_gebo.actions.mocks, undefined);
         test.done();
     },
 };
