@@ -201,19 +201,31 @@ exports.schemata = {
  * enable
  */
 exports.enable = {
-    'Add schema from action module': function(test) {
+    'Add schema and actions from action module': function(test) {
+        test.expect(2);
+        var gebo = require('..')(true);
+        gebo.enable(require('./mocks/full-action-module'));
+        test.equal(typeof gebo.schemata.someModel, 'object');
+        test.equal(typeof gebo.actions.someAction, 'function');
         test.done();
     },
 
     'Don\'t barf if no schema is included in the action module': function(test) {
-        test.done();
-    },
-
-    'Add actions from action module': function(test) {
+        test.expect(2);
+        var gebo = require('..')(true);
+        gebo.enable(require('./mocks/no-schema'));
+        test.equal(gebo.schemata.someModel, undefined);
+        test.equal(typeof gebo.actions.someAction, 'function');
         test.done();
     },
 
     'Don\'t barf if no actions are included in the action module': function(test) {
+        test.expect(2);
+        var gebo = require('..')(true);
+        gebo.enable(require('./mocks/no-actions'));
+        test.equal(typeof gebo.schemata.someModel, 'object');
+        console.log('gebo.actions.someAction', gebo.actions.someAction);
+        test.equal(gebo.actions.someAction, undefined);
         test.done();
     },
 };
