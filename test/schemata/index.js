@@ -12,7 +12,6 @@ var fs = require('fs'),
 
 
 nconf.file({ file: 'gebo.json' });
-var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));
 
 exports.onLoad = {
     tearDown: function(callback) {
@@ -61,9 +60,8 @@ exports.add = {
         schemata.add('test1', testSchema);
 
         test.equal(typeof schemata.test1, 'function');
-        var db = new schemata.test1(TEST_DB);
+        var db = new schemata.test1();
         test.equal(typeof db, 'object');
-        db.connection.db.close();
 
         test.done();
     },
@@ -79,13 +77,11 @@ exports.add = {
         schemata.add(testSchemata);
 
         test.equal(typeof schemata.test1, 'function');
-        var db = new schemata.test1(TEST_DB);
+        var db = new schemata.test1();
         test.equal(typeof db, 'object');
-        db.connection.db.close();
         test.equal(typeof schemata.test2, 'function');
-        db = new schemata.test2(TEST_DB);
+        db = new schemata.test2();
         test.equal(typeof db, 'object');
-        db.connection.db.close();
 
         test.done();
     },
@@ -137,13 +133,11 @@ exports.remove = {
         schemata.add('test2', testSchema);
 
         test.equal(typeof schemata.test1, 'function');
-        var db = new schemata.test1(TEST_DB);
-        test.equal(typeof new schemata.test1(TEST_DB), 'object');
-        db.connection.db.close();
+        var db = new schemata.test1();
+        test.equal(typeof new schemata.test1(), 'object');
         test.equal(typeof schemata.test2, 'function');
-        db = new schemata.test2(TEST_DB);
+        db = new schemata.test2();
         test.equal(typeof db, 'object');
-        db.connection.db.close();
 
         schemata.remove('test1');
         test.equal(schemata.test1, undefined);
