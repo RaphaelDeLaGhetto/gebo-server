@@ -98,15 +98,24 @@ module.exports = function(testing) {
     /**
      * Enable behaviour defined in action module
      *
+     * @param string - a unique module name
      * @param object
      */
-    exports.enable = function(actionModule) {
+    exports.enable = function(moduleName, actionModule) {
+        // Add actions
         if (actionModule.actions) {
-          console.log('here');
-          exports.actions.add(actionModule.actions); 
+          var keys = Object.keys(actionModule.actions);
+          if (keys.length > 0) { 
+            exports.actions[moduleName] = {};
+            for (var i = 0; i < keys.length; i++) {
+              exports.actions[moduleName][keys[i]] = actionModule.actions[keys[i]]; 
+            }
+          }
+          //exports.actions.add(actionModule.actions); 
         }
+        // Add modules
         if (actionModule.schemata) {
-          exports.schemata.add(actionModule.schemata);
+          exports.schemata.add(moduleName, actionModule.schemata);
         }
       };
 
