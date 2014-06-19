@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function() {
-    exports.someModel = {};
+    exports.someModel = function(){};
 
     return exports;
   };

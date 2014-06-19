@@ -2,7 +2,7 @@
 
 module.exports = function() {
 
-    exports.schemata = require('./schema')();
+    exports.schemata = require('./schema');
 
     return exports;
   }();
