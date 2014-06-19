@@ -209,4 +209,34 @@ module.exports = function (grunt) {
                       });
                   });
           });
+
+    /**
+     * createtoken
+     */
+    grunt.registerTask('createtoken', 'Create an access token for a registrant',
+        function(registrantEmail, resource, tokenString) {
+
+            // Save call is async. Put grunt into async mode to work
+            var done = this.async();
+
+            db.registrantModel.findOne({ email: registrantEmail },
+                function(err, registrant) {
+                    if (err) {
+                      console.log(err);
+                    }
+
+                    var token = new db.tokenModel({
+                                            registrantId: registrant._id,
+                                            resource: resource,
+                                            string: tokenString,
+                                        });
+
+                    token.save(function(err) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        done();
+                      });
+                  });
+          });
   };
