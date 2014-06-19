@@ -97,9 +97,17 @@ module.exports = function(testing) {
 
     /**
      * Enable behaviour defined in action module
+     *
+     * @param object
      */
     exports.enable = function(actionModule) {
-
+        if (actionModule.actions) {
+          console.log('here');
+          exports.actions.add(actionModule.actions); 
+        }
+        if (actionModule.schemata) {
+          exports.schemata.add(actionModule.schemata);
+        }
       };
 
     /**
