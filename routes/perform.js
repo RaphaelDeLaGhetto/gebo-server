@@ -54,15 +54,29 @@ module.exports = function(testing) {
                         logger.info('verified', verified);
 
                         /**
+                         * Actions may be specified in dot notation. This was written
+                         * in the heat of the moment, so an agent can currently only
+                         * have an action burried one layer deep. Ideally, this should
+                         * handle actions burried any arbitrary depth, but at the moment
+                         * I can't see why it would ever go deeper than one. So screw it.
+                         */
+                        var actionParts = message.action.split('.');
+                        if (actionParts.length === 2) {
+                            action = action[actionParts[0]];
+                        }
+
+                        /**
                          * Make sure this agent knows how to
                          * perform the requested action
                          */
-                        if(!action[message.action]) {
+                        //if(!action[message.action]) {
+                        if(!action[actionParts[actionParts.length - 1]]) {
                           res.send(501, 'I don\'t know how to ' + message.action);
                           done();
                         }
                         else {
-                          action[message.action](verified, message).
+                          //action[message.action](verified, message).
+                          action[actionParts[actionParts.length - 1]](verified, message).
                               then(function(data) {
                                  sc.fulfil(message.receiver, socialCommitment._id).
                                       then(function(sc) {

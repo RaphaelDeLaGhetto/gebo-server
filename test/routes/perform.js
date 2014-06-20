@@ -102,7 +102,7 @@ exports.handler = {
         agentDb.socialCommitmentModel.find({}, function(err, scs) {
             test.equal(scs.length, 0);
 
-            perform.handler(SEND_REQ, RES, function(err, results) { 
+            perform.handler(SEND_REQ, RES, function(err) { 
                 if (err) {
                   test.ok(false, err);
                 }
@@ -130,7 +130,7 @@ exports.handler = {
         extend(true, req, SEND_REQ);
         req.user.email = 'some@foreignagent.com';
 
-        perform.handler(req, RES, function(err, results) { 
+        perform.handler(req, RES, function(err) { 
             if (err) {
               test.equal(err, 'You are not allowed access to that resource');
             }
@@ -151,7 +151,7 @@ exports.handler = {
             }
             test.equal(docs.length, 1);
 
-            perform.handler(SEND_REQ, RES, function(err, results) { 
+            perform.handler(SEND_REQ, RES, function(err) { 
                 if (err) {
                   test.ok(false, err);
                 }
@@ -183,7 +183,7 @@ exports.handler = {
         extend(true, req, SEND_REQ);
         req.body.action = 'bakeACake';
 
-        perform.handler(req, RES, function(err, results) { 
+        perform.handler(req, RES, function(err) { 
             if (err) {
               test.ok(false, err);
             }
@@ -191,6 +191,41 @@ exports.handler = {
             test.equal(_content, 'I don\'t know how to bakeACake');
             test.done();
         }); 
+    },
+
+    'Perform proposed or requested actions received in dot notation': function(test) {
+        test.expect(2);
+        
+        // Add some actions from a module
+        var actions = require('../../actions')(),
+            actionModule = require('../mocks/full-action-module');
+
+        // This is how it's done in the index.enable function
+        var keys = Object.keys(actionModule.actions);
+        if (keys.length > 0) { 
+          actions['mock'] = {};
+          for (var i = 0; i < keys.length; i++) {
+            actions['mock'][keys[i]] = actionModule.actions[keys[i]]; 
+          }
+        }
+
+        var req = {
+                body: { 
+                     sender: CLIENT,
+                     action: 'mock.someAction',
+                  },
+                user: { email: CLIENT, admin: false },
+              };
+
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(_code, 200);
+            test.equal(_content, 'Hi, guy!');
+
+            test.done();
+          });
     },
 };
 

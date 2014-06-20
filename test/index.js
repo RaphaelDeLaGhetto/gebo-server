@@ -233,8 +233,16 @@ exports.enable = {
         var db = new _gebo.schemata.mocks();
         test.equal(typeof db.someModel, 'function');
         test.equal(typeof _gebo.actions.mocks.someAction, 'function');
-        test.equal(_gebo.actions.mocks.someAction(), 'Hi, guy!');
-        test.done();
+        //test.equal(_gebo.actions.mocks.someAction(), 'Hi, guy!');
+        _gebo.actions.mocks.someAction().
+            then(function(results) {
+                test.equal(results, 'Hi, guy!');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
     },
 
     'Don\'t barf if no schema is included in the action module': function(test) {
@@ -242,8 +250,16 @@ exports.enable = {
         _gebo.enable('mocks', require('./mocks/no-schema'));
         test.equal(_gebo.schemata.mocks, undefined);
         test.equal(typeof _gebo.actions.mocks.someAction, 'function');
-        test.equal(_gebo.actions.mocks.someAction(), 'Hi, guy!');
-        test.done();
+        //test.equal(_gebo.actions.mocks.someAction(), 'Hi, guy!');
+        _gebo.actions.mocks.someAction().
+            then(function(results) {
+                test.equal(results, 'Hi, guy!');
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
     },
 
     'Don\'t barf if no actions are included in the action module': function(test) {

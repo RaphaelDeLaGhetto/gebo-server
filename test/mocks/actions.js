@@ -1,9 +1,12 @@
 'use strict';
+var q = require('q');
 
 module.exports = function() {
 
     exports.someAction = function() {
-        return 'Hi, guy!';        
+        var deferred = q.defer();
+        deferred.resolve('Hi, guy!');
+        return deferred.promise;
       };
 
     return exports;
