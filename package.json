@@ -26,7 +26,7 @@
   },
   "scripts": {
     "test": "grunt nodeunit",
-    "postinstall": "bower install"
+    "postinstall": "bower install --allow-root"
   },
   "dependencies": {
     "base64url": "0.0.4",
