@@ -5,6 +5,7 @@ module.exports = function (app, express, passport, logger) {
 //        cachify = require('connect-cachify'),
         winston = require('winston'),
         path = require('path'),
+        fs = require('fs'),
         requestLogger = require('winston-request-logger'),
         bodyParser = require('body-parser'),
         methodOverride = require('method-override'),
@@ -76,7 +77,17 @@ module.exports = function (app, express, passport, logger) {
 
     // Global Configuration
     app.use(allowCrossDomain);
-    app.set('views', './views');
+
+    // Find alternate views
+    try {
+        var viewsDir = fs.readdirSync('./views');
+        app.set('views', './views');
+    }
+    catch(err) {
+        app.set('views', __dirname + '/../views');
+    }
+    //app.set('views', './views');
+
     app.set('view engine', 'jade');
     app.set('view options', { layout: false });
     app.use(cookieParser());
@@ -84,9 +95,28 @@ module.exports = function (app, express, passport, logger) {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(methodOverride());
     //app.use(express.static(root + '/public'));
-    app.use(express.static('./public'));
-    //app.use(favicon(root + '/favicon.ico'));
-    app.use(favicon('./favicon.ico'));
+
+    // Find alternate public directory
+    try {
+        var publicDir = fs.readdirSync('./public');
+        app.use(express.static('./public'));
+    }
+    catch(err) {
+        app.use(express.static(__dirname + '/../public'));
+    }
+    //app.use(express.static('./public'));
+
+    // Find alternate favicon 
+    try {
+        var faviconFile = fs.openSync('./favicon.ico');
+        faviconFile.close();
+        app.use(favicon('./favicon.ico'));
+    }
+    catch(err) {
+        app.use(favicon(__dirname + '/../favicon.ico'));
+    }
+    //app.use(favicon('./favicon.ico'));
+
     app.use(session({
                 store: new ClusterStore(),
                 secret: 'What the halo!?'}));
@@ -95,5 +125,4 @@ module.exports = function (app, express, passport, logger) {
     // persistent login sessions (recommended).
     app.use(passport.initialize());
     app.use(passport.session());
-
 };
