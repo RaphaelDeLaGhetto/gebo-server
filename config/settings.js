@@ -14,10 +14,6 @@ module.exports = function (app, express, passport, logger) {
         errorHandler = require('errorhandler'),
         ClusterStore = require('strong-cluster-express-store')(session);
 
-//    if (!root) {
-//      root = path.normalize(__dirname + '/..');
-//    }
-//    nconf.file({ file: root + '/gebo.json' });
     nconf.file({ file: './gebo.json' });
 
     // load assets node from configuration file.
@@ -80,12 +76,12 @@ module.exports = function (app, express, passport, logger) {
 
     // Global Configuration
     app.use(allowCrossDomain);
-    //app.set('views', root + '/views');
     app.set('views', './views');
     app.set('view engine', 'jade');
     app.set('view options', { layout: false });
     app.use(cookieParser());
-    app.use(bodyParser());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.use(methodOverride());
     //app.use(express.static(root + '/public'));
     app.use(express.static('./public'));
