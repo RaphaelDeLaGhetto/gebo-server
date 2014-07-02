@@ -174,9 +174,9 @@ module.exports = function(testing) {
                 execute: false,
             };
 
-        if (!verified.dbName) {
-          verified.dbName = utils.getMongoDbName(agent.email);
-        }
+//        if (!verified.dbName) {
+//          verified.dbName = utils.getMongoDbName(agent.email);
+//        }
 
         if (agent.admin) {
           verified.read = true;
