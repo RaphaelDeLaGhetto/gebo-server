@@ -227,6 +227,44 @@ exports.handler = {
             test.done();
           });
     },
+
+    'Convert a numeric return value to a string (so it doesn\'t get set as a status code)': function(test) {
+        test.expect(3);
+        
+        // Add some actions from a module
+        var actions = require('../../actions')(),
+            actionModule = require('../mocks/full-action-module');
+
+        // This is how it's done in the index.enable function
+        var keys = Object.keys(actionModule.actions);
+        console.log('keys', keys);
+        if (keys.length > 0) { 
+          actions['mock'] = {};
+          for (var i = 0; i < keys.length; i++) {
+            actions['mock'][keys[i]] = actionModule.actions[keys[i]]; 
+          }
+        }
+
+        var req = {
+                body: { 
+                     sender: CLIENT,
+                     action: 'mock.theAnswerToLifeTheUniverseAndEverything',
+                  },
+                user: { email: CLIENT, admin: false },
+              };
+
+        console.log('Hello');
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(_code, 200);
+            test.equal(_content, '42');
+            test.equal(typeof _content, 'string');
+
+            test.done();
+          });
+    },
 };
 
 // I can't figure out how to use sinon's mocks, stubs, etc.

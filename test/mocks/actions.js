@@ -9,5 +9,11 @@ module.exports = function() {
         return deferred.promise;
       };
 
+    exports.theAnswerToLifeTheUniverseAndEverything = function() {
+        var deferred = q.defer();
+        deferred.resolve(42);
+        return deferred.promise;
+      };
+
     return exports;
   };

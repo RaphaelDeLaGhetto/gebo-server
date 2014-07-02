@@ -60,28 +60,35 @@ module.exports = function(testing) {
                          * handle actions burried any arbitrary depth, but at the moment
                          * I can't see why it would ever go deeper than one. So screw it.
                          */
+                        var actionPtr = action;
                         var actionParts = message.action.split('.');
                         if (actionParts.length === 2) {
-                            action = action[actionParts[0]];
+                            actionPtr = actionPtr[actionParts[0]];
                         }
 
                         /**
                          * Make sure this agent knows how to
                          * perform the requested action
                          */
-                        //if(!action[message.action]) {
-                        if(!action[actionParts[actionParts.length - 1]]) {
+                        if(!actionPtr[actionParts[actionParts.length - 1]]) {
                           res.send(501, 'I don\'t know how to ' + message.action);
                           done();
                         }
                         else {
-                          //action[message.action](verified, message).
-                          action[actionParts[actionParts.length - 1]](verified, message).
+                          actionPtr[actionParts[actionParts.length - 1]](verified, message).
                               then(function(data) {
                                  sc.fulfil(message.receiver, socialCommitment._id).
                                       then(function(sc) {
                                           logger.info('data', data);
-                                          res.send(200, data);
+                                          // If you don't set this as a string,
+                                          // the status code will be set to the 
+                                          // numeric value contained in data
+                                          if (typeof data === 'number') {
+                                            res.send(200, '' + data);
+                                          }
+                                          else {
+                                            res.send(200, data);
+                                          }
                                           done();
                                         }).
                                       catch(function(err) {
