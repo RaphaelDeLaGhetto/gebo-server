@@ -118,6 +118,8 @@ module.exports = function (app, express, passport, logger) {
     //app.use(favicon('./favicon.ico'));
 
     app.use(session({
+                saveUninitialized: true,
+                resave: true,
                 store: new ClusterStore(),
                 secret: 'What the halo!?'}));
     app.use(requireHttps);
