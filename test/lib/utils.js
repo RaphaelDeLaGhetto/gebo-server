@@ -534,9 +534,9 @@ exports.saveFile = {
              * Write some files to /tmp
              */
             fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
-            fs.writeFileSync('/tmp/gebo-server-utils-test-2.txt', 'It\'s Christmas time in Hollis, Queens');
-            fs.writeFileSync('/tmp/gebo-server-utils-test-3.txt', 'Yes I eat cow, I am not proud');
-            fs.writeFileSync('/tmp/gebo-server-utils-test-4.txt', 'Genesis 9:6');
+//            fs.writeFileSync('/tmp/gebo-server-utils-test-2.txt', 'It\'s Christmas time in Hollis, Queens');
+//            fs.writeFileSync('/tmp/gebo-server-utils-test-3.txt', 'Yes I eat cow, I am not proud');
+//            fs.writeFileSync('/tmp/gebo-server-utils-test-4.txt', 'Genesis 9:6');
             callback();
     	}
         catch(e) {

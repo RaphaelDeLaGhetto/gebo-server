@@ -55,11 +55,17 @@ module.exports = function() {
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) {
-                    utils.saveFilesToAgentDirectory(message.files, verified).
-                        then(function() {
+                    utils.saveFile(message.file, verified).
+                        then(function(file) {
                             if (message.content && message.content.data) {
                               if (message.content.data._id) {
                                 message.content.data._id = new mongo.ObjectID(message.content.data._id + '');
+                              }
+
+                              // If there's a file attached to this message,
+                              // link it to do the data being saved
+                              if (file) {
+                                message.content.data.fileId = file._id;
                               }
       
                               collection.save(message.content.data, { safe: true },
