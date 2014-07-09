@@ -966,6 +966,8 @@ exports.rm = {
     
     tearDown: function (callback) {
         rimraf.sync('docs/someCollection');
+        rimraf.sync('docs/save');
+        rimraf.sync('docs/unitTest');
 
         // Lose the database for next time
         db.dropDatabase(function(err) { 
@@ -1175,8 +1177,9 @@ exports.rm = {
     * gets saved. I think it's 'docs/save'.
     */
    'Delete a file and its meta object': function(test) {
-        // Save a file with an object
-        action.save({ resource: 'files',
+        // Save a file with an object. The resource is save,
+        // because that's the action name
+        action.save({ resource: 'save',
 		      write: true },
                     { content: { data: { junk: 'I like to move it move it' } },
                       file: {
@@ -1190,12 +1193,12 @@ exports.rm = {
                         test.ok(docs);
 
                         // Make sure the file is saved to the proper directory
-                        var files = fs.readdirSync('docs/files');
+                        var files = fs.readdirSync('docs/save');
                         test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
 
 
                         // Remove
-                        action.rm({ resource: 'files',
+                        action.rm({ resource: 'save',
                                     admin: false,
                                     write: true },
                                   { content: { id: docs._id } }).
@@ -1210,7 +1213,7 @@ exports.rm = {
                                         test.equal(file, null); 
 
                                         // Make sure the file is removed from the file system
-                                        var files = fs.readdirSync('docs/files');
+                                        var files = fs.readdirSync('docs/save');
                                         test.equal(files.indexOf('gebo-server-save-test-1.txt'), -1);
 
                                         test.done();
