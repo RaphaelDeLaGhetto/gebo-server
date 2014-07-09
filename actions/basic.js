@@ -5,12 +5,14 @@ var mongo = require('mongodb'),
     q = require('q'),
     fs = require('fs'),
     mv = require('mv'),
-    mkdirp = require('mkdirp');
+    mkdirp = require('mkdirp'),
+    nconf = require('nconf');
 
 module.exports = function() {
 
     var agentDb = require('../schemata/agent')(),
         geboDb = require('../schemata/gebo')(),
+//        mongooseConnection = require('gebo-mongoose-connection').get(testing),
         nativeConnection = require('../lib/native-mongo-connection');
 
     /**
@@ -146,6 +148,7 @@ module.exports = function() {
     var _rm = function(verified, message) {
         var deferred = q.defer();
 
+
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) {
@@ -157,17 +160,59 @@ module.exports = function() {
                                             verified.resource + ' does not exist'));
                           }
                           else {
-                            collection.remove({ _id: new mongo.ObjectID(message.content.id) },
-                            function(err, ack) {
-                                if (err || ack === 0) {
-                                  deferred.reject(
-                                          new Error('Could not delete document: ' +
-                                                  message.content.id));
+                            var id = message.content.id;
+                            if (typeof id === 'string') {
+                              id = new mongo.ObjectID(message.content.id);
+                            }
+
+                            // Ugh, this has to be done so that any files attached
+                            // to the document will be removed too
+                            collection.findOne({ '_id': id }, function(err, doc) {
+                                if (err) {
+                                  deferred.reject(err);
                                 }
                                 else {
-                                  deferred.resolve();
+                                  collection.remove({ _id: id },
+                                      function(err, ack) {
+                                          if (err || ack === 0) {
+                                            deferred.reject(
+                                                    new Error('Could not delete document: ' +
+                                                            message.content.id));
+                                          }
+                                          else {
+                                            // Check for an attached file.
+                                            // Remove it from the file system
+                                            // and database
+                                            if (doc.fileId) {
+                                              agentDb.fileModel.findById(doc.fileId, function(err, file) {
+                                                    if (err) {
+                                                      deferred.reject(err);
+                                                    }
+                                                    file.remove(function(err) {
+                                                        if (err) {
+                                                          deferred.reject(err);
+                                                        }
+                                                        fs.unlink(nconf.get('docs') +
+                                                                '/' + verified.resource +
+                                                                '/' + file.name, function(err) {
+                                                              if (err) {
+                                                                deferred.reject(err);
+                                                              }
+                                                              else {
+                                                                deferred.resolve();
+                                                              }
+                                                          });
+                                                      });
+                                                });
+                                            }
+                                            else {
+                                              deferred.resolve();
+                                            }
+                                          }
+                                    });
                                 }
                               });
+
                           }
                         });
                     }).

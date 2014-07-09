@@ -30,7 +30,7 @@ var verifiedUser = {
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testEmail'));
 
-var agentDb = require('../../schemata/agent')(),
+var agentDb = require('../../schemata/agent')(true),
     geboDb = require('../../schemata/gebo')(),
     action = require('../../actions/basic')();
 
@@ -930,6 +930,12 @@ exports.rm = {
 
     setUp: function (callback) {
     	try{
+
+            /**
+             * Put a file in /tmp
+             */
+            fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+
             var server = new mongo.Server('localhost', 27017, {});
             db = new mongo.Db(TEST_DB, server, { safe: true });
             db.open(function (err, client) {
@@ -959,13 +965,20 @@ exports.rm = {
     },
     
     tearDown: function (callback) {
+        rimraf.sync('docs/someCollection');
+
         // Lose the database for next time
         db.dropDatabase(function(err) { 
             db.close();
             if (err) {
               console.log(err);
             }
-            callback();
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
         });
     },
 
@@ -1100,6 +1113,119 @@ exports.rm = {
                     test.equal(err, 'You are not permitted to request or propose that action');
                     test.done();
                  });
+   },
+
+   'Delete a database object with an attached file': function(test) {
+
+        // Save a file with an object
+        action.save({ resource: 'someCollection',
+		      write: true },
+                    { content: { data: { junk: 'I like to move it move it' } },
+                      file: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 21,
+                      }
+                  }).
+                then(function(docs) {
+                        test.ok(docs);
+
+                        // Make sure the file is saved to the proper directory
+                        var files = fs.readdirSync('docs/someCollection');
+                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+
+
+                        // Remove
+                        action.rm({ resource: 'someCollection',
+                                    admin: false,
+                                    write: true },
+                                  { content: { id: docs._id } }).
+                            then(function() {
+                                    test.ok(true, 'The doc has been deleted, I think');
+
+                                    // Make sure the database file document is gone
+                                    agentDb.fileModel.findById(docs.fileId, function(err, file) {
+                                        if (err) {
+                                          test.ok(false);
+                                        }
+                                        test.equal(file, null); 
+
+                                        // Make sure the file is removed from the file system
+                                        var files = fs.readdirSync('docs/someCollection');
+                                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), -1);
+
+                                        test.done();
+                                      });
+                                }).
+                            catch(function(err) {
+                                    test.ok(false, err);
+                                    test.done();
+                                 });
+                    }).
+                catch(function(err) {
+                        console.log('Error???? ' + err);       
+                        test.ifError(err);
+                        test.done();
+                    });
+   },
+
+   /**
+    * This test is incomplete. I can't remember to which directory a file
+    * gets saved. I think it's 'docs/save'.
+    */
+   'Delete a file and its meta object': function(test) {
+        // Save a file with an object
+        action.save({ resource: 'files',
+		      write: true },
+                    { content: { data: { junk: 'I like to move it move it' } },
+                      file: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 21,
+                      }
+                  }).
+                then(function(docs) {
+                        test.ok(docs);
+
+                        // Make sure the file is saved to the proper directory
+                        var files = fs.readdirSync('docs/files');
+                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+
+
+                        // Remove
+                        action.rm({ resource: 'files',
+                                    admin: false,
+                                    write: true },
+                                  { content: { id: docs._id } }).
+                            then(function() {
+                                    test.ok(true, 'The doc has been deleted, I think');
+
+                                    // Make sure the database file document is gone
+                                    agentDb.fileModel.findById(docs.fileId, function(err, file) {
+                                        if (err) {
+                                          test.ok(false);
+                                        }
+                                        test.equal(file, null); 
+
+                                        // Make sure the file is removed from the file system
+                                        var files = fs.readdirSync('docs/files');
+                                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), -1);
+
+                                        test.done();
+                                      });
+                                }).
+                            catch(function(err) {
+                                    test.ok(false, err);
+                                    test.done();
+                                 });
+                    }).
+                catch(function(err) {
+                        console.log('Error???? ' + err);       
+                        test.ifError(err);
+                        test.done();
+                    });
    },
 };
 
