@@ -1,10 +1,11 @@
 {
-    "name":"gebo-server",
-    "main":[
-        "./public/css/style.css",
-        "./public/js/site.js"
-    ],
-    "dependencies":{
-        "bootstrap":"~3.0.x"
-    }
+  "name": "gebo-server",
+  "main": [
+    "./public/css/style.css",
+    "./public/js/site.js"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.0.x",
+    "jquery": "~2.1.x"
+  }
 }
