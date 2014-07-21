@@ -348,7 +348,7 @@ module.exports = function() {
         // the emails parameter in the [de]serializeClient functions.
         // Hence, req.oauth2.client.agent = req.user.email
         function (req, res) {
-            logger.info('render dialog', req.query, req.user);
+            logger.info(req.user.email, 'is using', req.query.client_name, req.query.client_id);
     
             // Add some details to the oauth2 object
             // created by oauth2orize. This will all get
@@ -362,7 +362,7 @@ module.exports = function() {
                                userreq.connection.socket.remoteAddress; 
             req.oauth2.req.clientName = req.query.client_name;
     
-            logger.info('oauth2', req.oauth2);
+            logger.info('resource', req.oauth2.resource);
     
             res.render('dialog', {
                     transactionID: req.oauth2.transactionID,
@@ -405,7 +405,7 @@ module.exports = function() {
     exports.verify = [
         passport.authenticate('bearer', { session: false }),
         function (req, res) {
-            logger.info('api', req.user);
+            logger.info('verified', req.user.email);
             res.json(req.user);
           },
      ];
