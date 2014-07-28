@@ -324,10 +324,17 @@ exports.bearerStrategy = {
         test.expect(1);
         pass.bearerStrategy('n0sucht0ken', function(err, verified) {
             if (err) {
-              test.equal(err, 'The token provided is invalid');       
+              test.equal(err, {
+                                 'error': {
+                                     'code': 401,
+                                     'message': 'The token provided is invalid'
+                              }
+                });
+//              test.equal(err, 'The token provided is invalid');       
             }
             else {
-              test.ok(false, 'Permission should not have been granted');
+              test.equal(verified, false);
+//              test.ok(false, 'Permission should not have been granted');
             }
             test.done();
         });
@@ -337,10 +344,17 @@ exports.bearerStrategy = {
         test.expect(1);
         pass.bearerStrategy(EXPIRED_TOKEN, function(err, friendo) {
             if (err) {
-              test.equal(err, 'The token provided is invalid');       
+              test.equal(err, {
+                                 'error': {
+                                     'code': 401,
+                                     'message': 'The token provided is invalid'
+                              }
+                });
+//              test.equal(err, 'The token provided is invalid');       
             } 
             else {
-              test.ok(false, 'Permission should not have been granted');
+              test.equal(friendo, false);
+//              test.ok(false, 'Permission should not have been granted');
             }
             test.done();
           });

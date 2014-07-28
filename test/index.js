@@ -273,3 +273,12 @@ exports.enable = {
         test.done();
     },
 };
+
+
+/**
+ * This ensures that all the expected HTTP codes get
+ * returned at the right time
+ */
+exports.api = { 
+
+};

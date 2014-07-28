@@ -163,13 +163,15 @@ module.exports = function() {
             }
 
             if (!token) {
-              return done('The token provided is invalid', null);
+              return done(null, false, 'The token provided is invalid');
+//              return done('The token provided is invalid', null);
             }
             logger.info('token found:', token.string);
 
             if (token.expires && new Date(token.expires) < new Date()) {
               logger.info('token: expired', token.expires);
-              return done('The token provided is invalid', null);
+              //return done('The token provided is invalid', null);
+              return done(null, false, 'The token provided is invalid');
             }
             
             // Look up the resource owner
@@ -181,7 +183,7 @@ module.exports = function() {
                 if (!registrant) {
                   return done(null, false);
                 }
-                logger.info('registrant.email',registrant.email);
+                logger.info('registrant.email', registrant.email);
                 done(null, registrant);  
               });
           });
