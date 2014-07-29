@@ -1,4 +1,5 @@
-var utils = require('../lib/utils');
+var request = require('supertest'),
+    utils = require('../lib/utils');
 
 //var geboMongoose = require('gebo-mongoose-connection');
 //var mongoose = geboMongoose.get(true);
@@ -84,7 +85,8 @@ exports.testModes = {
  * This ensures that a connection is made to the
  * test databases
  */
-var nativeMongoConnection = require('../lib/native-mongo-connection').get(true, function(){});
+var mongooseConnection = require('gebo-mongoose-connection'),
+    nativeMongoConnection = require('../lib/native-mongo-connection').get(true, function(){});
 
 /**
  * Add an action
@@ -276,9 +278,82 @@ exports.enable = {
 
 
 /**
- * This ensures that all the expected HTTP codes get
+ * These tests ensure that all the expected HTTP codes get
  * returned at the right time
  */
+var _goodMessage = {
+        sender: 'someguy@example.com',
+        performative: 'request',    
+        action: 'ls',
+        content: { 
+            resource: 'files',
+            fields: ['_id', 'name', 'lastModified'],
+        },
+        access_token: 'SomeAccessToken',
+    };
+
+var geboDb, agentDb;
+
 exports.api = { 
+
+    setUp: function(callback) {
+        _gebo = require('..')(true);
+
+        // The gebo, by default, redirects all requests to
+        // HTTPS. This overrides the redirecting function,
+        // which the tests don't like.
+        var index = utils.getIndexOfObject(_gebo.server._router.stack, 'name', 'requireHttps');
+        if (index > -1) {
+          _gebo.server._router.stack.splice(index, 1);
+        }
+
+        // Set up permissions and a token for a friendo
+        geboDb = new _gebo.schemata.gebo();
+        var registrant = new geboDb.registrantModel({
+                name: 'Some guy',
+                email: 'someguy@example.com',
+            });
+
+        agentDb = new _gebo.schemata.agent();
+        var friendo = new agentDb.friendoModel({
+                name: 'Some guy',
+                email: 'someguy@example.com',
+                gebo: 'https://somegebo.com',
+            });
+
+        friendo.permissions.push({ resource: 'ls',
+                                   read: true, 
+                                   write: false, 
+                                   execute: false, 
+                                 });
+
+        friendo.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            callback();
+          });
+    },
+
+    tearDown: function(callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
+    },
+
+    'Respond with 200 when a well-formed request has been received': function(test) {
+        request(_gebo.server).
+            post('/perform').
+            send(_goodMessage).
+            expect(200, test.done);
+    },
 
 };
