@@ -45,6 +45,7 @@ var CLIENT = 'yanfen@example.com',
 var SEND_REQ = {
         body: { 
              sender: CLIENT,
+             performative: 'request',
              action: 'ls',
              content: {
                 resource: 'friendos',
@@ -55,11 +56,20 @@ var SEND_REQ = {
 
 var _code, _content;
 var RES = {
-    send: function(code, content) {
+    status: function(code) {
         _code = code;
-        _content = content;
-        return;
-      }
+        return { 
+                send: function(content) {
+                    _content = content;
+                    return;
+                }
+        }
+      },
+//    send: function(code, content) {
+//        _code = code;
+//        _content = content;
+//        return;
+//      }
   };
 
 /**
@@ -135,7 +145,7 @@ exports.handler = {
               test.equal(err, 'You are not allowed access to that resource');
             }
             test.equal(_code, 401);
-            test.equal(_content, 'You are not allowed access to that resource');
+            test.equal(_content.message, 'You are not allowed access to that resource');
             test.done();
           });
 
@@ -188,7 +198,7 @@ exports.handler = {
               test.ok(false, err);
             }
             test.equal(_code, 501);
-            test.equal(_content, 'I don\'t know how to bakeACake');
+            test.equal(_content.message, 'I don\'t know how to bakeACake');
             test.done();
         }); 
     },
@@ -253,7 +263,6 @@ exports.handler = {
                 user: { email: CLIENT, admin: false },
               };
 
-        console.log('Hello');
         perform.handler(req, RES, function(err) {
             if (err) {
               test.ok(false, err);
