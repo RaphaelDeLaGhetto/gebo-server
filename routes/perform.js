@@ -71,7 +71,7 @@ module.exports = function(testing) {
                          * perform the requested action
                          */
                         if(!actionPtr[actionParts[actionParts.length - 1]]) {
-                          res.send(501, 'I don\'t know how to ' + message.action);
+                          res.status(501).send({ error: 501, message: 'I don\'t know how to ' + message.action });
                           done();
                         }
                         else {
@@ -84,7 +84,8 @@ module.exports = function(testing) {
                                           // the status code will be set to the 
                                           // numeric value contained in data
                                           if (typeof data === 'number') {
-                                            res.send(200, '' + data);
+                                            //res.send(200, '' + data);
+                                            res.status(200).send('' + data);
                                           }
                                           else {
                                             res.status(200).send(data);
@@ -93,26 +94,29 @@ module.exports = function(testing) {
                                         }).
                                       catch(function(err) {
                                           logger.error('Social commitment fulfil', err);
-                                          res.send(401, err);
+                                          //res.send(401, err);
+                                          res.status(401).send({ code: '401', message: err });
                                           done(err);
                                         });
                                 }).
                               catch(function(err) {
                                       logger.error('Action', err);
-                                      res.send(401, err);
+                                      //res.send(401, err);
+                                      res.status(401).send({ code: '401', message: 'You are not allowed access to that resource' });
                                       done(err);
                                 });
                         }
                       }).
                     catch(function(err) {
                         logger.error('Verification', err);
-                        res.send(401, err);
+                        //res.send(401, err);
+                        res.status(401).send({ code: '401', message: err });
                         done(err);
                       });
               }).
             catch(function(err) {
-                logger.error('Cannot commit', err);
-                res.send(401, err);
+                logger.error('Bad request', err);
+                res.status(400).send({ code: '400', message: 'The request could not be understood by the server' });
                 done(err);
               });
        };
