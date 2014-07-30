@@ -135,43 +135,45 @@ module.exports = function (grunt) {
      * friendo
      */
     grunt.registerTask('friendo', 'add a friendo to the agent specified',
-        function (name, email, agentEmail, geboUri) {
+        function (name, email, geboUri) {
 
             // Put grunt into async mode
             var done = this.async();
  
-            utils.getPrivateKeyAndCertificate().
-                then(function(pair) {
-                    var agentDb = require('./schemata/agent')();
-                    var friendo = new agentDb.friendoModel({
-                            name: name,
-                            email: email,
-                            uri: geboUri,
-                            myPrivateKey: pair.privateKey,
-                            myCertificate: pair.certificate,
-                        });
+            // Removing the private key and certificate for now
+            // 2014-7-30
+//            utils.getPrivateKeyAndCertificate().
+//                then(function(pair) {
+            var agentDb = require('./schemata/agent')();
+            var friendo = new agentDb.friendoModel({
+                                name: name,
+                                email: email,
+                                gebo: geboUri,
+//                            myPrivateKey: pair.privateKey,
+//                            myCertificate: pair.certificate,
+                            });
         
                     // Can't modify ID in findOneAndUpdate
-                    friendo._id = undefined;
+            friendo._id = undefined;
        
-                    agentDb.friendoModel.findOneAndUpdate({ email: friendo.email },
-                            friendo.toObject(),
-                            { upsert: true },
-                            function (err) {
-                                if (err) {
-                                  console.log('Error: ' + err);
-                                  done(false);
-                                }
-                                else {
-                                  console.log('Saved friendo: ' + friendo.name);
-                                  done();
-                                }
-                              });
-                  }).
-                catch(function(err) {
-                    console.log(err);
-                    done();
-                  });
+            agentDb.friendoModel.findOneAndUpdate({ email: friendo.email },
+                    friendo.toObject(),
+                    { upsert: true },
+                    function (err) {
+                        if (err) {
+                          console.log('Error: ' + err);
+                          done(false);
+                        }
+                        else {
+                          console.log('Saved friendo: ' + friendo.name);
+                          done();
+                        }
+                });
+//                  }).
+//                catch(function(err) {
+//                    console.log(err);
+//                    done();
+//                  });
           });
 
     /**
@@ -214,20 +216,24 @@ module.exports = function (grunt) {
      * createtoken
      */
     grunt.registerTask('createtoken', 'Create an access token for a registrant',
-        function(registrantEmail, resource, tokenString) {
+        function(email, tokenString) {
 
             // Save call is async. Put grunt into async mode to work
             var done = this.async();
 
-            db.registrantModel.findOne({ email: registrantEmail },
+            //db.registrantModel.findOne({ email: registrantEmail },
+            var agentDb = require('./schemata/agent')();
+            agentDb.friendoModel.findOne({ email: email },
                 function(err, registrant) {
                     if (err) {
                       console.log(err);
                     }
 
+                    var db = require('./schemata/gebo')();
                     var token = new db.tokenModel({
-                                            registrantId: registrant._id,
-                                            resource: resource,
+                                            //registrantId: registrant._id,
+                                            friendoId: registrant._id,
+                                            //resource: resource,
                                             string: tokenString,
                                         });
 

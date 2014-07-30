@@ -89,11 +89,12 @@ module.exports = function() {
      */
     var tokenSchema = new Schema({
         // The resource owner
-        registrantId: { type: ObjectId, required: true, unique: false },
+        //registrantId: { type: ObjectId, required: true, unique: false },
         // The ID of the friendo granted access to the resource
-        friendoId: { type: ObjectId, required: false, default: null },
+        //friendoId: { type: ObjectId, required: false, default: null },
+        friendoId: { type: ObjectId, required: true, default: null },
         // The resource
-        resource: { type: String, required: true, unique: false },
+        //resource: { type: String, required: true, unique: false },
         // The authorized IP address
         ip: { type: String, required: false, unique: false },
         // The token itself

@@ -300,8 +300,8 @@ exports.api = {
         _gebo = require('..')(true);
 
         // The gebo, by default, redirects all requests to
-        // HTTPS. This overrides the redirecting function,
-        // which the tests don't like.
+        // HTTPS. This removes the redirecting function from
+        // the middleware stack, which the tests don't like.
         var index = utils.getIndexOfObject(_gebo.server._router.stack, 'name', 'requireHttps');
         if (index > -1) {
           _gebo.server._router.stack.splice(index, 1);
@@ -355,5 +355,83 @@ exports.api = {
             send(_goodMessage).
             expect(200, test.done);
     },
+
+/*
+     ------ Testing a Typical Request -----
+             HttpCode: 200
+             Content-Type: application/json; charset=utf-8
+
+
+              ------ Testing an Invalid API Key -----
+              HttpCode: 401
+              Content-Type: application/json; charset=utf-8
+
+              {
+                          "error": {
+                                          "code": 123,
+                                                  "message": "The token provided is invalid"
+                                                              }
+              }
+
+
+     ------ Testing an Invalid Content Type Header -----
+             HttpCode: 400
+             Content-Type: application/json; charset=utf-8
+
+             {
+                         "error": {
+                                         "code": 123,
+                                                 "message": "The request could not be understood by the server."
+                                                             }
+             }
+
+      ------ Testing an Invalid Sender -----
+              HttpCode: 401
+              Content-Type: application/json; charset=utf-8
+
+              {
+                          "error": {
+                                          "code": 123,
+                                                  "message": "The token provided is invalid"
+                                                              }
+              }
+
+
+       ------ Testing an Invalid Performative -----
+               HttpCode: 501
+               Content-Type: application/json; charset=utf-8
+
+               {
+                           "error": {
+                                           "code": 123,
+                                                   "message": "The performative is not recognized"
+                                                               }
+               }
+
+
+        ------ Testing an Invalid Action -----
+                HttpCode: 501
+                Content-Type: application/json; charset=utf-8
+
+                {
+                            "error": {
+                                            "code": 123,
+                                                    "message": "I don't know how to _______"
+                                                                }
+                }
+
+         ------ Testing an Invalid Content -----
+                 HttpCode: 501
+                 Content-Type: application/json; charset=utf-8
+
+                 {
+                             "error": {
+                                             "code": 123,
+                                                     "message": "Content format is not available"
+                                                                 }
+                 }
+
+
+*/
 
 };

@@ -21,7 +21,8 @@ var passport = require('passport'),
 
 module.exports = function() {
 
-    var geboDb = require('../schemata/gebo')();
+    var geboDb = require('../schemata/gebo')(),
+        agentDb = require('../schemata/agent')();
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
@@ -106,42 +107,42 @@ module.exports = function() {
      * to the `Authorization` header).  While this approach is not recommended by
      * the specification, in practice it is quite common.
      */
-    passport.use(new BasicStrategy(
-        function(clientName, password, done) {
-            loggger.info('BasicStrategy');
-
-            geboDb.clientModel.findOne({ name: clientName }, function(err, client) {
-                if (err) {
-                  return done(err);
-                }
-                if (!client) {
-                  return done(null, false, { message: 'Invalid client credentials' });
-                }
-                if (client.secret !== password) {
-                  return done(null, false);
-                }
-                return done(null, client);
-              });
-          }
-      ));
-    
-    passport.use(new ClientPasswordStrategy(
-        function(clientId, secret, done) {
-            logger.info('ClientPasswordStrategy');
-            geboDb.clientModel.findOne({ clientId: clientId, secret: secret }, function(err, client) {
-                if (err) {
-                  return done(err);
-                }
-                if (!client) {
-                  return done(null, false);
-                }
-                if (client.secret !== secret) {
-                  return done(null, false);
-                }
-                return done(null, client);
-              });
-          }
-      ));
+//    passport.use(new BasicStrategy(
+//        function(clientName, password, done) {
+//            loggger.info('BasicStrategy');
+//
+//            geboDb.clientModel.findOne({ name: clientName }, function(err, client) {
+//                if (err) {
+//                  return done(err);
+//                }
+//                if (!client) {
+//                  return done(null, false, { message: 'Invalid client credentials' });
+//                }
+//                if (client.secret !== password) {
+//                  return done(null, false);
+//                }
+//                return done(null, client);
+//              });
+//          }
+//      ));
+//    
+//    passport.use(new ClientPasswordStrategy(
+//        function(clientId, secret, done) {
+//            logger.info('ClientPasswordStrategy');
+//            geboDb.clientModel.findOne({ clientId: clientId, secret: secret }, function(err, client) {
+//                if (err) {
+//                  return done(err);
+//                }
+//                if (!client) {
+//                  return done(null, false);
+//                }
+//                if (client.secret !== secret) {
+//                  return done(null, false);
+//                }
+//                return done(null, client);
+//              });
+//          }
+//      ));
     
     /**
      * BearerStrategy
@@ -164,27 +165,46 @@ module.exports = function() {
 
             if (!token) {
               return done(null, false, 'The token provided is invalid');
-//              return done('The token provided is invalid', null);
             }
+
             logger.info('token found:', token.string);
 
             if (token.expires && new Date(token.expires) < new Date()) {
               logger.info('token: expired', token.expires);
-              //return done('The token provided is invalid', null);
               return done(null, false, 'The token provided is invalid');
             }
             
             // Look up the resource owner
-            geboDb.registrantModel.findOne({ _id: token.registrantId }, { password: 0 }, function(err, registrant) {
+            agentDb.friendoModel.findOne({ _id: token.friendoId }, function(err, friendo) {
                 if (err) {
                   return done(err);
                 }
 
-                if (!registrant) {
+                if (!friendo) {
                   return done(null, false);
                 }
-                logger.info('registrant.email', registrant.email);
-                done(null, registrant);  
+
+                // Not every friendo is a registrant. If there's a registrant ID, then the
+                // registrant object is returned (because the registrant may have administrative
+                // privileges
+                else if (friendo.registrantId) {
+                  geboDb.registrantModel.findOne({ _id: friendo.registrantId }, { password: 0 }, function(err, registrant) {
+                        if (err) {
+                          return done(err);
+                        }
+                        if (!registrant) {
+                          return done(null, false);
+                        }
+                        else {
+                          logger.info('registrant.email', registrant.email);
+                          done(null, registrant);  
+                        }
+                    });
+                }
+                else {
+                  logger.info('friendo.email', friendo.email);
+                  done(null, friendo);  
+                }
               });
           });
       };

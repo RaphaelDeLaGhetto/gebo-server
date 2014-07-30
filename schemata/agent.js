@@ -39,10 +39,19 @@ module.exports = function() {
     var friendoSchema = new Schema({
         name: { type: String, required: true, unique: false, default: 'Innominate' },
         email: { type: String, required: true, unique: true },
+
+        // A friendo doesn't necessarily need to be registered with
+        // the gebo. If he is, however, then he can use traditional 
+        // authentication to do a login and may have administrative 
+        // privileges.
+        registrantId: { type: ObjectId, required: false, unique: true },
     
-        // Experimental
-        myPrivateKey: { type: String, default: null, required: false },
-        myCertificate: { type: String, default: null, required: false },
+        // Candidates for removal
+        // 2014-7-30
+//        myPrivateKey: { type: String, default: null, required: false },
+//        myCertificate: { type: String, default: null, required: false },
+
+        // Experimental JWT stuff. See config/token
         certificate: { type: String, default: null, unique: false },
     
         permissions: [permissionSchema],

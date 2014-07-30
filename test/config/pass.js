@@ -15,6 +15,7 @@ var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '9012',
     REGULAR_TOKEN = '3456',
     EXPIRED_TOKEN = '7890',
+    NON_REGISTERED_TOKEN = 'ABCD',
     HAI_EMAIL = 'human-agent@interface.org',
     IP = '127.0.0.1';
 
@@ -112,7 +113,9 @@ exports.bearerStrategy = {
     setUp: function(callback) {
         try {
             /**
-             * Setup a registrant
+             * Setup a registrant and make him a friendo. If 
+             * registrant isn't also a friendo, then he won't
+             * be able to do anything
              */
             var adminRegistrant = new geboDb.registrantModel({
                     name: 'dan',
@@ -121,19 +124,27 @@ exports.bearerStrategy = {
                     admin: true,
                     _id: new mongo.ObjectID('0123456789AB')
                 });
-          
+
+            var adminFriendo = new agentDb.friendoModel({
+                    name: 'dan',
+                    email: 'dan@example.com',
+                    gebo: 'https://example.com',
+                    registrantId:  adminRegistrant._id,
+                    _id: new mongo.ObjectID('123456789ABC')
+                });
+         
             /**
              * Create an access token for the friendo
              */
             var adminToken = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('0123456789AB'),
-                    resource: HAI_EMAIL,
+                    friendoId: adminFriendo._id,
                     ip: IP,
                     string: ADMIN_TOKEN,
                 });
 
             /** 
-             * Set up another registrant
+             * Set up another registrant and make him 
+             * a friendo
              */
             var registrant = new geboDb.registrantModel({
                     name: 'yanfen',
@@ -143,12 +154,19 @@ exports.bearerStrategy = {
                     _id: new mongo.ObjectID('123456789ABC')
                 });
 
+            var registrantFriendo = new agentDb.friendoModel({
+                    name: 'yanfen',
+                    email: 'yanfen@example.com',
+                    gebo: 'https://example.com',
+                    registrantId: registrant._id,
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
+ 
             /**
              * Create an access token for regular user 
              */
             var regularToken = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('123456789ABC'),
-                    resource: HAI_EMAIL,
+                    friendoId: registrantFriendo._id,
                     ip: IP,
                     string: REGULAR_TOKEN,
                 });
@@ -157,15 +175,32 @@ exports.bearerStrategy = {
              * Create an expired token
              */
             var expiredToken = new geboDb.tokenModel({
-                    registrantId: new mongo.ObjectID('456789ABCDEF'),
-                    resource: HAI_EMAIL,
+                    friendoId: new mongo.ObjectID('456789ABCDEF'),
                     ip: IP,
                     string: EXPIRED_TOKEN,
                     expires: Date.now() - 60*60*1000,
                 });
 
-            // Tokens weren't getting saved in time for tests...
-            // There has got to be a better way to do this.
+            /**
+             * Create a non-registered friendo
+             */
+            var nonRegisteredFriendo = new agentDb.friendoModel({
+                    name: 'john',
+                    email: 'john@example.com',
+                    gebo: 'https://example.com',
+                    _id: new mongo.ObjectID('3456789ABCDE')
+                });
+ 
+            /**
+             * Create an access token for the non-registered friendo 
+             */
+            var nonRegisteredToken = new geboDb.tokenModel({
+                    friendoId: nonRegisteredFriendo._id,
+                    ip: IP,
+                    string: NON_REGISTERED_TOKEN,
+                });
+
+
             expiredToken.save(function(err) {
                 if (err) {
                   console.log(err);
@@ -178,15 +213,35 @@ exports.bearerStrategy = {
                         if (err) {
                           console.log(err);
                         }
-                        adminToken.save(function(err) {
+                        registrantFriendo.save(function(err) {
                             if (err) {
                               console.log(err);
                             }
-                            adminRegistrant.save(function(err) {
+                            adminToken.save(function(err) {
                                 if (err) {
                                   console.log(err);
                                 }
-                                callback();
+                                adminRegistrant.save(function(err) {
+                                    if (err) {
+                                      console.log(err);
+                                    }
+                                    adminFriendo.save(function(err) {
+                                        if (err) {
+                                          console.log(err);
+                                        }
+                                        nonRegisteredFriendo.save(function(err) {
+                                            if (err) {
+                                              console.log(err);
+                                            }
+                                            nonRegisteredToken.save(function(err) {
+                                               if (err) {
+                                                 console.log(err);
+                                               }
+                                               callback();
+                                             });
+                                          });
+                                      });
+                                  });
                               });
                           });
                       });
@@ -240,85 +295,21 @@ exports.bearerStrategy = {
           });
     },
 
-
-//    'Return permissions object for a friendo requesting a resource from a regular agent': function(test) {
-//        test.expect(7);
-//
-//        pass.bearerStrategy(FRIEND_TOKEN, function(err, verified) {
-//            if (err) {
-//              test.ok(false, err);
-//            }
-//            else {
-//              test.equal(verified.agentName, 'yanfen'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-//              test.equal(verified.resource, utils.getMongoCollectionName('human-agent@interface.org')); 
-//              test.equal(verified.read, true); 
-//              test.equal(verified.write, false); 
-//              test.equal(verified.execute, false); 
-//              test.equal(verified.admin, false); 
-//            }
-//            test.done();
-//        });
-//    },
-//
-//    'Return permissions object for a friendo requesting a resource from an admin agent': function(test) {
-//        test.expect(7);
-//        pass.bearerStrategy(ADMIN_FRIEND_TOKEN, function(err, verified) {
-//            if (err) {
-//              console.log('err');
-//              console.log(err);
-//              test.ok(false, err);
-//            }
-//            else {
-//              test.equal(verified.agentName, 'dan'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-//              test.equal(verified.resource, utils.getMongoCollectionName('human-agent@interface.org')); 
-//              test.equal(verified.read, true); 
-//              test.equal(verified.write, false); 
-//              test.equal(verified.execute, false); 
-//              test.equal(verified.admin, true); 
-//            }
-//            test.done();
-//        });
-//    },
-//    
-//    'Return permissions object for an admin agent requesting access to his own resource': function(test) {
-//        test.expect(7);
-//        pass.bearerStrategy(ADMIN_TOKEN, function(err, verified) {
-//            if (err) {
-//              test.ok(false, err);
-//            }
-//            else {
-//              test.equal(verified.agentName, 'dan'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('dan@example.com')); 
-//              test.equal(verified.resource, utils.getMongoCollectionName(HAI_EMAIL)); 
-//              test.equal(verified.read, true); 
-//              test.equal(verified.write, true); 
-//              test.equal(verified.execute, true); 
-//              test.equal(verified.admin, true); 
-//            }
-//            test.done();
-//        });
-//    },
-//
-//    'Return permissions object for a regular agent requesting access to his own resource': function(test) {
-//        test.expect(7);
-//        pass.bearerStrategy(REGULAR_TOKEN, function(err, verified) {
-//            if (err) {
-//              test.ok(false, err);
-//            }
-//            else {
-//              test.equal(verified.agentName, 'yanfen'); 
-//              test.equal(verified.dbName, utils.getMongoDbName('yanfen@example.com')); 
-//              test.equal(verified.resource, utils.getMongoCollectionName(HAI_EMAIL)); 
-//              test.equal(verified.read, true); 
-//              test.equal(verified.write, true); 
-//              test.equal(verified.execute, true); 
-//              test.equal(verified.admin, false); 
-//            }
-//            test.done();
-//        });
-//    },
+    'Return a friendo object for a non-registered friendo with a valid token': function(test) {
+        test.expect(4);
+        pass.bearerStrategy(NON_REGISTERED_TOKEN, function(err, friendo) {
+            if (err) {
+              test.ok(false, err);
+            }
+            else {
+              test.equal(friendo.name, 'john');
+              test.equal(friendo.email, 'john@example.com');
+              test.equal(friendo.admin, undefined);
+              test.equal(friendo.password, undefined);
+            }
+            test.done();
+          });
+    },
 
     'Do not barf if the token provided does not exist': function(test) {
         test.expect(1);
@@ -330,11 +321,9 @@ exports.bearerStrategy = {
                                      'message': 'The token provided is invalid'
                               }
                 });
-//              test.equal(err, 'The token provided is invalid');       
             }
             else {
               test.equal(verified, false);
-//              test.ok(false, 'Permission should not have been granted');
             }
             test.done();
         });
@@ -350,11 +339,9 @@ exports.bearerStrategy = {
                                      'message': 'The token provided is invalid'
                               }
                 });
-//              test.equal(err, 'The token provided is invalid');       
             } 
             else {
               test.equal(friendo, false);
-//              test.ok(false, 'Permission should not have been granted');
             }
             test.done();
           });
@@ -389,7 +376,6 @@ exports.clientJwtBearerStrategy = {
                     _id: new mongo.ObjectID('123456789ABC')
                 });
 
-            // There has got to be a better way to do this.
             friendo.save(function(err) {
                 if (err) {
                   console.log(err);
