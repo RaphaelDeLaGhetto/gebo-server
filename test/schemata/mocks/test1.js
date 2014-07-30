@@ -1,5 +1,5 @@
 
-var mongoose = require('gebo-mongoose-connection').get(),
+var mongoose = require('gebo-mongoose-connection').get(true),
     utils = require('../../../lib/utils');
 
 module.exports = function () {
