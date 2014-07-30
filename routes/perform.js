@@ -87,7 +87,7 @@ module.exports = function(testing) {
                                             res.send(200, '' + data);
                                           }
                                           else {
-                                            res.send(200, data);
+                                            res.status(200).send(data);
                                           }
                                           done();
                                         }).
