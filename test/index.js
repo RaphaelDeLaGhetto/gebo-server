@@ -289,7 +289,7 @@ var _goodMessage = {
             resource: 'files',
             fields: ['_id', 'name', 'lastModified'],
         },
-        access_token: 'SomeAccessToken',
+        access_token: 'LetMeIn',
     };
 
 var geboDb, agentDb;
@@ -307,13 +307,7 @@ exports.api = {
           _gebo.server._router.stack.splice(index, 1);
         }
 
-        // Set up permissions and a token for a friendo
-        geboDb = new _gebo.schemata.gebo();
-        var registrant = new geboDb.registrantModel({
-                name: 'Some guy',
-                email: 'someguy@example.com',
-            });
-
+        // Make a friendo
         agentDb = new _gebo.schemata.agent();
         var friendo = new agentDb.friendoModel({
                 name: 'Some guy',
@@ -321,17 +315,29 @@ exports.api = {
                 gebo: 'https://somegebo.com',
             });
 
-        friendo.permissions.push({ resource: 'ls',
+        friendo.permissions.push({ resource: 'files',
                                    read: true, 
                                    write: false, 
                                    execute: false, 
                                  });
 
+        // Set up permissions and a token for a friendo
+        geboDb = new _gebo.schemata.gebo();
+        var token = new geboDb.tokenModel({
+            friendoId: friendo._id,
+            string: 'LetMeIn',
+          });
+
         friendo.save(function(err) {
             if (err) {
               console.log(err);
             }
-            callback();
+            token.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
           });
     },
 
