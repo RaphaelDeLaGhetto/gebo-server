@@ -1,4 +1,5 @@
-var request = require('supertest'),
+var extend = require('extend'),
+    request = require('supertest'),
     utils = require('../lib/utils');
 
 //var geboMongoose = require('gebo-mongoose-connection');
@@ -85,7 +86,7 @@ exports.testModes = {
  * This ensures that a connection is made to the
  * test databases
  */
-var mongooseConnection = require('gebo-mongoose-connection'),
+var mongooseConnection = require('gebo-mongoose-connection').get(true),
     nativeMongoConnection = require('../lib/native-mongo-connection').get(true, function(){});
 
 /**
@@ -362,23 +363,30 @@ exports.api = {
             expect(200, test.done);
     },
 
+    'Respond with 401 when given an invalid token': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.access_token = 'InvalidToken';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(401, test.done);
+    },
+
+    'Respond with 400 when given invalid content type header': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.content = 'Content should be an object, not a string';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(400, test.done);
+    },
+
+
 /*
-     ------ Testing a Typical Request -----
-             HttpCode: 200
-             Content-Type: application/json; charset=utf-8
-
-
-              ------ Testing an Invalid API Key -----
-              HttpCode: 401
-              Content-Type: application/json; charset=utf-8
-
-              {
-                          "error": {
-                                          "code": 123,
-                                                  "message": "The token provided is invalid"
-                                                              }
-              }
-
 
      ------ Testing an Invalid Content Type Header -----
              HttpCode: 400
