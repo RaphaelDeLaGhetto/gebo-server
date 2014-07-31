@@ -1,12 +1,13 @@
+/**
+ * This ensures that a connection is made to the
+ * test databases
+ */
+var mongooseConnection = require('gebo-mongoose-connection').get(true),
+    nativeMongoConnection = require('../lib/native-mongo-connection').get(true, function(){});
+
 var extend = require('extend'),
     request = require('supertest'),
     utils = require('../lib/utils');
-
-//var geboMongoose = require('gebo-mongoose-connection');
-//var mongoose = geboMongoose.get(true);
-//geboMongoose.once('mongoose-connect', function() {
-//    mongoose.connection.db.close();
-//  });
 
 var events = require('events'),
     event = new events.EventEmitter();
@@ -14,6 +15,148 @@ var events = require('events'),
 var nconf = require('nconf');
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testEmail'));
+
+
+/**
+ * Ensure the HTTP codes are as expected
+ */
+var _goodMessage = {
+        sender: 'someguy@example.com',
+        performative: 'request',    
+        action: 'ls',
+        content: { 
+            resource: 'files',
+            fields: ['_id', 'name', 'lastModified'],
+        },
+        access_token: 'LetMeIn',
+    };
+
+var geboDb, agentDb;
+
+exports.httpCodes = { 
+
+    setUp: function(callback) {
+        _gebo = require('..')(true);
+
+        // The gebo, by default, redirects all requests to
+        // HTTPS. This removes the redirecting function from
+        // the middleware stack, which the tests don't like.
+        var index = utils.getIndexOfObject(_gebo.server._router.stack, 'name', 'requireHttps');
+        if (index > -1) {
+          _gebo.server._router.stack.splice(index, 1);
+        }
+
+        // Make a friendo
+        agentDb = new _gebo.schemata.agent();
+        var friendo = new agentDb.friendoModel({
+                name: 'Some guy',
+                email: 'someguy@example.com',
+                gebo: 'https://somegebo.com',
+            });
+
+        friendo.permissions.push({ resource: 'files',
+                                   read: true, 
+                                   write: false, 
+                                   execute: false, 
+                                 });
+
+        // Set up permissions and a token for a friendo
+        geboDb = new _gebo.schemata.gebo();
+        var token = new geboDb.tokenModel({
+            friendoId: friendo._id,
+            string: 'LetMeIn',
+          });
+
+        friendo.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            token.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
+          });
+    },
+
+    tearDown: function(callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                }
+                callback();
+              });
+          });
+    },
+
+    'Respond with 200 when a well-formed request has been received': function(test) {
+        request(_gebo.server).
+            post('/perform').
+            send(_goodMessage).
+            expect(200, test.done);
+    },
+
+    'Respond with 401 when given an invalid token': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.access_token = 'InvalidToken';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(401, test.done);
+    },
+
+    'Respond with 400 when given invalid content type header': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.content = 'Content should be an object, not a string';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(400, test.done);
+    },
+
+    'Respond with 401 when an unknown sender presents a token': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.sender = 'somefakeguy@example.com';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(401, test.done);
+    },
+
+
+    'Respond with 501 if given an unknown performative': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.performative = 'FakePerformative';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(501, test.done);
+    },
+
+    'Respond with 501 if given an unknown action': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.action = 'hemTrousers';
+
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(501, test.done);
+    },
+};
 
 /**
  * Test modes
@@ -81,13 +224,6 @@ exports.testModes = {
     },
 
 };
-
-/**
- * This ensures that a connection is made to the
- * test databases
- */
-var mongooseConnection = require('gebo-mongoose-connection').get(true),
-    nativeMongoConnection = require('../lib/native-mongo-connection').get(true, function(){});
 
 /**
  * Add an action
@@ -278,174 +414,4 @@ exports.enable = {
 };
 
 
-/**
- * These tests ensure that all the expected HTTP codes get
- * returned at the right time
- */
-var _goodMessage = {
-        sender: 'someguy@example.com',
-        performative: 'request',    
-        action: 'ls',
-        content: { 
-            resource: 'files',
-            fields: ['_id', 'name', 'lastModified'],
-        },
-        access_token: 'LetMeIn',
-    };
 
-var geboDb, agentDb;
-
-exports.api = { 
-
-    setUp: function(callback) {
-        _gebo = require('..')(true);
-
-        // The gebo, by default, redirects all requests to
-        // HTTPS. This removes the redirecting function from
-        // the middleware stack, which the tests don't like.
-        var index = utils.getIndexOfObject(_gebo.server._router.stack, 'name', 'requireHttps');
-        if (index > -1) {
-          _gebo.server._router.stack.splice(index, 1);
-        }
-
-        // Make a friendo
-        agentDb = new _gebo.schemata.agent();
-        var friendo = new agentDb.friendoModel({
-                name: 'Some guy',
-                email: 'someguy@example.com',
-                gebo: 'https://somegebo.com',
-            });
-
-        friendo.permissions.push({ resource: 'files',
-                                   read: true, 
-                                   write: false, 
-                                   execute: false, 
-                                 });
-
-        // Set up permissions and a token for a friendo
-        geboDb = new _gebo.schemata.gebo();
-        var token = new geboDb.tokenModel({
-            friendoId: friendo._id,
-            string: 'LetMeIn',
-          });
-
-        friendo.save(function(err) {
-            if (err) {
-              console.log(err);
-            }
-            token.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                callback();
-              });
-          });
-    },
-
-    tearDown: function(callback) {
-        geboDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err)
-            }
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err)
-                }
-                callback();
-              });
-          });
-    },
-
-    'Respond with 200 when a well-formed request has been received': function(test) {
-        request(_gebo.server).
-            post('/perform').
-            send(_goodMessage).
-            expect(200, test.done);
-    },
-
-    'Respond with 401 when given an invalid token': function(test) {
-        var badMessage = {};
-        extend(true, badMessage, _goodMessage);
-        badMessage.access_token = 'InvalidToken';
-
-        request(_gebo.server).
-            post('/perform').
-            send(badMessage).
-            expect(401, test.done);
-    },
-
-    'Respond with 400 when given invalid content type header': function(test) {
-        var badMessage = {};
-        extend(true, badMessage, _goodMessage);
-        badMessage.content = 'Content should be an object, not a string';
-
-        request(_gebo.server).
-            post('/perform').
-            send(badMessage).
-            expect(400, test.done);
-    },
-
-
-/*
-
-     ------ Testing an Invalid Content Type Header -----
-             HttpCode: 400
-             Content-Type: application/json; charset=utf-8
-
-             {
-                         "error": {
-                                         "code": 123,
-                                                 "message": "The request could not be understood by the server."
-                                                             }
-             }
-
-      ------ Testing an Invalid Sender -----
-              HttpCode: 401
-              Content-Type: application/json; charset=utf-8
-
-              {
-                          "error": {
-                                          "code": 123,
-                                                  "message": "The token provided is invalid"
-                                                              }
-              }
-
-
-       ------ Testing an Invalid Performative -----
-               HttpCode: 501
-               Content-Type: application/json; charset=utf-8
-
-               {
-                           "error": {
-                                           "code": 123,
-                                                   "message": "The performative is not recognized"
-                                                               }
-               }
-
-
-        ------ Testing an Invalid Action -----
-                HttpCode: 501
-                Content-Type: application/json; charset=utf-8
-
-                {
-                            "error": {
-                                            "code": 123,
-                                                    "message": "I don't know how to _______"
-                                                                }
-                }
-
-         ------ Testing an Invalid Content -----
-                 HttpCode: 501
-                 Content-Type: application/json; charset=utf-8
-
-                 {
-                             "error": {
-                                             "code": 123,
-                                                     "message": "Content format is not available"
-                                                                 }
-                 }
-
-
-*/
-
-};

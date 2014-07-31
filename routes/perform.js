@@ -63,7 +63,7 @@ module.exports = function(testing) {
                         var actionPtr = action;
                         var actionParts = message.action.split('.');
                         if (actionParts.length === 2) {
-                            actionPtr = actionPtr[actionParts[0]];
+                          actionPtr = actionPtr[actionParts[0]];
                         }
 
                         /**
@@ -83,8 +83,9 @@ module.exports = function(testing) {
                                           // If you don't set this as a string,
                                           // the status code will be set to the 
                                           // numeric value contained in data
+                                          //
+                                          // 2014-7-31 Do I need this anymore?
                                           if (typeof data === 'number') {
-                                            //res.send(200, '' + data);
                                             res.status(200).send('' + data);
                                           }
                                           else {
@@ -94,14 +95,12 @@ module.exports = function(testing) {
                                         }).
                                       catch(function(err) {
                                           logger.error('Social commitment fulfil', err);
-                                          //res.send(401, err);
                                           res.status(401).send({ code: '401', message: err });
                                           done(err);
                                         });
                                 }).
                               catch(function(err) {
                                       logger.error('Action', err);
-                                      //res.send(401, err);
                                       res.status(401).send({ code: '401', message: 'You are not allowed access to that resource' });
                                       done(err);
                                 });
@@ -109,7 +108,6 @@ module.exports = function(testing) {
                       }).
                     catch(function(err) {
                         logger.error('Verification', err);
-                        //res.send(401, err);
                         res.status(401).send({ code: '401', message: err });
                         done(err);
                       });
@@ -129,7 +127,6 @@ module.exports = function(testing) {
         if (req.user) {
           return next();
         }
-
         passport.authenticate(['bearer'], { session: false })(req, res, next);
       };
     exports.authenticate = _authenticate;
@@ -145,8 +142,28 @@ module.exports = function(testing) {
         // passport.authenticate's next() callback screws everything up
         // when the server runs for real. This step, though goofy looking,
         // circumvents that issue.
+        //
+        // 2014-7-31
+        // This also now ensures that the email that corresponds to this
+        // token matches the one provided.
         function(req, res, next) {
-            _handler(req, res, function(){});
+            // Make sure sender matches the email corresponding to the token
+            if (req.user.email.toLowerCase() === req.body.sender.toLowerCase()) {
+
+              // This is a hack that could easily be avoided, but which is 
+              // implemented for future reference (i.e., to remind me that 
+              // the performative field will eventually be necessary and 
+              // that proper response codes need to be issued)
+              if (req.body.performative.toLowerCase() === 'request') {
+                _handler(req, res, function(){});
+              }
+              else {
+                res.status(501).send({ error: 501, message: 'I do not understand that performative' });
+              }
+            }
+            else {
+              res.status(401).send({ error: 401, message: 'The token provided is invalid' });
+            }
         }
       ];
 
@@ -184,10 +201,6 @@ module.exports = function(testing) {
                 write: false,
                 execute: false,
             };
-
-//        if (!verified.dbName) {
-//          verified.dbName = utils.getMongoDbName(agent.email);
-//        }
 
         if (agent.admin) {
           verified.read = true;
