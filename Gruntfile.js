@@ -76,10 +76,10 @@ module.exports = function (grunt) {
     grunt.registerTask('dbseed', 'seed the database', function () {
         grunt.task.run('registeragent:admin:admin@example.com:secret:true');
         grunt.task.run('registeragent:bob:bob@example.com:secret:false');
-        grunt.task.run('friendo:bob:bob@example.com:admin@example.com');
-        grunt.task.run('friendo:admin:admin@example.com:bob@example.com');
-        grunt.task.run('setpermission:bob@example.com:admin@example.com:gebo-server@example.com:true:false:false');
-        grunt.task.run('setpermission:admin@example.com:bob@example.com:gebo-server@example.com:true:false:false');
+        grunt.task.run('friendo:bob:bob@example.com');
+        grunt.task.run('friendo:admin:admin@example.com');
+//        grunt.task.run('setpermission:bob@example.com:admin@example.com:gebo-server@example.com:true:false:false');
+//        grunt.task.run('setpermission:admin@example.com:bob@example.com:gebo-server@example.com:true:false:false');
       });
 
     grunt.registerTask('registeragent', 'add an agent to the database',
@@ -153,7 +153,7 @@ module.exports = function (grunt) {
 //                            myCertificate: pair.certificate,
                             });
         
-                    // Can't modify ID in findOneAndUpdate
+            // Can't modify ID in findOneAndUpdate
             friendo._id = undefined;
        
             agentDb.friendoModel.findOneAndUpdate({ email: friendo.email },
