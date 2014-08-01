@@ -106,33 +106,70 @@ module.exports = function() {
      * Here's my attempt at an implicit grant
      */
     server.grant(oauth2orize.grant.token(function(requestDetails, user, ares, done) {
-        logger.info('Implicit grant', requestDetails, user, ares);
-    
-        var tokenStr = utils.uid(256);
-      
-        var token = new geboDb.tokenModel({
-            registrantId: user._id,
-            friendoId: requestDetails.friendo,
-            resource: utils.getMongoCollectionName(requestDetails.resource),
-            ip: requestDetails.ip,
-            string: tokenStr,
-          });
-      
-        token.save(function (err, token) {
+        _implicitGrant(requestDetails, user, ares, function(err, str) {
             if (err) {
               return done(err);
             }
-            logger.info('Token', token);
-            return done(null, token.string);
-          });
+            return done(null, str);
+        });
+
+//        logger.info('Implicit grant', requestDetails, user, ares);
+//    
+//        var tokenStr = utils.uid(256);
+//      
+//        var token = new geboDb.tokenModel({
+//            registrantId: user._id,
+//            friendoId: requestDetails.friendo,
+//            resource: utils.getMongoCollectionName(requestDetails.resource),
+//            ip: requestDetails.ip,
+//            string: tokenStr,
+//          });
+//      
+//        token.save(function (err, token) {
+//            if (err) {
+//              return done(err);
+//            }
+//            logger.info('Token', token);
+//            return done(null, token.string);
+//          });
       }));
+    
+    function _implicitGrant(requestDetails, user, ares, done) {
+        logger.info('Implicit grant', requestDetails, user, ares);
+
+        agentDb.friendoModel.findOne({ email: user.email }, function(err, friendo) {
+            if (err) {
+              done(err);
+            }
+            if (!friendo) {
+              done('You may be registered, but you\'re not my friendo');
+            }
+            else {
+              var tokenStr = utils.uid(256);
+            
+              var token = new geboDb.tokenModel({
+                  friendoId: friendo._id,
+                  ip: requestDetails.ip,
+                  string: tokenStr,
+                });
+            
+              token.save(function (err, token) {
+                  if (err) {
+                    return done(err);
+                  }
+                  logger.info('Token', token.string);
+                  done(null, token.string);
+                });
+            }
+          });
+      };
+    exports.implicitGrant = _implicitGrant;
     
     // Exchange authorization codes for access tokens.  The callback accepts the
     // `client`, which is exchanging `code` and any `redirectUri` from the
     // authorization request for verification.  If these values are validated, the
     // application issues an access token on behalf of the user who authorized the
     // code.
-    
     server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
         logger.warn('------ regular exchange, no no');
         geboDb.authorizationModel.findOne({ code: code }, function (err, authCode) {

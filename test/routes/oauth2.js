@@ -360,7 +360,113 @@ exports.processScope = {
 //};
 
 
-exports.verify = { 
+/**
+ * implicitGrant
+ */
+exports.implicitGrant = { 
+
+   setUp: function(callback) {
+        var registrant = new geboDb.registrantModel({
+                    name: 'Dan',
+                    email: 'dan@example.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('0123456789AB')
+                });
+
+        var nonFriendoRegistrant = new geboDb.registrantModel({
+                    name: 'Marco',
+                    email: 'marco@example.com',
+                    password: 'password123',
+                    admin: false,
+                    _id: new mongo.ObjectID('23456789ABCD')
+                });
 
 
+        var friendo = new agentDb.friendoModel({
+                    name: 'Dan',
+                    email: 'dan@example.com',
+                    _id: new mongo.ObjectID('123456789ABC')
+              });
+
+        friendo.permissions.push({ resource: 'someCollection' });
+
+        registrant.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
+            friendo.save(function(err) {
+                if (err) {
+                  console.log(err);
+                }
+                callback();
+              });
+          });
+    },
+
+    tearDown: function(callback) {
+        geboDb.connection.db.dropDatabase(function(err) {
+            if (err) {
+              console.log(err)
+            }
+            agentDb.connection.db.dropDatabase(function(err) {
+                if (err) {
+                  console.log(err)
+                 }
+                 callback();
+              });
+          });
+    },
+
+    'Add a token for a registered user who is also a friendo': function(test) {
+        test.expect(6);
+        // Make sure there are no tokens
+        geboDb.tokenModel.find({}, function(err, tokens) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(tokens.length, 0);
+
+            oauth2.implicitGrant({ ip: '127.0.0.1' }, { email: 'dan@example.com' }, null, function(err, tokenStr) {
+                test.ok(tokenStr);
+
+                geboDb.tokenModel.find({}, function(err, tokens) {
+                    if (err) {
+                      test.ok(false, err);
+                    }
+                    test.equal(tokens.length, 1);
+                    test.equal(tokens[0].string, tokenStr);
+                    test.equal(tokens[0].ip, '127.0.0.1');
+                    test.equal(tokens[0].friendoId, new mongo.ObjectID('123456789ABC').toString());
+                    test.done();
+                  });
+              });
+          });
+    },
+
+    'Do not add token for registered user who is not a friendo': function(test) {
+        test.expect(3);
+        // Make sure there are no tokens
+        geboDb.tokenModel.find({}, function(err, tokens) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(tokens.length, 0);
+
+            oauth2.implicitGrant({ ip: '127.0.0.1' }, { email: 'marco@example.com' }, null, function(err, tokenStr) {
+                if (err) {
+                  test.equal(err, 'You may be registered, but you\'re not my friendo');
+                }
+
+                geboDb.tokenModel.find({}, function(err, tokens) {
+                    if (err) {
+                      test.ok(false, err);
+                    }
+                    test.equal(tokens.length, 0);
+                    test.done();
+                  });
+              });
+          });
+    },
 };
+
