@@ -180,7 +180,7 @@ module.exports = function (grunt) {
      * setpermission
      */
     grunt.registerTask('setpermission', 'Set access to an agent\'s resource',
-        function(friendoAgent, ownerAgent, resource, read, write, execute) {
+        function(friendoAgent, resource, read, write, execute) {
             var agentDb = require('./schemata/agent')();
             
             // Save call is async. Put grunt into async mode to work
