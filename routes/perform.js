@@ -80,7 +80,7 @@ module.exports = function(testing) {
                                 if (data.error) {
                                   logger.error('Server error', data.error);
                                   res.status(500).send(data.error);
-                                  done(err);
+                                  done(data.error);
                                 }
                                 else {
                                   sc.fulfil(message.receiver, socialCommitment._id).
