@@ -516,13 +516,15 @@ module.exports = function() {
 
           geboDb.registrantModel.findOne({ email: message.content.newAgent.email }, function(err, registrant) {
               if (registrant) {
-                deferred.reject('That email address has already been registered');
+                deferred.resolve({ error: { code: 500, message: 'That email address has already been registered' } });
+                //deferred.reject('That email address has already been registered');
               }
               else {
                 var agent = new geboDb.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
                     if (err) {
-                      deferred.reject(err);
+                      deferred.resolve({ error: { code: 500, message: err } });
+                      //deferred.reject(err);
                     }
                     else {
                       deferred.resolve(agent);
@@ -579,7 +581,7 @@ module.exports = function() {
                           { email: message.content.email }, message.content, { upsert: true },
                           function(err, friendo) {
                                   if (err) {
-                                    deferred.reject(err);
+                                    deferred.resolve({ error: { code: 500, message: err} });
                                   }
                                   else {
                                     deferred.resolve(friendo);

@@ -60,6 +60,12 @@ exports.httpCodes = {
                                    execute: false, 
                                  });
 
+        friendo.permissions.push({ resource: 'registerAgent',
+                                   read: false,
+                                   write: false,
+                                   execute: true,
+                                 });
+
         // Set up permissions and a token for a friendo
         geboDb = new _gebo.schemata.gebo();
         var token = new geboDb.tokenModel({
@@ -134,6 +140,20 @@ exports.httpCodes = {
             expect(401, test.done);
     },
 
+    'Respond with 500 if performing the action results in an error': function(test) {
+        var badMessage = {};
+        extend(true, badMessage, _goodMessage);
+        badMessage.action = 'registerAgent';
+        badMessage.content = { newAgent: { email: 'someguy@example.com' } };
+
+        // This creates an error because the message content doesn't contain
+        // required friendoModel properties
+        request(_gebo.server).
+            post('/perform').
+            send(badMessage).
+            expect(500, test.done);
+    },
+
 
     'Respond with 501 if given an unknown performative': function(test) {
         var badMessage = {};
@@ -156,6 +176,7 @@ exports.httpCodes = {
             send(badMessage).
             expect(501, test.done);
     },
+
 };
 
 /**

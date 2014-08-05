@@ -2108,7 +2108,7 @@ exports.registerAgent = {
     },
 
     'Do not overwrite an existing agent': function(test) {
-        test.expect(1);
+        test.expect(2);
         var existingAgent = {
                 name: 'dan',
                 email: 'dan@example.com',
@@ -2117,11 +2117,12 @@ exports.registerAgent = {
             };
         action.registerAgent({ admin: false, execute: true }, { content: { newAgent: existingAgent } }).
            then(function(agent) {
-                test.ok(false, 'Must not overwrite an existing agent');
+                test.equal(agent.error.code, 500);
+                test.equal(agent.error.message, 'That email address has already been registered');
                 test.done();
              }).
            catch(function(err) {
-               test.equal(err, 'That email address has already been registered');
+               test.ok(false, 'An error message should have been returned above');
                test.done();
              });
     },

@@ -76,8 +76,14 @@ module.exports = function(testing) {
                         }
                         else {
                           actionPtr[actionParts[actionParts.length - 1]](verified, message).
-                              then(function(data) {
-                                 sc.fulfil(message.receiver, socialCommitment._id).
+                            then(function(data) {
+                                if (data.error) {
+                                  logger.error('Server error', data.error);
+                                  res.status(500).send(data.error);
+                                  done(err);
+                                }
+                                else {
+                                  sc.fulfil(message.receiver, socialCommitment._id).
                                       then(function(sc) {
                                           logger.info('data', data);
                                           // If you don't set this as a string,
@@ -98,12 +104,13 @@ module.exports = function(testing) {
                                           res.status(401).send({ code: '401', message: err });
                                           done(err);
                                         });
-                                }).
-                              catch(function(err) {
-                                      logger.error('Action', err);
-                                      res.status(401).send({ code: '401', message: 'You are not allowed access to that resource' });
-                                      done(err);
-                                });
+                                }
+                              }).
+                            catch(function(err) {
+                                    logger.error('Action', err);
+                                    res.status(401).send({ code: '401', message: 'You are not allowed access to that resource' });
+                                    done(err);
+                              });
                         }
                       }).
                     catch(function(err) {
