@@ -135,7 +135,7 @@ exports.handler = {
     },
 
     'Respond with 401 unauthorized when an unknown agent makes tries to perform an action': function(test) {
-        test.expect(4);
+        test.expect(3);
         var req = {};
         extend(true, req, SEND_REQ);
         req.user.email = 'some@foreignagent.com';
@@ -145,8 +145,7 @@ exports.handler = {
               test.equal(err, 'You are not allowed access to that resource');
             }
             test.equal(_code, 401);
-            test.equal(_content.error.code, 401);
-            test.equal(_content.error.message, 'You are not allowed access to that resource');
+            test.equal(_content, 'You are not allowed access to that resource');
             test.done();
           });
 
@@ -221,11 +220,10 @@ exports.handler = {
 
         perform.handler(req, RES, function(err) { 
             if (err) {
-              test.ok(false, err);
+              test.equal(err, 'I don\'t know how to bakeACake');
             }
             test.equal(_code, 501);
-            test.equal(_content.error.message, 'I don\'t know how to bakeACake');
-            test.equal(_content.error.code, 501);
+            test.equal(_content, 'I don\'t know how to bakeACake');
             test.done();
         }); 
     },

@@ -1011,19 +1011,18 @@ exports.rm = {
    'Do not delete from a non-existent collection': function (test) {
         test.expect(1);
 
-        // Retrieve the existing document
         action.rm({ resource: 'NoSuchCollection',
                     admin: true },
                   { content: { id: '0123456789AB' } }).
             then(
-                function() {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
+                function(results) {
+                    test.equal(results.error, 'Collection: NoSuchCollection does not exist');        
                     test.done();
                 }).
             catch(
                 function(err) {
-                    test.ok(err, 'This should throw an error');        
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 });
    }, 
@@ -1035,14 +1034,14 @@ exports.rm = {
                     admin: true },
                   { content: { id: 'NoSuchDocABC' } }).
             then(
-                function() {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
+                function(results) {
+                    test.equal(results.error, 'Could not delete document: NoSuchDocABC');        
                     test.done();
                 }).
             catch(
                 function(err) {
-                    test.ok(err, 'This should throw an error');        
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 });
    }, 
@@ -1304,13 +1303,13 @@ exports.rmdir = {
         action.rmdir({ resource: 'NoSuchCollection',
                        admin: true,
                        execute: true }).
-            then(function() {
-                    // Shouldn't get here
-                    test.ok(false, 'Shouldn\'t get here!!!');
+            then(function(results) {
+                    test.equal(results.error, 'Collection: NoSuchCollection does not exist');        
                     test.done();
                 }).
             catch(function(err) {
-                    test.ok(err, 'This should throw an error');        
+                    // Shouldn't get here
+                    test.ok(false, 'Shouldn\'t get here!!!');
                     test.done();
                 });
    }, 
@@ -2108,7 +2107,7 @@ exports.registerAgent = {
     },
 
     'Do not overwrite an existing agent': function(test) {
-        test.expect(2);
+        test.expect(1);
         var existingAgent = {
                 name: 'dan',
                 email: 'dan@example.com',
@@ -2117,8 +2116,7 @@ exports.registerAgent = {
             };
         action.registerAgent({ admin: false, execute: true }, { content: { newAgent: existingAgent } }).
            then(function(agent) {
-                test.equal(agent.error.code, 500);
-                test.equal(agent.error.message, 'That email address has already been registered');
+                test.equal(agent.error, 'That email address has already been registered');
                 test.done();
              }).
            catch(function(err) {

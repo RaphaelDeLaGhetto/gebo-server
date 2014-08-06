@@ -71,15 +71,15 @@ module.exports = function(testing) {
                          * perform the requested action
                          */
                         if(!actionPtr[actionParts[actionParts.length - 1]]) {
-                          res.status(501).send({ error: { code: 501, message: 'I don\'t know how to ' + message.action } });
-                          done();
+                          res.status(501).send('I don\'t know how to ' + message.action);
+                          done('I don\'t know how to ' + message.action);
                         }
                         else {
                           actionPtr[actionParts[actionParts.length - 1]](verified, message).
                             then(function(data) {
                                 if (data.error) {
                                   logger.error('Server error', data);
-                                  res.status(500).send(data);
+                                  res.status(500).send(data.error);
                                   done(data.error);
                                 }
                                 else {
@@ -101,28 +101,28 @@ module.exports = function(testing) {
                                         }).
                                       catch(function(err) {
                                           logger.error('Social commitment fulfil', err);
-                                          res.status(409).send({ error: { code: '409', message: err } });
+                                          res.status(409).send(err);
                                           done(err);
                                         });
                                 }
                               }).
                             catch(function(err) {
                                     logger.error('Action', err);
-                                    res.status(401).send({ error: { code: '401', message: 'You are not allowed access to that resource' } });
-                                    done(err);
+                                    res.status(401).send('You are not allowed access to that resource');
+                                    done('You are not allowed access to that resource');
                               });
                         }
                       }).
                     catch(function(err) {
                         logger.error('Verification', err);
-                        res.status(401).send({ error: { code: '401', message: 'You could not be verified' } });
-                        done(err);
+                        res.status(401).send('You could not be verified');
+                        done('You could not be verified');
                       });
               }).
             catch(function(err) {
                 logger.error('Bad request', err);
-                res.status(400).send({ error: { code: '400', message: 'The request could not be understood by the server' } });
-                done(err);
+                res.status(400).send('The request could not be understood by the server');
+                done('The request could not be understood by the server');
               });
        };
     exports.handler = _handler;
@@ -165,11 +165,11 @@ module.exports = function(testing) {
                 _handler(req, res, function(){});
               }
               else {
-                res.status(501).send({ error: { code: 501, message: 'I do not understand that performative' } });
+                res.status(501).send('I do not understand that performative');
               }
             }
             else {
-              res.status(401).send({ error: { code: 401, message: 'The token provided is invalid' } });
+              res.status(401).send('The token provided is invalid');
             }
         }
       ];

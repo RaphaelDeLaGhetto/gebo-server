@@ -28,7 +28,7 @@ module.exports = function() {
           nativeConnection.get(function(conn) {
                 conn.collection(verified.resource, function(err, collection) {
                     if (err) {
-                      deferred.reject(err);
+                      deferred.resolve({ error: err });
                     }
                     else {
                       deferred.resolve(collection);
@@ -73,7 +73,7 @@ module.exports = function() {
                               collection.save(message.content.data, { safe: true },
                                       function(err, ack) {
                                           if (err) {
-                                            deferred.reject(err);
+                                            deferred.resolve({ error: err });
                                           }
                                           else {
                                             deferred.resolve(ack);
@@ -85,11 +85,11 @@ module.exports = function() {
                             }
                           }).
                         catch(function(err) {
-                            deferred.reject(err);
+                            deferred.resolve({ error: err });
                           });
                     }).
                   catch(function(err) {
-                      deferred.reject(err);
+                      deferred.resolve({ error: err });
                     });
         }
         else {
@@ -117,7 +117,7 @@ module.exports = function() {
 
                       collection.findOne({ '_id': id }, function(err, doc) {
                           if (err) {
-                            deferred.reject(err);
+                            deferred.resolve({ error: err });
                           }
                           else {
                             deferred.resolve(doc);
@@ -129,7 +129,7 @@ module.exports = function() {
                     }
                 }).
               catch(function(err) {
-                    deferred.reject(err);
+                    deferred.resolve({ error: err });
                 });
         }
         else {
@@ -155,9 +155,7 @@ module.exports = function() {
                       // Does this collection exist?
                       collection.count(function(err, count) {
                           if (count === 0) {
-                            deferred.reject(
-                                    new Error('Collection: ' +
-                                            verified.resource + ' does not exist'));
+                            deferred.resolve({ error: 'Collection: ' + verified.resource + ' does not exist' });
                           }
                           else {
                             var id = message.content.id;
@@ -169,15 +167,13 @@ module.exports = function() {
                             // to the document will be removed too
                             collection.findOne({ '_id': id }, function(err, doc) {
                                 if (err) {
-                                  deferred.reject(err);
+                                  deferred.resolve({ error: err });
                                 }
                                 else {
                                   collection.remove({ _id: id },
                                       function(err, ack) {
                                           if (err || ack === 0) {
-                                            deferred.reject(
-                                                    new Error('Could not delete document: ' +
-                                                            message.content.id));
+                                            deferred.resolve({ error: 'Could not delete document: ' + message.content.id });
                                           }
                                           else {
                                             // Check for an attached file.
@@ -186,17 +182,17 @@ module.exports = function() {
                                             if (doc.fileId) {
                                               agentDb.fileModel.findById(doc.fileId, function(err, file) {
                                                     if (err) {
-                                                      deferred.reject(err);
+                                                      deferred.resolve({ error: err });
                                                     }
                                                     file.remove(function(err) {
                                                         if (err) {
-                                                          deferred.reject(err);
+                                                          deferred.resolve({ error: err });
                                                         }
                                                         fs.unlink(nconf.get('docs') +
                                                                 '/' + verified.resource +
                                                                 '/' + file.name, function(err) {
                                                               if (err) {
-                                                                deferred.reject(err);
+                                                                deferred.resolve({ error: err });
                                                               }
                                                               else {
                                                                 deferred.resolve();
@@ -217,7 +213,7 @@ module.exports = function() {
                         });
                     }).
                   catch(function(err) {
-                        deferred.reject(err);
+                        deferred.resolve({ error: err });
                     });
         }
         else {
@@ -244,17 +240,13 @@ module.exports = function() {
                       // Does this collection exist?
                       collection.count(function(err, count) {
                           if (count === 0) {
-                            deferred.reject(
-                              new Error('Collection: ' +
-                                      verified.resource + ' does not exist'));
+                            deferred.resolve({ error: 'Collection: ' + verified.resource + ' does not exist' });
                           }
                           else {
                             collection.drop(
                                 function(err, ack) {
                                     if (err || ack === 0) {
-                                      deferred.reject(
-                                              new Error('Could not delete collection: ' +
-                                                      verified.resource));
+                                      deferred.resolve({ error: 'Could not delete collection: ' + verified.resource });
                                     }
                                     else {
                                       deferred.resolve();
@@ -264,7 +256,7 @@ module.exports = function() {
                         });
                     }).
               catch(function(err) {
-                    deferred.reject(err);
+                    deferred.resolve({ error: err });
                 });
         }
         else {
@@ -325,7 +317,7 @@ module.exports = function() {
                     cursor.toArray(
                         function(err, docs) {
                             if (err) {
-                              deferred.reject(err);
+                              deferred.resolve({ error: err });
                             }
                             else {
                               deferred.resolve(docs);
@@ -333,7 +325,7 @@ module.exports = function() {
                           });
                 }).
               catch(function(err) {
-                      deferred.reject(err);
+                    deferred.resolve({ error: err });
                 });
         }
         else {
@@ -357,7 +349,7 @@ module.exports = function() {
           nativeConnection.get(function(client) {
             client.collectionNames(function(err, names) {
                 if (err) {
-                  deferred.reject(err);
+                  deferred.resolve({ error: err });
                 }
                 else {
                   var cleanNames = [];
@@ -516,15 +508,13 @@ module.exports = function() {
 
           geboDb.registrantModel.findOne({ email: message.content.newAgent.email }, function(err, registrant) {
               if (registrant) {
-                deferred.resolve({ error: { code: 500, message: 'That email address has already been registered' } });
-                //deferred.reject('That email address has already been registered');
+                deferred.resolve({ error: 'That email address has already been registered' });
               }
               else {
                 var agent = new geboDb.registrantModel(message.content.newAgent);
                 agent.save(function(err, agent) {
                     if (err) {
-                      deferred.resolve({ error: { code: 500, message: err } });
-                      //deferred.reject(err);
+                      deferred.resolve({ error: err });
                     }
                     else {
                       deferred.resolve(agent);
@@ -552,7 +542,7 @@ module.exports = function() {
         if (verified.admin || verified.execute) {
           geboDb.registrantModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
-                    deferred.reject(err);
+                    deferred.resolve({ error: err });
                   }
                   else {
                     deferred.resolve(ack);
@@ -607,7 +597,7 @@ module.exports = function() {
         if (verified.write) {
           agentDb.friendoModel.remove({ email: message.content.email }, function(err, ack) {
                   if (err) {
-                    deferred.reject(err);
+                    deferred.resolve({ error: err });
                   }
                   else {
                     deferred.resolve(ack);
@@ -635,7 +625,7 @@ module.exports = function() {
         if (verified.admin || verified.write) {
           agentDb.friendoModel.findOne({ email: message.content.friendo }, function(err, friendo) {
                   if (err) {
-                    deferred.reject(err);
+                    deferred.resolve({ error: err });
                   }
                   else {
                     var index = utils.getIndexOfObject(friendo.permissions, 'resource', message.content.permission.resource);
@@ -652,7 +642,7 @@ module.exports = function() {
 
                     friendo.save(function(err, savedFriend) {
                             if (err) {
-                              deferred.reject(err);
+                              deferred.resolve({ error: err });
                             }
                             else {
                               deferred.resolve(savedFriend);
@@ -685,7 +675,7 @@ module.exports = function() {
                 agentDb.keyModel.findOneAndUpdate({ email: message.content.email }, data, { upsert: true },
                     function(err, key) {
                         if (err) {
-                          deferred.reject(err);
+                          deferred.resolve({ error: err });
                         }
                         else {
                           _friendo(verified, message).
@@ -693,13 +683,13 @@ module.exports = function() {
                                     deferred.resolve(key.public);
                                   }).
                                 catch(function(err) {
-                                    deferred.reject(err);
+                                    deferred.resolve({ error: err });
                                   });
                         }
                       });
               }).
             catch(function(err) {
-                deferred.reject(err);
+                deferred.resolve({ error: err });
               });
         }
         else {
