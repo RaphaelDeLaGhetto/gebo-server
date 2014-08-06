@@ -32,7 +32,7 @@ module.exports = function(testing) {
             agent = req.user;
 
         logger.info('message', JSON.stringify(message, null, 2));
-        logger.info('req.files', JSON.stringify(req.files, null, 2));
+        //logger.info('req.files', JSON.stringify(req.files, null, 2));
 
         // A message's receiver used to be specified in the 
         // message body. Since the vanilla gebo no longer mediates
@@ -71,21 +71,21 @@ module.exports = function(testing) {
                          * perform the requested action
                          */
                         if(!actionPtr[actionParts[actionParts.length - 1]]) {
-                          res.status(501).send({ error: 501, message: 'I don\'t know how to ' + message.action });
+                          res.status(501).send({ error: { code: 501, message: 'I don\'t know how to ' + message.action } });
                           done();
                         }
                         else {
                           actionPtr[actionParts[actionParts.length - 1]](verified, message).
                             then(function(data) {
                                 if (data.error) {
-                                  logger.error('Server error', data.error);
-                                  res.status(500).send(data.error);
+                                  logger.error('Server error', data);
+                                  res.status(500).send(data);
                                   done(data.error);
                                 }
                                 else {
                                   sc.fulfil(message.receiver, socialCommitment._id).
                                       then(function(sc) {
-                                          logger.info('data', data);
+                                          logger.info('Done:', data);
                                           // If you don't set this as a string,
                                           // the status code will be set to the 
                                           // numeric value contained in data
@@ -101,27 +101,27 @@ module.exports = function(testing) {
                                         }).
                                       catch(function(err) {
                                           logger.error('Social commitment fulfil', err);
-                                          res.status(401).send({ code: '401', message: err });
+                                          res.status(409).send({ error: { code: '409', message: err } });
                                           done(err);
                                         });
                                 }
                               }).
                             catch(function(err) {
                                     logger.error('Action', err);
-                                    res.status(401).send({ code: '401', message: 'You are not allowed access to that resource' });
+                                    res.status(401).send({ error: { code: '401', message: 'You are not allowed access to that resource' } });
                                     done(err);
                               });
                         }
                       }).
                     catch(function(err) {
                         logger.error('Verification', err);
-                        res.status(401).send({ code: '401', message: err });
+                        res.status(401).send({ error: { code: '401', message: 'You could not be verified' } });
                         done(err);
                       });
               }).
             catch(function(err) {
                 logger.error('Bad request', err);
-                res.status(400).send({ code: '400', message: 'The request could not be understood by the server' });
+                res.status(400).send({ error: { code: '400', message: 'The request could not be understood by the server' } });
                 done(err);
               });
        };
@@ -165,11 +165,11 @@ module.exports = function(testing) {
                 _handler(req, res, function(){});
               }
               else {
-                res.status(501).send({ error: 501, message: 'I do not understand that performative' });
+                res.status(501).send({ error: { code: 501, message: 'I do not understand that performative' } });
               }
             }
             else {
-              res.status(401).send({ error: 401, message: 'The token provided is invalid' });
+              res.status(401).send({ error: { code: 401, message: 'The token provided is invalid' } });
             }
         }
       ];
@@ -219,6 +219,7 @@ module.exports = function(testing) {
           agentDb.friendoModel.findOne({ email: agent.email }, function(err, friendo) {
                 logger.info('friendo:', agent.email, JSON.stringify(friendo, null, 2));
                 if (err) {
+                  logger.error('Verification', err);
                   deferred.reject(err);
                 }
                 if (!friendo) {

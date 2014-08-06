@@ -135,7 +135,7 @@ exports.handler = {
     },
 
     'Respond with 401 unauthorized when an unknown agent makes tries to perform an action': function(test) {
-        test.expect(3);
+        test.expect(4);
         var req = {};
         extend(true, req, SEND_REQ);
         req.user.email = 'some@foreignagent.com';
@@ -145,11 +145,32 @@ exports.handler = {
               test.equal(err, 'You are not allowed access to that resource');
             }
             test.equal(_code, 401);
-            test.equal(_content.message, 'You are not allowed access to that resource');
+            test.equal(_content.error.code, 401);
+            test.equal(_content.error.message, 'You are not allowed access to that resource');
             test.done();
           });
 
     },
+
+    /**
+     * TODO
+     * 2014-8-6 It seems that the only way this will happen is if there is an
+     * error retrieving the friendo from the database. A missing email field will
+     * currently be caught on attempting the formation of a social commitment.
+     */
+    'Respond with 401 unauthorized when an agent cannot be verified': function(test) {
+//        test.expect(4);
+//        perform.handler(SEND_REQ, RES, function(err) { 
+//            if (err) {
+//              test.equal(err, 'You could not be verified');
+//            }
+//            test.equal(_code, 400);
+//            test.equal(_content.error.code, 400);
+//            test.equal(_content.error.message, 'You could not be verified');
+            test.done();
+//          });
+    },
+
 
     'Fulfil social commitment and return data when action is performed': function(test) {
         test.expect(13);
@@ -185,9 +206,14 @@ exports.handler = {
               });
           });
     },
+    
+    // TODO
+    'Return 409 if there\'s an error fulfilling a social commitment': function(test) {
+        test.done();
+    },
 
     'Return a 501 error if the agent does not know how to perform the requested action': function(test) {
-        test.expect(2);
+        test.expect(3);
 
         var req = {};
         extend(true, req, SEND_REQ);
@@ -198,7 +224,8 @@ exports.handler = {
               test.ok(false, err);
             }
             test.equal(_code, 501);
-            test.equal(_content.message, 'I don\'t know how to bakeACake');
+            test.equal(_content.error.message, 'I don\'t know how to bakeACake');
+            test.equal(_content.error.code, 501);
             test.done();
         }); 
     },
