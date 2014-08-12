@@ -73,7 +73,7 @@ module.exports = function() {
      */
     var fileSchema = new Schema({
         name: { type: String, required: true, unique: true },
-        resource: { type: String, required: true, unique: false },
+        resource: { type: String, required: false, unique: false },
         type: { type: String, required: false, unique: false },
         size: { type: Number, required: false, unique: false },
         lastModified: { type: Date, required: true, default: Date.now() },
