@@ -186,9 +186,9 @@ exports.getCollection = {
  * save
  *
  * The save function does one of three things:
- * 1) It saves data to the DB (see exports.saveToDb)
+ * 1) It saves a document to a collection in the DB (see exports.saveToDb)
  * 2) It saves a file to the file system (see exports.saveToFs)
- * 3) It saves data to the DB with an associated file on the file system (see below)
+ * 3) It saves a document to a collection with an associated file on the file system (see below)
  */
 exports.save = {
     setUp: function (callback) {
@@ -231,8 +231,9 @@ exports.save = {
         });
     },
 
-   'Save file to file system and JSON with fileId to database with permission': function (test) {
-        test.expect(10);
+   //'Save file to file system and JSON with fileId to database with permission': function (test) {
+   'Save file to file collection and JSON with fileId to database with permission': function (test) {
+        test.expect(9);
 
         action.save({ resource: 'someCollection',
 		      write: true },
@@ -267,8 +268,8 @@ exports.save = {
                                 }
 
                                 // Make sure the file is in the right directory
-                                var files = fs.readdirSync('docs/someCollection');
-                                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+//                                var files = fs.readdirSync('docs/someCollection');
+//                                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
  
                                 test.done();
                               });
