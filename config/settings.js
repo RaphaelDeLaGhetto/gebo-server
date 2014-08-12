@@ -9,6 +9,7 @@ module.exports = function (app, express, passport, logger) {
         requestLogger = require('winston-request-logger'),
         bodyParser = require('body-parser'),
         methodOverride = require('method-override'),
+        multer = require('multer'),
         cookieParser = require('cookie-parser'),
         session = require('express-session'),
         favicon = require('static-favicon'),
@@ -91,6 +92,7 @@ module.exports = function (app, express, passport, logger) {
     app.set('view engine', 'jade');
     app.set('view options', { layout: false });
     app.use(cookieParser());
+    app.use(multer({ dest: '/tmp/'}));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(methodOverride());
