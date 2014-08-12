@@ -58,7 +58,7 @@ module.exports = function() {
           _getCollection(verified).
               then(function(collection) {
                     utils.saveFile(message.file, verified).
-                        then(function(file) {
+                       then(function(file) {
                             if (message.content && message.content.data) {
                               if (message.content.data._id) {
                                 message.content.data._id = new mongo.ObjectID(message.content.data._id + '');
