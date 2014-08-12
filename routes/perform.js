@@ -3,7 +3,7 @@
 var action = require('../actions')(),
     agentDb = require('../schemata/agent')(),
     extend = require('extend'),
-    multiparty = require('connect-multiparty'),
+//    multiparty = require('connect-multiparty'),
     nconf = require('nconf'),
     passport = require('passport'),
     q = require('q'),
@@ -141,9 +141,9 @@ module.exports = function(testing) {
     /**
      * Receive a perform attempt for consideration
      */
-    var multipartyMiddleware = multiparty();
+//    var multipartyMiddleware = multiparty();
     exports.perform = [
-        multipartyMiddleware,
+//        multipartyMiddleware,
         _authenticate,
         // _handler takes a callback for unit testing purposes.
         // passport.authenticate's next() callback screws everything up
