@@ -8,6 +8,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 
 var utils = require('../../lib/utils'),
     mongo = require('mongodb'),
+    GridStore = mongo.GridStore,
     nconf = require('nconf'),
     rimraf = require('rimraf'),
     fs = require('fs'),
@@ -187,8 +188,11 @@ exports.getCollection = {
  *
  * The save function does one of three things:
  * 1) It saves a document to a collection in the DB (see exports.saveToDb)
- * 2) It saves a file to the file system (see exports.saveToFs)
- * 3) It saves a document to a collection with an associated file on the file system (see below)
+ * ~~2) It saves a file to the file system (see exports.saveToFs)~~
+ * ~~3) It saves a document to a collection with an associated file on the file system (see below)~~
+ *
+ * 2014-8-13
+ * Adapted from http://mongodb.github.io/node-mongodb-native/api-generated/gridstore.html
  */
 exports.save = {
     setUp: function (callback) {
@@ -231,9 +235,8 @@ exports.save = {
         });
     },
 
-   //'Save file to file system and JSON with fileId to database with permission': function (test) {
    'Save file to file collection and JSON with fileId to database with permission': function (test) {
-        test.expect(9);
+        test.expect(6);
 
         action.save({ resource: 'someCollection',
 		      write: true },
@@ -253,26 +256,23 @@ exports.save = {
                         test.ok(docs.fileId);
                         test.ok(docs._id);
 
+                        // This is a temporary measure. The utils.saveFilesToAgentDirectory
+                        // deletes the given file in /tmp. That function will no longer 
+                        // be used
+                        fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+                        
                         // Make sure the file model is saved
-                        agentDb.fileModel.findById(docs.fileId,
-                            function(err, file) {
-                                if (err) {
-                                  test.ok(false, err);
-                                }
-                                else {
-                                  test.equal(file.name, 'gebo-server-save-test-1.txt'); 
-                                  test.equal(file.resource, 'someCollection'); 
-                                  test.equal(file.type, 'text/plain'); 
-                                  test.equal(file.size, 21); 
-                                  test.equal(file.lastModified === null, false); 
-                                }
+                        var fileSize = fs.statSync('/tmp/gebo-server-save-test-1.txt').size;
+                        var data = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
 
-                                // Make sure the file is in the right directory
-//                                var files = fs.readdirSync('docs/someCollection');
-//                                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
- 
-                                test.done();
-                              });
+                        GridStore.read(db, docs.fileId, function(err, fileData) {
+                            if (err) {
+                              test.ok(false, err);
+                            }
+                            test.equal(data.toString('base64'), fileData.toString('base64')); 
+                            test.equal(data, fileData.length); 
+                            test.done();
+                          });
                     }).
                 catch(function(err) {
                         console.log('Error???? ' + err);       
@@ -282,6 +282,55 @@ exports.save = {
    }, 
 
 
+   //'Save file to file system and JSON with fileId to database with permission': function (test) {
+//   'Save file to file collection and JSON with fileId to database with permission': function (test) {
+//        test.expect(9);
+//
+//        action.save({ resource: 'someCollection',
+//		      write: true },
+//                    { content: { data: { junk: 'I like to move it move it' } },
+//                      file: {
+//                            path: '/tmp/gebo-server-save-test-1.txt',
+//                            name: 'gebo-server-save-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 21,
+//                      }
+//                  }).
+//                then(function(docs) {
+//                        test.ok(docs);
+//                        // If it's already saved, it doesn't return
+//                        // the mongo ID
+//                        test.equal(docs.junk, 'I like to move it move it');
+//                        test.ok(docs.fileId);
+//                        test.ok(docs._id);
+//
+//                        // Make sure the file model is saved
+//                        agentDb.fileModel.findById(docs.fileId,
+//                            function(err, file) {
+//                                if (err) {
+//                                  test.ok(false, err);
+//                                }
+//                                else {
+//                                  test.equal(file.name, 'gebo-server-save-test-1.txt'); 
+//                                  test.equal(file.resource, 'someCollection'); 
+//                                  test.equal(file.type, 'text/plain'); 
+//                                  test.equal(file.size, 21); 
+//                                  test.equal(file.lastModified === null, false); 
+//                                }
+//
+//                                // Make sure the file is in the right directory
+////                                var files = fs.readdirSync('docs/someCollection');
+////                                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+// 
+//                                test.done();
+//                              });
+//                    }).
+//                catch(function(err) {
+//                        console.log('Error???? ' + err);       
+//                        test.ifError(err);
+//                        test.done();
+//                    });
+//   }, 
  
 };
 

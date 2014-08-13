@@ -7,6 +7,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 
 var utils = require('../../lib/utils'),
     fs = require('fs'),
+    mongo = require('mongodb'),
     nock = require('nock'),
     mkdirp = require('mkdirp'),
     nconf = require('nconf'),
@@ -872,3 +873,115 @@ exports.getDefaultDomain = {
         test.done();
     },
 };
+
+
+/**
+ * saveFileToDb
+ */
+var db, collection;
+var TEST_DB = utils.getMongoDbName(nconf.get('testEmail'));
+exports.saveFileToDb = {
+
+    setUp: function (callback) {
+    	try{
+            /**
+             * Write some files to /tmp
+             */
+            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
+
+            // Get a database connection
+            var server = new mongo.Server('localhost', 27017, {});
+
+            db = new mongo.Db(TEST_DB, server, { safe: true });
+            db.open(function (err, client) {
+                if (err) {
+                  console.log(err);
+                }
+        	collection = new mongo.Collection(client, 'someCollection');
+//                collection.remove({}, function(err) {
+    		    callback();
+//    		  });
+              });
+    	}
+        catch(e) {
+            console.dir(e);
+    	}
+    },
+    
+    tearDown: function (callback) {
+        // Lose the database for next time
+        db.dropDatabase(function(err) { 
+            if (err) {
+              console.log(err);
+            }
+            db.close();
+            callback();
+        });
+    },
+
+    'Remove file from /tmp': function(test) {
+        test.expect(1);
+
+        utils.saveFileToDb({
+                                path: '/tmp/gebo-server-utils-test-1.txt',
+                                name: 'gebo-server-utils-test-1.txt',
+                                type: 'text/plain',
+                                size: 16,
+                            }, db).
+            then(function() {
+                var files = fs.readdirSync('/tmp');
+                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), -1);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+
+    },
+
+    'Return a file object': function(test) {
+        test.expect(4);
+        utils.saveFileToDb({
+                            path: '/tmp/gebo-server-utils-test-1.txt',
+                            name: 'gebo-server-utils-test-1.txt',
+                            type: 'text/plain',
+                            size: 16,
+                        }, db).
+            then(function(file) {
+                test.equal(file.filename, 'gebo-server-utils-test-1.txt');
+                test.equal(file.contentType, 'binary/octet-stream');
+                test.equal(file.length, 16);
+                test.ok(file.uploadDate);
+                test.done();
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done();
+              });
+    },
+
+    'Don\'t barf if the files object is empty, null, or undefined': function(test) {
+        test.expect(3);
+
+        var dir = 'docs/someResource';
+        utils.saveFileToDb({}, dir).
+            then(function() {
+                test.ok(true);
+                return utils.saveFileToDb(null, dir);
+              }).
+            then(function() {
+                test.ok(true);
+                return utils.saveFileToDb(undefined, dir);
+              }).
+            then(function() {
+                test.ok(true);
+                test.done(); 
+              }).
+            catch(function(err) {
+                test.ok(false, err);
+                test.done(); 
+              });
+    },
+};
+
