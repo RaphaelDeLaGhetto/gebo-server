@@ -1,4 +1,3 @@
-//module.exports = function (app, express, passport, logger, root) {
 module.exports = function (app, express, passport, logger) {
 
     var nconf = require('nconf'),
@@ -93,10 +92,10 @@ module.exports = function (app, express, passport, logger) {
     app.set('view options', { layout: false });
     app.use(cookieParser());
     app.use(multer({ dest: '/tmp/'}));
+    // body-parser is needed for HAI login
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(methodOverride());
-    //app.use(express.static(root + '/public'));
 
     // Find alternate public directory
     try {
@@ -106,7 +105,6 @@ module.exports = function (app, express, passport, logger) {
     catch(err) {
         app.use(express.static(__dirname + '/../public'));
     }
-    //app.use(express.static('./public'));
 
     // Find alternate favicon 
     try {
@@ -117,7 +115,6 @@ module.exports = function (app, express, passport, logger) {
     catch(err) {
         app.use(favicon(__dirname + '/../favicon.ico'));
     }
-    //app.use(favicon('./favicon.ico'));
 
     app.use(session({
                 saveUninitialized: true,
