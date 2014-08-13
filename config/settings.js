@@ -91,7 +91,12 @@ module.exports = function (app, express, passport, logger) {
     app.set('view engine', 'jade');
     app.set('view options', { layout: false });
     app.use(cookieParser());
-    app.use(multer({ dest: '/tmp/'}));
+    app.use(multer({
+                        dest: '/tmp/',
+                        limits: {
+                            fieldSize: 4000000
+                        },
+                    }));
     // body-parser is needed for HAI login
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
