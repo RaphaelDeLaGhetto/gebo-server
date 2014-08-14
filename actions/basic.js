@@ -57,7 +57,8 @@ module.exports = function() {
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) {
-                    utils.saveFile(message.file, verified).
+                    //utils.saveFile(message.file, verified).
+                    utils.saveFileToDb(message.file, collection.db).
                        then(function(file) {
                             if (message.content && message.content.data) {
                               if (message.content.data._id) {
@@ -67,7 +68,7 @@ module.exports = function() {
                               // If there's a file attached to this message,
                               // link it to do the data being saved
                               if (file) {
-                                message.content.data.fileId = file._id;
+                                message.content.data.fileId = file.fileId;
                               }
       
                               collection.save(message.content.data, { safe: true },

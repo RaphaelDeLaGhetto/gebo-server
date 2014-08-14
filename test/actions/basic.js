@@ -210,14 +210,41 @@ exports.save = {
                   console.log(err);
                 }
         	collection = new mongo.Collection(client, 'someCollection');
-    	    	collection.remove({}, function(err) {
-    		    callback();
-    		  });
+
+                collection.insert({
+                        _id: new mongo.ObjectID('0123456789AB'), 
+                        name: 'dan',
+                        occupation: 'Batman'
+                    }, function() {
+                        callback();
+                    });
+
+//    	    	collection.remove({}, function(err) {
+//    		    callback();
+//    		  });
               });
     	}
         catch(e) {
             console.dir(e);
     	}
+
+
+//            var server = new mongo.Server('localhost', 27017, {});
+//
+//            db = new mongo.Db(TEST_DB, server, { safe: true });
+//            db.open(function (err, client) {
+//                if (err) {
+//                  throw err;
+//                }
+//        	collection = new mongo.Collection(client, cname);
+//                collection.insert({
+//                        _id: new mongo.ObjectID('0123456789AB'), 
+//                        name: 'dan',
+//                        occupation: 'Batman'
+//                    }, function() {
+//                        callback();
+//                    });
+//            });
     },
     
     tearDown: function (callback) {
@@ -235,7 +262,7 @@ exports.save = {
         });
     },
 
-   'Save file to file collection and JSON with fileId to database with permission': function (test) {
+   'Save file to file collection and JSON with fileId to collection with permission': function (test) {
         test.expect(6);
 
         action.save({ resource: 'someCollection',
@@ -256,9 +283,7 @@ exports.save = {
                         test.ok(docs.fileId);
                         test.ok(docs._id);
 
-                        // This is a temporary measure. The utils.saveFilesToAgentDirectory
-                        // deletes the given file in /tmp. That function will no longer 
-                        // be used
+                        // The utils.saveFileToDb function deletes the given file in /tmp
                         fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
                         
                         // Make sure the file model is saved
@@ -270,7 +295,7 @@ exports.save = {
                               test.ok(false, err);
                             }
                             test.equal(data.toString('base64'), fileData.toString('base64')); 
-                            test.equal(data, fileData.length); 
+                            test.equal(data.length, fileData.length); 
                             test.done();
                           });
                     }).
@@ -281,96 +306,7 @@ exports.save = {
                     });
    }, 
 
-
-   //'Save file to file system and JSON with fileId to database with permission': function (test) {
-//   'Save file to file collection and JSON with fileId to database with permission': function (test) {
-//        test.expect(9);
-//
-//        action.save({ resource: 'someCollection',
-//		      write: true },
-//                    { content: { data: { junk: 'I like to move it move it' } },
-//                      file: {
-//                            path: '/tmp/gebo-server-save-test-1.txt',
-//                            name: 'gebo-server-save-test-1.txt',
-//                            type: 'text/plain',
-//                            size: 21,
-//                      }
-//                  }).
-//                then(function(docs) {
-//                        test.ok(docs);
-//                        // If it's already saved, it doesn't return
-//                        // the mongo ID
-//                        test.equal(docs.junk, 'I like to move it move it');
-//                        test.ok(docs.fileId);
-//                        test.ok(docs._id);
-//
-//                        // Make sure the file model is saved
-//                        agentDb.fileModel.findById(docs.fileId,
-//                            function(err, file) {
-//                                if (err) {
-//                                  test.ok(false, err);
-//                                }
-//                                else {
-//                                  test.equal(file.name, 'gebo-server-save-test-1.txt'); 
-//                                  test.equal(file.resource, 'someCollection'); 
-//                                  test.equal(file.type, 'text/plain'); 
-//                                  test.equal(file.size, 21); 
-//                                  test.equal(file.lastModified === null, false); 
-//                                }
-//
-//                                // Make sure the file is in the right directory
-////                                var files = fs.readdirSync('docs/someCollection');
-////                                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-// 
-//                                test.done();
-//                              });
-//                    }).
-//                catch(function(err) {
-//                        console.log('Error???? ' + err);       
-//                        test.ifError(err);
-//                        test.done();
-//                    });
-//   }, 
- 
-};
-
-/**
- * Save to the database
- */
-exports.saveToDb = {
-
-    setUp: function (callback) {
-    	try{
-            var server = new mongo.Server('localhost', 27017, {});
-
-            db = new mongo.Db(TEST_DB, server, { safe: true });
-            db.open(function (err, client) {
-                if (err) {
-                  throw err;
-                }
-        	collection = new mongo.Collection(client, cname);
-                collection.insert({
-                        _id: new mongo.ObjectID('0123456789AB'), 
-                        name: 'dan',
-                        occupation: 'Batman'
-                    }, function() {
-                        callback();
-                    });
-            });
-    	} catch(e) {
-            console.dir(e);
-    	}
-    },
-    
-    tearDown: function (callback) {
-        // Lose the database for next time
-        db.dropDatabase(function(err) { 
-            db.close();
-            callback();
-        });
-    },
- 
-   'Save JSON to existing database as admin': function (test) {
+   'Save JSON with no file to existing database as admin': function (test) {
         test.expect(3);
 
         action.save({ resource: cname,
@@ -395,8 +331,8 @@ exports.saveToDb = {
         test.expect(8);
 
         // Retrieve the existing document
-        action.cp({ resource: cname,
-		            admin: true },
+        action.cp({ resource: 'someCollection',
+		    admin: true },
                   { content: { id: '0123456789AB' } }).
             then(function(docs) {
                     test.ok(docs, 'Docs successfully copied');
@@ -404,16 +340,16 @@ exports.saveToDb = {
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
                     return action.save(
-                            { resource: cname,
-		                      admin: true },
+                            { resource: 'someCollection',
+		              admin: true },
                             { content: { data: docs } });
                 }).
             then(function(ack) {
                     test.ok(ack, 'Doc successfully saved');
                     test.equal(ack, '1');
                     return action.cp(
-                            { resource: cname,
-		                      admin: true },
+                            { resource: 'someCollection',
+		              admin: true },
                             { content: { id: '0123456789AB' } });
                 }).
             then(function(docs) {
@@ -432,7 +368,7 @@ exports.saveToDb = {
    'Save JSON to existing database with write permission': function (test) {
         test.expect(3);
 
-        action.save({ resource: cname,
+        action.save({ resource: 'someCollection',
                       admin: false,
                       write: true },
                     { content: { data: { junk: 'I like to move it move it' } } }).
@@ -454,7 +390,7 @@ exports.saveToDb = {
         test.expect(8);
 
         // Retrieve the existing document
-        action.cp({ resource: cname,
+        action.cp({ resource: 'someCollection',
                     admin: false,
                     read: true,
                     write: true },
@@ -465,7 +401,7 @@ exports.saveToDb = {
                     test.equal(docs.occupation, 'Batman');
                     docs.occupation = 'AI Practitioner';
                     return action.save(
-                            { resource: cname,
+                            { resource: 'someCollection',
                               admin: false,
                               read: true,
                               write: true },
@@ -475,7 +411,7 @@ exports.saveToDb = {
                     test.ok(ack, 'Doc successfully saved');
 		    test.equal(ack, '1');
                     return action.cp(
-                            { resource: cname,
+                            { resource: 'someCollection',
                               admin: false,
                               read: true,
                               write: true },
@@ -497,7 +433,7 @@ exports.saveToDb = {
    'Do not save without permission': function (test) {
         test.expect(1);
         
-        action.save({ resource: cname,
+        action.save({ resource: 'someCollection',
                       admin: false,
                       write: false },
                     { content: { data: 'junk' } }).
@@ -511,289 +447,294 @@ exports.saveToDb = {
                   });
    }, 
 
+
 };
 
+/**
+ * 2014-8-14
+ * These are almost all certainly defunct. They're preserved here
+ * until I can bring myself to delete all my hard work.
 /**
  * Save to file system
  *
  * These tests are for the same function as above. They are set apart 
  * so as to simplify setUp and tearDown operations
  */
-exports.saveToFs = {
-
-    setUp: function (callback) {
-    	try{
-            /**
-             * Write a file to /tmp
-             */
-            fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
-            fs.writeFileSync('/tmp/gebo-server-save-test-2.txt', 'How you doin\'?');
-            
-            /**
-             * Setup a registrant
-             */
-            var registrant = new geboDb.registrantModel({
-                    name: 'dan',
-                    email: 'dan@example.com',
-                    password: 'password123',
-                    admin: false,
-                    _id: new mongo.ObjectID('0123456789AB')
-                });
-
-            /**
-             * Make a friendo for the gebo
-             */
-            var friendo = new agentDb.friendoModel({
-                    name: 'john',
-                    email: 'john@painter.com',
-                    gebo: 'http://theirhost.com',
-                    _id: new mongo.ObjectID('23456789ABCD')
-                });
-
-            /**
-             * Set permissions for this friendo
-             */
-            friendo.permissions.push({ resource: 'canWriteToCollection', write: true });
-            friendo.permissions.push({ resource: 'cannotWriteToCollection' });
-
-            registrant.save(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                friendo.save(function(err) {
-                    if (err) {
-                      console.log(err);
-                    }
-                    callback();
-                });
-            });
-    	}
-        catch(e) {
-            console.dir(e);
-    	}
-    },
-    
-    tearDown: function (callback) {
-        rimraf.sync('docs/' + utils.getMongoCollectionName('canwrite@app.com'));
-
-        geboDb.connection.db.dropDatabase(function(err) { 
-            if (err) {
-              console.log(err);
-            }
-            agentDb.connection.db.dropDatabase(function(err) {
-                if (err) {
-                  console.log(err);
-                }
-                callback();
-              });
-          });
-    },
-
-    'Create agent and app directories on the file system if they do not exist': function(test) {
-        test.expect(2);
-
-        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
-
-        // Make sure the directory isn't there
-        try {
-            fs.readdirSync('docs/' + utils.getMongoCollectionName('canwrite@app.com'));
-        }
-        catch (err) {
-            test.ok(err);
-        }
-
-        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
-                      write: true },
-                    { file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
-                            size: 21,
-                      },
-                    }).
-            then(function() {
-                var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-                test.done();
-              }).
-            catch(function(err) {
-                console.log('what is causing this error?');
-                console.log(err);
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Write a file object to the agent\'s file collection in the DB': function(test) {
-        test.expect(5);
-        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
-                      write: true },
-                    { file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
-                            size: 21,
-                      },
-                    }).
-            then(function() {
-                agentDb.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
-                                       resource: utils.getMongoCollectionName('canwrite@app.com') },
-                    function(err, file) {
-                        if (err) {
-                          test.ok(false, err);
-                        }
-                        else {
-                          test.equal(file.name, 'gebo-server-save-test-1.txt'); 
-                          test.equal(file.resource, utils.getMongoCollectionName('canwrite@app.com')); 
-                          test.equal(file.type, 'text/plain'); 
-                          test.equal(file.size, 21); 
-                          test.equal(file.lastModified === null, false); 
-                        }
-                        test.done();
-                      });
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-   
-    'Do not allow an agent to save to the file system without permission': function(test) {
-        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
-                      write: false },
-                    { file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
-                            size: 21,
-                      },
-                    }).
-            then(function() {
-                test.ok(false, 'Should not be allowed to save without permission');
-                test.done();
-              }).
-            catch(function(err) {
-                test.equal(err, 'You are not permitted to request or propose that action');
-                test.done();
-              });
-    },
-    
-    'Should not overwrite files with the same name': function(test) {
-        test.expect(4);
-
-        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
-
-        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
-                      write: true },
-                    { file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
-                            size: 21,
-                      },
-                    }).
-            then(function() {
-                var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-
-                fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
-                action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
-                              write: true },
-                            { file: {
-                                    path: '/tmp/gebo-server-save-test-1.txt',
-                                    name: 'gebo-server-save-test-1.txt',
-                                    type: 'text/plain',
-                                    size: 21,
-                              },
-                            }).
-                    then(function() {
-                        var files = fs.readdirSync(dir);
-                        test.equal(files.length, 2);
-                        test.equal(files.indexOf('gebo-server-save-test-1(1).txt'), 0);
-                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 1);
-                        test.done();
-                    });
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    /**
-     * This may be defunct
-     * 2014-7-8
-     */
-//    'Write multiple files to disk': function(test) {
+//exports.saveToFs = {
+//
+//    setUp: function (callback) {
+//    	try{
+//            /**
+//             * Write a file to /tmp
+//             */
+//            fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+//            fs.writeFileSync('/tmp/gebo-server-save-test-2.txt', 'How you doin\'?');
+//            
+//            /**
+//             * Setup a registrant
+//             */
+//            var registrant = new geboDb.registrantModel({
+//                    name: 'dan',
+//                    email: 'dan@example.com',
+//                    password: 'password123',
+//                    admin: false,
+//                    _id: new mongo.ObjectID('0123456789AB')
+//                });
+//
+//            /**
+//             * Make a friendo for the gebo
+//             */
+//            var friendo = new agentDb.friendoModel({
+//                    name: 'john',
+//                    email: 'john@painter.com',
+//                    gebo: 'http://theirhost.com',
+//                    _id: new mongo.ObjectID('23456789ABCD')
+//                });
+//
+//            /**
+//             * Set permissions for this friendo
+//             */
+//            friendo.permissions.push({ resource: 'canWriteToCollection', write: true });
+//            friendo.permissions.push({ resource: 'cannotWriteToCollection' });
+//
+//            registrant.save(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                friendo.save(function(err) {
+//                    if (err) {
+//                      console.log(err);
+//                    }
+//                    callback();
+//                });
+//            });
+//    	}
+//        catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//    
+//    tearDown: function (callback) {
+//        rimraf.sync('docs/' + utils.getMongoCollectionName('canwrite@app.com'));
+//
+//        geboDb.connection.db.dropDatabase(function(err) { 
+//            if (err) {
+//              console.log(err);
+//            }
+//            agentDb.connection.db.dropDatabase(function(err) {
+//                if (err) {
+//                  console.log(err);
+//                }
+//                callback();
+//              });
+//          });
+//    },
+//
+//    'Create agent and app directories on the file system if they do not exist': function(test) {
 //        test.expect(2);
 //
 //        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
 //
+//        // Make sure the directory isn't there
+//        try {
+//            fs.readdirSync('docs/' + utils.getMongoCollectionName('canwrite@app.com'));
+//        }
+//        catch (err) {
+//            test.ok(err);
+//        }
+//
 //        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
 //                      write: true },
-//                    { files: {
-//                        test1: {
+//                    { file: {
 //                            path: '/tmp/gebo-server-save-test-1.txt',
 //                            name: 'gebo-server-save-test-1.txt',
 //                            type: 'text/plain',
 //                            size: 21,
-//                        },
-//                        test2: {
-//                            path: '/tmp/gebo-server-save-test-2.txt',
-//                            name: 'gebo-server-save-test-2.txt',
-//                            type: 'text/plain',
-//                            size: 14,
-//                        },
 //                      },
 //                    }).
 //            then(function() {
 //                var files = fs.readdirSync(dir);
 //                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-//                test.equal(files.indexOf('gebo-server-save-test-2.txt'), 1);
 //                test.done();
+//              }).
+//            catch(function(err) {
+//                console.log('what is causing this error?');
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Write a file object to the agent\'s file collection in the DB': function(test) {
+//        test.expect(5);
+//        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
+//                      write: true },
+//                    { file: {
+//                            path: '/tmp/gebo-server-save-test-1.txt',
+//                            name: 'gebo-server-save-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 21,
+//                      },
+//                    }).
+//            then(function() {
+//                agentDb.fileModel.findOne({ name: 'gebo-server-save-test-1.txt',
+//                                       resource: utils.getMongoCollectionName('canwrite@app.com') },
+//                    function(err, file) {
+//                        if (err) {
+//                          test.ok(false, err);
+//                        }
+//                        else {
+//                          test.equal(file.name, 'gebo-server-save-test-1.txt'); 
+//                          test.equal(file.resource, utils.getMongoCollectionName('canwrite@app.com')); 
+//                          test.equal(file.type, 'text/plain'); 
+//                          test.equal(file.size, 21); 
+//                          test.equal(file.lastModified === null, false); 
+//                        }
+//                        test.done();
+//                      });
 //              }).
 //            catch(function(err) {
 //                test.ok(false, err);
 //                test.done();
 //              });
 //    },
-
-    'Write a file and data to the database': function(test) {
-        test.expect(2);
-
-        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
-
-        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
-                      write: true },
-                    { file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
-                            size: 21,
-                      },
-                      content: {
-                          data: {
-                            test: 'Some test data'
-                          },
-                      }
-                    }).
-            then(function(doc) {
-                var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-
-                // Make sure the data was written to the collection
-                test.equal(doc.test, 'Some test data');
-                test.done();
-              }).
-            catch(function(err) {
-                console.log('what is causing this error?');
-                console.log(err);
-                test.ok(false, err);
-                test.done();
-              });
-    },
-    
-};
+//   
+//    'Do not allow an agent to save to the file system without permission': function(test) {
+//        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
+//                      write: false },
+//                    { file: {
+//                            path: '/tmp/gebo-server-save-test-1.txt',
+//                            name: 'gebo-server-save-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 21,
+//                      },
+//                    }).
+//            then(function() {
+//                test.ok(false, 'Should not be allowed to save without permission');
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.equal(err, 'You are not permitted to request or propose that action');
+//                test.done();
+//              });
+//    },
+//    
+//    'Should not overwrite files with the same name': function(test) {
+//        test.expect(4);
+//
+//        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
+//
+//        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
+//                      write: true },
+//                    { file: {
+//                            path: '/tmp/gebo-server-save-test-1.txt',
+//                            name: 'gebo-server-save-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 21,
+//                      },
+//                    }).
+//            then(function() {
+//                var files = fs.readdirSync(dir);
+//                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+//
+//                fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+//                action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
+//                              write: true },
+//                            { file: {
+//                                    path: '/tmp/gebo-server-save-test-1.txt',
+//                                    name: 'gebo-server-save-test-1.txt',
+//                                    type: 'text/plain',
+//                                    size: 21,
+//                              },
+//                            }).
+//                    then(function() {
+//                        var files = fs.readdirSync(dir);
+//                        test.equal(files.length, 2);
+//                        test.equal(files.indexOf('gebo-server-save-test-1(1).txt'), 0);
+//                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 1);
+//                        test.done();
+//                    });
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    /**
+//     * This may be defunct
+//     * 2014-7-8
+//     */
+////    'Write multiple files to disk': function(test) {
+////        test.expect(2);
+////
+////        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
+////
+////        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
+////                      write: true },
+////                    { files: {
+////                        test1: {
+////                            path: '/tmp/gebo-server-save-test-1.txt',
+////                            name: 'gebo-server-save-test-1.txt',
+////                            type: 'text/plain',
+////                            size: 21,
+////                        },
+////                        test2: {
+////                            path: '/tmp/gebo-server-save-test-2.txt',
+////                            name: 'gebo-server-save-test-2.txt',
+////                            type: 'text/plain',
+////                            size: 14,
+////                        },
+////                      },
+////                    }).
+////            then(function() {
+////                var files = fs.readdirSync(dir);
+////                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+////                test.equal(files.indexOf('gebo-server-save-test-2.txt'), 1);
+////                test.done();
+////              }).
+////            catch(function(err) {
+////                test.ok(false, err);
+////                test.done();
+////              });
+////    },
+//
+//    'Write a file and data to the database': function(test) {
+//        test.expect(2);
+//
+//        var dir = 'docs/' + utils.getMongoCollectionName('canwrite@app.com');
+//
+//        action.save({ resource: utils.getMongoCollectionName('canwrite@app.com'),
+//                      write: true },
+//                    { file: {
+//                            path: '/tmp/gebo-server-save-test-1.txt',
+//                            name: 'gebo-server-save-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 21,
+//                      },
+//                      content: {
+//                          data: {
+//                            test: 'Some test data'
+//                          },
+//                      }
+//                    }).
+//            then(function(doc) {
+//                var files = fs.readdirSync(dir);
+//                test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
+//
+//                // Make sure the data was written to the collection
+//                test.equal(doc.test, 'Some test data');
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                console.log('what is causing this error?');
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//    
+//};
 
 /**
  * Copy document from the database
