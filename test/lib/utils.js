@@ -8,6 +8,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 var utils = require('../../lib/utils'),
     fs = require('fs'),
     mongo = require('mongodb'),
+    GridStore = mongo.GridStore,
     nock = require('nock'),
     mkdirp = require('mkdirp'),
     nconf = require('nconf'),
@@ -941,7 +942,7 @@ exports.saveFileToDb = {
     },
 
     'Return a file object': function(test) {
-        test.expect(4);
+        test.expect(5);
         utils.saveFileToDb({
                             path: '/tmp/gebo-server-utils-test-1.txt',
                             name: 'gebo-server-utils-test-1.txt',
@@ -951,9 +952,24 @@ exports.saveFileToDb = {
             then(function(file) {
                 test.equal(file.filename, 'gebo-server-utils-test-1.txt');
                 test.equal(file.contentType, 'binary/octet-stream');
-                test.equal(file.length, 16);
                 test.ok(file.uploadDate);
-                test.done();
+
+                // The utils.saveToDb deletes the given file in /tmp
+                fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+                
+                // Make sure the file model is saved
+                var fileSize = fs.statSync('/tmp/gebo-server-save-test-1.txt').size;
+                var data = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
+
+
+                GridStore.read(db, file.fileId, function(err, fileData) {
+                    if (err) {
+                      test.ok(false, err);
+                    }
+                    test.equal(data.toString('base64'), fileData.toString('base64')); 
+                    test.equal(fileSize, fileData.length); 
+                    test.done();
+                  });
               }).
             catch(function(err) {
                 test.ok(false, err);
