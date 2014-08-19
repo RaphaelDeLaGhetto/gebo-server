@@ -6,6 +6,5 @@
     "httpsPort":3443,
     "cachify":false,
     "testDb": "gebo-server-test@example.com",
-    "testEmail": "gebo-server-test@example.com",
-    "timeout": 10000
+    "testEmail": "gebo-server-test@example.com"
 }
