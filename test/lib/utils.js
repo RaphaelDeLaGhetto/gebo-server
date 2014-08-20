@@ -195,483 +195,494 @@ exports.ensureDbName = {
 };
 
 /**
- *saveFilesToAgentDirectory
+ * 2014-8-20
+ *
+ * I'm moving away from saving files to the agent directory in favour of
+ * storing all files in mongo. This is preserved for reference.
+ *
+ * saveFilesToAgentDirectory
  */
-exports.saveFilesToAgentDirectory = {
-
-    setUp: function (callback) {
-    	try{
-            /**
-             * Write some files to /tmp
-             */
-            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
-            fs.writeFileSync('/tmp/gebo-server-utils-test-2.txt', 'It\'s Christmas time in Hollis, Queens');
-            fs.writeFileSync('/tmp/gebo-server-utils-test-3.txt', 'Yes I eat cow, I am not proud');
-            fs.writeFileSync('/tmp/gebo-server-utils-test-4.txt', 'Genesis 9:6');
-            callback();
-    	}
-        catch(e) {
-            console.dir(e);
-    	}
-    },
-    
-    tearDown: function (callback) {
-        rimraf.sync('docs/' + utils.getMongoCollectionName('testapp@example.com'));
-
-        var agentDb = new agentSchema(); 
-        agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err);
-            }
-            callback();
-          });
-    },
-
-    'Move one file from /tmp to destination': function(test) {
-        test.expect(2);
-        var dir = 'docs/' + utils.getMongoCollectionName('testapp@example.com');
-
-        // Make sure the directory isn't there
-        try {
-            fs.readdirSync('docs/' + utils.getMongoCollectionName('testapp@example.com'));
-        }
-        catch (err) {
-            test.ok(err);
-        }
-
-        utils.saveFilesToAgentDirectory(
-                        { test: {
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            },
-                        },
-                        { resource: utils.getMongoCollectionName('testapp@example.com')
-                        }).
-            then(function() {
-                var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-
-    },
-
-    'Return an array with a single file object when saving a single file': function(test) {
-        test.expect(6);
-        utils.saveFilesToAgentDirectory(
-                        { test: {
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            },
-                        },
-                        { resource: utils.getMongoCollectionName('testapp@example.com')
-                        }).
-            then(function(files) {
-                test.equal(files.length, 1);
-                test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
-                test.equal(files[0].resource, utils.getMongoCollectionName('testapp@example.com'));
-                test.equal(files[0].type, 'text/plain');
-                test.equal(files[0].size, 16);
-                test.ok(files[0].lastModified);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Move multiple files from /tmp to destination': function(test) {
-        test.expect(5);
-        var dir = 'docs/' + utils.getMongoCollectionName('testapp@example.com');
-
-        // Make sure the directory isn't there
-        try {
-            fs.readdirSync('docs/' + utils.getMongoCollectionName('testapp@example.com'));
-        }
-        catch (err) {
-            test.ok(err);
-        }
-
-        utils.saveFilesToAgentDirectory(
-                        {
-                            test1: {
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            },
-                            test2: {
-                                path: '/tmp/gebo-server-utils-test-2.txt',
-                                name: 'gebo-server-utils-test-2.txt',
-                                type: 'text/plain',
-                                size: 37,
-                            },
-                            test3: {
-                                path: '/tmp/gebo-server-utils-test-3.txt',
-                                name: 'gebo-server-utils-test-3.txt',
-                                type: 'text/plain',
-                                size: 29,
-                            },
-                            test4: {
-                                path: '/tmp/gebo-server-utils-test-4.txt',
-                                name: 'gebo-server-utils-test-4.txt',
-                                type: 'text/plain',
-                                size: 11,
-                            },
-                        },
-                        { resource: utils.getMongoCollectionName('testapp@example.com')
-                        }).
-            then(function() {
-                var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
-                test.equal(files.indexOf('gebo-server-utils-test-2.txt'), 1);
-                test.equal(files.indexOf('gebo-server-utils-test-3.txt'), 2);
-                test.equal(files.indexOf('gebo-server-utils-test-4.txt'), 3);
-                test.done();
-              }).
-            catch(function(err) {
-                console.log('err');
-                console.log(err);
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Return an array of multiple file objects': function(test) {
-        test.expect(21);
-
-        utils.saveFilesToAgentDirectory(
-                        {
-                            test1: {
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            },
-                            test2: {
-                                path: '/tmp/gebo-server-utils-test-2.txt',
-                                name: 'gebo-server-utils-test-2.txt',
-                                type: 'text/plain',
-                                size: 37,
-                            },
-                            test3: {
-                                path: '/tmp/gebo-server-utils-test-3.txt',
-                                name: 'gebo-server-utils-test-3.txt',
-                                type: 'text/plain',
-                                size: 29,
-                            },
-                            test4: {
-                                path: '/tmp/gebo-server-utils-test-4.txt',
-                                name: 'gebo-server-utils-test-4.txt',
-                                type: 'text/plain',
-                                size: 11,
-                            },
-                        },
-                        { resource: utils.getMongoCollectionName('testapp@example.com')
-                        }).
-            then(function(files) {
-                test.equal(files.length, 4);
-                test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
-                test.equal(files[0].resource, utils.getMongoCollectionName('testapp@example.com'));
-                test.equal(files[0].type, 'text/plain');
-                test.equal(files[0].size, 16);
-                test.ok(files[0].lastModified);
-                test.equal(files[1].name, 'gebo-server-utils-test-2.txt');
-                test.equal(files[1].resource, utils.getMongoCollectionName('testapp@example.com'));
-                test.equal(files[1].type, 'text/plain');
-                test.equal(files[1].size, 37);
-                test.ok(files[1].lastModified);
-                test.equal(files[2].name, 'gebo-server-utils-test-3.txt');
-                test.equal(files[2].resource, utils.getMongoCollectionName('testapp@example.com'));
-                test.equal(files[2].type, 'text/plain');
-                test.equal(files[2].size, 29);
-                test.ok(files[2].lastModified);
-                test.equal(files[3].name, 'gebo-server-utils-test-4.txt');
-                test.equal(files[3].resource, utils.getMongoCollectionName('testapp@example.com'));
-                test.equal(files[3].type, 'text/plain');
-                test.equal(files[3].size, 11);
-                test.ok(files[3].lastModified);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-    'Don\'t barf if the files object is empty, null, or undefined': function(test) {
-        test.expect(3);
-
-        var dir = 'docs/' + utils.getMongoCollectionName('testapp@example.com');
-        utils.saveFilesToAgentDirectory({}, dir).
-            then(function() {
-                test.ok(true);
-                return utils.saveFilesToAgentDirectory(null, dir);
-              }).
-            then(function() {
-                test.ok(true);
-                return utils.saveFilesToAgentDirectory(undefined, dir);
-               }).
-            then(function() {
-                test.ok(true);
-                test.done(); 
-               }).
-             catch(function(err) {
-                test.ok(false, err);
-                test.done(); 
-              });
-    },
-
-    'Write a file object to the agent\'s file collection in the DB': function(test) {
-        test.expect(5);
-
-        utils.saveFilesToAgentDirectory(
-                        { test: {
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            },
-                        },
-                        { resource: utils.getMongoCollectionName('testapp@example.com')
-                        }).
-            then(function() {
-                var db = new agentSchema();
-                db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
-                                       resource: utils.getMongoCollectionName('testapp@example.com') },
-                    function(err, file) {
-                        if (err || !file) {
-                          test.ok(false, err);
-                        }
-                        else {
-                          test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
-                          test.equal(file.resource, utils.getMongoCollectionName('testapp@example.com')); 
-                          test.equal(file.type, 'text/plain'); 
-                          test.equal(file.size, 16); 
-                          test.equal(file.lastModified === null, false); 
-                        }
-                        test.done();
-                      });
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Write multiple file objects to the agent\'s file collection in the DB': function(test) {
-        test.expect(5);
-
-        utils.saveFilesToAgentDirectory(
-                        {
-                            test1: {
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            },
-                            test2: {
-                                path: '/tmp/gebo-server-utils-test-2.txt',
-                                name: 'gebo-server-utils-test-2.txt',
-                                type: 'text/plain',
-                                size: 37,
-                            },
-                            test3: {
-                                path: '/tmp/gebo-server-utils-test-3.txt',
-                                name: 'gebo-server-utils-test-3.txt',
-                                type: 'text/plain',
-                                size: 29,
-                            },
-                            test4: {
-                                path: '/tmp/gebo-server-utils-test-4.txt',
-                                name: 'gebo-server-utils-test-4.txt',
-                                type: 'text/plain',
-                                size: 11,
-                            },
-                        },
-                        { resource: utils.getMongoCollectionName('testapp@example.com')
-                        }).
-            then(function() {
-                var db = new agentSchema();
-                db.fileModel.find({},
-                    function(err, files) {
-                        if (err) {
-                          test.ok(false, err);
-                        }
-                        else {
-                          test.equal(files.length, 4);
-                          test.equal(files[0].name, 'gebo-server-utils-test-1.txt'); 
-                          test.equal(files[1].name, 'gebo-server-utils-test-2.txt'); 
-                          test.equal(files[2].name, 'gebo-server-utils-test-3.txt'); 
-                          test.equal(files[3].name, 'gebo-server-utils-test-4.txt'); 
-                        }
-                        test.done();
-                      });
-              }).
-            catch(function(err) {
-                console.log('err');
-                console.log(err);
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-};
-
-/**
- *saveFile
- */
-exports.saveFile = {
-
-    setUp: function (callback) {
-    	try{
-            /**
-             * Write some files to /tmp
-             */
-            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
+//exports.saveFilesToAgentDirectory = {
+//
+//    setUp: function (callback) {
+//    	try{
+//            /**
+//             * Write some files to /tmp
+//             */
+//            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
 //            fs.writeFileSync('/tmp/gebo-server-utils-test-2.txt', 'It\'s Christmas time in Hollis, Queens');
 //            fs.writeFileSync('/tmp/gebo-server-utils-test-3.txt', 'Yes I eat cow, I am not proud');
 //            fs.writeFileSync('/tmp/gebo-server-utils-test-4.txt', 'Genesis 9:6');
-            callback();
-    	}
-        catch(e) {
-            console.dir(e);
-    	}
-    },
-    
-    tearDown: function (callback) {
-        rimraf.sync('docs/someResource');
+//            callback();
+//    	}
+//        catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//    
+//    tearDown: function (callback) {
+//        rimraf.sync('docs/' + utils.getMongoCollectionName('testapp@example.com'));
+//
+//        var agentDb = new agentSchema(); 
+//        agentDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err);
+//            }
+//            callback();
+//          });
+//    },
+//
+//    'Move one file from /tmp to destination': function(test) {
+//        test.expect(2);
+//        var dir = 'docs/' + utils.getMongoCollectionName('testapp@example.com');
+//
+//        // Make sure the directory isn't there
+//        try {
+//            fs.readdirSync('docs/' + utils.getMongoCollectionName('testapp@example.com'));
+//        }
+//        catch (err) {
+//            test.ok(err);
+//        }
+//
+//        utils.saveFilesToAgentDirectory(
+//                        { test: {
+//                                path: '/tmp/gebo-server-utils-test-1.txt',
+//                                name: 'gebo-server-utils-test-1.txt',
+//                                type: 'text/plain',
+//                                size: 16,
+//                            },
+//                        },
+//                        { resource: utils.getMongoCollectionName('testapp@example.com')
+//                        }).
+//            then(function() {
+//                var files = fs.readdirSync(dir);
+//                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//
+//    },
+//
+//    'Return an array with a single file object when saving a single file': function(test) {
+//        test.expect(6);
+//        utils.saveFilesToAgentDirectory(
+//                        { test: {
+//                                path: '/tmp/gebo-server-utils-test-1.txt',
+//                                name: 'gebo-server-utils-test-1.txt',
+//                                type: 'text/plain',
+//                                size: 16,
+//                            },
+//                        },
+//                        { resource: utils.getMongoCollectionName('testapp@example.com')
+//                        }).
+//            then(function(files) {
+//                test.equal(files.length, 1);
+//                test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
+//                test.equal(files[0].resource, utils.getMongoCollectionName('testapp@example.com'));
+//                test.equal(files[0].type, 'text/plain');
+//                test.equal(files[0].size, 16);
+//                test.ok(files[0].lastModified);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Move multiple files from /tmp to destination': function(test) {
+//        test.expect(5);
+//        var dir = 'docs/' + utils.getMongoCollectionName('testapp@example.com');
+//
+//        // Make sure the directory isn't there
+//        try {
+//            fs.readdirSync('docs/' + utils.getMongoCollectionName('testapp@example.com'));
+//        }
+//        catch (err) {
+//            test.ok(err);
+//        }
+//
+//        utils.saveFilesToAgentDirectory(
+//                        {
+//                            test1: {
+//                                path: '/tmp/gebo-server-utils-test-1.txt',
+//                                name: 'gebo-server-utils-test-1.txt',
+//                                type: 'text/plain',
+//                                size: 16,
+//                            },
+//                            test2: {
+//                                path: '/tmp/gebo-server-utils-test-2.txt',
+//                                name: 'gebo-server-utils-test-2.txt',
+//                                type: 'text/plain',
+//                                size: 37,
+//                            },
+//                            test3: {
+//                                path: '/tmp/gebo-server-utils-test-3.txt',
+//                                name: 'gebo-server-utils-test-3.txt',
+//                                type: 'text/plain',
+//                                size: 29,
+//                            },
+//                            test4: {
+//                                path: '/tmp/gebo-server-utils-test-4.txt',
+//                                name: 'gebo-server-utils-test-4.txt',
+//                                type: 'text/plain',
+//                                size: 11,
+//                            },
+//                        },
+//                        { resource: utils.getMongoCollectionName('testapp@example.com')
+//                        }).
+//            then(function() {
+//                var files = fs.readdirSync(dir);
+//                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
+//                test.equal(files.indexOf('gebo-server-utils-test-2.txt'), 1);
+//                test.equal(files.indexOf('gebo-server-utils-test-3.txt'), 2);
+//                test.equal(files.indexOf('gebo-server-utils-test-4.txt'), 3);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                console.log('err');
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Return an array of multiple file objects': function(test) {
+//        test.expect(21);
+//
+//        utils.saveFilesToAgentDirectory(
+//                        {
+//                            test1: {
+//                                path: '/tmp/gebo-server-utils-test-1.txt',
+//                                name: 'gebo-server-utils-test-1.txt',
+//                                type: 'text/plain',
+//                                size: 16,
+//                            },
+//                            test2: {
+//                                path: '/tmp/gebo-server-utils-test-2.txt',
+//                                name: 'gebo-server-utils-test-2.txt',
+//                                type: 'text/plain',
+//                                size: 37,
+//                            },
+//                            test3: {
+//                                path: '/tmp/gebo-server-utils-test-3.txt',
+//                                name: 'gebo-server-utils-test-3.txt',
+//                                type: 'text/plain',
+//                                size: 29,
+//                            },
+//                            test4: {
+//                                path: '/tmp/gebo-server-utils-test-4.txt',
+//                                name: 'gebo-server-utils-test-4.txt',
+//                                type: 'text/plain',
+//                                size: 11,
+//                            },
+//                        },
+//                        { resource: utils.getMongoCollectionName('testapp@example.com')
+//                        }).
+//            then(function(files) {
+//                test.equal(files.length, 4);
+//                test.equal(files[0].name, 'gebo-server-utils-test-1.txt');
+//                test.equal(files[0].resource, utils.getMongoCollectionName('testapp@example.com'));
+//                test.equal(files[0].type, 'text/plain');
+//                test.equal(files[0].size, 16);
+//                test.ok(files[0].lastModified);
+//                test.equal(files[1].name, 'gebo-server-utils-test-2.txt');
+//                test.equal(files[1].resource, utils.getMongoCollectionName('testapp@example.com'));
+//                test.equal(files[1].type, 'text/plain');
+//                test.equal(files[1].size, 37);
+//                test.ok(files[1].lastModified);
+//                test.equal(files[2].name, 'gebo-server-utils-test-3.txt');
+//                test.equal(files[2].resource, utils.getMongoCollectionName('testapp@example.com'));
+//                test.equal(files[2].type, 'text/plain');
+//                test.equal(files[2].size, 29);
+//                test.ok(files[2].lastModified);
+//                test.equal(files[3].name, 'gebo-server-utils-test-4.txt');
+//                test.equal(files[3].resource, utils.getMongoCollectionName('testapp@example.com'));
+//                test.equal(files[3].type, 'text/plain');
+//                test.equal(files[3].size, 11);
+//                test.ok(files[3].lastModified);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//    'Don\'t barf if the files object is empty, null, or undefined': function(test) {
+//        test.expect(3);
+//
+//        var dir = 'docs/' + utils.getMongoCollectionName('testapp@example.com');
+//        utils.saveFilesToAgentDirectory({}, dir).
+//            then(function() {
+//                test.ok(true);
+//                return utils.saveFilesToAgentDirectory(null, dir);
+//              }).
+//            then(function() {
+//                test.ok(true);
+//                return utils.saveFilesToAgentDirectory(undefined, dir);
+//               }).
+//            then(function() {
+//                test.ok(true);
+//                test.done(); 
+//               }).
+//             catch(function(err) {
+//                test.ok(false, err);
+//                test.done(); 
+//              });
+//    },
+//
+//    'Write a file object to the agent\'s file collection in the DB': function(test) {
+//        test.expect(5);
+//
+//        utils.saveFilesToAgentDirectory(
+//                        { test: {
+//                                path: '/tmp/gebo-server-utils-test-1.txt',
+//                                name: 'gebo-server-utils-test-1.txt',
+//                                type: 'text/plain',
+//                                size: 16,
+//                            },
+//                        },
+//                        { resource: utils.getMongoCollectionName('testapp@example.com')
+//                        }).
+//            then(function() {
+//                var db = new agentSchema();
+//                db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
+//                                       resource: utils.getMongoCollectionName('testapp@example.com') },
+//                    function(err, file) {
+//                        if (err || !file) {
+//                          test.ok(false, err);
+//                        }
+//                        else {
+//                          test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
+//                          test.equal(file.resource, utils.getMongoCollectionName('testapp@example.com')); 
+//                          test.equal(file.type, 'text/plain'); 
+//                          test.equal(file.size, 16); 
+//                          test.equal(file.lastModified === null, false); 
+//                        }
+//                        test.done();
+//                      });
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Write multiple file objects to the agent\'s file collection in the DB': function(test) {
+//        test.expect(5);
+//
+//        utils.saveFilesToAgentDirectory(
+//                        {
+//                            test1: {
+//                                path: '/tmp/gebo-server-utils-test-1.txt',
+//                                name: 'gebo-server-utils-test-1.txt',
+//                                type: 'text/plain',
+//                                size: 16,
+//                            },
+//                            test2: {
+//                                path: '/tmp/gebo-server-utils-test-2.txt',
+//                                name: 'gebo-server-utils-test-2.txt',
+//                                type: 'text/plain',
+//                                size: 37,
+//                            },
+//                            test3: {
+//                                path: '/tmp/gebo-server-utils-test-3.txt',
+//                                name: 'gebo-server-utils-test-3.txt',
+//                                type: 'text/plain',
+//                                size: 29,
+//                            },
+//                            test4: {
+//                                path: '/tmp/gebo-server-utils-test-4.txt',
+//                                name: 'gebo-server-utils-test-4.txt',
+//                                type: 'text/plain',
+//                                size: 11,
+//                            },
+//                        },
+//                        { resource: utils.getMongoCollectionName('testapp@example.com')
+//                        }).
+//            then(function() {
+//                var db = new agentSchema();
+//                db.fileModel.find({},
+//                    function(err, files) {
+//                        if (err) {
+//                          test.ok(false, err);
+//                        }
+//                        else {
+//                          test.equal(files.length, 4);
+//                          test.equal(files[0].name, 'gebo-server-utils-test-1.txt'); 
+//                          test.equal(files[1].name, 'gebo-server-utils-test-2.txt'); 
+//                          test.equal(files[2].name, 'gebo-server-utils-test-3.txt'); 
+//                          test.equal(files[3].name, 'gebo-server-utils-test-4.txt'); 
+//                        }
+//                        test.done();
+//                      });
+//              }).
+//            catch(function(err) {
+//                console.log('err');
+//                console.log(err);
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//};
 
-        var agentDb = new agentSchema(); 
-        agentDb.connection.db.dropDatabase(function(err) {
-            if (err) {
-              console.log(err);
-            }
-            callback();
-          });
-    },
-
-    'Move file from /tmp to destination': function(test) {
-        test.expect(2);
-        var dir = 'docs/someResource';
-
-        // Make sure the directory isn't there
-        try {
-            fs.readdirSync('docs/someResource');
-        }
-        catch (err) {
-            test.ok(err);
-        }
-
-        utils.saveFile({
-                            path: '/tmp/gebo-server-utils-test-1.txt',
-                            name: 'gebo-server-utils-test-1.txt',
-                            type: 'text/plain',
-                            size: 16,
-                        },
-                        { resource: 'someResource'
-                        }).
-            then(function() {
-                var files = fs.readdirSync(dir);
-                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-
-    },
-
-    'Return a file object': function(test) {
-        test.expect(5);
-        utils.saveFile({
-                            path: '/tmp/gebo-server-utils-test-1.txt',
-                            name: 'gebo-server-utils-test-1.txt',
-                            type: 'text/plain',
-                            size: 16,
-                        },
-                        { resource: 'someResource'
-                        }).
-            then(function(file) {
-                test.equal(file.name, 'gebo-server-utils-test-1.txt');
-                test.equal(file.resource, 'someResource');
-                test.equal(file.type, 'text/plain');
-                test.equal(file.size, 16);
-                test.ok(file.lastModified);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-
-    'Don\'t barf if the files object is empty, null, or undefined': function(test) {
-        test.expect(3);
-
-        var dir = 'docs/someResource';
-        utils.saveFile({}, dir).
-            then(function() {
-                test.ok(true);
-                return utils.saveFile(null, dir);
-              }).
-            then(function() {
-                test.ok(true);
-                return utils.saveFile(undefined, dir);
-               }).
-            then(function() {
-                test.ok(true);
-                test.done(); 
-               }).
-             catch(function(err) {
-                test.ok(false, err);
-                test.done(); 
-              });
-    },
-
-    'Write a file object to the agent\'s file collection in the DB': function(test) {
-        test.expect(5);
-
-        utils.saveFile({
-                            path: '/tmp/gebo-server-utils-test-1.txt',
-                            name: 'gebo-server-utils-test-1.txt',
-                            type: 'text/plain',
-                            size: 16,
-                        },
-                        { resource: 'someResource'
-                        }).
-            then(function() {
-                var db = new agentSchema();
-                db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
-                                       resource: 'someResource' },
-                    function(err, file) {
-                        if (err || !file) {
-                          test.ok(false, err);
-                        }
-                        else {
-                          test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
-                          test.equal(file.resource, 'someResource'); 
-                          test.equal(file.type, 'text/plain'); 
-                          test.equal(file.size, 16); 
-                          test.equal(file.lastModified === null, false); 
-                        }
-                        test.done();
-                      });
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-    },
-};
+/**
+ * 2014-8-20
+ *
+ * I'm moving away from saving files to the agent directory in favour of
+ * storing all files in mongo. This is preserved for reference.
+ *
+/**
+ *saveFile
+ */
+//exports.saveFile = {
+//
+//    setUp: function (callback) {
+//    	try{
+//            /**
+//             * Write some files to /tmp
+//             */
+//            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
+////            fs.writeFileSync('/tmp/gebo-server-utils-test-2.txt', 'It\'s Christmas time in Hollis, Queens');
+////            fs.writeFileSync('/tmp/gebo-server-utils-test-3.txt', 'Yes I eat cow, I am not proud');
+////            fs.writeFileSync('/tmp/gebo-server-utils-test-4.txt', 'Genesis 9:6');
+//            callback();
+//    	}
+//        catch(e) {
+//            console.dir(e);
+//    	}
+//    },
+//    
+//    tearDown: function (callback) {
+////        rimraf.sync('docs/someResource');
+//
+//        var agentDb = new agentSchema(); 
+//        agentDb.connection.db.dropDatabase(function(err) {
+//            if (err) {
+//              console.log(err);
+//            }
+//            callback();
+//          });
+//    },
+//
+//    'Move file from /tmp to destination': function(test) {
+//        test.expect(2);
+//        var dir = 'docs/someResource';
+//
+//        // Make sure the directory isn't there
+//        try {
+//            fs.readdirSync('docs/someResource');
+//        }
+//        catch (err) {
+//            test.ok(err);
+//        }
+//
+//        utils.saveFile({
+//                            path: '/tmp/gebo-server-utils-test-1.txt',
+//                            name: 'gebo-server-utils-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 16,
+//                        },
+//                        { resource: 'someResource'
+//                        }).
+//            then(function() {
+//                var files = fs.readdirSync(dir);
+//                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), 0);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//
+//    },
+//
+//    'Return a file object': function(test) {
+//        test.expect(5);
+//        utils.saveFile({
+//                            path: '/tmp/gebo-server-utils-test-1.txt',
+//                            name: 'gebo-server-utils-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 16,
+//                        },
+//                        { resource: 'someResource'
+//                        }).
+//            then(function(file) {
+//                test.equal(file.name, 'gebo-server-utils-test-1.txt');
+//                test.equal(file.resource, 'someResource');
+//                test.equal(file.type, 'text/plain');
+//                test.equal(file.size, 16);
+//                test.ok(file.lastModified);
+//                test.done();
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//
+//    'Don\'t barf if the files object is empty, null, or undefined': function(test) {
+//        test.expect(3);
+//
+//        var dir = 'docs/someResource';
+//        utils.saveFile({}, dir).
+//            then(function() {
+//                test.ok(true);
+//                return utils.saveFile(null, dir);
+//              }).
+//            then(function() {
+//                test.ok(true);
+//                return utils.saveFile(undefined, dir);
+//               }).
+//            then(function() {
+//                test.ok(true);
+//                test.done(); 
+//               }).
+//             catch(function(err) {
+//                test.ok(false, err);
+//                test.done(); 
+//              });
+//    },
+//
+//    'Write a file object to the agent\'s file collection in the DB': function(test) {
+//        test.expect(5);
+//
+//        utils.saveFile({
+//                            path: '/tmp/gebo-server-utils-test-1.txt',
+//                            name: 'gebo-server-utils-test-1.txt',
+//                            type: 'text/plain',
+//                            size: 16,
+//                        },
+//                        { resource: 'someResource'
+//                        }).
+//            then(function() {
+//                var db = new agentSchema();
+//                db.fileModel.findOne({ name: 'gebo-server-utils-test-1.txt',
+//                                       resource: 'someResource' },
+//                    function(err, file) {
+//                        if (err || !file) {
+//                          test.ok(false, err);
+//                        }
+//                        else {
+//                          test.equal(file.name, 'gebo-server-utils-test-1.txt'); 
+//                          test.equal(file.resource, 'someResource'); 
+//                          test.equal(file.type, 'text/plain'); 
+//                          test.equal(file.size, 16); 
+//                          test.equal(file.lastModified === null, false); 
+//                        }
+//                        test.done();
+//                      });
+//              }).
+//            catch(function(err) {
+//                test.ok(false, err);
+//                test.done();
+//              });
+//    },
+//};
 
 
 
