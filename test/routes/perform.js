@@ -272,7 +272,6 @@ exports.handler = {
 
         // This is how it's done in the index.enable function
         var keys = Object.keys(actionModule.actions);
-        console.log('keys', keys);
         if (keys.length > 0) { 
           actions['mock'] = {};
           for (var i = 0; i < keys.length; i++) {
