@@ -419,6 +419,33 @@ module.exports = function() {
     
     exports.decision = [
         login.ensureLoggedIn(),
+        /**
+         * 2014-8-20
+         * If I didn't know any better (and I don't), jaredhanson's oauth2orize
+         * isn't properly destroying the session after an agent has been
+         * authenticated. Regrettably, I have no easy way of demonstrating
+         * this, so this hack will have to suffice until someone better-equipped
+         * can show me the error of my ways.
+         *
+         * https://github.com/jaredhanson/oauth2orize
+         *
+         * See oauth2orize/lib/middleware/decision.js (line ~106).
+         * This `delete req.session[key][tid];` has no impact, because
+         * an authorized user remains logged in even after issued a token
+         */
+        function(req, res, next){
+            var end = res.end;
+            res.end = function(chunk, encoding) {
+                req.session.destroy(function(err) {
+                    if (err) {
+                      if (logLevel === 'trace') logger.error('oauth2orize hack', err);
+                    }
+                    res.end = end;
+                    res.end(chuck, encoding);
+                  });
+            };
+            next();
+        },
         server.decision()
       ];
     
