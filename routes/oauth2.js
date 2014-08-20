@@ -441,7 +441,7 @@ module.exports = function() {
                       if (logLevel === 'trace') logger.error('oauth2orize hack', err);
                     }
                     res.end = end;
-                    res.end(chuck, encoding);
+                    res.end(chunk, encoding);
                   });
             };
             next();
