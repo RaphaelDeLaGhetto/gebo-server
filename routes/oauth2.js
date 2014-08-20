@@ -24,6 +24,7 @@ var oauth2orize = require('oauth2orize'),
     winston = require('winston');
 
 nconf.file({ file: 'gebo.json' });
+var logLevel = nconf.get('logLevel');
 
 module.exports = function() {
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
@@ -47,21 +48,21 @@ module.exports = function() {
     // the client by ID from the database.
     
     server.serializeClient(function (resourceEmail, done) {
-        logger.info('serializeClient', resourceEmail);
+        if (logLevel === 'trace') logger.info('serializeClient', resourceEmail);
         return done(null, resourceEmail);
       });
     
     server.deserializeClient(function (requestDetails, done) {
-        logger.info('deserializeClient', requestDetails);
+        if (logLevel === 'trace') logger.info('deserializeClient', requestDetails);
     
         agentDb.friendoModel.findOne({ email: requestDetails.friendo }, function (err, friendo) {
-                logger.info('friendoModel', friendo);
+                if (logLevel === 'trace') logger.info('friendoModel', friendo);
                 var id = null;
                 if (friendo) {
                   id = friendo._id;
                 }
                 requestDetails.friendo = id;
-                logger.info('requestDetails', requestDetails);
+                if (logLevel === 'trace') logger.info('requestDetails', requestDetails);
                 if (err) {
                   return done(err);
                 }
@@ -135,7 +136,7 @@ module.exports = function() {
       }));
     
     function _implicitGrant(requestDetails, user, ares, done) {
-        logger.info('Implicit grant', requestDetails, user, ares);
+        if (logLevel === 'trace') logger.info('Implicit grant', requestDetails, user, ares);
 
         agentDb.friendoModel.findOne({ email: user.email }, function(err, friendo) {
             if (err) {
@@ -157,7 +158,7 @@ module.exports = function() {
                   if (err) {
                     return done(err);
                   }
-                  logger.info('Token', token.string);
+                  if (logLevel === 'trace') logger.info('Token', token.string);
                   done(null, token.string);
                 });
             }
@@ -171,7 +172,7 @@ module.exports = function() {
     // application issues an access token on behalf of the user who authorized the
     // code.
     server.exchange(oauth2orize.exchange.code(function (client, code, redirectUri, done) {
-        logger.warn('------ regular exchange, no no');
+        if (logLevel === 'trace') logger.warn('------ regular exchange, no no');
         geboDb.authorizationModel.findOne({ code: code }, function (err, authCode) {
             if (err) {
               return done(err);
@@ -204,7 +205,7 @@ module.exports = function() {
      * For server login
      */
     var _jwtBearerExchange = function(citizen, data, signature, done) {
-        logger.info('JWT, yeah yeah');
+        if (logLevel === 'trace') logger.info('JWT, yeah yeah');
     
         // The signature hasn't been verified yet, but
         // I need the user in the prn field to get the
@@ -222,7 +223,7 @@ module.exports = function() {
     
         agentDb.friendoModel.findOne({ email: decodedData.prn }, function(err, friendo) {
             if (err) {
-              logger.error(err);
+              if (logLevel === 'trace') logger.error(err);
               done(err);
             }
         
@@ -231,7 +232,7 @@ module.exports = function() {
             verifier.update(data);
             
             if (verifier.verify(friendo.certificate, signature, 'base64')) {
-              logger.info('verified');
+              if (logLevel === 'trace') logger.info('verified');
     
               var scope = _processScope(decodedData.scope);
     
@@ -274,7 +275,7 @@ module.exports = function() {
 //                          });
             }
             else {
-              logger.error('error');
+              if (logLevel === 'trace') logger.error('error');
               return done(new Error('Could not verify data with signature'));
             }
           });
@@ -374,7 +375,7 @@ module.exports = function() {
     exports.authorization = [
         login.ensureLoggedIn(),
         server.authorization(function (email, redirectUri, done) {
-            logger.info('authorization');
+            if (logLevel === 'trace') logger.info('authorization');
             // { resource: email } gets passed to the serializeClient function's
             // resourceEmail parameter. The agent email and originating IP address
             // is added just before the dialog window is rendered
@@ -385,7 +386,7 @@ module.exports = function() {
         // the emails parameter in the [de]serializeClient functions.
         // Hence, req.oauth2.client.agent = req.user.email
         function (req, res) {
-            logger.info(req.user.email, 'is using', req.query.client_name, req.query.client_id);
+            if (logLevel === 'trace') logger.info(req.user.email, 'is using', req.query.client_name, req.query.client_id);
     
             // Add some details to the oauth2 object
             // created by oauth2orize. This will all get
@@ -399,7 +400,7 @@ module.exports = function() {
                                userreq.connection.socket.remoteAddress; 
             req.oauth2.req.clientName = req.query.client_name;
     
-            logger.info('resource', req.oauth2.resource);
+            if (logLevel === 'trace') logger.info('resource', req.oauth2.resource);
     
             res.render('dialog', {
                     transactionID: req.oauth2.transactionID,
@@ -442,7 +443,7 @@ module.exports = function() {
     exports.verify = [
         passport.authenticate('bearer', { session: false }),
         function (req, res) {
-            logger.info('verified', req.user.email);
+            if (logLevel === 'trace') logger.info('verified', req.user.email);
             res.json(req.user);
           },
      ];

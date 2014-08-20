@@ -13,6 +13,8 @@ var q = require('q'),
 module.exports = function(email) {
 
     nconf.file({ file: 'gebo.json' });
+    var logLevel = nconf.get('logLevel');
+
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
     // JWT header
@@ -170,23 +172,23 @@ module.exports = function(email) {
                               res.setEncoding('utf8');
                               res.on('data', function(t) {
                                       token = t;
-                                      logger.info('token.token', token);
+                                      if (logLevel === 'trace') logger.info('token.token', token);
                                   });
                               res.on('end', function() {
-                                      logger.info('Token received');
+                                      if (logLevel === 'trace') logger.info('Token received');
                                       token = JSON.parse(token);
                                       if (token.error) {
-                                        logger.error('token.error_description', token.error_description);
+                                        if (logLevel === 'trace') logger.error('token.error_description', token.error_description);
                                         deferred.reject(token.error_description);
                                       }
                                       else {
-                                        logger.info('token', token);
+                                        if (logLevel === 'trace') logger.info('token', token);
                                         deferred.resolve(token);
                                       }
                                   });
                           }).
                         on('error', function(err){
-                                logger.error(err);
+                                if (logLevel === 'trace') logger.error(err);
                                 deferred.reject(err);
                           });
               

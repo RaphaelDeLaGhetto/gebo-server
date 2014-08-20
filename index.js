@@ -30,6 +30,7 @@ module.exports = function(testing) {
      * Load gebo configurations
      */
     nconf.file({ file: './gebo.json' });
+    var logLevel = nconf.get('logLevel');
 
     /**
      * Load passport configuration,
@@ -124,7 +125,7 @@ module.exports = function(testing) {
      */
     exports.start = function() {
         // HTTP
-        logger.info('HTTP listening on', nconf.get('port'));
+        if (logLevel !== 'off') logger.info('HTTP listening on', nconf.get('port'));
         http.createServer(server).listen(nconf.get('port'));
         
         // HTTPS
@@ -133,7 +134,7 @@ module.exports = function(testing) {
             cert: fs.readFileSync('./cert/cert.pem'),
         };
         
-        logger.info('HTTPS listening on', nconf.get('httpsPort'));
+        if (logLevel !== 'off') logger.info('HTTPS listening on', nconf.get('httpsPort'));
 
         https.createServer(options, server).listen(nconf.get('httpsPort'));
       };

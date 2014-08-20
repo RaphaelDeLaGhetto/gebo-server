@@ -16,25 +16,35 @@ module.exports = function (app, express, passport, logger) {
         ClusterStore = require('strong-cluster-express-store')(session);
 
     nconf.file({ file: './gebo.json' });
-
+    var logLevel = nconf.get('logLevel');
+ 
     // load assets node from configuration file.
     var assets = nconf.get('assets') || {};
 
+    // 2014-8-20
+    // Logging is configured in gebo.json. Preserved for reference.
+    //
     // What kind of environment is this?
-    var env = process.env.NODE_ENV || 'development';
-
-    // Development Configuration
-    if ('development' === env) {
-      // register the request logger
+//    var env = process.env.NODE_ENV || 'development';
+//
+//    // Development Configuration
+//    if ('development' === env) {
+//      // register the request logger
+//      app.use(requestLogger.create(logger))
+//      app.set('DEBUG', true)
+//      app.use(errorHandler({ dumpExceptions: true, showStack: true }))
+//    }
+//
+//    // Production Configuration
+//    if ('production' === env) {
+//      app.set('DEBUG', false)
+//      app.use(errorHandler())
+//    }
+    
+    if (logLevel !== 'off') {
       app.use(requestLogger.create(logger))
       app.set('DEBUG', true)
       app.use(errorHandler({ dumpExceptions: true, showStack: true }))
-    }
-
-    // Production Configuration
-    if ('production' === env) {
-      app.set('DEBUG', false)
-      app.use(errorHandler())
     }
 
     /**

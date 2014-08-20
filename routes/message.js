@@ -7,8 +7,12 @@ var passport = require('passport'),
     extend = require('extend'),
     conversations = require('../conversations'),
     q = require('q'),
+    nconf = require('nconf'),
     winston = require('winston');
 
+nconf.file({ file: './gebo.json' });
+var logLevel = nconf.get('logLevel');
+ 
 var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
 /**
@@ -18,9 +22,9 @@ var _sendMessageHandler = function(req, res, done) {
     var message = req.body,
         agent = req.user;
 
-    logger.info('_sendMessageHandler');
-    logger.info('agent',  JSON.stringify(agent, null, 2));
-    logger.info('message', JSON.stringify(message, null, 2));
+    if (logLevel === 'trace') logger.info('_sendMessageHandler');
+    if (logLevel === 'trace') logger.info('agent',  JSON.stringify(agent, null, 2));
+    if (logLevel === 'trace') logger.info('message', JSON.stringify(message, null, 2));
 
     conversationUtils.loadConversation(message, agent).
         then(function(conversation) {
@@ -33,15 +37,15 @@ var _sendMessageHandler = function(req, res, done) {
 
             conversations[conversation.type][conversation.role](message, agent).
                 then(function(conversation) {
-                    logger.info('conversation.gebo', conversation.gebo);
+                    if (logLevel === 'trace') logger.info('conversation.gebo', conversation.gebo);
                     conversationUtils.postMessage(conversation.gebo, '/receive', message).
                         then(function(data) {
-                            logger.info('data', data);
+                            if (logLevel === 'trace') logger.info('data', data);
                             res.send(200, conversation);
                             done();
                           }).
                         catch(function(err) {
-                            logger.error(err);
+                            if (logLevel === 'trace') logger.error(err);
                             res.send(500, err);
                             done();
                           });
@@ -86,10 +90,10 @@ exports.send = [
  * Handle incoming messages
  */
 var _receiveMessageHandler = function(req, res, done) { 
-    logger.info('receive');
+    if (logLevel === 'trace') logger.info('receive');
     var message = req.body;
 
-    logger.info('message', JSON.stringify(message, null, 2));
+    if (logLevel === 'trace') logger.info('message', JSON.stringify(message, null, 2));
     conversationUtils.loadConversation(message, { email: message.receiver }).
         then(function(conversation) {
 
@@ -101,7 +105,7 @@ var _receiveMessageHandler = function(req, res, done) {
 
             conversations[conversation.type][conversation.role](message, { email: message.receiver }).
                 then(function(conversation) {
-                    logger.info('conversation', JSON.stringify(conversation, null, 2));
+                    if (logLevel === 'trace') logger.info('conversation', JSON.stringify(conversation, null, 2));
                     res.send(200, conversation);
                     done();
                   }).

@@ -15,12 +15,16 @@ module.exports = function(testing) {
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
+    nconf.file({ file: './gebo.json' });
+    var logLevel = nconf.get('logLevel');
+
     // Get this agent's email. Put into
     // test mode, if specified
     var agentEmail = nconf.get('email');
     if (testing) {
       agentEmail = nconf.get('testEmail');
     }
+
 
     /**
      * Handle incoming attempts to perform
@@ -31,7 +35,7 @@ module.exports = function(testing) {
         var message = req.body,
             agent = req.user;
 
-        logger.info('message', JSON.stringify(message, null, 2));
+        if (logLevel === 'trace') logger.info('message', JSON.stringify(message, null, 2));
         //logger.info('req.files', JSON.stringify(req.files, null, 2));
 
         // A message's receiver used to be specified in the 
@@ -51,7 +55,7 @@ module.exports = function(testing) {
                         // silly to attach them to the social commitment.
                         extend(true, message, req.files);
 
-                        logger.info('verified', verified);
+                        if (logLevel === 'trace') logger.info('verified', verified);
 
                         /**
                          * Actions may be specified in dot notation. This was written
@@ -78,14 +82,14 @@ module.exports = function(testing) {
                           actionPtr[actionParts[actionParts.length - 1]](verified, message).
                             then(function(data) {
                                 if (data.error) {
-                                  logger.error('Server error', data);
+                                  if (logLevel === 'trace') logger.error('Server error', data);
                                   res.status(500).send(data.error);
                                   done(data.error);
                                 }
                                 else {
                                   sc.fulfil(message.receiver, socialCommitment._id).
                                       then(function(sc) {
-                                          logger.info('Done:', data);
+                                          if (logLevel === 'trace') logger.info('Done:', data);
                                           // If you don't set this as a string,
                                           // the status code will be set to the 
                                           // numeric value contained in data
@@ -100,27 +104,27 @@ module.exports = function(testing) {
                                           done();
                                         }).
                                       catch(function(err) {
-                                          logger.error('Social commitment fulfil', err);
+                                          if (logLevel === 'trace') logger.error('Social commitment fulfil', err);
                                           res.status(409).send(err);
                                           done(err);
                                         });
                                 }
                               }).
                             catch(function(err) {
-                                    logger.error('Action', err);
+                                    if (logLevel === 'trace') logger.error('Action', err);
                                     res.status(401).send('You are not allowed access to that resource');
                                     done('You are not allowed access to that resource');
                               });
                         }
                       }).
                     catch(function(err) {
-                        logger.error('Verification', err);
+                        if (logLevel === 'trace') logger.error('Verification', err);
                         res.status(401).send('You could not be verified');
                         done('You could not be verified');
                       });
               }).
             catch(function(err) {
-                logger.error('Bad request', err);
+                if (logLevel === 'trace') logger.error('Bad request', err);
                 res.status(400).send('The request could not be understood by the server');
                 done('The request could not be understood by the server');
               });
@@ -217,9 +221,9 @@ module.exports = function(testing) {
         }
         else {
           agentDb.friendoModel.findOne({ email: agent.email }, function(err, friendo) {
-                logger.info('friendo:', agent.email, JSON.stringify(friendo, null, 2));
+                if (logLevel === 'trace') logger.info('friendo:', agent.email, JSON.stringify(friendo, null, 2));
                 if (err) {
-                  logger.error('Verification', err);
+                  if (logLevel === 'trace') logger.error('Verification', err);
                   deferred.reject(err);
                 }
                 if (!friendo) {

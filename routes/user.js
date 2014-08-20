@@ -11,6 +11,7 @@ module.exports = function() {
 
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
     nconf.file({ file: './gebo.json' });
+    var logLevel = nconf.get('logLevel');
 
     var pass = require('../config/pass')();
 
@@ -31,7 +32,7 @@ module.exports = function() {
     
     exports.getLogin = function (req, res) {
         if (cluster.worker) {
-          logger.info('Worker', cluster.worker.id, 'received login request');
+          if (logLevel === 'trace') logger.info('Worker', cluster.worker.id, 'received login request');
         }
         res.render('login');
       };
