@@ -2,8 +2,14 @@
 
 var agentSchema = require('../schemata/agent'),
     https = require('https'),
+    nconf = require('nconf'),
     utils = require('../lib/utils'),
-    q = require('q');
+    q = require('q'),
+    winston = require('winston');
+
+var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
+nconf.file({ file: './gebo.json' });
+var logLevel = nconf.get('logLevel');
 
 /**
  * Retrieve the conversation, if it exists
@@ -250,16 +256,15 @@ exports.getOptions = _getOptions;
  * @return promise
  */
 exports.postMessage = function(uri, path, content) {
-    console.log('postMessage');
-    console.log('uri', uri);
-    console.log('path', path);
+    if (logLevel === 'trace') logger.info('postMessage');
+    if (logLevel === 'trace') logger.info('uri', uri);
+    if (logLevel === 'trace') logger.info('path', path);
     var deferred = q.defer();
  
     var options = _getOptions(uri, path, content);
     content = JSON.stringify(content);
  
-    console.log('options');
-    console.log(options);
+    if (logLevel === 'trace') logger.info('options', options);
 
     var req = https.request(options, function(res) {
             var data = '';
@@ -278,7 +283,7 @@ exports.postMessage = function(uri, path, content) {
                 });
         }).
       on('error', function(err){
-              console.log(err);
+              if (logLevel === 'trace') logger.error(err);
               deferred.reject(err);
         });
     
