@@ -153,6 +153,16 @@ grunt dbdrop
 node app.js
 ```
 
+# Configuration
+
+Agent-specific settings can be adjusted in `gebo.json`. The properties are self-descriptive, and all are required.
+
+`logLevel` currently takes one of three values:
+
+* `trace`: for development and debugging. This is the verbose logging mode.
+* `info`: for production. All basic server interactions will be logged.
+* `off`: no output will be written to the log files
+
 # Add agent
 
 From the project directory...
