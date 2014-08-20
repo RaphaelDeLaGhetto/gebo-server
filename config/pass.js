@@ -17,6 +17,7 @@ var passport = require('passport'),
     BearerStrategy = require('passport-http-bearer').Strategy,
     ClientJwtBearerStrategy = require('passport-oauth2-jwt-bearer').Strategy,
     cluster = require('cluster'),
+    nconf = require('nconf'),
     winston = require('winston');
 
 module.exports = function() {
@@ -24,6 +25,8 @@ module.exports = function() {
     var geboDb = require('../schemata/gebo')(),
         agentDb = require('../schemata/agent')();
 
+    nconf.file({ file: './gebo.json' });
+    var logLevel = nconf.get('logLevel');
     var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
     /**
@@ -38,7 +41,7 @@ module.exports = function() {
      * @param function
      */
     var _localStrategy = function(email, password, done) {
-        if (cluster.worker) {
+        if (cluster.worker && logLevel === 'trace') {
           logger.info('_localStrategy. Worker', cluster.worker.id, 'attempting authentication');
         }
 
@@ -156,7 +159,7 @@ module.exports = function() {
      * @param function
      */
     var _bearerStrategy = function(accessToken, done) {
-        logger.info('_bearerStrategy', accessToken);
+        if (logLevel === 'trace') logger.info('_bearerStrategy', accessToken);
 
         geboDb.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
@@ -167,10 +170,11 @@ module.exports = function() {
               return done(null, false, 'The token provided is invalid');
             }
 
-            logger.info('token found:', token.string);
+            if (logLevel === 'trace') logger.info('token found:', token.string);
 
             if (token.expires && new Date(token.expires) < new Date()) {
-              logger.info('token: expired', token.expires);
+
+              if (logLevel === 'trace') logger.info('token: expired', token.expires);
               return done(null, false, 'The token provided is invalid');
             }
             
@@ -196,13 +200,13 @@ module.exports = function() {
                           return done(null, false);
                         }
                         else {
-                          logger.info('registrant.email', registrant.email);
+                          if (logLevel === 'trace') logger.info('registrant.email', registrant.email);
                           done(null, registrant);  
                         }
                     });
                 }
                 else {
-                  logger.info('friendo.email', friendo.email);
+                  if (logLevel === 'trace') logger.info('friendo.email', friendo.email);
                   done(null, friendo);  
                 }
               });
