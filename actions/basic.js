@@ -70,7 +70,7 @@ module.exports = function() {
                               if (file) {
                                 message.content.data.fileId = file.fileId;
                               }
-      
+
                               collection.save(message.content.data, { safe: true },
                                       function(err, ack) {
                                           if (err) {
@@ -116,14 +116,28 @@ module.exports = function() {
                     if (message.content && message.content.id) {
                       var id = _transformId(message.content.id);
 
-                      collection.findOne({ '_id': id }, function(err, doc) {
-                          if (err) {
-                            deferred.resolve({ error: err });
-                          }
-                          else {
-                            deferred.resolve(doc);
-                          }                           
-                        });
+                      // DEFAULT_ROOT_CONNECTION is expected to equal 'fs'
+                      if (collection.collectionName === GridStore.DEFAULT_ROOT_COLLECTION) {
+                        var store = new GridStore(collection.db, id, 'r');
+                        store.open(function(err, file) {
+                            if (err) {
+                              deferred.resolve({ error: err });
+                            }
+                            else {
+                              deferred.resolve(file);
+                            }
+                          });
+                      }
+                      else {
+                        collection.findOne({ '_id': id }, function(err, doc) {
+                            if (err) {
+                              deferred.resolve({ error: err });
+                            }
+                            else {
+                              deferred.resolve(doc);
+                            }                           
+                          });
+                      }
                     }
                     else {
                       deferred.reject('You need to specify the ID of the document you want to copy');
@@ -696,7 +710,7 @@ module.exports = function() {
      * to ObjectIds. If not, they can be left alone.
      */
     function _transformId(id) {
-        if (/^[0-9a-fA-F]{12,24}$/.test(id)) {
+        if (/^[0-9a-fA-F]{12,24}$/.test(id) && !(id instanceof mongo.ObjectID)) {
           return new mongo.ObjectID(id)
         }
         return id;

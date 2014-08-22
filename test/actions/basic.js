@@ -186,11 +186,6 @@ exports.getCollection = {
 /**
  * save
  *
- * ~~The save function does one of three things:~~
- * 1) It saves a document to a collection in the DB (see exports.saveToDb)
- * ~~2) It saves a file to the file system (see exports.saveToFs)~~
- * ~~3) It saves a document to a collection with an associated file on the file system (see below)~~
- *
  * 2014-8-13
  * Adapted from http://mongodb.github.io/node-mongodb-native/api-generated/gridstore.html
  */
@@ -226,8 +221,6 @@ exports.save = {
     },
     
     tearDown: function (callback) {
-        rimraf.sync('docs/someCollection');
-
         // Lose the database for next time
         db.dropDatabase(function(err) { 
             db.close();
@@ -241,7 +234,7 @@ exports.save = {
     },
 
    'Save file to file collection and JSON with fileId to collection with permission': function (test) {
-        test.expect(7);
+        test.expect(8);
 
         action.save({ resource: 'someCollection',
 		      write: true },
@@ -280,6 +273,7 @@ exports.save = {
                                 find({ _id: docs.fileId }).
                                 toArray(function(err, files) {
                                     test.equal(files[0].metadata.collection, 'someCollection');
+                                    test.equal(files[0].contentType, 'text/plain');
                                     test.done();
                                   });
                           });
@@ -774,7 +768,7 @@ exports.save = {
 //};
 
 /**
- * Copy document from the database
+ * Copy a file or a document from the database
  */
 exports.cp = {
 
@@ -947,6 +941,82 @@ exports.cp = {
                    test.equal(err, 'You need to specify the ID of the document you want to copy');
                    test.done();
                  });
+   },
+
+   'Return a file stored in the database': function(test) {
+        test.expect(8);
+
+        // Save a file to the DB
+        fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+        var savedFile = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
+        action.save({ resource: cname,
+		      write: true },
+                    { content: { data: {
+                                        _id: new mongo.ObjectID('0123456789AB'),
+                                        name: 'dan',
+                                        occupation: 'Vigilante crime fighter'
+                                    },
+                               },
+                      file: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 16,
+                      }
+                  }).
+                then(function(ack) {
+                        test.ok(ack);
+
+                        // Since the save call updated an existing record, a copy
+                        // of the document was not returned. Copy the file just
+                        // saved to get the fileId
+                        action.cp({ resource: cname,
+                                    admin: false,
+                                    read: true },
+                                  { content: { id: '0123456789AB' } }).
+                             then(function(doc) {
+                                    test.ok(doc, 'File copied');
+
+                                    // Copy the saved file back from the DB
+                                    test.ok(doc.fileId instanceof mongo.ObjectID);
+                                    action.cp({ resource: 'fs',
+                                                admin: false,
+                                                read: true },
+                                              { content: { id: doc.fileId } }).
+                                         then(function(file) {
+                                                test.equal(file.filename, 'gebo-server-save-test-1.txt');
+                                                test.equal(file.contentType, 'text/plain');
+                                                test.equal(file.length, 16);
+                                                test.equal(file.metadata.collection, cname);
+
+                                                // Make sure I get the file contents back
+                                                var fileContents = '';
+                                                var stream = file.stream(true);
+                                                stream.on('data', function(chunk) {
+                                                    fileContents += chunk;
+                                                  });
+                                                stream.on('end', function() {
+                                                    test.equal(fileContents, savedFile);
+                                                    test.done();
+                                                  });
+                                            }).
+                                        catch(function(err) {
+                                                // Shouldn't get here
+                                                test.ok(false, err); 
+                                                test.done();
+                                             });
+                              }).
+                            catch(function(err) {
+                		    // Shouldn't get here
+                                    test.ok(false, err); 
+                                    test.done();
+                                 });
+                    }).
+                catch(function(err) {
+                        console.log('Error???? ' + err);       
+                        test.ifError(err);
+                        test.done();
+                    });
    },
 
 };
@@ -2783,6 +2853,14 @@ exports.transformId = {
         var id = action.transformId('This is a non-hex string');
         test.ok(typeof id, 'string');
         test.equal(id, 'This is a non-hex string');
+        test.done();
+    },
+
+    'It should leave an ObjectId alone': function(test) {
+        test.expect(2);
+        var id = action.transformId(new mongo.ObjectID('0123456789abcdefABCDEF01'));
+        test.ok(id instanceof mongo.ObjectID);
+        test.equal(id, '0123456789abcdefabcdef01');
         test.done();
     },
 };
