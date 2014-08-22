@@ -960,7 +960,7 @@ exports.saveFileToDb = {
                         }, collection).
             then(function(file) {
                 test.equal(file.filename, 'gebo-server-utils-test-1.txt');
-                test.equal(file.contentType, 'binary/octet-stream');
+                test.equal(file.contentType, 'text/plain');
                 test.equal(file.metadata.collection, 'someCollection');
                 test.ok(file.uploadDate);
 
