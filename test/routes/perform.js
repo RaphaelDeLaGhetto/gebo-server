@@ -298,6 +298,11 @@ exports.handler = {
             test.done();
           });
     },
+
+    // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
+    'Stream to the response object when copying a file': function(test) {
+        test.done();
+    },
 };
 
 // I can't figure out how to use sinon's mocks, stubs, etc.
