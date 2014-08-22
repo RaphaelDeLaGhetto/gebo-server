@@ -910,9 +910,7 @@ exports.saveFileToDb = {
                   console.log(err);
                 }
         	collection = new mongo.Collection(client, 'someCollection');
-//                collection.remove({}, function(err) {
-    		    callback();
-//    		  });
+    		callback();
               });
     	}
         catch(e) {
@@ -939,7 +937,7 @@ exports.saveFileToDb = {
                                 name: 'gebo-server-utils-test-1.txt',
                                 type: 'text/plain',
                                 size: 16,
-                            }, db).
+                            }, collection).
             then(function() {
                 var files = fs.readdirSync('/tmp');
                 test.equal(files.indexOf('gebo-server-utils-test-1.txt'), -1);
@@ -953,16 +951,17 @@ exports.saveFileToDb = {
     },
 
     'Return a file object': function(test) {
-        test.expect(5);
+        test.expect(6);
         utils.saveFileToDb({
                             path: '/tmp/gebo-server-utils-test-1.txt',
                             name: 'gebo-server-utils-test-1.txt',
                             type: 'text/plain',
                             size: 16,
-                        }, db).
+                        }, collection).
             then(function(file) {
                 test.equal(file.filename, 'gebo-server-utils-test-1.txt');
                 test.equal(file.contentType, 'binary/octet-stream');
+                test.equal(file.metadata.collection, 'someCollection');
                 test.ok(file.uploadDate);
 
                 // The utils.saveToDb deletes the given file in /tmp
@@ -992,14 +991,14 @@ exports.saveFileToDb = {
         test.expect(3);
 
         var dir = 'docs/someResource';
-        utils.saveFileToDb({}, dir).
+        utils.saveFileToDb({}, collection).
             then(function() {
                 test.ok(true);
-                return utils.saveFileToDb(null, dir);
+                return utils.saveFileToDb(null, collection);
               }).
             then(function() {
                 test.ok(true);
-                return utils.saveFileToDb(undefined, dir);
+                return utils.saveFileToDb(undefined, collection);
               }).
             then(function() {
                 test.ok(true);
@@ -1010,5 +1009,6 @@ exports.saveFileToDb = {
                 test.done(); 
               });
     },
+
 };
 
