@@ -71,20 +71,20 @@ module.exports = function() {
     /**
      * File schema
      */
-    var fileSchema = new Schema({
-        name: { type: String, required: true, unique: true },
-        resource: { type: String, required: false, unique: false },
-        type: { type: String, required: false, unique: false },
-        size: { type: Number, required: false, unique: false },
-        lastModified: { type: Date, required: true, default: Date.now() },
-      });
-    
-    // Export fileSchema model
-    try {
-        var fileModel = mongoose.model('File', fileSchema);
-        exports.fileModel = fileModel;
-      }
-    catch (error) {}
+//    var fileSchema = new Schema({
+//        name: { type: String, required: true, unique: true },
+//        resource: { type: String, required: false, unique: false },
+//        type: { type: String, required: false, unique: false },
+//        size: { type: Number, required: false, unique: false },
+//        lastModified: { type: Date, required: true, default: Date.now() },
+//      });
+//    
+//    // Export fileSchema model
+//    try {
+//        var fileModel = mongoose.model('File', fileSchema);
+//        exports.fileModel = fileModel;
+//      }
+//    catch (error) {}
     
     /**
      * Social commitment schema
