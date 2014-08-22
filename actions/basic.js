@@ -1,6 +1,7 @@
 'use strict';
 
 var mongo = require('mongodb'),
+    GridStore = mongo.GridStore,
     utils = require('../lib/utils'),
     q = require('q'),
     fs = require('fs'),
@@ -57,8 +58,7 @@ module.exports = function() {
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) {
-                    //utils.saveFile(message.file, verified).
-                    utils.saveFileToDb(message.file, collection.db).
+                    utils.saveFileToDb(message.file, collection).
                        then(function(file) {
                             if (message.content && message.content.data) {
                               if (message.content.data._id) {
@@ -66,7 +66,7 @@ module.exports = function() {
                               }
 
                               // If there's a file attached to this message,
-                              // link it to do the data being saved
+                              // link it to the data being saved
                               if (file) {
                                 message.content.data.fileId = file.fileId;
                               }
@@ -149,7 +149,6 @@ module.exports = function() {
     var _rm = function(verified, message) {
         var deferred = q.defer();
 
-
         if (verified.admin || verified.write) { 
           _getCollection(verified).
               then(function(collection) {
@@ -178,27 +177,19 @@ module.exports = function() {
                                           }
                                           else {
                                             // Check for an attached file.
-                                            // Remove it from the file system
-                                            // and database
+                                            // Remove it from the database
                                             if (doc.fileId) {
-                                              agentDb.fileModel.findById(doc.fileId, function(err, file) {
+                                                new GridStore(collection.db, doc.fileId, 'r').open(function(err, gridStore) {
                                                     if (err) {
                                                       deferred.resolve({ error: err });
                                                     }
-                                                    file.remove(function(err) {
+                                                    gridStore.unlink(function(err, results) {
                                                         if (err) {
                                                           deferred.resolve({ error: err });
                                                         }
-                                                        fs.unlink(nconf.get('docs') +
-                                                                '/' + verified.resource +
-                                                                '/' + file.name, function(err) {
-                                                              if (err) {
-                                                                deferred.resolve({ error: err });
-                                                              }
-                                                              else {
-                                                                deferred.resolve();
-                                                              }
-                                                          });
+                                                        else {
+                                                          deferred.resolve(results);
+                                                        }
                                                       });
                                                 });
                                             }

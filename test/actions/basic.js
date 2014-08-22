@@ -186,7 +186,7 @@ exports.getCollection = {
 /**
  * save
  *
- * The save function does one of three things:
+ * ~~The save function does one of three things:~~
  * 1) It saves a document to a collection in the DB (see exports.saveToDb)
  * ~~2) It saves a file to the file system (see exports.saveToFs)~~
  * ~~3) It saves a document to a collection with an associated file on the file system (see below)~~
@@ -218,33 +218,11 @@ exports.save = {
                     }, function() {
                         callback();
                     });
-
-//    	    	collection.remove({}, function(err) {
-//    		    callback();
-//    		  });
               });
     	}
         catch(e) {
             console.dir(e);
     	}
-
-
-//            var server = new mongo.Server('localhost', 27017, {});
-//
-//            db = new mongo.Db(TEST_DB, server, { safe: true });
-//            db.open(function (err, client) {
-//                if (err) {
-//                  throw err;
-//                }
-//        	collection = new mongo.Collection(client, cname);
-//                collection.insert({
-//                        _id: new mongo.ObjectID('0123456789AB'), 
-//                        name: 'dan',
-//                        occupation: 'Batman'
-//                    }, function() {
-//                        callback();
-//                    });
-//            });
     },
     
     tearDown: function (callback) {
@@ -263,7 +241,7 @@ exports.save = {
     },
 
    'Save file to file collection and JSON with fileId to collection with permission': function (test) {
-        test.expect(6);
+        test.expect(7);
 
         action.save({ resource: 'someCollection',
 		      write: true },
@@ -296,7 +274,14 @@ exports.save = {
                             }
                             test.equal(data.toString('base64'), fileData.toString('base64')); 
                             test.equal(data.length, fileData.length); 
-                            test.done();
+
+                            // Make sure the associated collection is stored in the file's metadata
+                            db.collection('fs.files').
+                                find({ _id: docs.fileId }).
+                                toArray(function(err, files) {
+                                    test.equal(files[0].metadata.collection, 'someCollection');
+                                    test.done();
+                                  });
                           });
                     }).
                 catch(function(err) {
@@ -305,6 +290,58 @@ exports.save = {
                         test.done();
                     });
    }, 
+
+   'Save file with no associated collection': function (test) {
+        test.expect(7);
+
+        action.save({ resource: 'fs',
+		      write: true },
+                    { content: { data: { junk: 'I like to move it move it' } },
+                      file: {
+                            path: '/tmp/gebo-server-save-test-1.txt',
+                            name: 'gebo-server-save-test-1.txt',
+                            type: 'text/plain',
+                            size: 21,
+                      }
+                  }).
+                then(function(docs) {
+                        test.ok(docs);
+                        // If it's already saved, it doesn't return
+                        // the mongo ID
+                        test.equal(docs.junk, 'I like to move it move it');
+                        test.ok(docs.fileId);
+                        test.ok(docs._id);
+
+                        // The utils.saveFileToDb function deletes the given file in /tmp
+                        fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+                        
+                        // Make sure the file model is saved
+                        var fileSize = fs.statSync('/tmp/gebo-server-save-test-1.txt').size;
+                        var data = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
+
+                        GridStore.read(db, docs.fileId, function(err, fileData) {
+                            if (err) {
+                              test.ok(false, err);
+                            }
+                            test.equal(data.toString('base64'), fileData.toString('base64')); 
+                            test.equal(data.length, fileData.length); 
+
+                            // Make sure the associated collection is stored in the file's metadata
+                            db.collection('fs.files').
+                                find({ _id: docs.fileId }).
+                                toArray(function(err, files) {
+                                    test.equal(files[0].metadata.collection, 'fs');
+                                    test.done();
+                                  });
+                          });
+                    }).
+                catch(function(err) {
+                        console.log('Error???? ' + err);       
+                        test.ifError(err);
+                        test.done();
+                    });
+   }, 
+
 
    'Save JSON with no file to existing database as admin': function (test) {
         test.expect(3);
@@ -1108,6 +1145,7 @@ exports.rm = {
    },
 
    'Delete a database object with an attached file': function(test) {
+        test.expect(3);
 
         // Save a file with an object
         action.save({ resource: 'someCollection',
@@ -1123,11 +1161,6 @@ exports.rm = {
                 then(function(docs) {
                         test.ok(docs);
 
-                        // Make sure the file is saved to the proper directory
-                        var files = fs.readdirSync('docs/someCollection');
-                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-
-
                         // Remove
                         action.rm({ resource: 'someCollection',
                                     admin: false,
@@ -1136,78 +1169,12 @@ exports.rm = {
                             then(function() {
                                     test.ok(true, 'The doc has been deleted, I think');
 
-                                    // Make sure the database file document is gone
-                                    agentDb.fileModel.findById(docs.fileId, function(err, file) {
-                                        if (err) {
-                                          test.ok(false);
-                                        }
-                                        test.equal(file, null); 
-
-                                        // Make sure the file is removed from the file system
-                                        var files = fs.readdirSync('docs/someCollection');
-                                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), -1);
-
-                                        test.done();
-                                      });
-                                }).
-                            catch(function(err) {
-                                    test.ok(false, err);
-                                    test.done();
-                                 });
-                    }).
-                catch(function(err) {
-                        console.log('Error???? ' + err);       
-                        test.ifError(err);
-                        test.done();
-                    });
-   },
-
-   /**
-    * This test is incomplete. I can't remember to which directory a file
-    * gets saved. I think it's 'docs/save'.
-    */
-   'Delete a file and its meta object': function(test) {
-        // Save a file with an object. The resource is save,
-        // because that's the action name
-        action.save({ resource: 'save',
-		      write: true },
-                    { content: { data: { junk: 'I like to move it move it' } },
-                      file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
-                            size: 21,
-                      }
-                  }).
-                then(function(docs) {
-                        test.ok(docs);
-
-                        // Make sure the file is saved to the proper directory
-                        var files = fs.readdirSync('docs/save');
-                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), 0);
-
-
-                        // Remove
-                        action.rm({ resource: 'save',
-                                    admin: false,
-                                    write: true },
-                                  { content: { id: docs._id } }).
-                            then(function() {
-                                    test.ok(true, 'The doc has been deleted, I think');
-
-                                    // Make sure the database file document is gone
-                                    agentDb.fileModel.findById(docs.fileId, function(err, file) {
-                                        if (err) {
-                                          test.ok(false);
-                                        }
-                                        test.equal(file, null); 
-
-                                        // Make sure the file is removed from the file system
-                                        var files = fs.readdirSync('docs/save');
-                                        test.equal(files.indexOf('gebo-server-save-test-1.txt'), -1);
-
-                                        test.done();
-                                      });
+                                    // Make sure the associated collection is stored in the file's metadata
+                                    db.collection('fs.files').
+                                        findOne({ _id: docs.fileId }, function(err, file) {
+                                            test.equal(file, null);
+                                            test.done();
+                                          });
                                 }).
                             catch(function(err) {
                                     test.ok(false, err);
