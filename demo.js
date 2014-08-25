@@ -1,5 +1,10 @@
-var cluster = require('cluster');
+var cluster = require('cluster'),
+    nconf = require('nconf'),
+    winston = require('winston');
 
+nconf.file({ file: './gebo.json' });
+var logLevel = nconf.get('logLevel');
+var logger = new (winston.Logger)({ transports: [ new (winston.transports.Console)({ colorize: true }) ] });
 
 /**
  * The clustering stuff is courtesy of Rowan Manning
@@ -22,7 +27,7 @@ if (cluster.isMaster) {
   cluster.on('exit', function (worker) {
         // Replace the dead worker,
         // we're not sentimental
-        console.log('Worker ' + worker.id + ' died :(');
+        if (logLevel === 'trace') logger.warn('Worker ' + worker.id + ' died :(');
         cluster.fork();
     });
 }
@@ -35,5 +40,5 @@ else {
   
   gebo.start();
 
-  console.log('Worker ' + cluster.worker.id + ' running!');
+  if (logLevel === 'trace') logger.info('Worker ' + cluster.worker.id + ' running!');
 }
