@@ -60,7 +60,7 @@ module.exports = function(testing) {
     /**
      * Apply settings
      */
-    require('./config/settings')(server, express, passport, logger);
+    require('./config/settings')(server, express, passport);
 
     /**
      * Basic routes
@@ -125,7 +125,7 @@ module.exports = function(testing) {
      */
     exports.start = function() {
         // HTTP
-        if (logLevel !== 'off') logger.info('HTTP listening on', nconf.get('port'));
+        if (logLevel !== 'trace') logger.info('HTTP listening on', nconf.get('port'));
         http.createServer(server).listen(nconf.get('port'));
         
         // HTTPS
@@ -134,7 +134,7 @@ module.exports = function(testing) {
             cert: fs.readFileSync('./cert/cert.pem'),
         };
         
-        if (logLevel !== 'off') logger.info('HTTPS listening on', nconf.get('httpsPort'));
+        if (logLevel !== 'trace') logger.info('HTTPS listening on', nconf.get('httpsPort'));
 
         https.createServer(options, server).listen(nconf.get('httpsPort'));
       };
