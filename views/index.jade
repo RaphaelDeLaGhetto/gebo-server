@@ -6,17 +6,17 @@ block content
             .col-md-6
                 if (!agent)
                     h1 Welcome
-                    p.lead Don't forget to seed the database:
-                    code $ grunt dbseed
+                    //- p.lead Don't forget to seed the database:
+                    //- code $ grunt dbseed
                 else
                     p.lead Hello, #{agent.name}
-            if (!agent)
-                .col-md-6
-                    div.pull-right
-                        h2 New to gebo? 
-                        form.form-signin(action="/signup", method="post", autocomplete="off")
-                            input.form-control(type="text", name="name", placeholder="Name")
-                            input.form-control(type="text", name="email", placeholder="Email")
-                            input.form-control(type="password", name="password", placeholder="Password")
-                            button.btn.btn-md.btn-primary.btn-block(type="submit") Sign up
+            //- if (!agent)
+                //- .col-md-6
+                    //- div.pull-right
+                        //- h2 New to gebo? 
+                        //- form.form-signin(action="/signup", method="post", autocomplete="off")
+                            //- input.form-control(type="text", name="name", placeholder="Name")
+                            //- input.form-control(type="text", name="email", placeholder="Email")
+                            //- input.form-control(type="password", name="password", placeholder="Password")
+                            //- button.btn.btn-md.btn-primary.btn-block(type="submit") Sign up
 
