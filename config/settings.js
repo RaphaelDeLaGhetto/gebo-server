@@ -1,13 +1,13 @@
-module.exports = function (app, express, passport, logger) {
+module.exports = function (app, express, passport) {
 
     var nconf = require('nconf'),
 //        cachify = require('connect-cachify'),
         winston = require('winston'),
         path = require('path'),
         fs = require('fs'),
-        requestLogger = require('winston-request-logger'),
         bodyParser = require('body-parser'),
         methodOverride = require('method-override'),
+        morgan = require('morgan'),
         multer = require('multer'),
         cookieParser = require('cookie-parser'),
         session = require('express-session'),
@@ -21,30 +21,16 @@ module.exports = function (app, express, passport, logger) {
     // load assets node from configuration file.
     var assets = nconf.get('assets') || {};
 
-    // 2014-8-20
-    // Logging is configured in gebo.json. Preserved for reference.
-    //
-    // What kind of environment is this?
-//    var env = process.env.NODE_ENV || 'development';
-//
-//    // Development Configuration
-//    if ('development' === env) {
-//      // register the request logger
-//      app.use(requestLogger.create(logger))
-//      app.set('DEBUG', true)
-//      app.use(errorHandler({ dumpExceptions: true, showStack: true }))
-//    }
-//
-//    // Production Configuration
-//    if ('production' === env) {
-//      app.set('DEBUG', false)
-//      app.use(errorHandler())
-//    }
-    
+    // Logging is configured in gebo.json
+    if (logLevel === 'info') {
+      app.use(morgan('common'));
+    }
+    else if (logLevel ==='trace') {
+      app.use(morgan('dev'));
+    }
     if (logLevel !== 'off') {
-      app.use(requestLogger.create(logger))
-      app.set('DEBUG', true)
-      app.use(errorHandler({ dumpExceptions: true, showStack: true }))
+      app.set('DEBUG', true);
+      app.use(errorHandler({ dumpExceptions: true, showStack: true }));
     }
 
     /**
