@@ -60,8 +60,8 @@ module.exports = function(testing) {
                         /**
                          * Actions may be specified in dot notation. This was written
                          * in the heat of the moment, so an agent can currently only
-                         * have an action burried one layer deep. Ideally, this should
-                         * handle actions burried any arbitrary depth, but at the moment
+                         * have an action buried one layer deep. Ideally, this should
+                         * handle actions buried any arbitrary depth, but at the moment
                          * I can't see why it would ever go deeper than one. So screw it.
                          */
                         var actionPtr = action;
