@@ -1009,6 +1009,114 @@ exports.saveFileToDb = {
                 test.done(); 
               });
     },
-
 };
 
+/**
+ * deleteTmpFiles
+ */
+exports.deleteTmpFiles = {
+
+    setUp: function(callback) {
+        /**
+         * Write some files to /tmp
+         */
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf0.pdf'));
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf1.pdf'));
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf2.pdf'));
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf3.pdf'));
+
+        callback();
+    },
+    
+    tearDown: function(callback) {
+        callback();
+    },
+
+    'Remove a single file from the /tmp directory': function(test) {
+        test.expect(1);
+        var files = { 
+                    file: { 
+                        name: 'pdf0.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf0.pdf',
+                    },
+            };
+        var count = fs.readdirSync('/tmp').length;
+        utils.deleteTmpFiles(files, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(count - 1, fs.readdirSync('/tmp').length);
+            test.done();
+          });
+    },
+
+    'Remove a multiple files from the /tmp directory': function(test) {
+        test.expect(1);
+        var files = { 
+                    file0: { 
+                        name: 'pdf0.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf0.pdf',
+                    },
+                    file1: { 
+                        name: 'pdf1.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf1.pdf',
+                    },
+                    file2: { 
+                        name: 'pdf2.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf2.pdf',
+                    },
+                    file3: { 
+                        name: 'pdf3.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf3.pdf',
+                    },
+            };
+        var count = fs.readdirSync('/tmp').length;
+        utils.deleteTmpFiles(files, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(count - 4, fs.readdirSync('/tmp').length);
+            test.done();
+          });
+    },
+
+    'Don\'t barf if an invalid file is passed': function(test) {
+        test.expect(2);
+        var files = { 
+                    file: { 
+                        name: 'nosuchfile.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/nosuchfile.pdf',
+                    },
+            };
+        var count = fs.readdirSync('/tmp').length;
+        utils.deleteTmpFiles(files, function(err) {
+            if (err) {
+              test.ok(true, err);
+            }
+            else {
+              test.ok(false);
+            }
+            test.equal(count, fs.readdirSync('/tmp').length);
+            test.done();
+          });
+    },
+
+    'Don\'t barf if no files are passed': function(test) {
+        test.expect(1);
+        var files = {};
+        var count = fs.readdirSync('/tmp').length;
+        utils.deleteTmpFiles(files, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(count, fs.readdirSync('/tmp').length);
+            test.done();
+          });
+    },
+};
