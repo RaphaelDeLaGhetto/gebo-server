@@ -45,7 +45,7 @@ module.exports = function() {
     exports.getCollection = _getCollection;
     
     /**
-     * Save JSON to user's profile
+     * Save JSON to the given collection 
      *
      * @param Object
      * @param Object
