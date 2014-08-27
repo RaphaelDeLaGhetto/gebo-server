@@ -929,27 +929,6 @@ exports.saveFileToDb = {
         });
     },
 
-    'Remove file from /tmp': function(test) {
-        test.expect(1);
-
-        utils.saveFileToDb({
-                                path: '/tmp/gebo-server-utils-test-1.txt',
-                                name: 'gebo-server-utils-test-1.txt',
-                                type: 'text/plain',
-                                size: 16,
-                            }, collection).
-            then(function() {
-                var files = fs.readdirSync('/tmp');
-                test.equal(files.indexOf('gebo-server-utils-test-1.txt'), -1);
-                test.done();
-              }).
-            catch(function(err) {
-                test.ok(false, err);
-                test.done();
-              });
-
-    },
-
     'Return a file object': function(test) {
         test.expect(6);
         utils.saveFileToDb({
