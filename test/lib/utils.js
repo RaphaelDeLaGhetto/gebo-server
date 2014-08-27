@@ -1119,4 +1119,17 @@ exports.deleteTmpFiles = {
             test.done();
           });
     },
+
+    'Don\'t barf if the files parameter is undefined': function(test) {
+        test.expect(1);
+        var files = undefined;
+        var count = fs.readdirSync('/tmp').length;
+        utils.deleteTmpFiles(files, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(count, fs.readdirSync('/tmp').length);
+            test.done();
+          });
+    },
 };
