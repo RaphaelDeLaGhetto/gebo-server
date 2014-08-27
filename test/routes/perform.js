@@ -8,6 +8,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 var mongo = require('mongodb'),
     utils = require('../../lib/utils'),
     extend = require('extend'),
+    fs = require('fs'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent'),
     sinon = require('sinon');
@@ -78,6 +79,12 @@ var RES = {
 exports.handler = {
 
     setUp: function(callback) {
+        // Put the test PDF in /tmp
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf0.pdf'));
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf1.pdf'));
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf2.pdf'));
+        fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf3.pdf'));
+
         _code = undefined;
         _content = undefined;
 
@@ -89,6 +96,7 @@ exports.handler = {
                         });
     
         friendo.permissions.push({ resource: 'friendos' });
+        friendo.permissions.push({ resource: 'fs', write: true });
         
         friendo.save(function(err) {
             if (err) {
@@ -299,6 +307,81 @@ exports.handler = {
           });
     },
 
+    'Remove one file attached to the request from the /tmp directory': function(test) {
+        test.expect(1);
+        var req = {
+                body: { 
+                     sender: CLIENT,
+                     action: 'save',
+                     content: { resource: 'fs' },
+                  },
+                user: { email: CLIENT, admin: false },
+                files: {
+                    file: { 
+                        name: 'pdf0.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf0.pdf',
+                    },
+                },
+              };
+
+        var count = fs.readdirSync('/tmp').length;
+
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(count - 1, fs.readdirSync('/tmp').length);
+            test.done();
+        });
+    },
+
+
+    'Remove all files attached to the request from the /tmp directory': function(test) {
+        test.expect(1);
+        var req = {
+                body: { 
+                     sender: CLIENT,
+                     action: 'save',
+                     content: { resource: 'fs' },
+                  },
+                user: { email: CLIENT, admin: false },
+                files: {
+                    file0: { 
+                        name: 'pdf0.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf0.pdf',
+                    },
+                    file1: { 
+                        name: 'pdf1.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf1.pdf',
+                    },
+                    file2: { 
+                        name: 'pdf2.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf2.pdf',
+                    },
+                    file3: { 
+                        name: 'pdf3.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf3.pdf',
+                    },
+                },
+              };
+
+        var count = fs.readdirSync('/tmp').length;
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(count - 4, fs.readdirSync('/tmp').length);
+            test.done();
+          });
+    },
+
+
+    
     // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
     'Stream to the response object when copying a file': function(test) {
         test.done();
@@ -550,4 +633,5 @@ exports.verify = {
               });
     },
 };
+
 

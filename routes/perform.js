@@ -31,12 +31,11 @@ module.exports = function(testing) {
      * actions on the data specified in the message
      */
     var _handler = function(req, res, done) {
-    
+
         var message = req.body,
             agent = req.user;
 
         if (logLevel === 'trace') logger.info('message', JSON.stringify(message, null, 2));
-        //logger.info('req.files', JSON.stringify(req.files, null, 2));
 
         // A message's receiver used to be specified in the 
         // message body. Since the vanilla gebo no longer mediates
@@ -81,7 +80,7 @@ module.exports = function(testing) {
                         else {
                           actionPtr[actionParts[actionParts.length - 1]](verified, message).
                             then(function(data) {
-                                if (data.error) {
+                                if (data && data.error) {
                                   if (logLevel === 'trace') logger.error('Server error', data);
                                   res.status(500).send(data.error);
                                   done(data.error);
@@ -101,12 +100,18 @@ module.exports = function(testing) {
                                           else {
                                             res.status(200).send(data);
                                           }
+                                          //utils.deleteTmpFiles(req.files, done);
                                           done();
                                         }).
                                       catch(function(err) {
                                           if (logLevel === 'trace') logger.error('Social commitment fulfil', err);
                                           res.status(409).send(err);
-                                          done(err);
+//                                          utils.deleteTmpFiles(req.files, function(err) {
+//                                                if (err) {
+//                                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+//                                                }
+                                                done(err);
+//                                            });
                                         });
                                 }
                               }).
@@ -127,6 +132,13 @@ module.exports = function(testing) {
                 if (logLevel === 'trace') logger.error('Bad request', err);
                 res.status(400).send('The request could not be understood by the server');
                 done('The request could not be understood by the server');
+              }).
+            fin(function() {
+                utils.deleteTmpFiles(req.files, function(err) {
+                    if (err) {
+                      if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                    }
+                  });      
               });
        };
     exports.handler = _handler;
