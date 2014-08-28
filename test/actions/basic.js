@@ -812,7 +812,7 @@ exports.cp = {
  
     /**
      * I'm saving this for future reference. gebo can only
-     * access on database at the moment. This will almost
+     * access one database at the moment. This will almost
      * certainly change, at which point this test will 
      * become relevant again
      *
