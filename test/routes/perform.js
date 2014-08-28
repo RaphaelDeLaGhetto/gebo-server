@@ -325,20 +325,44 @@ exports.handler = {
                 },
               };
 
+        // Make sure all the test files are stored in /tmp
+        try {
+          fs.closeSync(fs.openSync(req.files.file.path, 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
+
+//        try {
+//          var fd = fs.openSync('/tmp/pdf0.pdf', 'r');
+//          fs.closeSync(fd);
+//        }
+//        catch(err) {
+//          test.ok(false, err);
+//        }
         var count = fs.readdirSync('/tmp').length;
 
         perform.handler(req, RES, function(err) {
             if (err) {
               test.ok(false, err);
             }
-            test.equal(count - 1, fs.readdirSync('/tmp').length);
-            test.done();
+//            setTimeout(function() {
+                test.equal(count - 1, fs.readdirSync('/tmp').length);
+                test.done();
+//            }, 1000);
         });
     },
 
 
+    /**
+     * Careful here... the save action will only take one file to save at a time. An
+     * agent can potentially attach as many files as he wants, so this demonstrates that
+     * they all get removed, not that save has successfully stored all the files
+     * in the database.
+     */
     'Remove all files attached to the request from the /tmp directory': function(test) {
-        test.expect(1);
+        test.expect(5);
         var req = {
                 body: { 
                      sender: CLIENT,
@@ -370,12 +394,73 @@ exports.handler = {
                 },
               };
 
+        // Make sure all the test files are stored in /tmp
+        try {
+          fs.closeSync(fs.openSync(req.files.file0.path, 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
+        try {
+          fs.closeSync(fs.openSync(req.files.file1.path, 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
+        try {
+          fs.closeSync(fs.openSync(req.files.file2.path, 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
+        try {
+          fs.closeSync(fs.openSync(req.files.file3.path, 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
         var count = fs.readdirSync('/tmp').length;
         perform.handler(req, RES, function(err) {
             if (err) {
               test.ok(false, err);
             }
             test.equal(count - 4, fs.readdirSync('/tmp').length);
+
+            try {
+              fs.openSync(req.files.file0.path, 'r');
+              test.ok(false, 'This file shouldn\'t exist');
+            }
+            catch (err) {
+              test.ok(true, err);
+            }
+
+            try {
+              fs.openSync(req.files.file1.path, 'r');
+              test.ok(false, 'This file shouldn\'t exist');
+            }
+            catch (err) {
+              test.ok(true, err);
+            }
+
+            try {
+              fs.openSync(req.files.file2.path, 'r');
+              test.ok(false, 'This file shouldn\'t exist');
+            }
+            catch (err) {
+              test.ok(true, err);
+            }
+
+            try {
+              fs.openSync(req.files.file3.path, 'r');
+              test.ok(false, 'This file shouldn\'t exist');
+            }
+            catch (err) {
+              test.ok(true, err);
+            }
             test.done();
           });
     },

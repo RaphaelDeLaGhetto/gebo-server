@@ -3,7 +3,6 @@
 var action = require('../actions')(),
     agentDb = require('../schemata/agent')(),
     extend = require('extend'),
-//    multiparty = require('connect-multiparty'),
     nconf = require('nconf'),
     passport = require('passport'),
     q = require('q'),
@@ -75,7 +74,12 @@ module.exports = function(testing) {
                          */
                         if(!actionPtr[actionParts[actionParts.length - 1]]) {
                           res.status(501).send('I don\'t know how to ' + message.action);
-                          done('I don\'t know how to ' + message.action);
+                          utils.deleteTmpFiles(req.files, function(err) {
+                                if (err) {
+                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                                }
+                                done('I don\'t know how to ' + message.action);
+                            });
                         }
                         else {
                           actionPtr[actionParts[actionParts.length - 1]](verified, message).
@@ -83,7 +87,12 @@ module.exports = function(testing) {
                                 if (data && data.error) {
                                   if (logLevel === 'trace') logger.error('Server error', data);
                                   res.status(500).send(data.error);
-                                  done(data.error);
+                                  utils.deleteTmpFiles(req.files, function(err) {
+                                        if (err) {
+                                          if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                                        }
+                                        done(data.error);
+                                    });
                                 }
                                 else {
                                   sc.fulfil(message.receiver, socialCommitment._id).
@@ -100,45 +109,52 @@ module.exports = function(testing) {
                                           else {
                                             res.status(200).send(data);
                                           }
-                                          //utils.deleteTmpFiles(req.files, done);
-                                          done();
+                                          utils.deleteTmpFiles(req.files, done);
                                         }).
                                       catch(function(err) {
                                           if (logLevel === 'trace') logger.error('Social commitment fulfil', err);
                                           res.status(409).send(err);
-//                                          utils.deleteTmpFiles(req.files, function(err) {
-//                                                if (err) {
-//                                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-//                                                }
+                                          utils.deleteTmpFiles(req.files, function(err) {
+                                                if (err) {
+                                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                                                }
                                                 done(err);
-//                                            });
+                                            });
                                         });
                                 }
                               }).
                             catch(function(err) {
-                                    if (logLevel === 'trace') logger.error('Action', err);
-                                    res.status(401).send('You are not allowed access to that resource');
+                                if (logLevel === 'trace') logger.error('Action', err);
+                                res.status(401).send('You are not allowed access to that resource');
+                                utils.deleteTmpFiles(req.files, function(err) {
+                                    if (err) {
+                                      if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                                    }
                                     done('You are not allowed access to that resource');
+                                  });
                               });
                         }
                       }).
                     catch(function(err) {
                         if (logLevel === 'trace') logger.error('Verification', err);
                         res.status(401).send('You could not be verified');
-                        done('You could not be verified');
+                        utils.deleteTmpFiles(req.files, function(err) {
+                            if (err) {
+                              if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                            }
+                            done('You could not be verified');
+                          });
                       });
               }).
             catch(function(err) {
                 if (logLevel === 'trace') logger.error('Bad request', err);
                 res.status(400).send('The request could not be understood by the server');
-                done('The request could not be understood by the server');
-              }).
-            fin(function() {
                 utils.deleteTmpFiles(req.files, function(err) {
                     if (err) {
                       if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
                     }
-                  });      
+                    done('The request could not be understood by the server');
+                  });
               });
        };
     exports.handler = _handler;
