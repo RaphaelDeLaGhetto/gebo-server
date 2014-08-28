@@ -500,7 +500,7 @@ exports.handler = {
                          action: 'cp',
                          content: {
                                  resource: 'fs',
-                                 id: new mongo.ObjectID('0123456789AB'),
+                                 id: '0123456789AB',
                          },
                     },
                     user: { email: CLIENT, admin: false },
