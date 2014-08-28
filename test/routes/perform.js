@@ -333,24 +333,14 @@ exports.handler = {
           test.ok(false, err);
         }
 
-
-//        try {
-//          var fd = fs.openSync('/tmp/pdf0.pdf', 'r');
-//          fs.closeSync(fd);
-//        }
-//        catch(err) {
-//          test.ok(false, err);
-//        }
         var count = fs.readdirSync('/tmp').length;
 
         perform.handler(req, RES, function(err) {
             if (err) {
               test.ok(false, err);
             }
-//            setTimeout(function() {
-                test.equal(count - 1, fs.readdirSync('/tmp').length);
-                test.done();
-//            }, 1000);
+            test.equal(count - 1, fs.readdirSync('/tmp').length);
+            test.done();
         });
     },
 
@@ -464,12 +454,66 @@ exports.handler = {
             test.done();
           });
     },
-
-
     
     // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
     'Stream to the response object when copying a file': function(test) {
-        test.done();
+        test.expect(1);
+        var req = {
+                body: { 
+                     sender: CLIENT,
+                     action: 'save',
+                     content: { resource: 'fs',
+                                data: {
+                                        _id: new mongo.ObjectID('0123456789AB'),
+                                    },
+                     },
+                },
+                user: { email: CLIENT, admin: false },
+                files: {
+                    file: { 
+                        name: 'pdf0.pdf',
+                        type: 'application/pdf',
+                        path: '/tmp/pdf0.pdf',
+                    },
+                },
+              };
+
+        // Make sure all the test files are stored in /tmp
+        try {
+          fs.closeSync(fs.openSync(req.files.file.path, 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
+        var count = fs.readdirSync('/tmp').length;
+
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            
+            // Copy the file back
+            var req = {
+                    body: { 
+                         sender: CLIENT,
+                         action: 'cp',
+                         content: {
+                                 resource: 'fs',
+                                 id: new mongo.ObjectID('0123456789AB'),
+                         },
+                    },
+                    user: { email: CLIENT, admin: false },
+                  };
+
+            perform.handler(req, RES, function(err) {
+                if (err) {
+                  test.ok(false, err);
+                }
+                console.log(_code, _content);
+                test.done();
+            });
+        });
     },
 };
 
