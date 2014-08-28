@@ -897,9 +897,9 @@ exports.saveFileToDb = {
     setUp: function (callback) {
     	try{
             /**
-             * Write some files to /tmp
+             * Write the test file to /tmp
              */
-            fs.writeFileSync('/tmp/gebo-server-utils-test-1.txt', 'Word to your mom');
+            fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf0.pdf'));
 
             // Get a database connection
             var server = new mongo.Server('localhost', 27017, {});
@@ -932,24 +932,20 @@ exports.saveFileToDb = {
     'Return a file object': function(test) {
         test.expect(6);
         utils.saveFileToDb({
-                            path: '/tmp/gebo-server-utils-test-1.txt',
-                            name: 'gebo-server-utils-test-1.txt',
-                            type: 'text/plain',
+                            path: '/tmp/pdf0.pdf',
+                            name: 'pdf0.pdf',
+                            type: 'application/pdf',
                             size: 16,
                         }, collection).
             then(function(file) {
-                test.equal(file.filename, 'gebo-server-utils-test-1.txt');
-                test.equal(file.contentType, 'text/plain');
+                test.equal(file.filename, 'pdf0.pdf');
+                test.equal(file.contentType, 'application/pdf');
                 test.equal(file.metadata.collection, 'someCollection');
                 test.ok(file.uploadDate);
 
-                // The utils.saveToDb deletes the given file in /tmp
-                fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
-                
                 // Make sure the file model is saved
-                var fileSize = fs.statSync('/tmp/gebo-server-save-test-1.txt').size;
-                var data = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
-
+                var fileSize = fs.statSync('/tmp/pdf0.pdf').size;
+                var data = fs.readFileSync('/tmp/pdf0.pdf');
 
                 GridStore.read(db, file.fileId, function(err, fileData) {
                     if (err) {

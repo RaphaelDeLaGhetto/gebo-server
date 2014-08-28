@@ -195,7 +195,7 @@ exports.save = {
             /**
              * Write a file to /tmp
              */
-            fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
+            fs.createReadStream('./test/files/pdf.pdf').pipe(fs.createWriteStream('/tmp/pdf0.pdf'));
 
             var server = new mongo.Server('localhost', 27017, {});
 
@@ -240,9 +240,9 @@ exports.save = {
 		      write: true },
                     { content: { data: { junk: 'I like to move it move it' } },
                       file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
+                            path: '/tmp/pdf0.pdf',
+                            name: 'pdf0.pdf',
+                            type: 'application/pdf',
                             size: 21,
                       }
                   }).
@@ -254,12 +254,9 @@ exports.save = {
                         test.ok(docs.fileId);
                         test.ok(docs._id);
 
-                        // The utils.saveFileToDb function deletes the given file in /tmp
-                        fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
-                        
                         // Make sure the file model is saved
-                        var fileSize = fs.statSync('/tmp/gebo-server-save-test-1.txt').size;
-                        var data = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
+                        var fileSize = fs.statSync('/tmp/pdf0.pdf').size;
+                        var data = fs.readFileSync('/tmp/pdf0.pdf');
 
                         GridStore.read(db, docs.fileId, function(err, fileData) {
                             if (err) {
@@ -273,7 +270,7 @@ exports.save = {
                                 find({ _id: docs.fileId }).
                                 toArray(function(err, files) {
                                     test.equal(files[0].metadata.collection, 'someCollection');
-                                    test.equal(files[0].contentType, 'text/plain');
+                                    test.equal(files[0].contentType, 'application/pdf');
                                     test.done();
                                   });
                           });
@@ -292,9 +289,9 @@ exports.save = {
 		      write: true },
                     { content: { data: { junk: 'I like to move it move it' } },
                       file: {
-                            path: '/tmp/gebo-server-save-test-1.txt',
-                            name: 'gebo-server-save-test-1.txt',
-                            type: 'text/plain',
+                            path: '/tmp/pdf0.pdf',
+                            name: 'pdf0.pdf',
+                            type: 'application/pdf',
                             size: 21,
                       }
                   }).
@@ -306,12 +303,9 @@ exports.save = {
                         test.ok(docs.fileId);
                         test.ok(docs._id);
 
-                        // The utils.saveFileToDb function deletes the given file in /tmp
-                        fs.writeFileSync('/tmp/gebo-server-save-test-1.txt', 'Word to your mom');
-                        
                         // Make sure the file model is saved
-                        var fileSize = fs.statSync('/tmp/gebo-server-save-test-1.txt').size;
-                        var data = fs.readFileSync('/tmp/gebo-server-save-test-1.txt');
+                        var fileSize = fs.statSync('/tmp/pdf0.pdf').size;
+                        var data = fs.readFileSync('/tmp/pdf0.pdf');
 
                         GridStore.read(db, docs.fileId, function(err, fileData) {
                             if (err) {
