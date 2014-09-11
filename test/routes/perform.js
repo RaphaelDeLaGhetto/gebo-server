@@ -11,7 +11,8 @@ var mongo = require('mongodb'),
     fs = require('fs'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent'),
-    sinon = require('sinon');
+    sinon = require('sinon'),
+    q = require('q');
 
 var nconf = require('nconf');
 nconf.file({ file: 'gebo.json' });
@@ -55,7 +56,7 @@ var SEND_REQ = {
         user: { email: CLIENT, admin: false },
       };
 
-var _code, _content;
+var _code, _content, filename;
 var RES = {
     status: function(code) {
         _code = code;
@@ -65,12 +66,13 @@ var RES = {
                     return;
                 }
         }
-      },
-//    send: function(code, content) {
-//        _code = code;
-//        _content = content;
-//        return;
-//      }
+    },
+    download: function(content, filename) {
+          _content = content; 
+          _filename = content.split('/')[content.split('/').length-1];
+          if (filename) _filename = filename;
+          return;
+    }
   };
 
 /**
@@ -97,6 +99,7 @@ exports.handler = {
     
         friendo.permissions.push({ resource: 'friendos' });
         friendo.permissions.push({ resource: 'fs', write: true });
+        friendo.permissions.push({ resource: 'downloadFileTest', execute: true });
         
         friendo.save(function(err) {
             if (err) {
@@ -454,8 +457,100 @@ exports.handler = {
             test.done();
           });
     },
-    
-    // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
+
+    'Send a file if the to-be-returned data object contains the filePath property': function(test) {
+        test.expect(2);
+
+        // Need to add a dummy action for this test
+        // Remove the old modules
+        delete require.cache[require.resolve('../../actions')];
+        delete require.cache[require.resolve('../../routes/perform')];
+
+        // Create a dummy test to return an object with a filePath property
+        var action = require('../../actions')();
+        action.add('downloadFileTest', function() {
+            var deferred = q.defer();
+            deferred.resolve({ filePath: '/tmp/pdf0.pdf' });
+            return deferred.promise;
+          });
+
+        var perform = require('../../routes/perform')(true);
+
+        var req = {
+            body: {
+                sender: CLIENT,
+                action: 'downloadFileTest',
+            },
+            user: { email: CLIENT, admin: false },
+          };
+
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(_content, '/tmp/pdf0.pdf');
+            test.equal(_filename, 'pdf0.pdf');
+
+            // These tests are hairy enough as it is. Set things
+            // back to the way they were
+            delete require.cache[require.resolve('../../actions')];
+            delete require.cache[require.resolve('../../routes/perform')];
+            require('../../actions')();
+            require('../../routes/perform')(true);
+
+            test.done();
+          });
+    },
+
+    'Send a file if the to-be-returned data object contains the filePath property and a distinct file name': function(test) {
+        test.expect(2);
+
+        // Need to add a dummy action for this test
+        // Remove the old modules
+        delete require.cache[require.resolve('../../actions')];
+        delete require.cache[require.resolve('../../routes/perform')];
+
+        // Create a dummy test to return an object with a filePath property
+        var action = require('../../actions')();
+        action.add('downloadFileTest', function() {
+            var deferred = q.defer();
+            deferred.resolve({ filePath: '/tmp/pdf0.pdf', fileName: 'myfile.pdf' });
+            return deferred.promise;
+          });
+
+        var perform = require('../../routes/perform')(true);
+
+        var req = {
+            body: {
+                sender: CLIENT,
+                action: 'downloadFileTest',
+            },
+            user: { email: CLIENT, admin: false },
+          };
+
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(_content, '/tmp/pdf0.pdf');
+            test.equal(_filename, 'myfile.pdf');
+
+            // These tests are hairy enough as it is. Set things
+            // back to the way they were
+            delete require.cache[require.resolve('../../actions')];
+            delete require.cache[require.resolve('../../routes/perform')];
+            require('../../actions')();
+            require('../../routes/perform')(true);
+
+            test.done();
+          });
+    },
+
+    'Remove the file from the file system if the to-be-returned data object contains the filePath property': function(test) {
+        test.done();
+    },
+  
+     // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
     'Stream to the response object when copying a file': function(test) {
         test.expect(1);
         var req = {

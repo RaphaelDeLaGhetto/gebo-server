@@ -106,6 +106,14 @@ module.exports = function(testing) {
                                           if (typeof data === 'number') {
                                             res.status(200).send('' + data);
                                           }
+                                          else if (data.filePath) {
+                                            if (data.fileName) {
+                                              res.download(data.filePath, data.fileName);
+                                            }
+                                            else {
+                                              res.download(data.filePath); 
+                                            }
+                                          }
                                           else {
                                             res.status(200).send(data);
                                           }
