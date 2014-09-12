@@ -67,11 +67,16 @@ var RES = {
                 }
         }
     },
-    download: function(content, filename) {
+    download: function(content, filename, done) {
           _content = content; 
-          _filename = content.split('/')[content.split('/').length-1];
-          if (filename) _filename = filename;
-          return;
+          if (typeof filename === 'function') {
+            done = filename;
+            _filename = content.split('/')[content.split('/').length-1];
+          }
+          else if (typeof filename === 'string') {
+            _filename = filename;
+          }
+          done();
     }
   };
 
@@ -547,7 +552,64 @@ exports.handler = {
     },
 
     'Remove the file from the file system if the to-be-returned data object contains the filePath property': function(test) {
-        test.done();
+        test.expect(3);
+
+        // Need to add a dummy action for this test
+        // Remove the old modules
+        delete require.cache[require.resolve('../../actions')];
+        delete require.cache[require.resolve('../../routes/perform')];
+
+        // Create a dummy test to return an object with a filePath property
+        var action = require('../../actions')();
+        action.add('downloadFileTest', function() {
+            var deferred = q.defer();
+            deferred.resolve({ filePath: '/tmp/pdf0.pdf', fileName: 'myfile.pdf' });
+            return deferred.promise;
+          });
+
+        var perform = require('../../routes/perform')(true);
+
+        var req = {
+            body: {
+                sender: CLIENT,
+                action: 'downloadFileTest',
+            },
+            user: { email: CLIENT, admin: false },
+          };
+
+        // Make sure the file is where it's supposed to be
+        try {
+          fs.closeSync(fs.openSync('/tmp/pdf0.pdf', 'r'));
+        }
+        catch (err) {
+          test.ok(false, err);
+        }
+
+        perform.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(_content, '/tmp/pdf0.pdf');
+            test.equal(_filename, 'myfile.pdf');
+
+            // Make sure the file is no longer where it once was
+            try {
+              fs.closeSync(fs.openSync('/tmp/pdf0.pdf', 'r'));
+              test.ok(false, 'This file shouldn\'t exist');
+            }
+            catch (err) {
+              test.ok(true);
+            }
+
+            // These tests are hairy enough as it is. Set things
+            // back to the way they were
+            delete require.cache[require.resolve('../../actions')];
+            delete require.cache[require.resolve('../../routes/perform')];
+            require('../../actions')();
+            require('../../routes/perform')(true);
+
+            test.done();
+          });
     },
   
      // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee

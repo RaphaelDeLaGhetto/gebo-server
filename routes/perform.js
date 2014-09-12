@@ -3,6 +3,7 @@
 var action = require('../actions')(),
     agentDb = require('../schemata/agent')(),
     extend = require('extend'),
+    fs = require('fs'),
     nconf = require('nconf'),
     passport = require('passport'),
     q = require('q'),
@@ -107,12 +108,22 @@ module.exports = function(testing) {
                                             res.status(200).send('' + data);
                                           }
                                           else if (data.filePath) {
-                                            if (data.fileName) {
-                                              res.download(data.filePath, data.fileName);
+
+                                            if (!data.fileName) {
+                                              var fname = data.filePath.split('/');
+                                              fname = fname[fname.length - 1];
+                                              data.fileName = fname; 
                                             }
-                                            else {
-                                              res.download(data.filePath); 
-                                            }
+                                            res.download(data.filePath, data.fileName, function(err) {
+                                                  if (err) {
+                                                    if (logLevel === 'trace') logger.error('Send file:', err);
+                                                  }
+                                                  fs.unlink(data.filePath, function(err) {
+                                                      if (err) {
+                                                        if (logLevel === 'trace') logger.error('File removal:', err);
+                                                      }
+                                                    });
+                                              });
                                           }
                                           else {
                                             res.status(200).send(data);
