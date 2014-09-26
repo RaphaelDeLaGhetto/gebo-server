@@ -128,14 +128,10 @@ module.exports = function(testing) {
         if (logLevel !== 'trace') logger.info('HTTP listening on', nconf.get('port'));
         http.createServer(server).listen(nconf.get('port'));
         
-        // HTTPS
-        var options = {
-            key: fs.readFileSync('./cert/key.pem'),
-            cert: fs.readFileSync('./cert/cert.pem'),
-        };
-        
         if (logLevel !== 'trace') logger.info('HTTPS listening on', nconf.get('httpsPort'));
 
+        // HTTPS
+        var options = nconf.get('ssl');
         https.createServer(options, server).listen(nconf.get('httpsPort'));
       };
 
