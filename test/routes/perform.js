@@ -5,13 +5,16 @@
 var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
     mongoose = require('gebo-mongoose-connection').get(true);
 
-var mongo = require('mongodb'),
+var childProcess = require('child_process'),
+    mongo = require('mongodb'),
     utils = require('../../lib/utils'),
+    events = require('events'),
     extend = require('extend'),
-    fs = require('fs'),
+    fs = require('fs-extra'),
     geboSchema = require('../../schemata/gebo'),
     agentSchema = require('../../schemata/agent'),
     sinon = require('sinon'),
+    tmp = require('tmp'),
     q = require('q');
 
 var nconf = require('nconf');
@@ -24,7 +27,6 @@ var geboDb = new geboSchema(),
 var COL_NAME = 'appCollection',
     HAI = 'A human-agent interface',
     IP = '127.0.0.1';
-
 
 // Agent configs
 var BASE_ADDRESS = 'http://theirhost.com';
@@ -54,6 +56,10 @@ var SEND_REQ = {
              }
           },
         user: { email: CLIENT, admin: false },
+        on: function(evt, handler) {
+                this.handle = handler;
+            },
+        handle: null,
       };
 
 var _code, _content, filename;
@@ -266,6 +272,10 @@ exports.handler = {
                      action: 'mock.someAction',
                   },
                 user: { email: CLIENT, admin: false },
+                on: function(evt, handler) {
+                        var handle = handler;
+                        return;
+                    },
               };
 
         perform.handler(req, RES, function(err) {
@@ -301,6 +311,10 @@ exports.handler = {
                      action: 'mock.theAnswerToLifeTheUniverseAndEverything',
                   },
                 user: { email: CLIENT, admin: false },
+                on: function(evt, handler) {
+                        var handle = handler;
+                        return;
+                    },
               };
 
         perform.handler(req, RES, function(err) {
@@ -331,6 +345,10 @@ exports.handler = {
                         path: '/tmp/pdf0.pdf',
                     },
                 },
+                on: function(evt, handler) {
+                        var handle = handler;
+                        return;
+                    },
               };
 
         // Make sure all the test files are stored in /tmp
@@ -390,6 +408,10 @@ exports.handler = {
                         path: '/tmp/pdf3.pdf',
                     },
                 },
+                on: function(evt, handler) {
+                        var handle = handler;
+                        return;
+                    },
               };
 
         // Make sure all the test files are stored in /tmp
@@ -487,6 +509,10 @@ exports.handler = {
                 action: 'downloadFileTest',
             },
             user: { email: CLIENT, admin: false },
+            on: function(evt, handler) {
+                    var handle = handler;
+                    return;
+                },
           };
 
         perform.handler(req, RES, function(err) {
@@ -531,6 +557,10 @@ exports.handler = {
                 action: 'downloadFileTest',
             },
             user: { email: CLIENT, admin: false },
+            on: function(evt, handler) {
+                    var handle = handler;
+                    return;
+                },
           };
 
         perform.handler(req, RES, function(err) {
@@ -575,6 +605,10 @@ exports.handler = {
                 action: 'downloadFileTest',
             },
             user: { email: CLIENT, admin: false },
+            on: function(evt, handler) {
+                    var handle = handler;
+                    return;
+                },
           };
 
         // Make sure the file is where it's supposed to be
@@ -633,6 +667,10 @@ exports.handler = {
                         path: '/tmp/pdf0.pdf',
                     },
                 },
+                on: function(evt, handler) {
+                        var handle = handler;
+                        return;
+                    },
               };
 
         // Make sure all the test files are stored in /tmp
@@ -661,6 +699,10 @@ exports.handler = {
                          },
                     },
                     user: { email: CLIENT, admin: false },
+                    on: function(evt, handler) {
+                            var handle = handler;
+                            return;
+                        },
                   };
 
             perform.handler(req, RES, function(err) {
@@ -672,6 +714,91 @@ exports.handler = {
             });
         });
     },
+
+
+    /**
+     * Kill processes when connection closes prematurely
+     */
+    'Should add a PID file name to the message\'s content field': function(test) {
+        test.expect(2);
+        var actions = require('../../actions')();
+        sinon.stub(actions, 'ls', function(verified, message) {
+            var deferred = q.defer();
+            test.ok(message.content.pidFile);
+            deferred.resolve();
+            return deferred.promise;
+          });
+
+        // This has to be required here, otherwise the actions
+        // module isn't properly stubbed out
+        var p = require('../../routes/perform')(true);
+        p.handler(SEND_REQ, RES, function(err) {
+           test.ok(actions.ls.called);
+           actions.ls.restore();
+           test.done();
+         });
+    },
+
+    'Should call tmp.tmpName to write a file to the /tmp directory': function(test) {
+        test.expect(1);
+        sinon.stub(tmp, 'tmpName', function(done) {
+            done(err, '/tmp/someRandom.pid');
+          });
+
+        perform.handler(SEND_REQ, RES, function(err) {
+           test.ok(tmp.tmpName.called);
+           tmp.tmpName.restore();
+           test.done();
+         });
+    },
+
+    'Should kill the process named in the PID file if it exists and the \'close\' event is emitted': function(test) {
+        test.expect(2);
+
+        var ev = new events.EventEmitter();
+        var actions = require('../../actions')();
+        sinon.stub(actions, 'ls', function(verified, message) {
+            var deferred = q.defer();
+            SEND_REQ.handle();
+            // Do I really reject here?
+            // 2014-11-17
+            deferred.reject();
+            return deferred.promise;
+          });
+
+        // This will be overriden so that it can call the 'close' event
+        var childProcess = require('child_process');
+        sinon.stub(childProcess, 'exec', function(err, stdout, stderr) {
+            actions.ls.restore();
+            test.ok(true);
+            test.done();
+          });
+
+        // This has to be required here, otherwise the actions
+        // module isn't properly stubbed out
+        var p = require('../../routes/perform')(true);
+        p.handler(SEND_REQ, RES, function(err) {
+            if (err) {
+              test.ok(true);
+            }
+            else {
+              test.ok(false);
+            }
+         });
+    },
+
+    'Should do nothing if there is no process named in the PID file and the \'close\' event is emitted': function(test) {
+        test.done();
+    },
+
+    'Should remove the PID file on successful execution': function(test) {
+        test.done();
+    },
+
+    'Should remove the PID file on when \'close\' event is emitted': function(test) {
+        test.done();
+    },
+
 };
 
 // I can't figure out how to use sinon's mocks, stubs, etc.
