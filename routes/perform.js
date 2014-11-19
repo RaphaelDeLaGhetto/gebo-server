@@ -126,8 +126,10 @@ module.exports = function(testing) {
                                 });
 
                               // Act!
+                              var timer = utils.setTimeLimit(message.content);
                               actionPtr[actionParts[actionParts.length - 1]](verified, message).
                                 then(function(data) {
+                                    utils.stopTimer(timer, message.content);
                                     if (data && data.error) {
                                       if (logLevel === 'trace') logger.error('Server error', data);
                                       res.status(500).send(data.error);

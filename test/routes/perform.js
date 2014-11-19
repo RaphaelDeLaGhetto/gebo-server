@@ -8,7 +8,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 var childProcess = require('child_process'),
     mongo = require('mongodb'),
     utils = require('gebo-utils'),
-    events = require('events'),
+    //events = require('events'),
     extend = require('extend'),
     fs = require('fs-extra'),
     geboSchema = require('../../schemata/gebo'),
@@ -53,7 +53,6 @@ var SEND_REQ = {
              action: 'ls',
              content: {
                 resource: 'friendos',
-                timeLimit: 1,
              }
           },
         user: { email: CLIENT, admin: false },
@@ -756,7 +755,6 @@ exports.handler = {
     'Should kill the process named in the PID file if it exists and the \'close\' event is emitted': function(test) {
         test.expect(2);
 
-        var ev = new events.EventEmitter();
         var actions = require('../../actions')();
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
@@ -805,7 +803,6 @@ exports.handler = {
     'Should do nothing if there is no PID file and the \'close\' event is emitted': function(test) {
         test.expect(4);
 
-        var ev = new events.EventEmitter();
         var actions = require('../../actions')();
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
@@ -848,7 +845,6 @@ exports.handler = {
     'Should remove the PID file when \'close\' event is emitted': function(test) {
         test.expect(4);
 
-        var ev = new events.EventEmitter();
         var actions = require('../../actions')();
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
@@ -880,7 +876,6 @@ exports.handler = {
         // This will be overriden so that it can call the 'close' event
         var childProcess = require('child_process');
         sinon.stub(childProcess, 'exec', function(command, done) {
-
             done(null); 
           });
 
@@ -901,9 +896,79 @@ exports.handler = {
      * Timeout
      */
     'Kill the process identified in the PID file if it executes longer than allowed': function(test) {
-        test.done();
+        test.expect(3);
+
+        sinon.spy(utils, 'setTimeLimit');
+
+        var childProcess = require('child_process');
+        sinon.stub(childProcess, 'exec', function(command, done) {
+            done(null); 
+          });
+
+        // fs.readFile needs to return something, even though no file
+        // actually exists
+        sinon.stub(fs, 'readFile', function(path, enc, done) {
+            done(null, '12345'); 
+          });
+
+        var req = {};
+        extend(true, req, SEND_REQ);
+        req.body.content.timeLimit = 1;
+ 
+        var p = require('../../routes/perform')(true);
+        p.handler(req, RES, function(err) {
+            test.ok(utils.setTimeLimit.called);
+            test.ok(fs.readFile.called);
+            test.ok(childProcess.exec.calledWith('kill 12345'));
+
+            utils.setTimeLimit.restore();
+            childProcess.exec.restore();
+            fs.readFile.restore();
+
+            test.done();
+         });
     },
 
+    'Don\'t kill the process identified in the PID file if the timer is stopped': function(test) {
+        test.expect(5);
+
+        sinon.spy(utils, 'setTimeLimit');
+        sinon.spy(utils, 'stopTimer');
+
+        var childProcess = require('child_process');
+        sinon.stub(childProcess, 'exec', function(command, done) {
+            done(null); 
+          });
+
+        // fs.readFile needs to return something, even though no file
+        // actually exists
+        sinon.stub(fs, 'readFile', function(path, enc, done) {
+            done(null, '12345'); 
+          });
+
+        var req = {};
+        extend(true, req, SEND_REQ);
+        req.body.content.timeLimit = 5000;
+ 
+        var p = require('../../routes/perform')(true);
+        p.handler(req, RES, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.ok(utils.setTimeLimit.called);
+            test.ok(utils.stopTimer.called);
+            test.ok(fs.readFile.called);
+
+            test.ok(!childProcess.exec.calledWith('kill 12345'));
+            test.ok(!childProcess.exec.called);
+
+            utils.setTimeLimit.restore();
+            childProcess.exec.restore();
+            fs.readFile.restore();
+
+            test.done();
+         });
+    },
 };
 
 // I can't figure out how to use sinon's mocks, stubs, etc.
