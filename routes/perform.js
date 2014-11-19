@@ -100,17 +100,27 @@ module.exports = function(testing) {
                               // This is called in the event that the connection with 
                               // the client is broken
                               req.on('close', function() {
-                                  var kill = 'kill $(cat ' + path + ')';
-                                  if (logLevel === 'trace') logger.warn('process', kill);
-                                  childProcess.exec(kill, function(err, stdout, stderr) {
-                                      if (err) {
-                                        if (logLevel === 'trace') logger.error('process', 'timeout', err);
-                                      }
-                                      if (stderr) {
-                                        if (logLevel === 'trace') logger.warn('process', 'timeout', stderr);
-                                      }
-                                      if (stdout) {
-                                        if (logLevel === 'trace') logger.info('process', 'timeout', stdout);
+                                  fs.readFile(path, 'utf8', function(err, pid) {
+                                      if (!err) {
+                                        //var kill = 'kill $(cat ' + path + ')';
+                                        var kill = 'kill ' + pid;
+                                        if (logLevel === 'trace') logger.warn('process', kill);
+                                        childProcess.exec(kill, function(err, stdout, stderr) {
+                                            if (err) {
+                                              if (logLevel === 'trace') logger.error('perform', 'close', err);
+                                            }
+                                            if (stderr) {
+                                              if (logLevel === 'trace') logger.warn('perform', 'close', stderr);
+                                            }
+                                            if (stdout) {
+                                              if (logLevel === 'trace') logger.info('perform', 'close', stdout);
+                                            }
+                                            fs.remove(path, function(err) {
+                                                if (err) {
+                                                  if (logLevel === 'trace') logger.error('perform', 'close', err);
+                                                }
+                                              });
+                                          });
                                       }
                                     });
                                 });
