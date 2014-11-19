@@ -1,7 +1,7 @@
 'use strict';
 
 var passport = require('passport'),
-    generalUtils = require('../lib/utils'),
+    generalUtils = require('gebo-utils'),
     conversationUtils = require('../conversations/utils'),
     https = require('https'),
     extend = require('extend'),

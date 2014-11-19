@@ -2,7 +2,6 @@
 var passport = require('passport'),
     nconf = require('nconf'),
     q = require('q'),
-    utils = require('../lib/utils'),
     login = require('connect-ensure-login'),
     cluster = require('cluster'),
     winston = require('winston');

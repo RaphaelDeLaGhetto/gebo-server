@@ -3,6 +3,7 @@
 var mongo = require('mongodb'),
     GridStore = mongo.GridStore,
     utils = require('../lib/utils'),
+    generalUtils = require('gebo-utils'),
     q = require('q'),
     fs = require('fs'),
     mv = require('mv'),
@@ -13,7 +14,6 @@ module.exports = function() {
 
     var agentDb = require('../schemata/agent')(),
         geboDb = require('../schemata/gebo')(),
-//        mongooseConnection = require('gebo-mongoose-connection').get(testing),
         nativeConnection = require('../lib/native-mongo-connection');
 
     /**
@@ -634,7 +634,7 @@ module.exports = function() {
                     deferred.resolve({ error: err });
                   }
                   else {
-                    var index = utils.getIndexOfObject(friendo.permissions, 'resource', message.content.permission.resource);
+                    var index = generalUtils.getIndexOfObject(friendo.permissions, 'resource', message.content.permission.resource);
                     if (index > -1) {
                       friendo.permissions.splice(index, 1);
                     }
@@ -670,7 +670,7 @@ module.exports = function() {
     exports.certificate = function(verified, message) {
         var deferred = q.defer();
         if (verified.admin || verified.write) {
-          utils.getPrivateKeyAndCertificate().
+          generalUtils.getPrivateKeyAndCertificate().
             then(function(pair) {
                 var data = {
                         public: pair.certificate,

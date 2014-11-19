@@ -2,8 +2,7 @@
 
 var bcrypt = require('bcrypt'),
     extend = require('extend'),
-    geboMongoose = require('gebo-mongoose-connection'),
-    utils = require('../lib/utils');
+    geboMongoose = require('gebo-mongoose-connection');
 
 module.exports = function() {
 

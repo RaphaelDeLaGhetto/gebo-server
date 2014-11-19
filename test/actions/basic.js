@@ -6,7 +6,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
     mongooseConnection = require('gebo-mongoose-connection'),
     mongoose = mongooseConnection.get(true);
 
-var utils = require('../../lib/utils'),
+var utils = require('gebo-utils'),
     mongo = require('mongodb'),
     GridStore = mongo.GridStore,
     nconf = require('nconf'),

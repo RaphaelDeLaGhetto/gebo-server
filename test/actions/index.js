@@ -1,7 +1,7 @@
 var nconf = require('nconf'),
     path = require('path'),
     fs = require('fs'),
-    utils = require('../../lib/utils');
+    utils = require('gebo-utils');
 
 nconf.file({ file: 'gebo.json' });
 var TEST_DB = utils.getMongoDbName(nconf.get('testDb'));

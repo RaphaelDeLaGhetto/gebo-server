@@ -1,6 +1,7 @@
 'use strict';
 
-var utils = require('./lib/utils'),
+//var utils = require('./lib/utils'),
+var utils = require('gebo-utils'),
     nconf = require('nconf');
 
 nconf.file({ file: './gebo.json' });

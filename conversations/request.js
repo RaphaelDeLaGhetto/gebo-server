@@ -1,7 +1,6 @@
 'use strict';
 
 var utils = require('./utils'),
-    generalUtils = require('../lib/utils'),
     q = require('q');
 
 /**

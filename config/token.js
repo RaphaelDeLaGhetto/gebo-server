@@ -5,7 +5,6 @@ var q = require('q'),
     base64url = require('base64url'),
     crypto = require('crypto'),
     agentDb = require('../schemata/agent')(),
-    utils = require('../lib/utils'),
     nconf = require('nconf'),
     fs = require('fs'),
     winston = require('winston');

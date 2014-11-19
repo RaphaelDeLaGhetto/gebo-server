@@ -7,7 +7,7 @@ var mongooseConnection = require('gebo-mongoose-connection').get(true),
 
 var extend = require('extend'),
     request = require('supertest'),
-    utils = require('../lib/utils');
+    utils = require('gebo-utils');
 
 var events = require('events'),
     event = new events.EventEmitter();

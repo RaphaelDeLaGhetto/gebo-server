@@ -7,7 +7,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 
 var childProcess = require('child_process'),
     mongo = require('mongodb'),
-    utils = require('../../lib/utils'),
+    utils = require('gebo-utils'),
     events = require('events'),
     extend = require('extend'),
     fs = require('fs-extra'),
@@ -53,6 +53,7 @@ var SEND_REQ = {
              action: 'ls',
              content: {
                 resource: 'friendos',
+                timeLimit: 1,
              }
           },
         user: { email: CLIENT, admin: false },
@@ -894,6 +895,13 @@ exports.handler = {
               test.ok(false);
             }
          });
+    },
+
+    /**
+     * Timeout
+     */
+    'Kill the process identified in the PID file if it executes longer than allowed': function(test) {
+        test.done();
     },
 
 };

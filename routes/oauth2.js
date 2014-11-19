@@ -12,7 +12,7 @@ var oauth2orize = require('oauth2orize'),
     passport = require('passport'),
     login = require('connect-ensure-login'),
     nconf = require('nconf'),
-    utils = require('../lib/utils'),
+    utils = require('gebo-utils'),
     q = require('q'),
     fs = require('fs'),
     crypto = require('crypto'),
@@ -85,7 +85,7 @@ module.exports = function() {
     // values, and will be exchanged for an access token.
     
     server.grant(oauth2orize.grant.code(function (client, redirectUri, user, ares, done) {
-        var code = utils.uid(16);
+        var code = utils.getUid(16);
       
         var authorization = new geboDb.authorizationModel({
             userId: user.id,
@@ -146,7 +146,7 @@ module.exports = function() {
               done('You may be registered, but you\'re not my friendo');
             }
             else {
-              var tokenStr = utils.uid(256);
+              var tokenStr = utils.getUid(256);
             
               var token = new geboDb.tokenModel({
                   friendoId: friendo._id,
@@ -184,7 +184,7 @@ module.exports = function() {
               return done(null, false);
             }
         
-            var tokenStr = utils.uid(256);
+            var tokenStr = utils.getUid(256);
     
             var token = new geboDb.tokenModel({
                 userId: authCode.userId,
@@ -254,7 +254,7 @@ module.exports = function() {
                                       return done(err);
                                     }
     
-                                    var tokenStr = utils.uid(256);
+                                    var tokenStr = utils.getUid(256);
                                     var token = new geboDb.tokenModel({
                                         registrantId: owner._id,
                                         friendoId: friendo._id,

@@ -7,7 +7,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 
 var nconf = require('nconf'),
     mongo = require('mongodb'),
-    utils = require('../../lib/utils'),
+    utils = require('gebo-utils'),
     geboDb = require('../../schemata/gebo')();
     agentDb = require('../../schemata/agent')();
 

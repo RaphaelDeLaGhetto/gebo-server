@@ -7,8 +7,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 
 var fs = require('fs'),
     nconf = require('nconf'),
-    path = require('path'),
-    utils = require('../../lib/utils');
+    path = require('path');
 
 
 nconf.file({ file: 'gebo.json' });

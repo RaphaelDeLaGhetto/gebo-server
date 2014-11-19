@@ -6,7 +6,8 @@ var express = require('express'),
     nconf = require('nconf'),
     passport = require('passport'),
     server = express(),
-    utils = require('./lib/utils'),
+    //utils = require('./lib/utils'),
+    utils = require('gebo-utils'),
     winston = require('winston');
 
 module.exports = function(testing) {

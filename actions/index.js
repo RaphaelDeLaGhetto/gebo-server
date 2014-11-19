@@ -1,5 +1,4 @@
-var utils = require('../lib/utils'),
-    q = require('q');
+var q = require('q');
 
 /**
  * Inspired by Greg Wang, 2013-11-5

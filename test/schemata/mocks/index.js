@@ -1,4 +1,3 @@
-var utils = require('../../../lib/utils');
 
 /**
  * Inspired by Greg Wang, 2013-11-5

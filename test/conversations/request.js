@@ -9,8 +9,7 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 
 
 var agentDb = require('../../schemata/agent')(),
-    request = require('../../conversations/request'),
-    utils = require('../../conversations/utils');
+    request = require('../../conversations/request');
 
 /**
  * Performative functions, because I need to keep

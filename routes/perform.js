@@ -10,7 +10,7 @@ var action = require('../actions')(),
     q = require('q'),
     sc = require('../lib/sc'),
     tmp = require('tmp'),
-    utils = require('../lib/utils'),
+    utils = require('gebo-utils'),
     winston = require('winston');
 
 module.exports = function(testing) {
