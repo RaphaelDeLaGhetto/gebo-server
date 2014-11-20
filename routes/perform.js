@@ -126,75 +126,84 @@ module.exports = function(testing) {
                                 });
 
                               // Act!
-                              var timer = utils.setTimeLimit(message.content);
-                              actionPtr[actionParts[actionParts.length - 1]](verified, message).
-                                then(function(data) {
-                                    utils.stopTimer(timer, message.content);
-                                    if (data && data.error) {
-                                      if (logLevel === 'trace') logger.error('Server error', data);
-                                      res.status(500).send(data.error);
-                                      utils.deleteTmpFiles(req.files, function(err) {
+                              utils.setTimeLimit(message.content, function(timer){
+                                  actionPtr[actionParts[actionParts.length - 1]](verified, message).
+                                    then(function(data) {
+
+                                        utils.stopTimer(timer, message.content);
+                                        console.log('message.content', message.content);
+                                        if (message.content.timeLimit < 0) {
+                                          if (logLevel === 'trace') logger.error('Timeout');
+                                          res.status(500).send('Sorry, you ran out of time');
+                                          done('Sorry, you ran out of time');
+                                        }
+
+                                        else if (data && data.error) {
+                                          if (logLevel === 'trace') logger.error('Server error', data);
+                                          res.status(500).send(data.error);
+                                          utils.deleteTmpFiles(req.files, function(err) {
+                                                if (err) {
+                                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                                                }
+                                                done(data.error);
+                                            });
+                                        }
+                                        else {
+                                          sc.fulfil(message.receiver, socialCommitment._id).
+                                              then(function(sc) {
+                                                  if (logLevel === 'trace') logger.info('Done:', data);
+                                                  // If you don't set this as a string,
+                                                  // the status code will be set to the 
+                                                  // numeric value contained in data
+                                                  //
+                                                  // 2014-7-31 Do I need this anymore?
+                                                  if (typeof data === 'number') {
+                                                    res.status(200).send('' + data);
+                                                  }
+                                                  else if (data.filePath) {
+        
+                                                    if (!data.fileName) {
+                                                      var fname = data.filePath.split('/');
+                                                      fname = fname[fname.length - 1];
+                                                      data.fileName = fname; 
+                                                    }
+                                                    res.download(data.filePath, data.fileName, function(err) {
+                                                          if (err) {
+                                                            if (logLevel === 'trace') logger.error('Send file:', err);
+                                                          }
+                                                          fs.unlink(data.filePath, function(err) {
+                                                              if (err) {
+                                                                if (logLevel === 'trace') logger.error('File removal:', err);
+                                                              }
+                                                            });
+                                                      });
+                                                  }
+                                                  else {
+                                                    res.status(200).send(data);
+                                                  }
+                                                  utils.deleteTmpFiles(req.files, done);
+                                                }).
+                                              catch(function(err) {
+                                                  if (logLevel === 'trace') logger.error('Social commitment fulfil', err);
+                                                  res.status(409).send(err);
+                                                  utils.deleteTmpFiles(req.files, function(err) {
+                                                        if (err) {
+                                                          if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                                                        }
+                                                        done(err);
+                                                    });
+                                                });
+                                        }
+                                      }).
+                                    catch(function(err) {
+                                        if (logLevel === 'trace') logger.error('Action', err);
+                                        res.status(401).send('You are not allowed access to that resource');
+                                        utils.deleteTmpFiles(req.files, function(err) {
                                             if (err) {
                                               if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
                                             }
-                                            done(data.error);
-                                        });
-                                    }
-                                    else {
-                                      sc.fulfil(message.receiver, socialCommitment._id).
-                                          then(function(sc) {
-                                              if (logLevel === 'trace') logger.info('Done:', data);
-                                              // If you don't set this as a string,
-                                              // the status code will be set to the 
-                                              // numeric value contained in data
-                                              //
-                                              // 2014-7-31 Do I need this anymore?
-                                              if (typeof data === 'number') {
-                                                res.status(200).send('' + data);
-                                              }
-                                              else if (data.filePath) {
-    
-                                                if (!data.fileName) {
-                                                  var fname = data.filePath.split('/');
-                                                  fname = fname[fname.length - 1];
-                                                  data.fileName = fname; 
-                                                }
-                                                res.download(data.filePath, data.fileName, function(err) {
-                                                      if (err) {
-                                                        if (logLevel === 'trace') logger.error('Send file:', err);
-                                                      }
-                                                      fs.unlink(data.filePath, function(err) {
-                                                          if (err) {
-                                                            if (logLevel === 'trace') logger.error('File removal:', err);
-                                                          }
-                                                        });
-                                                  });
-                                              }
-                                              else {
-                                                res.status(200).send(data);
-                                              }
-                                              utils.deleteTmpFiles(req.files, done);
-                                            }).
-                                          catch(function(err) {
-                                              if (logLevel === 'trace') logger.error('Social commitment fulfil', err);
-                                              res.status(409).send(err);
-                                              utils.deleteTmpFiles(req.files, function(err) {
-                                                    if (err) {
-                                                      if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                                                    }
-                                                    done(err);
-                                                });
-                                            });
-                                    }
-                                  }).
-                                catch(function(err) {
-                                    if (logLevel === 'trace') logger.error('Action', err);
-                                    res.status(401).send('You are not allowed access to that resource');
-                                    utils.deleteTmpFiles(req.files, function(err) {
-                                        if (err) {
-                                          if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                                        }
-                                        done('You are not allowed access to that resource');
+                                            done('You are not allowed access to that resource');
+                                          });
                                       });
                                   });
                             });
