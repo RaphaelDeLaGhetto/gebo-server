@@ -801,50 +801,52 @@ exports.handler = {
          });
     },
 
-    'Should do nothing if there is no PID file and the \'close\' event is emitted': function(test) {
-        test.expect(4);
-
-        var actions = require('../../actions')();
-        sinon.stub(actions, 'ls', function(verified, message) {
-            var deferred = q.defer();
-            SEND_REQ.handle();
-            // Do I really reject here?
-            // 2014-11-17
-            deferred.reject();
-            return deferred.promise;
-          });
-
-        sinon.spy(fs, 'readFile');
-        sinon.spy(fs, 'remove');
-
-        // This will be overriden so that it can call the 'close' event
-        var childProcess = require('child_process');
-        sinon.spy(childProcess, 'exec');
-
-        // This has to be required here, otherwise the actions
-        // module isn't properly stubbed out
-        var p = require('../../routes/perform')(true);
-        p.handler(SEND_REQ, RES, function(err) {
-            test.ok(fs.readFile.called);
-            test.ok(!fs.remove.called);
-            test.ok(!childProcess.exec.called);
-
-            if (err) {
-              test.ok(true);
-            }
-            else {
-              test.ok(false);
-            }
-            fs.readFile.restore();
-            fs.remove.restore();
-            childProcess.exec.restore();
-            actions.ls.restore();
-            test.done();
-         });
-    },
+    // This is mothballed, because this process termination stuff is changing moment
+    // by moment, 2014-11-19
+//    'Should do nothing if there is no PID file and the \'close\' event is emitted': function(test) {
+//        test.expect(3);
+//
+//        var actions = require('../../actions')();
+//        sinon.stub(actions, 'ls', function(verified, message) {
+//            var deferred = q.defer();
+//            SEND_REQ.handle();
+//            // Do I really reject here?
+//            // 2014-11-17
+//            deferred.reject();
+//            return deferred.promise;
+//          });
+//
+////        sinon.spy(fs, 'readFile');
+//        sinon.spy(fs, 'remove');
+//
+//        // This will be overriden so that it can call the 'close' event
+//        var childProcess = require('child_process');
+//        sinon.spy(childProcess, 'exec');
+//
+//        // This has to be required here, otherwise the actions
+//        // module isn't properly stubbed out
+//        var p = require('../../routes/perform')(true);
+//        p.handler(SEND_REQ, RES, function(err) {
+////            test.ok(fs.readFile.called);
+//            test.ok(!fs.remove.called);
+//            test.ok(!childProcess.exec.called);
+//
+//            if (err) {
+//              test.ok(true);
+//            }
+//            else {
+//              test.ok(false);
+//            }
+////            fs.readFile.restore();
+//            fs.remove.restore();
+//            childProcess.exec.restore();
+//            actions.ls.restore();
+//            test.done();
+//         });
+//    },
 
     'Should remove the PID file when \'close\' event is emitted': function(test) {
-        test.expect(4);
+        test.expect(3);
 
         var actions = require('../../actions')();
         sinon.stub(actions, 'ls', function(verified, message) {
@@ -858,9 +860,9 @@ exports.handler = {
 
         // fs.readFile needs to return something, even though no file
         // actually exists
-        sinon.stub(fs, 'readFile', function(path, enc, done) {
-            done(null, '12345'); 
-          });
+//        sinon.stub(fs, 'readFile', function(path, enc, done) {
+//            done(null, '12345'); 
+//          });
 
         // This will be overriden so that it can call the 'close' event
         var childProcess = require('child_process');
@@ -871,10 +873,10 @@ exports.handler = {
         // There's no file to remove
         sinon.stub(fs, 'remove', function(path, done) {
             test.ok(fs.remove.called);
-            test.ok(fs.readFile.called);
+//            test.ok(fs.readFile.called);
             test.ok(childProcess.exec.called);
             actions.ls.restore();
-            fs.readFile.restore();
+//            fs.readFile.restore();
             fs.remove.restore();
             childProcess.exec.restore();
             test.done();

@@ -100,29 +100,24 @@ module.exports = function(testing) {
                               // This is called in the event that the connection with 
                               // the client is broken
                               req.on('close', function() {
-                                  fs.readFile(path, 'utf8', function(err, pid) {
-                                      if (!err) {
-                                        //var kill = 'kill $(cat ' + path + ')';
-                                        var kill = 'kill ' + pid;
-                                        if (logLevel === 'trace') logger.warn('process', kill);
-                                        childProcess.exec(kill, function(err, stdout, stderr) {
+                                    var kill = 'kill $(cat ' + path + ')';
+                                    if (logLevel === 'trace') logger.warn('process', kill);
+                                    childProcess.exec(kill, function(err, stdout, stderr) {
+                                        if (err) {
+                                          if (logLevel === 'trace') logger.error('perform', 'close', err);
+                                        }
+                                        if (stderr) {
+                                          if (logLevel === 'trace') logger.warn('perform', 'close', stderr);
+                                        }
+                                        if (stdout) {
+                                          if (logLevel === 'trace') logger.info('perform', 'close', stdout);
+                                        }
+                                        fs.remove(path, function(err) {
                                             if (err) {
                                               if (logLevel === 'trace') logger.error('perform', 'close', err);
                                             }
-                                            if (stderr) {
-                                              if (logLevel === 'trace') logger.warn('perform', 'close', stderr);
-                                            }
-                                            if (stdout) {
-                                              if (logLevel === 'trace') logger.info('perform', 'close', stdout);
-                                            }
-                                            fs.remove(path, function(err) {
-                                                if (err) {
-                                                  if (logLevel === 'trace') logger.error('perform', 'close', err);
-                                                }
-                                              });
                                           });
-                                      }
-                                    });
+                                      });
                                 });
 
                               // Act!
@@ -131,7 +126,6 @@ module.exports = function(testing) {
                                     then(function(data) {
 
                                         utils.stopTimer(timer, message.content);
-                                        console.log('message.content', message.content);
                                         if (message.content.timeLimit < 0) {
                                           if (logLevel === 'trace') logger.error('Timeout');
                                           res.status(500).send('Sorry, you ran out of time');
