@@ -65,6 +65,7 @@
     "static-favicon": "^1.0.2",
     "strong-cluster-express-store": "0.0.x",
     "strong-store-cluster": "~0.1.3",
+    "tmp": "0.0.24",
     "uglify-js": "*",
     "uglifycss": "*",
     "winston": "*"
