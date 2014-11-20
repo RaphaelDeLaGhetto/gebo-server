@@ -858,12 +858,6 @@ exports.handler = {
             return deferred.promise;
           });
 
-        // fs.readFile needs to return something, even though no file
-        // actually exists
-//        sinon.stub(fs, 'readFile', function(path, enc, done) {
-//            done(null, '12345'); 
-//          });
-
         // This will be overriden so that it can call the 'close' event
         var childProcess = require('child_process');
         sinon.stub(childProcess, 'exec', function(command, done) {
@@ -873,10 +867,8 @@ exports.handler = {
         // There's no file to remove
         sinon.stub(fs, 'remove', function(path, done) {
             test.ok(fs.remove.called);
-//            test.ok(fs.readFile.called);
             test.ok(childProcess.exec.called);
             actions.ls.restore();
-//            fs.readFile.restore();
             fs.remove.restore();
             childProcess.exec.restore();
             test.done();
@@ -899,7 +891,7 @@ exports.handler = {
      * Timeout
      */
     'Kill the process identified in the PID file if it executes longer than allowed': function(test) {
-        test.expect(4);
+        test.expect(3);
 
         sinon.spy(utils, 'setTimeLimit');
         sinon.spy(utils, 'stopTimer');
@@ -910,12 +902,6 @@ exports.handler = {
             done(null); 
           });
 
-        // fs.readFile needs to return something, even though no file
-        // actually exists
-        sinon.stub(fs, 'readFile', function(path, enc, done) {
-            done(null, '12345'); 
-          });
-   
         var req = {};
         extend(true, req, SEND_REQ);
         req.body.content.timeLimit = 1;
@@ -934,14 +920,12 @@ exports.handler = {
             test.equal(err, 'Sorry, you ran out of time');
             test.ok(utils.setTimeLimit.called);
             test.ok(utils.stopTimer.called);
-            test.ok(fs.readFile.called);
 
             // Keep an eye on this. This should be called, but is not.
             // 2014-11-19
             //test.ok(childProcess.exec.calledWith('kill 12345'));
             //test.ok(childProcess.exec.called);
 
-            fs.readFile.restore();
             utils.setTimeLimit.restore();
             utils.stopTimer.restore();
             childProcess.exec.restore();
@@ -952,7 +936,7 @@ exports.handler = {
     },
 
     'Return a 500 error if the agent executes longer than allowed': function(test) {
-        test.expect(5);
+        test.expect(4);
 
         var childProcess = require('child_process');
         sinon.stub(childProcess, 'exec', function(command, done) {
@@ -967,15 +951,7 @@ exports.handler = {
             return deferred.promise;
           });
 
-
         sinon.spy(utils, 'setTimeLimit');
-
-        // fs.readFile needs to return something, even though no file
-        // actually exists
-        sinon.stub(fs, 'readFile', function(path, enc, done) {
-            done(null, '12345'); 
-          });
-
 
         var req = {};
         extend(true, req, SEND_REQ);
@@ -990,7 +966,6 @@ exports.handler = {
             test.equal(_content, 'Sorry, you ran out of time');
 
             test.ok(utils.setTimeLimit.called);
-            test.ok(fs.readFile.called);
 
             // Keep an eye on this. This should be called, but is not.
             // 2014-11-19
@@ -999,14 +974,13 @@ exports.handler = {
             actions.ls.restore();
             utils.setTimeLimit.restore();
             childProcess.exec.restore();
-            fs.readFile.restore();
 
             test.done();
         }); 
     },
 
     'Don\'t kill the process identified in the PID file if the timer is stopped': function(test) {
-        test.expect(5);
+        test.expect(4);
 
         sinon.spy(utils, 'setTimeLimit');
         sinon.spy(utils, 'stopTimer');
@@ -1014,12 +988,6 @@ exports.handler = {
         var childProcess = require('child_process');
         sinon.stub(childProcess, 'exec', function(command, done) {
             done(null); 
-          });
-
-        // fs.readFile needs to return something, even though no file
-        // actually exists
-        sinon.stub(fs, 'readFile', function(path, enc, done) {
-            done(null, '12345'); 
           });
 
         var req = {};
@@ -1033,14 +1001,12 @@ exports.handler = {
             }
             test.ok(utils.setTimeLimit.called);
             test.ok(utils.stopTimer.called);
-            test.ok(fs.readFile.called);
 
             test.ok(!childProcess.exec.calledWith('kill 12345'));
             test.ok(!childProcess.exec.called);
 
             utils.setTimeLimit.restore();
             childProcess.exec.restore();
-            fs.readFile.restore();
 
             test.done();
          });
