@@ -112,6 +112,7 @@ module.exports = function(testing) {
                                         if (stdout) {
                                           if (logLevel === 'trace') logger.info('perform', 'close', stdout);
                                         }
+                                        message.content.returnNow = 'Connection was closed by the client';
                                         fs.remove(path, function(err) {
                                             if (err) {
                                               if (logLevel === 'trace') logger.error('perform', 'close', err);
@@ -126,11 +127,17 @@ module.exports = function(testing) {
                                     then(function(data) {
 
                                         utils.stopTimer(timer, message.content);
-                                        if (message.content.timeLimit < 0) {
-                                          if (logLevel === 'trace') logger.error('Timeout');
-                                          res.status(500).send('Sorry, you ran out of time');
-                                          done('Sorry, you ran out of time');
+                                        if (message.content.returnNow) {
+                                          if (logLevel === 'trace') logger.error('Force return');
+                                          res.status(500).send(message.content.returnNow);
+                                          done(message.content.returnNow);
                                         }
+                                        else if (message.content.timeLimit < 0) {
+                                          if (logLevel === 'trace') logger.error('Timeout');
+                                          res.status(500).send('That request was taking too long');
+                                          done('That request was taking too long');
+                                        }
+
 
                                         else if (data && data.error) {
                                           if (logLevel === 'trace') logger.error('Server error', data);

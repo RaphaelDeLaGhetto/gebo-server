@@ -755,13 +755,14 @@ exports.handler = {
     'Should kill the process named in the PID file if it exists and the \'close\' event is emitted': function(test) {
         test.expect(2);
 
+        var req = {};
+        extend(true, req, SEND_REQ);
+
         var actions = require('../../actions')();
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
-            SEND_REQ.handle();
-            // Do I really reject here?
-            // 2014-11-17
-            deferred.reject();
+            req.handle();
+            deferred.resolve();
             return deferred.promise;
           });
 
@@ -791,7 +792,7 @@ exports.handler = {
         // This has to be required here, otherwise the actions
         // module isn't properly stubbed out
         var p = require('../../routes/perform')(true);
-        p.handler(SEND_REQ, RES, function(err) {
+        p.handler(req, RES, function(err) {
             if (err) {
               test.ok(true);
             }
@@ -800,6 +801,57 @@ exports.handler = {
             }
          });
     },
+
+    'Should set the options.returnNow message when the \'close\' event is emitted': function(test) {
+        test.expect(3);
+
+        var req = {};
+        extend(true, req, SEND_REQ);
+
+        var actions = require('../../actions')();
+        sinon.stub(actions, 'ls', function(verified, message) {
+            var deferred = q.defer();
+            req.handle();
+            deferred.resolve();
+            return deferred.promise;
+          });
+
+        // fs.readFile needs to return something, even though no file
+        // actually exists
+        sinon.stub(fs, 'readFile', function(path, enc, done) {
+            done(null, '12345'); 
+          });
+
+        // This will be overriden so that it can call the 'close' event
+        var childProcess = require('child_process');
+        sinon.stub(childProcess, 'exec', function(command, done) {
+            done(null); 
+          });
+
+        // There's no file to remove
+        sinon.stub(fs, 'remove', function(path, done) {
+            actions.ls.restore();
+            fs.readFile.restore();
+            fs.remove.restore();
+            childProcess.exec.restore();
+            test.ok(true);
+            test.done();
+          });
+
+        // This has to be required here, otherwise the actions
+        // module isn't properly stubbed out
+        var p = require('../../routes/perform')(true);
+        p.handler(req, RES, function(err) {
+            test.equal(req.body.content.returnNow, 'Connection was closed by the client');
+            if (err) {
+              test.equal(err, 'Connection was closed by the client');
+            }
+            else {
+              test.ok(false);
+            }
+         });
+    },
+
 
     // This is mothballed, because this process termination stuff is changing moment
     // by moment, 2014-11-19
@@ -848,13 +900,14 @@ exports.handler = {
     'Should remove the PID file when \'close\' event is emitted': function(test) {
         test.expect(3);
 
+        var req = {};
+        extend(true, req, SEND_REQ);
+ 
         var actions = require('../../actions')();
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
-            SEND_REQ.handle();
-            // Do I really reject here?
-            // 2014-11-17
-            deferred.reject();
+            req.handle();
+            deferred.resolve();
             return deferred.promise;
           });
 
@@ -877,7 +930,7 @@ exports.handler = {
         // This has to be required here, otherwise the actions
         // module isn't properly stubbed out
         var p = require('../../routes/perform')(true);
-        p.handler(SEND_REQ, RES, function(err) {
+        p.handler(req, RES, function(err) {
             if (err) {
               test.ok(true);
             }
@@ -917,7 +970,11 @@ exports.handler = {
 
         var p = require('../../routes/perform')(true);
         p.handler(req, RES, function(err) {
-            test.equal(err, 'Sorry, you ran out of time');
+            // This test, and the test below, reveal that any decisions made
+            // concering the value set by utils.stopTimer may beat the call
+            // on the actual timeout function
+            //test.equal(err, req.body.content.returnNow);
+            test.equal(err, 'That request was taking too long');
             test.ok(utils.setTimeLimit.called);
             test.ok(utils.stopTimer.called);
 
@@ -935,45 +992,23 @@ exports.handler = {
           });
     },
 
+    // If nothing else, this test reveals that the timer can be cleared before
+    // the timeout function is triggered. That's why there's a timeout test
+    // clause in addition to the the options.returnNow test
     'Return a 500 error if the agent executes longer than allowed': function(test) {
-        test.expect(4);
-
-        var childProcess = require('child_process');
-        sinon.stub(childProcess, 'exec', function(command, done) {
-            done(null); 
-          });
-
-        var actions = require('../../actions')();
-        sinon.stub(actions, 'ls', function(verified, message) {
-            var deferred = q.defer();
-            for (var i = 0; i < 3000000; i++) { /* I can't get sinon.useFakeTimers to work */ }
-            deferred.resolve();
-            return deferred.promise;
-          });
-
-        sinon.spy(utils, 'setTimeLimit');
+        test.expect(3);
 
         var req = {};
         extend(true, req, SEND_REQ);
         req.body.content.timeLimit = 1;
- 
+
         var p = require('../../routes/perform')(true);
         p.handler(req, RES, function(err) { 
             if (err) {
-              test.equal(err, 'Sorry, you ran out of time');
+              test.equal(err, 'That request was taking too long');
             }
             test.equal(_code, 500);
-            test.equal(_content, 'Sorry, you ran out of time');
-
-            test.ok(utils.setTimeLimit.called);
-
-            // Keep an eye on this. This should be called, but is not.
-            // 2014-11-19
-            //test.ok(childProcess.exec.calledWith('kill 12345'));
-
-            actions.ls.restore();
-            utils.setTimeLimit.restore();
-            childProcess.exec.restore();
+            test.equal(_content, 'That request was taking too long');
 
             test.done();
         }); 
@@ -993,6 +1028,7 @@ exports.handler = {
         var req = {};
         extend(true, req, SEND_REQ);
         req.body.content.timeLimit = 5000;
+        console.log(req);
  
         var p = require('../../routes/perform')(true);
         p.handler(req, RES, function(err) {
