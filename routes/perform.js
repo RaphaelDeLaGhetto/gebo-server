@@ -101,7 +101,7 @@ module.exports = function(testing) {
                               // the client is broken
                               req.on('close', function() {
                                     var kill = 'kill $(cat ' + path + ')';
-                                    if (logLevel === 'trace') logger.warn('process', kill);
+                                    if (logLevel === 'trace') logger.warn('gebo-server process:', kill);
                                     childProcess.exec(kill, function(err, stdout, stderr) {
                                         if (err) {
                                           if (logLevel === 'trace') logger.error('perform', 'close', err);
