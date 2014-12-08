@@ -237,7 +237,7 @@ exports.save = {
         test.expect(8);
 
         action.save({ resource: 'someCollection',
-		      write: true },
+		              write: true },
                     { content: { data: { junk: 'I like to move it move it' } },
                       file: {
                             path: '/tmp/pdf0.pdf',
@@ -283,42 +283,39 @@ exports.save = {
    }, 
 
    'Save file with no associated collection': function (test) {
-        test.expect(7);
+        test.expect(5);
 
         action.save({ resource: 'fs',
-		      write: true },
-                    { content: { data: { junk: 'I like to move it move it' } },
-                      file: {
+		              write: true },
+                    { file: {
                             path: '/tmp/pdf0.pdf',
                             name: 'pdf0.pdf',
                             type: 'application/pdf',
                             size: 21,
                       }
                   }).
-                then(function(docs) {
-                        test.ok(docs);
-                        // If it's already saved, it doesn't return
-                        // the mongo ID
-                        test.equal(docs.junk, 'I like to move it move it');
-                        test.ok(docs.fileId);
-                        test.ok(docs._id);
+                then(function(fileId) {
+                        // A saved file (with no collection) returns the fileId
+                        test.ok(fileId);
 
                         // Make sure the file model is saved
                         var fileSize = fs.statSync('/tmp/pdf0.pdf').size;
                         var data = fs.readFileSync('/tmp/pdf0.pdf');
 
-                        GridStore.read(db, docs.fileId, function(err, fileData) {
+                        //GridStore.read(db, docs.fileId, function(err, fileData) {
+                        GridStore.read(db, fileId, function(err, fileData) {
                             if (err) {
                               test.ok(false, err);
                             }
                             test.equal(data.toString('base64'), fileData.toString('base64')); 
                             test.equal(data.length, fileData.length); 
 
-                            // Make sure the associated collection is stored in the file's metadata
+                            // Make sure the associated collection (fs in this case) is stored in the file's metadata
                             db.collection('fs.files').
-                                find({ _id: docs.fileId }).
+                                find({ _id: fileId }).
                                 toArray(function(err, files) {
                                     test.equal(files[0].metadata.collection, 'fs');
+                                    test.equal(files[0].contentType, 'application/pdf');
                                     test.done();
                                   });
                           });

@@ -70,7 +70,8 @@ var RES = {
                 send: function(content) {
                     _content = content;
                     return;
-                }
+                },
+
         }
     },
     download: function(content, filename, done) {
@@ -83,7 +84,7 @@ var RES = {
             _filename = filename;
           }
           done();
-    }
+    },
   };
 
 /**
@@ -654,9 +655,9 @@ exports.handler = {
                      sender: CLIENT,
                      action: 'save',
                      content: { resource: 'fs',
-                                data: {
-                                        _id: new mongo.ObjectID('0123456789AB'),
-                                    },
+//                                data: {
+//                                        _id: new mongo.ObjectID('0123456789AB'),
+//                                    },
                      },
                 },
                 user: { email: CLIENT, admin: false },
@@ -695,21 +696,28 @@ exports.handler = {
                          action: 'cp',
                          content: {
                                  resource: 'fs',
-                                 id: '0123456789AB',
+                                 id: _content,
                          },
                     },
                     user: { email: CLIENT, admin: false },
                     on: function(evt, handler) {
-                            var handle = handler;
+                            console.log('HANDLING', handler);
+                            //handler();
+//                            var handle = handler;
                             return;
                         },
                   };
-
-            perform.handler(req, RES, function(err) {
+            var httpMocks = require('node-mocks-http');
+            var res = httpMocks.createResponse();
+            //perform.handler(req, RES, function(err) {
+            perform.handler(req, res, function(err) {
                 if (err) {
                   test.ok(false, err);
                 }
-                console.log(_code, _content);
+                console.log('res', res);
+                test.equal(res.statusCode, 200);
+                //console.log(_code, _content);
+//                console.log('KEYS', Object.keys(_content));
                 test.done();
             });
         });

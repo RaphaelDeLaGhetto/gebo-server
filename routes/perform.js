@@ -99,7 +99,7 @@ module.exports = function(testing) {
 
                               // This is called in the event that the connection with 
                               // the client is broken
-                              req.on('close', function() {
+                              var killCallback = function() {
                                     var kill = 'kill $(cat ' + path + ')';
                                     if (logLevel === 'trace') logger.warn('gebo-server process:', kill);
                                     childProcess.exec(kill, function(err, stdout, stderr) {
@@ -119,14 +119,19 @@ module.exports = function(testing) {
                                             }
                                           });
                                       });
-                                });
+                                };
+                              req.on('close', killCallback);
 
                               // Act!
                               utils.setTimeLimit(message.content, function(timer){
                                   actionPtr[actionParts[actionParts.length - 1]](verified, message).
                                     then(function(data) {
-
+                                        // There shouldn't be any process to kill at this point
+//                                        req.removeListener('close', killCallback);
+ 
                                         utils.stopTimer(timer, message.content);
+
+                                       
                                         if (message.content.returnNow) {
                                           if (logLevel === 'trace') logger.error('Force return');
                                           res.status(500).send(message.content.returnNow);
@@ -137,7 +142,6 @@ module.exports = function(testing) {
                                           res.status(500).send('That request was taking too long');
                                           done('That request was taking too long');
                                         }
-
 
                                         else if (data && data.error) {
                                           if (logLevel === 'trace') logger.error('Server error', data);
@@ -152,7 +156,7 @@ module.exports = function(testing) {
                                         else {
                                           sc.fulfil(message.receiver, socialCommitment._id).
                                               then(function(sc) {
-                                                  if (logLevel === 'trace') logger.info('Done:', data);
+                                                  if (logLevel === 'trace' && !data.filename) logger.info('Done:', data);
                                                   // If you don't set this as a string,
                                                   // the status code will be set to the 
                                                   // numeric value contained in data
@@ -161,6 +165,13 @@ module.exports = function(testing) {
                                                   if (typeof data === 'number') {
                                                     res.status(200).send('' + data);
                                                   }
+                                                  // 2014-12-8 
+                                                  // This could potentially get super confusing
+                                                  // This clause is for file address data stored on the
+                                                  // server for later download. The clause below is
+                                                  // for streaming files retrieved from mongo GridStore
+                                                  // 
+                                                  // What to do?...
                                                   else if (data.filePath) {
         
                                                     if (!data.fileName) {
@@ -178,6 +189,12 @@ module.exports = function(testing) {
                                                               }
                                                             });
                                                       });
+                                                  }
+                                                  else if (data.filename) {
+                                                    console.log('FILE',data.contentType, data.filename);
+                                                    res.header('Content-Type', data.contentType);
+                                                    res.header('Content-Disposition', 'attachment; filename=' + data.filename);
+                                                    data.stream(true).pipe(res);
                                                   }
                                                   else {
                                                     res.status(200).send(data);

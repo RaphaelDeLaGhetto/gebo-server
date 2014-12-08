@@ -82,7 +82,12 @@ module.exports = function() {
                                         });
                             }
                             else {
-                              deferred.resolve();
+                              if (file) {
+                                deferred.resolve(file.fileId);
+                              }
+                              else {
+                                deferred.resolve();
+                              }
                             }
                           }).
                         catch(function(err) {
@@ -112,12 +117,37 @@ module.exports = function() {
         if (verified.admin || verified.read) { 
           _getCollection(verified).
               then(function(collection) {
+
                     // Make sure an ID was specified 
                     if (message.content && message.content.id) {
                       var id = _transformId(message.content.id);
 
+//                      collection.findOne({ '_id': id }, function(err, doc) {
+//                      console.log('COPYING', doc);
+//                          if (err) {
+//                            deferred.resolve({ error: err });
+//                          }
+//                          // DEFAULT_ROOT_CONNECTION is expected to equal 'fs'
+//                          else if (collection.collectionName === GridStore.DEFAULT_ROOT_COLLECTION) {
+//                            var store = new GridStore(collection.db, doc.fileId, 'r');
+//                            store.open(function(err, file) {
+//                                console.log('file', file.type);
+//                                if (err) {
+//                                  deferred.resolve({ error: err });
+//                                }
+//                                else {
+//                                  deferred.resolve(file);
+//                                }
+//                              });
+//                          }
+//                          else {
+//                            deferred.resolve(doc);
+//                          }                           
+//                        });
+//                      }
                       // DEFAULT_ROOT_CONNECTION is expected to equal 'fs'
                       if (collection.collectionName === GridStore.DEFAULT_ROOT_COLLECTION) {
+
                         var store = new GridStore(collection.db, id, 'r');
                         store.open(function(err, file) {
                             if (err) {
