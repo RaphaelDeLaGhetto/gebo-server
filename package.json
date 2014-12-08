@@ -81,6 +81,7 @@
     "grunt-contrib-uglify": "~0.2.0",
     "grunt-contrib-watch": "~0.4.0",
     "nock": "~0.22.1",
+    "node-mocks-http": "^1.2.1",
     "sinon": "^1.12.1",
     "supertest": "^0.13.0"
   },
