@@ -34,6 +34,8 @@ module.exports = function(testing) {
      */
     var _handler = function(req, res, done) {
 
+        var _error = null;
+
         var message = req.body,
             agent = req.user;
 
@@ -45,6 +47,16 @@ module.exports = function(testing) {
         // the receiver.
         message.receiver = agentEmail;
 
+        // Clean up any temporary files when done acting
+        res.on('end', function() {
+            utils.deleteTmpFiles(req.files, function(err) {
+                  if (err) {
+                    if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
+                  }
+                  done(_error);
+              });
+          });
+ 
         // Form a social commitment
         sc.form(agent, 'perform', message).
             then(function(socialCommitment) {
@@ -76,13 +88,8 @@ module.exports = function(testing) {
                          * perform the requested action
                          */
                         if(!actionPtr[actionParts[actionParts.length - 1]]) {
-                          res.status(501).send('I don\'t know how to ' + message.action);
-                          utils.deleteTmpFiles(req.files, function(err) {
-                                if (err) {
-                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                                }
-                                done('I don\'t know how to ' + message.action);
-                            });
+                          _error = 'I don\'t know how to ' + message.action;
+                          res.status(501).send(_error);
                         }
                         else {
                           // Create a temporary PID file before acting
@@ -126,42 +133,35 @@ module.exports = function(testing) {
                               utils.setTimeLimit(message.content, function(timer){
                                   actionPtr[actionParts[actionParts.length - 1]](verified, message).
                                     then(function(data) {
-                                        // There shouldn't be any process to kill at this point
-//                                        req.removeListener('close', killCallback);
- 
                                         utils.stopTimer(timer, message.content);
 
-                                       
                                         if (message.content.returnNow) {
                                           if (logLevel === 'trace') logger.error('Force return');
-                                          res.status(500).send(message.content.returnNow);
-                                          done(message.content.returnNow);
+                                          _error = message.content.returnNow;
+                                          res.status(500).send(_error);
                                         }
                                         else if (message.content.timeLimit < 0) {
                                           if (logLevel === 'trace') logger.error('Timeout');
-                                          res.status(500).send('That request was taking too long');
-                                          done('That request was taking too long');
+                                          _error = 'That request was taking too long';
+                                          res.status(500).send(_error);
                                         }
-
                                         else if (data && data.error) {
                                           if (logLevel === 'trace') logger.error('Server error', data);
-                                          res.status(500).send(data.error);
-                                          utils.deleteTmpFiles(req.files, function(err) {
-                                                if (err) {
-                                                  if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                                                }
-                                                done(data.error);
-                                            });
+                                          _error = data.error;
+                                          res.status(500).send(_error);
                                         }
                                         else {
                                           sc.fulfil(message.receiver, socialCommitment._id).
                                               then(function(sc) {
-                                                  if (logLevel === 'trace' && !data.filename) logger.info('Done:', data);
+                                                  if (logLevel === 'trace' && data && !data.filename) logger.info('Done:', data);
+
                                                   // If you don't set this as a string,
                                                   // the status code will be set to the 
                                                   // numeric value contained in data
                                                   //
                                                   // 2014-7-31 Do I need this anymore?
+                                                  //
+                                                  // 2014-12-9 Incredibly, I do still need this
                                                   if (typeof data === 'number') {
                                                     res.status(200).send('' + data);
                                                   }
@@ -172,7 +172,7 @@ module.exports = function(testing) {
                                                   // for streaming files retrieved from mongo GridStore
                                                   // 
                                                   // What to do?...
-                                                  else if (data.filePath) {
+                                                  else if (data && data.filePath) {
         
                                                     if (!data.fileName) {
                                                       var fname = data.filePath.split('/');
@@ -190,8 +190,7 @@ module.exports = function(testing) {
                                                             });
                                                       });
                                                   }
-                                                  else if (data.filename) {
-                                                    console.log('FILE',data.contentType, data.filename);
+                                                  else if (data && data.filename) {
                                                     res.header('Content-Type', data.contentType);
                                                     res.header('Content-Disposition', 'attachment; filename=' + data.filename);
                                                     data.stream(true).pipe(res);
@@ -199,29 +198,18 @@ module.exports = function(testing) {
                                                   else {
                                                     res.status(200).send(data);
                                                   }
-                                                  utils.deleteTmpFiles(req.files, done);
                                                 }).
                                               catch(function(err) {
                                                   if (logLevel === 'trace') logger.error('Social commitment fulfil', err);
-                                                  res.status(409).send(err);
-                                                  utils.deleteTmpFiles(req.files, function(err) {
-                                                        if (err) {
-                                                          if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                                                        }
-                                                        done(err);
-                                                    });
+                                                  _error = err;
+                                                  res.status(409).send(_error);
                                                 });
                                         }
                                       }).
                                     catch(function(err) {
                                         if (logLevel === 'trace') logger.error('Action', err);
-                                        res.status(401).send('You are not allowed access to that resource');
-                                        utils.deleteTmpFiles(req.files, function(err) {
-                                            if (err) {
-                                              if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                                            }
-                                            done('You are not allowed access to that resource');
-                                          });
+                                        _error = 'You are not allowed access to that resource';
+                                        res.status(401).send(_error);
                                       });
                                   });
                             });
@@ -229,24 +217,14 @@ module.exports = function(testing) {
                       }).
                     catch(function(err) {
                         if (logLevel === 'trace') logger.error('Verification', err);
-                        res.status(401).send('You could not be verified');
-                        utils.deleteTmpFiles(req.files, function(err) {
-                            if (err) {
-                              if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                            }
-                            done('You could not be verified');
-                          });
+                        _error = 'You could not be verified';
+                        res.status(401).send(_error);
                       });
               }).
             catch(function(err) {
                 if (logLevel === 'trace') logger.error('Bad request', err);
-                res.status(400).send('The request could not be understood by the server');
-                utils.deleteTmpFiles(req.files, function(err) {
-                    if (err) {
-                      if (logLevel === 'trace') logger.warn('deleteTmpFiles', err);
-                    }
-                    done('The request could not be understood by the server');
-                  });
+                _error = 'The request could not be understood by the server';
+                res.status(400).send(_error);
               });
        };
     exports.handler = _handler;
@@ -265,9 +243,7 @@ module.exports = function(testing) {
     /**
      * Receive a perform attempt for consideration
      */
-//    var multipartyMiddleware = multiparty();
     exports.perform = [
-//        multipartyMiddleware,
         _authenticate,
         // _handler takes a callback for unit testing purposes.
         // passport.authenticate's next() callback screws everything up
