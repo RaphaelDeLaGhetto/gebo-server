@@ -4,8 +4,9 @@
  * This ensures that a connection is made to the
  * test databases
  */
-var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
-    mongoose = require('gebo-mongoose-connection').get(true);
+var mongoose = require('gebo-mongoose-connection').get(true),
+    basic = require('gebo-basic-action'),
+    nativeMongoConnection = basic.nativeMongoConnection.get(true, function(){});
 
 var basic = require('gebo-basic-action'),
     agentDb = basic.schemata.agent(),

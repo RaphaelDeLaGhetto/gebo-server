@@ -2,12 +2,11 @@ var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     https = require('https'),
-    nativeMongoConnection = require('./lib/native-mongo-connection'),
     nconf = require('nconf'),
     passport = require('passport'),
     server = express(),
     basic = require('gebo-basic-action'),
-    //utils = require('./lib/utils'),
+    nativeMongoConnection = basic.nativeMongoConnection,
     utils = require('gebo-utils'),
     winston = require('winston');
 
@@ -51,8 +50,6 @@ module.exports = function(testing) {
      */   
     exports.actions = basic.actions;
     exports.schemata = basic.schemata;
-//    exports.actions = require('./actions')(); 
-//    exports.schemata = require('./schemata');
     exports.server = server;
     exports.utils = utils;
     

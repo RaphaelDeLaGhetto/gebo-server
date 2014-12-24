@@ -2,8 +2,9 @@
  * This ensures that a connection is made to the
  * test databases
  */
-var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
-    mongoose = require('gebo-mongoose-connection').get(true);
+var mongoose = require('gebo-mongoose-connection').get(true),
+    basic = require('gebo-basic-action'),
+    nativeMongoConnection = basic.nativeMongoConnection.get(true, function(){});
 
 var childProcess = require('child_process'),
     mongo = require('mongodb'),
@@ -17,7 +18,7 @@ var childProcess = require('child_process'),
     sinon = require('sinon'),
     tmp = require('tmp'),
     q = require('q');
-    basic = require('gebo-basic-action'),
+//    basic = require('gebo-basic-action'),
     geboSchema = basic.schemata.gebo,
     agentSchema = basic.schemata.agent;
 
@@ -201,6 +202,7 @@ exports.handler = {
                   test.ok(false, err);
                 }
                 // Return data
+                console.log('HERE');
                 test.equal(res.statusCode, 200);
                 test.equal(res._getData().length, 1);
                 test.equal(res._getData()[0].name, 'Yanfen');
