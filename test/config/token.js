@@ -13,8 +13,9 @@ var nock = require('nock'),
     base64url = require('base64url'),
     crypto = require('crypto'),
     fs = require('fs'),
-    geboDb = require('../../schemata/gebo')(),
-    agentDb = require('../../schemata/agent')();
+    basic = require('gebo-basic-action'),
+    geboDb = basic.schemata.gebo(),
+    agentDb = basic.schemata.agent();
 
 // Foreign agent configurations
 var CLIENT_ID = 'abc123',

@@ -1,6 +1,7 @@
 'use strict';
 
-var agentSchema = require('../schemata/agent'),
+var basic = require('gebo-basic-action'),
+    agentSchema = basic.schemata.agent,
     https = require('https'),
     nconf = require('nconf'),
     utils = require('../lib/utils'),

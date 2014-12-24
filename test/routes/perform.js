@@ -11,12 +11,15 @@ var childProcess = require('child_process'),
     events = require('events'),
     extend = require('extend'),
     fs = require('fs-extra'),
-    geboSchema = require('../../schemata/gebo'),
+//    geboSchema = require('../../schemata/gebo'),
     httpMocks = require('node-mocks-http'),
-    agentSchema = require('../../schemata/agent'),
+//    agentSchema = require('../../schemata/agent'),
     sinon = require('sinon'),
     tmp = require('tmp'),
     q = require('q');
+    basic = require('gebo-basic-action'),
+    geboSchema = basic.schemata.gebo,
+    agentSchema = basic.schemata.agent;
 
 var nconf = require('nconf');
 nconf.file({ file: 'gebo.json' });
@@ -177,7 +180,6 @@ exports.handler = {
 //          });
     },
 
-
     'Fulfil social commitment and return data when action is performed': function(test) {
         test.expect(14);
 
@@ -265,7 +267,7 @@ exports.handler = {
         test.expect(3);
 
         // Add some actions from a module
-        var actions = require('../../actions')(),
+        var actions = basic.actions,
             actionModule = require('../mocks/full-action-module');
 
         // This is how it's done in the index.enable function
@@ -312,7 +314,8 @@ exports.handler = {
         test.expect(4);
         
         // Add some actions from a module
-        var actions = require('../../actions')(),
+        //var actions = require('../../actions')(),
+        var actions = basic.actions,
             actionModule = require('../mocks/full-action-module');
 
         // This is how it's done in the index.enable function
@@ -404,7 +407,6 @@ exports.handler = {
             test.done();
         });
     },
-
 
     /**
      * Careful here... the save action will only take one file to save at a time. An
@@ -805,7 +807,8 @@ exports.handler = {
      */
     'Should add a PID file name to the message\'s content field': function(test) {
         test.expect(3);
-        var actions = require('../../actions')();
+        //var actions = require('../../actions')();
+        var actions = basic.actions;
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
             test.ok(message.content.pidFile);
@@ -879,8 +882,7 @@ exports.handler = {
             test.ok(true);
           });
 
-
-        var actions = require('../../actions')();
+        var actions = basic.actions;
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
             req.handle();
@@ -951,8 +953,7 @@ exports.handler = {
             test.ok(true);
           });
 
-
-        var actions = require('../../actions')();
+        var actions = basic.actions;
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
             req.handle();
@@ -1068,8 +1069,7 @@ exports.handler = {
             test.ok(true);
           });
 
-
-        var actions = require('../../actions')();
+        var actions = basic.actions;
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
             req.handle();
@@ -1145,7 +1145,7 @@ exports.handler = {
             test.ok(true);
           });
 
-        var actions = require('../../actions')();
+        var actions = basic.actions;
         sinon.stub(actions, 'ls', function(verified, message) {
             var deferred = q.defer();
             for (var i = 0; i < 3000000; i++) { /* I can't get sinon.useFakeTimers to work */ }

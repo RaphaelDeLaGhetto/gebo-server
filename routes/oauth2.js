@@ -18,8 +18,9 @@ var oauth2orize = require('oauth2orize'),
     crypto = require('crypto'),
     base64url = require('base64url'),
     jwtBearer = require('oauth2orize-jwt-bearer').Exchange,
-    geboDb = require('../schemata/gebo')(),
-    agentDb = require('../schemata/agent')(),
+    basic = require('gebo-basic-action'),
+    geboDb = basic.schemata.gebo(),
+    agentDb = basic.schemata.agent(),
     mongoose = require('mongoose'),
     winston = require('winston');
 

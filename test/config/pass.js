@@ -23,8 +23,9 @@ var COL_NAME = 'appCollection',
 var FRIEND_GEBO_URI = 'http://theirhost.com';
 
 nconf.file({ file: 'gebo.json' });
-var geboDb = require('../../schemata/gebo')(),
-    agentDb = require('../../schemata/agent')(),
+var basic = require('gebo-basic-action'),
+    geboDb = basic.schemata.gebo(),
+    agentDb = basic.schemata.agent(),
     pass = require('../../config/pass')();
 
 /**

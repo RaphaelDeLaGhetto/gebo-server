@@ -9,8 +9,9 @@ var mongo = require('mongodb'),
     nconf = require('nconf'),
     utils = require('gebo-utils'),
     sc = require('../../lib/sc'),
-    geboDb = require('../../schemata/gebo')(),
-    agentDb = require('../../schemata/agent')();
+    basic = require('gebo-basic-action'),
+    geboDb = basic.schemata.gebo(),
+    agentDb = basic.schemata.agent();
 
 var BASE_ADDRESS = 'http://theirhost.com';
 

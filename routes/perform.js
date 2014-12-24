@@ -1,7 +1,9 @@
 'use strict';
 
-var action = require('../actions')(),
-    agentDb = require('../schemata/agent')(),
+var basic = require('gebo-basic-action'),
+    agentDb = basic.schemata.agent(),
+    action = basic.actions,
+    //action = require('../actions')(),
     childProcess = require('child_process'),
     extend = require('extend'),
     fs = require('fs-extra'),

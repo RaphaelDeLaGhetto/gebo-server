@@ -7,8 +7,8 @@
 var nativeMongoConnection = require('../../lib/native-mongo-connection').get(true, function(){}),
     mongoose = require('gebo-mongoose-connection').get(true);
 
-
-var agentDb = require('../../schemata/agent')(),
+var basic = require('gebo-basic-action'),
+    agentDb = basic.schemata.agent(),
     request = require('../../conversations/request');
 
 /**

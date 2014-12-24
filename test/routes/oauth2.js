@@ -8,8 +8,9 @@ var nativeMongoConnection = require('../../lib/native-mongo-connection').get(tru
 var nconf = require('nconf'),
     mongo = require('mongodb'),
     utils = require('gebo-utils'),
-    geboDb = require('../../schemata/gebo')();
-    agentDb = require('../../schemata/agent')();
+    basic = require('gebo-basic-action'),
+    geboDb = basic.schemata.gebo(),
+    agentDb = basic.schemata.agent();
 
 var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '1234',

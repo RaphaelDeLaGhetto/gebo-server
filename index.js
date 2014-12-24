@@ -6,6 +6,7 @@ var express = require('express'),
     nconf = require('nconf'),
     passport = require('passport'),
     server = express(),
+    basic = require('gebo-basic-action'),
     //utils = require('./lib/utils'),
     utils = require('gebo-utils'),
     winston = require('winston');
@@ -48,8 +49,10 @@ module.exports = function(testing) {
     /**
      * Expose the necessary modules 
      */   
-    exports.actions = require('./actions')(); 
-    exports.schemata = require('./schemata');
+    exports.actions = basic.actions;
+    exports.schemata = basic.schemata;
+//    exports.actions = require('./actions')(); 
+//    exports.schemata = require('./schemata');
     exports.server = server;
     exports.utils = utils;
     

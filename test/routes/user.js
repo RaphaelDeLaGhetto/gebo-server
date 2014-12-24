@@ -1,6 +1,7 @@
 var nconf = require('nconf'),
     mongo = require('mongodb'),
-    gebo = require('../../schemata/gebo');
+    basic = require('gebo-basic-action'),
+    gebo = basic.schemata.gebo;
 
 var COL_NAME = 'appCollection',
     ADMIN_TOKEN = '1234',

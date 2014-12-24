@@ -21,8 +21,9 @@ var passport = require('passport'),
 
 module.exports = function() {
 
-    var geboDb = require('../schemata/gebo')(),
-        agentDb = require('../schemata/agent')();
+    var basic = require('gebo-basic-action'),
+        geboDb = basic.schemata.gebo(),
+        agentDb = basic.schemata.agent();
 
     nconf.file({ file: './gebo.json' });
     var logLevel = nconf.get('logLevel');

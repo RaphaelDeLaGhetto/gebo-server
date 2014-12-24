@@ -12,7 +12,8 @@ var message = require('../../routes/message'),
     q = require('q'),
     extend = require('extend'),
     utils = require('../../lib/utils'),
-    agentDb = require('../../schemata/agent')();
+    basic = require('gebo-basic-action'),
+    agentDb = basic.schemata.agent();
 
 var CLIENT = 'yanfen@example.com',
     SERVER = 'dan@example.com';
