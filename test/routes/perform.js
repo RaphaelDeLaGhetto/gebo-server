@@ -12,13 +12,10 @@ var childProcess = require('child_process'),
     events = require('events'),
     extend = require('extend'),
     fs = require('fs-extra'),
-//    geboSchema = require('../../schemata/gebo'),
     httpMocks = require('node-mocks-http'),
-//    agentSchema = require('../../schemata/agent'),
     sinon = require('sinon'),
     tmp = require('tmp'),
     q = require('q');
-//    basic = require('gebo-basic-action'),
     geboSchema = basic.schemata.gebo,
     agentSchema = basic.schemata.agent;
 
