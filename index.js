@@ -5,8 +5,8 @@ var express = require('express'),
     nconf = require('nconf'),
     passport = require('passport'),
     server = express(),
-    basic = require('gebo-basic-action'),
-    nativeMongoConnection = basic.nativeMongoConnection,
+//    basic = require('gebo-basic-action'),
+//    nativeMongoConnection = basic.nativeMongoConnection,
     utils = require('gebo-utils'),
     winston = require('winston');
 
@@ -23,9 +23,11 @@ module.exports = function(testing) {
      * the correct connection to the database
      * (i.e., testing or production)
      */
-    nativeMongoConnection.get(testing, function(){}); 
-    exports.nativeMongoConnection = nativeMongoConnection;
     exports.mongoose = require('gebo-mongoose-connection').get(testing);
+
+    var basic = require('gebo-basic-action');
+    basic.nativeMongoConnection.get(testing, function(){}); 
+    exports.nativeMongoConnection = basic.nativeMongoConnection;
 
     /**
      * Load gebo configurations
