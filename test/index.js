@@ -182,70 +182,82 @@ exports.httpCodes = {
 
 /**
  * Test modes
+ *
+ * 2014-12-27
+ * I dare say this may be an anti pattern. Test mode is established at the
+ * start of tests when the database connections are made. Test mode on the
+ * gebo-server may be pointless.
  */
-exports.testModes = {
-
-    setUp: function(callback) {
-        delete require.cache[require.resolve('../lib/native-mongo-connection')];
-        delete require.cache[require.resolve('gebo-mongoose-connection')];
-        delete require.cache[require.resolve('..')];
-        callback();
-    },
-
-    tearDown: function(callback) {
-        delete require.cache[require.resolve('../lib/native-mongo-connection')];
-        delete require.cache[require.resolve('gebo-mongoose-connection')];
-        delete require.cache[require.resolve('..')];
-        callback();
-    },
-
-    'Should go into test mode when the parameter is set to true': function(test) {
-        test.expect(2);
-        var gebo = require('../index')(true);
- 
-        gebo.nativeMongoConnection.once('native-connect', function() {
-            gebo.nativeMongoConnection.get(function(nativeConn) {
-                test.equal(nativeConn.databaseName, TEST_DB);
-
-                // Test gebo-mongoose-connection
-                test.equal(gebo.mongoose.connection.name, TEST_DB); 
-                gebo.mongoose.connection.db.close();
-                test.done();
-              });
-          });
-    },
-
-    'Should go into production mode when the parameter is not set': function(test) {
-        test.expect(2);
-        var gebo = require('../index')();
-        gebo.nativeMongoConnection.once('native-connect', function() {
-            gebo.nativeMongoConnection.get(function(nativeConn) {
-                test.equal(nativeConn.databaseName, utils.getMongoDbName(nconf.get('email'))); 
-
-                // Test gebo-mongoose-connection
-                test.equal(gebo.mongoose.connection.name, utils.getMongoDbName(nconf.get('email'))); 
-                gebo.mongoose.connection.db.close();
-                test.done();
-              });
-          });
-    },
-
-    'Should go into production mode when the parameter is set to false': function(test) {
-        test.expect(2);
-        var gebo = require('../index')(false);
-        gebo.nativeMongoConnection.once('native-connect', function() {
-            gebo.nativeMongoConnection.get(function(nativeConn) {
-                test.equal(nativeConn.databaseName, utils.getMongoDbName(nconf.get('email'))); 
-
-                // Test gebo-mongoose-connection
-                test.equal(gebo.mongoose.connection.name, utils.getMongoDbName(nconf.get('email'))); 
-                gebo.mongoose.connection.db.close();
-                test.done();
-              });
-          });
-    },
-
-};
+//exports.testModes = {
+//
+//    setUp: function(callback) {
+//        //delete require.cache[require.resolve('../lib/native-mongo-connection')];
+//        delete require.cache[require.resolve('gebo-basic-action')];
+//        delete require.cache[require.resolve('gebo-mongoose-connection')];
+//        delete require.cache[require.resolve('..')];
+//        //console.log(require.cache[require.resolve('gebo-basic-action')]);
+//        console.log(require.resolve('gebo-basic-action'));
+//        console.log(require.resolve('gebo-mongoose-connection'));
+//        callback();
+//    },
+//
+//    tearDown: function(callback) {
+//        //delete require.cache[require.resolve('../lib/native-mongo-connection')];
+//        delete require.cache[require.resolve('gebo-basic-action')];
+//        delete require.cache[require.resolve('mongodb')];
+//        delete require.cache[require.resolve('gebo-mongoose-connection')];
+//        delete require.cache[require.resolve('..')];
+//        callback();
+//    },
+//
+//    'Should go into test mode when the parameter is set to true': function(test) {
+//        test.expect(2);
+//        var gebo = require('..')(true);
+// 
+//        console.log('HERE');
+//        gebo.nativeMongoConnection.once('native-connect', function() {
+//            gebo.nativeMongoConnection.get(function(nativeConn) {
+//                test.equal(nativeConn.databaseName, TEST_DB);
+//
+//                // Test gebo-mongoose-connection
+//                test.equal(gebo.mongoose.connection.name, TEST_DB); 
+//                gebo.mongoose.connection.db.close();
+//                test.done();
+//              });
+//          });
+//    },
+//
+//    'Should go into production mode when the parameter is not set': function(test) {
+//        test.expect(2);
+//        var gebo = require('..')();
+//        gebo.nativeMongoConnection.once('native-connect', function() {
+//            gebo.nativeMongoConnection.get(function(nativeConn) {
+//                test.equal(nativeConn.databaseName, utils.getMongoDbName(nconf.get('email'))); 
+//
+//                // Test gebo-mongoose-connection
+//                test.equal(gebo.mongoose.connection.name, utils.getMongoDbName(nconf.get('email'))); 
+//                gebo.mongoose.connection.db.close();
+//                test.done();
+//              });
+//          });
+//    },
+//
+//    'Should go into production mode when the parameter is set to false': function(test) {
+//        test.expect(2);
+//        var gebo = require('..')(false);
+//        gebo.nativeMongoConnection.once('native-connect', function() {
+//            gebo.nativeMongoConnection.get(function(nativeConn) {
+//                test.equal(nativeConn.databaseName, utils.getMongoDbName(nconf.get('email'))); 
+//
+//                // Test gebo-mongoose-connection
+//                test.equal(gebo.mongoose.connection.name, utils.getMongoDbName(nconf.get('email'))); 
+//                gebo.mongoose.connection.db.close();
+//                test.done();
+//              });
+//          });
+//    },
+//
+//};
 
 /**
  * Add an action
@@ -254,7 +266,7 @@ exports.actionAdd = {
 
     'Should be able to add an action': function(test) {
         test.expect(3);
-        var gebo = require('../index')(true);
+        var gebo = require('..')(true);
         test.equal(gebo.actions.testAction, undefined);
 
         // Create a new action
@@ -278,7 +290,7 @@ exports.schemaAdd = {
 
     'Should be able to add a schema': function(test) {
         test.expect(3);
-        var gebo = require('../index')(true);
+        var gebo = require('..')(true);
         test.equal(gebo.schemata.test, undefined);
 
         var testSchema = require('./schemata/mocks/test1');
@@ -294,7 +306,7 @@ exports.schemaAdd = {
     'Should be able to add a schemata object': function(test) {
         test.expect(6);
 
-        var gebo = require('../index')(true);
+        var gebo = require('..')(true);
         test.equal(gebo.schemata.test1, undefined);
         test.equal(gebo.schemata.test2, undefined);
 
@@ -319,7 +331,7 @@ exports.schemaAdd = {
 exports.utils = {
     'Return a mongo-friendly database name': function(test) {
         test.expect(1);
-        var gebo = require('../index')(true);
+        var gebo = require('..')(true);
         var dbName = gebo.utils.getMongoDbName('dan@example.com');
         test.equal(dbName, 'dan_at_example_dot_com');
         test.done();
@@ -332,7 +344,7 @@ exports.utils = {
 exports.schemata = {
     'Return schemata objects with which to instantiate mongoose models': function(test) {
         test.expect(5);
-        var gebo = require('../index')(true);
+        var gebo = require('..')(true);
 
         var dbName = new gebo.schemata.agent();
         var friendo = new dbName.friendoModel({
