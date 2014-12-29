@@ -32,7 +32,7 @@ var _goodMessage = {
         access_token: 'LetMeIn',
     };
 
-var geboDb, agentDb;
+var _gebo, geboDb, agentDb;
 
 exports.httpCodes = { 
 
@@ -154,7 +154,6 @@ exports.httpCodes = {
             send(badMessage).
             expect(500, test.done);
     },
-
 
     'Respond with 501 if given an unknown performative': function(test) {
         var badMessage = {};
@@ -446,6 +445,3 @@ exports.enable = {
         test.done();
     },
 };
-
-
-
