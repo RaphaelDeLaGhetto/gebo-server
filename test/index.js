@@ -37,7 +37,7 @@ var geboDb, agentDb;
 exports.httpCodes = { 
 
     setUp: function(callback) {
-        _gebo = require('..')(true);
+        _gebo = require('..')();
 
         // The gebo, by default, redirects all requests to
         // HTTPS. This removes the redirecting function from
@@ -266,7 +266,7 @@ exports.actionAdd = {
 
     'Should be able to add an action': function(test) {
         test.expect(3);
-        var gebo = require('..')(true);
+        var gebo = require('..')();
         test.equal(gebo.actions.testAction, undefined);
 
         // Create a new action
@@ -290,7 +290,7 @@ exports.schemaAdd = {
 
     'Should be able to add a schema': function(test) {
         test.expect(3);
-        var gebo = require('..')(true);
+        var gebo = require('..')();
         test.equal(gebo.schemata.test, undefined);
 
         var testSchema = require('./schemata/mocks/test1');
@@ -306,7 +306,7 @@ exports.schemaAdd = {
     'Should be able to add a schemata object': function(test) {
         test.expect(6);
 
-        var gebo = require('..')(true);
+        var gebo = require('..')();
         test.equal(gebo.schemata.test1, undefined);
         test.equal(gebo.schemata.test2, undefined);
 
@@ -331,7 +331,7 @@ exports.schemaAdd = {
 exports.utils = {
     'Return a mongo-friendly database name': function(test) {
         test.expect(1);
-        var gebo = require('..')(true);
+        var gebo = require('..')();
         var dbName = gebo.utils.getMongoDbName('dan@example.com');
         test.equal(dbName, 'dan_at_example_dot_com');
         test.done();
@@ -344,7 +344,7 @@ exports.utils = {
 exports.schemata = {
     'Return schemata objects with which to instantiate mongoose models': function(test) {
         test.expect(5);
-        var gebo = require('..')(true);
+        var gebo = require('..')();
 
         var dbName = new gebo.schemata.agent();
         var friendo = new dbName.friendoModel({
@@ -383,7 +383,7 @@ exports.enable = {
         delete require.cache[require.resolve('./mocks/no-schema')];
         delete require.cache[require.resolve('./mocks/schema')];
         delete require.cache[require.resolve('./mocks/actions')];
-        _gebo = require('..')(true);
+        _gebo = require('..')();
         callback();
     },
 

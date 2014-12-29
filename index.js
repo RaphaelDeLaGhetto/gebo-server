@@ -10,11 +10,8 @@ var express = require('express'),
     utils = require('gebo-utils'),
     winston = require('winston');
 
-module.exports = function(testing) {
-
-    if (testing === undefined || typeof testing !== 'boolean') {
-      testing = false;
-    }
+//module.exports = function(testing) {
+module.exports = function() {
 
     /**
      * Use these functions to retrieve the
@@ -23,10 +20,10 @@ module.exports = function(testing) {
      * the correct connection to the database
      * (i.e., testing or production)
      */
-    exports.mongoose = require('gebo-mongoose-connection').get(testing);
+    exports.mongoose = require('gebo-mongoose-connection').get();
 
     var basic = require('gebo-basic-action');
-    basic.nativeMongoConnection.get(testing, function(){}); 
+    basic.nativeMongoConnection.get(function(){}); 
     exports.nativeMongoConnection = basic.nativeMongoConnection;
 
     /**
