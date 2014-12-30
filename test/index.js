@@ -37,7 +37,7 @@ var _gebo, geboDb, agentDb;
 exports.httpCodes = { 
 
     setUp: function(callback) {
-        _gebo = require('..')();
+        _gebo = require('..')(true);
 
         // The gebo, by default, redirects all requests to
         // HTTPS. This removes the redirecting function from
@@ -382,7 +382,7 @@ exports.enable = {
         delete require.cache[require.resolve('./mocks/no-schema')];
         delete require.cache[require.resolve('./mocks/schema')];
         delete require.cache[require.resolve('./mocks/actions')];
-        _gebo = require('..')();
+        _gebo = require('..')(true);
         callback();
     },
 
