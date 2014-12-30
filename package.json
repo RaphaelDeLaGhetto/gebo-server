@@ -60,7 +60,7 @@
     "passport-local": "*",
     "passport-oauth2-client-password": "*",
     "passport-oauth2-jwt-bearer": "*",
-    "q": "~0.9.6",
+    "q": "*",
     "static-favicon": "^1.0.2",
     "strong-cluster-express-store": "0.0.x",
     "strong-store-cluster": "~0.1.3",
