@@ -1,8 +1,7 @@
 'use strict';
 
 var utils = require('gebo-utils'),
-    nconf = require('nconf'),
-    basic = require('gebo-basic-action');
+    nconf = require('nconf');
 
 nconf.file({ file: './gebo.json' });
 
@@ -88,7 +87,7 @@ module.exports = function (grunt) {
             // convert adm string to bool
             adm = (adm === 'true');
 
-            var db = basic.schemata.gebo();
+            var db = require('gebo-basic-action').schemata.gebo();
             var agent = new db.registrantModel({
                 name: usr,
                 email: emailaddress,
@@ -145,7 +144,7 @@ module.exports = function (grunt) {
             // 2014-7-30
 //            utils.getPrivateKeyAndCertificate().
 //                then(function(pair) {
-            var agentDb = basic.schemata.agent();
+            var agentDb = require('gebo-basic-action').schemata.agent();
             var friendo = new agentDb.friendoModel({
                                 name: name,
                                 email: email,
@@ -182,7 +181,8 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('setpermission', 'Set access to an agent\'s resource',
         function(friendoAgent, resource, read, write, execute) {
-            var agentDb = basic.schemata.agent();
+
+            var agentDb = require('gebo-basic-action').schemata.agent();
             
             // Save call is async. Put grunt into async mode to work
             var done = this.async();
@@ -222,14 +222,14 @@ module.exports = function (grunt) {
             // Save call is async. Put grunt into async mode to work
             var done = this.async();
 
-            var agentDb = basic.schemata.agent();
+            var agentDb = require('gebo-basic-action').schemata.agent();
             agentDb.friendoModel.findOne({ email: email },
                 function(err, friendo) {
                     if (err) {
                       console.log(err);
                     }
 
-                    var db = basic.schemata.gebo();
+                    var db = require('gebo-basic-action').schemata.gebo();
                     var token = new db.tokenModel({
                                             friendoId: friendo._id,
                                             string: tokenString,
