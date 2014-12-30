@@ -12,7 +12,6 @@ var express = require('express'),
 
 module.exports = function(testing) {
 
-  console.log('initializing gebo-server');
     if (testing === undefined || typeof testing !== 'boolean') {
       testing = false;
     }
