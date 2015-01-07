@@ -194,7 +194,7 @@ module.exports = function(testing) {
                                                   }
                                                   else if (data && data.filename) {
                                                     res.header('Content-Type', data.contentType);
-                                                    res.header('Content-Disposition', 'attachment; filename=' + data.filename);
+                                                    res.header('Content-Disposition', 'attachment; filename="' + data.filename + '"');
                                                     data.stream(true).pipe(res);
                                                   }
                                                   else {
