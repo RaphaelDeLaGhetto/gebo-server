@@ -714,7 +714,6 @@ exports.handler = {
     'Stream to the response object when copying a file': function(test) {
         var res = httpMocks.createResponse();
 
-
         test.expect(6);
         var req = httpMocks.createRequest({
                 method: 'POST',
@@ -786,7 +785,6 @@ exports.handler = {
                 //test.equal(data, returnedFile); 
                 //test.equal(data.length, returnedFile.length); 
                 test.equal(fileSize, returnedFile.length); 
-
                 test.done();
               });
 
@@ -795,7 +793,7 @@ exports.handler = {
                   test.ok(false, err);
                 }
                 test.equal(res.header('Content-Type'), 'application/pdf');
-                test.equal(res.header('Content-Disposition'), 'attachment; filename=pdf0.pdf');
+                test.equal(res.header('Content-Disposition'), 'attachment; filename="pdf0.pdf"');
             });
         });
     },
