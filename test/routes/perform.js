@@ -104,6 +104,57 @@ exports.handler = {
           });
     },
 
+    'Set the receiver field in message if not set': function(test) {
+        test.expect(1);
+        var req = httpMocks.createRequest({
+                method: 'POST',
+                url: '/perform',
+                body: { 
+                     sender: CLIENT,
+                     action: 'ls',
+                     content: { resource: 'fs' },
+                },
+              });
+        req.user = { email: CLIENT, admin: false };
+        req.on = function(evt, handler) {};
+
+        var res = httpMocks.createResponse({ eventEmitter: events.EventEmitter });
+
+        perform.handler(req, res, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(req.body.receiver, SERVER);
+            test.done();    
+        });
+    },
+
+    'Do not set the receiver field in message if already set': function(test) {
+        test.expect(1);
+        var req = httpMocks.createRequest({
+                method: 'POST',
+                url: '/perform',
+                body: { 
+                     sender: CLIENT,
+                     receiver: 'someproxiedgebo@example.com',
+                     action: 'ls',
+                     content: { resource: 'fs' },
+                },
+              });
+        req.user = { email: CLIENT, admin: false };
+        req.on = function(evt, handler) {};
+
+        var res = httpMocks.createResponse({ eventEmitter: events.EventEmitter });
+
+        perform.handler(req, res, function(err) {
+            if (err) {
+              test.ok(false, err);
+            }
+            test.equal(req.body.receiver, 'someproxiedgebo@example.com');
+            test.done();    
+        });
+    },
+
     'Form a social commitment on receipt of a perform message': function(test) {
         test.expect(10);
         agentDb.socialCommitmentModel.find({}, function(err, scs) {
@@ -199,7 +250,6 @@ exports.handler = {
                   test.ok(false, err);
                 }
                 // Return data
-                console.log('HERE');
                 test.equal(res.statusCode, 200);
                 test.equal(res._getData().length, 1);
                 test.equal(res._getData()[0].name, 'Yanfen');
@@ -530,8 +580,6 @@ exports.handler = {
 
      // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
     'Stream to the response object when copying a file': function(test) {
-        var res = httpMocks.createResponse();
-
         test.expect(5);
         var req = httpMocks.createRequest({
                 method: 'POST',

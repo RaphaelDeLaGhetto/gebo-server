@@ -3,7 +3,6 @@
 var basic = require('gebo-basic-action'),
     agentDb = basic.schemata.agent(),
     action = basic.actions,
-    //action = require('../actions')(),
     childProcess = require('child_process'),
     extend = require('extend'),
     fs = require('fs-extra'),
@@ -43,11 +42,10 @@ module.exports = function(testing) {
 
         if (logLevel === 'trace') logger.info('message', JSON.stringify(message, null, 2));
 
-        // A message's receiver used to be specified in the 
-        // message body. Since the vanilla gebo no longer mediates
-        // between external agents, the vanilla gebo is always
-        // the receiver.
-        message.receiver = agentEmail;
+        // If the receiver isn't explicitly set, this gebo is the receiver
+        if (!message.receiver) {
+          message.receiver = agentEmail;
+        }
 
         // Clean up any temporary files when done acting
         res.on('end', function() {
@@ -348,5 +346,3 @@ module.exports = function(testing) {
 
     return exports;
   };
-
-
