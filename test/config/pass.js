@@ -348,21 +348,6 @@ exports.bearerStrategy = {
             test.done();
           });
     },
-
-    'Return an anonymous object when the proxy token is set': function(test) {
-        test.expect(1);
-        pass.bearerStrategy('proxy', function(err, anonymous) {
-            if (err) {
-              test.ok(false, err);
-            }
-            else {
-              test.ok(anonymous.wantsProxy);
-            }
-            test.done();
-          });
-    },
-
-
 };
 
 /**

@@ -161,11 +161,6 @@ module.exports = function() {
     var _bearerStrategy = function(accessToken, done) {
         if (logLevel === 'trace') logger.info('_bearerStrategy', accessToken);
 
-        // Proxy messages pass right through
-        if (accessToken === 'proxy') {
-          return done(null, { wantsProxy: true });
-        }
-
         geboDb.tokenModel.findOne({ string: accessToken }, function(err, token) {
             if (err) {
               return done(err);

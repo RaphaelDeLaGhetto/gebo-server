@@ -326,7 +326,6 @@ exports.handler = {
           }
         }
 
-        //var req = {
         // Request object
         var req = httpMocks.createRequest({
                 body: { 
@@ -529,192 +528,11 @@ exports.handler = {
           });
     },
 
-    'Send a file if the to-be-returned data object contains the filePath property': function(test) {
-//        test.expect(3);
-        console.log('THIS HAS GOT TO GO');
-//
-//        // Need to add a dummy action for this test
-//        // Remove the old modules
-//        delete require.cache[require.resolve('../../actions')];
-//        delete require.cache[require.resolve('../../routes/perform')];
-//
-//        // Create a dummy test to return an object with a filePath property
-//        var action = require('../../actions')();
-//        action.add('downloadFileTest', function() {
-//            var deferred = q.defer();
-//            deferred.resolve({ filePath: '/tmp/pdf0.pdf' });
-//            return deferred.promise;
-//          });
-//
-//        var perform = require('../../routes/perform')(true);
-//
-////        var req = {
-//        // Request object
-//        var req = httpMocks.createRequest({
-//             body: {
-//                sender: CLIENT,
-//                action: 'downloadFileTest',
-//            },
-// //           user: { email: CLIENT, admin: false },
-////            on: function(evt, handler) {
-////                    var handle = handler;
-////                    return;
-////                },
-//          });
-//        req.user = { email: CLIENT, admin: false };
-//        req.on = function(evt, handler) {
-//                        var handle = handler;
-//                   };
-//
-//        // Response object
-//        var res = httpMocks.createResponse({ eventEmitter: events.EventEmitter });
-//        res.on('end', function() {
-//            //test.ok(res._isEndCalled());
-//            test.ok(true);
-//          });
-//        res.download = function(path, name, done){};
-//
-//
-//        console.log('YO YOY OY');
-//        perform.handler(req, res, function(err) {
-//        console.log('WORD');
-//            if (err) {
-//              test.ok(false, err);
-//            }
-//            test.equal(res._getData(), '/tmp/pdf0.pdf');
-////            test.equal(_filename, 'pdf0.pdf');
-//
-//            // These tests are hairy enough as it is. Set things
-//            // back to the way they were
-//            delete require.cache[require.resolve('../../actions')];
-//            delete require.cache[require.resolve('../../routes/perform')];
-//            require('../../actions')();
-//            require('../../routes/perform')(true);
-//
-            test.done();
-//          });
-    },
-
-    'Send a file if the to-be-returned data object contains the filePath property and a distinct file name': function(test) {
-        console.log('THIS HAS GOT TO GO');
-//        test.expect(2);
-//
-//        // Need to add a dummy action for this test
-//        // Remove the old modules
-//        delete require.cache[require.resolve('../../actions')];
-//        delete require.cache[require.resolve('../../routes/perform')];
-//
-//        // Create a dummy test to return an object with a filePath property
-//        var action = require('../../actions')();
-//        action.add('downloadFileTest', function() {
-//            var deferred = q.defer();
-//            deferred.resolve({ filePath: '/tmp/pdf0.pdf', fileName: 'myfile.pdf' });
-//            return deferred.promise;
-//          });
-//
-//        var perform = require('../../routes/perform')(true);
-//
-//        var req = {
-//            body: {
-//                sender: CLIENT,
-//                action: 'downloadFileTest',
-//            },
-//            user: { email: CLIENT, admin: false },
-//            on: function(evt, handler) {
-//                    var handle = handler;
-//                    return;
-//                },
-//          };
-//
-//        perform.handler(req, RES, function(err) {
-//            if (err) {
-//              test.ok(false, err);
-//            }
-//            test.equal(RES.statusCode, '/tmp/pdf0.pdf');
-//            test.equal(_filename, 'myfile.pdf');
-//
-//            // These tests are hairy enough as it is. Set things
-//            // back to the way they were
-//            delete require.cache[require.resolve('../../actions')];
-//            delete require.cache[require.resolve('../../routes/perform')];
-//            require('../../actions')();
-//            require('../../routes/perform')(true);
-//
-            test.done();
-//          });
-    },
-
-    'Remove the file from the file system if the to-be-returned data object contains the filePath property': function(test) {
-        console.log('THIS HAS GOT TO GO');
-//        test.expect(3);
-//
-//        // Need to add a dummy action for this test
-//        // Remove the old modules
-//        delete require.cache[require.resolve('../../actions')];
-//        delete require.cache[require.resolve('../../routes/perform')];
-//
-//        // Create a dummy test to return an object with a filePath property
-//        var action = require('../../actions')();
-//        action.add('downloadFileTest', function() {
-//            var deferred = q.defer();
-//            deferred.resolve({ filePath: '/tmp/pdf0.pdf', fileName: 'myfile.pdf' });
-//            return deferred.promise;
-//          });
-//
-//        var perform = require('../../routes/perform')(true);
-//
-//        var req = {
-//            body: {
-//                sender: CLIENT,
-//                action: 'downloadFileTest',
-//            },
-//            user: { email: CLIENT, admin: false },
-//            on: function(evt, handler) {
-//                    var handle = handler;
-//                    return;
-//                },
-//          };
-//
-//        // Make sure the file is where it's supposed to be
-//        try {
-//          fs.closeSync(fs.openSync('/tmp/pdf0.pdf', 'r'));
-//        }
-//        catch (err) {
-//          test.ok(false, err);
-//        }
-//
-//        perform.handler(req, RES, function(err) {
-//            if (err) {
-//              test.ok(false, err);
-//            }
-//            test.equal(RES._getData(), '/tmp/pdf0.pdf');
-//            test.equal(_filename, 'myfile.pdf');
-//
-//            // Make sure the file is no longer where it once was
-//            try {
-//              fs.closeSync(fs.openSync('/tmp/pdf0.pdf', 'r'));
-//              test.ok(false, 'This file shouldn\'t exist');
-//            }
-//            catch (err) {
-//              test.ok(true);
-//            }
-//
-//            // These tests are hairy enough as it is. Set things
-//            // back to the way they were
-//            delete require.cache[require.resolve('../../actions')];
-//            delete require.cache[require.resolve('../../routes/perform')];
-//            require('../../actions')();
-//            require('../../routes/perform')(true);
-//
-            test.done();
-//          });
-    },
-  
      // https://github.com/jamescarr/nodejs-mongodb-streaming/blob/master/app.coffee
     'Stream to the response object when copying a file': function(test) {
         var res = httpMocks.createResponse();
 
-        test.expect(6);
+        test.expect(5);
         var req = httpMocks.createRequest({
                 method: 'POST',
                 url: '/perform',
@@ -736,7 +554,7 @@ exports.handler = {
                             var handle = handler;
                        };
 
-        // Make sure all the test files are stored in /tmp
+        // Make sure the test file is stored in /tmp
         try {
           fs.closeSync(fs.openSync(req.files.file.path, 'r'));
         }
@@ -1518,5 +1336,4 @@ exports.verify = {
               });
     },
 };
-
 
